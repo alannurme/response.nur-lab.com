@@ -1,0 +1,16 @@
+# Sensitive configuration (never commit these)
+app/Config/db.config.php
+
+# Cache files
+app/cache/
+
+# Uploaded files (optional - you may want to keep these)
+# public/uploads/
+
+# Zip/backup files
+*.zip
+*.sql
+
+# OS files
+.DS_Store
+Thumbs.db
