@@ -2239,33 +2239,8 @@ class Admin extends Controller {
     }
 
     public function blog_manager() {
-        $adminModel = $this->model('AdminModel');
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_dont_miss_settings'])) {
-            $settings = $_POST['settings'] ?? [];
-            
-            $blocks_count = isset($settings['blog_blocks_count']) ? intval($settings['blog_blocks_count']) : 4;
-            
-            // Loop through all category blocks and implode their sub-categories arrays
-            for ($i = 0; $i < $blocks_count; $i++) {
-                $key = "cat{$i}_sub_categories";
-                if (isset($settings[$key]) && is_array($settings[$key])) {
-                    $settings[$key] = implode(',', $settings[$key]);
-                } else if (!isset($settings[$key])) {
-                    $settings[$key] = '';
-                }
-            }
-            
-            $adminModel->updateSettings($settings);
-            header('Location: ' . URLROOT . '/admin/blog_manager?msg=settings_updated');
-            exit;
-        }
-
-        $this->view('admin/blog_manager', [
-            'categories' => $adminModel->getCategories(),
-            'current_page' => 'blog_manager',
-            'settings' => $adminModel->getSettings()
-        ]);
+        header('Location: ' . base_url('admin'));
+        exit;
     }
 
     public function add_menu() {

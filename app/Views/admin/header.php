@@ -741,9 +741,6 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/pages" class="nav-item <?= $current_page == 'pages' ? 'active' : '' ?>">
                     <i class="fas fa-file-alt"></i><span>Static Pages</span>
                 </a>
-                <a href="<?= URLROOT ?>/admin/blog_manager" class="nav-item <?= $current_page == 'blog_manager' ? 'active' : '' ?>">
-                    <i class="fas fa-blog"></i><span>Blog Manager</span>
-                </a>
                 <?php $menu_manager_active = in_array($current_page, ['menus', 'sub_menus', 'social_links', 'add_menu', 'edit_menu', 'add_sub_menu', 'edit_sub_menu']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $menu_manager_active ? 'active' : '' ?>">

@@ -1163,5 +1163,25 @@ class Home extends Controller {
             exit();
         }
     }
+
+    public function redirectBlog($category_slug = null) {
+        if ($category_slug !== null) {
+            header('Location: ' . base_url($category_slug));
+        } else {
+            return $this->blog();
+        }
+        exit;
+    }
+
+    public function redirectPostById($id) {
+        $postModel = $this->model('PostModel');
+        $post = $postModel->getPostById($id);
+        if ($post && !empty($post['slug'])) {
+            header('Location: ' . base_url($post['slug']));
+            exit;
+        }
+        header('Location: ' . base_url());
+        exit;
+    }
 }
 
