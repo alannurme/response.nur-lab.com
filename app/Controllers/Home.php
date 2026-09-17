@@ -1219,6 +1219,7 @@ class Home extends Controller {
                 'title' => $post['title'],
                 'post' => $post,
                 'category_name' => $cat_name,
+                'post_authors' => $postModel->getPostAuthors($post['id']),
                 'popular_posts' => $postModel->getPopularPosts(5),
                 'related_posts' => $postModel->getRelatedPosts($post['category_id'], $post['id'], 3),
                 'comments' => $adminModel->getCommentsByPostId($post['id']),
