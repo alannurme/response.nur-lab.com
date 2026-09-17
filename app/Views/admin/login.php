@@ -355,10 +355,13 @@
         </div>
 
         <div class="login-card">
-            <?php if(isset($data['error'])): ?>
+            <?php 
+                $err = $error ?? ($data['error'] ?? null);
+                if($err): 
+            ?>
                 <div class="error-container">
                     <i class="fas fa-circle-exclamation"></i>
-                    <span><?= $data['error'] ?></span>
+                    <span><?= $err ?></span>
                 </div>
             <?php endif; ?>
             
