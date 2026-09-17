@@ -181,30 +181,7 @@
     </div>
 </section>
 
-<!-- About Sections -->
-<?php if (!empty($data['about_sections'])): ?>
-    <?php foreach ($data['about_sections'] as $index => $about): ?>
-    <section class="about-section" style="padding: 80px 0; background: #ffffff; overflow: hidden; <?= $index > 0 ? 'border-top: 1px solid #f1f5f9;' : '' ?>">
-        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 40px;">
-            <div class="about-flex-row <?= $index % 2 === 0 ? 'about-animate-normal' : 'about-flex-row-reverse about-animate-reverse' ?>" style="display: flex; gap: 60px; align-items: center; flex-direction: <?= $index % 2 === 0 ? 'row' : 'row-reverse' ?>;">
-                <!-- Image Column -->
-                <div class="about-img-col <?= $index % 2 === 0 ? 'from-left' : 'from-right' ?>" style="flex: 1; min-width: 300px;">
-                    <div style="border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); aspect-ratio: 16/11; background: #000;">
-                        <img src="<?= $about['image'] ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; transition: 0.5s;" onmouseover="this.style.transform='scale(1.03)';" onmouseout="this.style.transform='scale(1)';">
-                    </div>
-                </div>
-                <!-- Content Column -->
-                <div class="about-content-col home-no-typewriter <?= $index % 2 === 0 ? 'from-right' : 'from-left' ?>" style="flex: 1.2; display: flex; flex-direction: column; align-items: flex-start;">
-                    <span style="color: #f97316; font-size: 1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; font-family: 'Hind Siliguri', sans-serif;"><?= htmlspecialchars($about['subtitle']) ?></span>
-                    <h2 style="font-size: 2.6rem; color: #1e293b; font-weight: 900; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 5px 0; line-height: 1.2;"><?= htmlspecialchars($about['title']) ?></h2>
-                    <h3 style="font-size: 2.2rem; color: #2563eb; font-weight: 900; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 25px 0; line-height: 1.2;"><?= htmlspecialchars($about['highlight_title']) ?></h3>
-                    <p style="color: #1e293b; font-size: 1.1rem; line-height: 1.85; margin: 0; text-align: justify; font-family: 'Hind Siliguri', sans-serif; font-weight: 400;"><?= nl2br(htmlspecialchars($about['description'])) ?></p>
-                </div>
-            </div>
-        </div>
-    </section>
-    <?php endforeach; ?>
-<?php endif; ?>
+
 
 <!-- Scopes Section -->
 <?php if (isset($data['settings']['show_scopes']) && $data['settings']['show_scopes'] == '1'): ?>

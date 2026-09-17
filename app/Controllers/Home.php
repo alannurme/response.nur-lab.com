@@ -1183,5 +1183,67 @@ class Home extends Controller {
         header('Location: ' . base_url());
         exit;
     }
+
+    public function _remap($method, ...$params) {
+        if (method_exists($this, $method)) {
+            return $this->$method(...$params);
+        }
+
+        // Handle dynamic slug (post slug or category slug)
+        $slug = $method;
+        if (!empty($params)) {
+            $slug = implode('/', array_merge([$method], $params));
+        }
+        $slug = rawurldecode($slug);
+
+        $db = \Config\Database::pdoConnect();
+
+        // 1. Check if slug matches a post
+        $stmt = $db->prepare("SELECT * FROM posts WHERE slug = :slug AND status = 'published' LIMIT 1");
+        $stmt->execute(['slug' => $slug]);
+        $post = $stmt->fetch();
+
+        if ($post) {
+            // Increment views
+            $db->prepare("UPDATE posts SET views = views + 1 WHERE id = :id")->execute(['id' => $post['id']]);
+
+            $postModel = $this->model('PostModel');
+            $adminModel = $this->model('AdminModel');
+
+            // Get post category name
+            $stmt_cat = $db->prepare("SELECT c.name FROM categories c JOIN post_categories pc ON c.id = pc.category_id WHERE pc.post_id = :post_id LIMIT 1");
+            $stmt_cat->execute(['post_id' => $post['id']]);
+            $cat_name = $stmt_cat->fetchColumn() ?: 'ইসলামিক';
+
+            $data = [
+                'title' => $post['title'],
+                'post' => $post,
+                'category_name' => $cat_name,
+                'popular_posts' => $postModel->getPopularPosts(5),
+                'related_posts' => $postModel->getRelatedPosts($post['category_id'], $post['id'], 3),
+                'comments' => $adminModel->getCommentsByPostId($post['id']),
+                'breaking_news' => $adminModel->getBreakingNews(),
+                'settings' => $adminModel->getSettings(),
+                'menus' => $adminModel->getMenus(),
+                'sub_menus' => $adminModel->getSubMenus(),
+                'prayer_times' => $adminModel->getPrayerTimes(),
+                'sidebar_slides' => $adminModel->getSidebarSlides()
+            ];
+
+            return $this->view('home/post_detail', $data);
+        }
+
+        // 2. Check if slug matches a category
+        $stmt_c = $db->prepare("SELECT * FROM categories WHERE slug = :slug LIMIT 1");
+        $stmt_c->execute(['slug' => $slug]);
+        $cat = $stmt_c->fetch();
+
+        if ($cat) {
+            return $this->blog($slug);
+        }
+
+        // 3. Fallback to 404
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Page or Post not found: " . $slug);
+    }
 }
 

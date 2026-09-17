@@ -1766,7 +1766,10 @@ if (!function_exists('getBengaliDate')) {
             <ul class="top-menu-links">
                 <?php if (!empty($data['sub_menus'])): ?>
                     <?php foreach ($data['sub_menus'] as $submenu): ?>
-                        <?php if (trim($submenu['title']) === 'সপ' || strpos($submenu['url'], 'shop') !== false) continue; ?>
+                        <?php 
+                            $t = trim($submenu['title']);
+                            if ($t === 'সপ' || strpos($submenu['url'], 'shop') !== false || $t === 'আমাদের সাথে যুক্ত হোন' || strpos($submenu['url'], 'join') !== false) continue; 
+                        ?>
                         <li>
                             <a href="<?= (strpos($submenu['url'], 'http') === 0) ? $submenu['url'] : URLROOT . $submenu['url'] ?>">
                                 <?= $submenu['title'] ?>
@@ -1848,7 +1851,10 @@ if (!function_exists('getBengaliDate')) {
                     <div class="mobile-topmenu-menu">
                         <?php if (!empty($data['sub_menus'])): ?>
                             <?php foreach ($data['sub_menus'] as $submenu): ?>
-                                <?php if (trim($submenu['title']) === 'সপ' || strpos($submenu['url'], 'shop') !== false) continue; ?>
+                                <?php 
+                                    $t = trim($submenu['title']);
+                                    if ($t === 'সপ' || strpos($submenu['url'], 'shop') !== false || $t === 'আমাদের সাথে যুক্ত হোন' || strpos($submenu['url'], 'join') !== false) continue; 
+                                ?>
                                 <a href="<?= (strpos($submenu['url'], 'http') === 0) ? $submenu['url'] : URLROOT . $submenu['url'] ?>" style="color: #ffffff;">
                                     <i class="fas fa-chevron-right" style="font-size: 0.8rem; color: var(--primary);"></i>
                                     <span><?= $submenu['title'] ?></span>

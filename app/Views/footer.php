@@ -17,7 +17,8 @@
                         $menus_stmt = $db->query("SELECT * FROM sub_menus ORDER BY order_index ASC");
                         $footer_menus = $menus_stmt->fetchAll();
                         foreach ($footer_menus as $menu):
-                            if (trim($menu['title']) === 'সপ' || strpos($menu['url'], 'shop') !== false) continue;
+                            $t = trim($menu['title']);
+                            if ($t === 'সপ' || strpos($menu['url'], 'shop') !== false || $t === 'আমাদের সাথে যুক্ত হোন' || strpos($menu['url'], 'join') !== false) continue;
                             $menu_url = (strpos($menu['url'], 'http') === 0) ? $menu['url'] : URLROOT . $menu['url'];
                         ?>
                             <li><a href="<?= $menu_url ?>" style="color: rgba(255,255,255,0.7)"><?= htmlspecialchars($menu['title']) ?></a></li>
