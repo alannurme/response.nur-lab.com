@@ -1230,7 +1230,7 @@ class Home extends Controller {
                 'sidebar_slides' => $adminModel->getSidebarSlides()
             ];
 
-            return $this->view('home/post_detail', $data);
+            return $this->view('home/post', $data);
         }
 
         // 2. Check if slug matches a category
