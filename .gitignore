@@ -1,16 +1,29 @@
-# Sensitive configuration (never commit these)
-app/Config/db.config.php
+# Composer vendor directory (Composer dependencies are re-installed on server or deployed via git if needed)
+vendor/
 
-# Cache files
+# Writable directory generated files
+writable/cache/*
+writable/debugbar/*
+writable/logs/*
+writable/session/*
+!writable/index.html
+!writable/cache/index.html
+!writable/logs/index.html
+!writable/session/index.html
+!writable/debugbar/index.html
+
+# Sensitive environment configuration
+.env
+
+# Legacy cache
 app/cache/
 
-# Uploaded files (optional - you may want to keep these)
-# public/uploads/
-
-# Zip/backup files
+# Backups and SQL dumps
 *.zip
 *.sql
+*.phar
+composer-setup.php
 
-# OS files
+# OS generated files
 .DS_Store
 Thumbs.db
