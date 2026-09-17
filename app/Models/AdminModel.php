@@ -293,8 +293,8 @@ class AdminModel extends Model {
         return $stmt->execute(['id' => $id]);
     }
     public function login($username, $password) {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
-        $stmt->execute(['username' => $username]);
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :user OR email = :user LIMIT 1");
+        $stmt->execute(['user' => $username]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
