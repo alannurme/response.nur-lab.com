@@ -956,9 +956,6 @@ class Home extends Controller {
         $category_slug = isset($_GET['category']) ? trim($_GET['category']) : null;
         $search = isset($_GET['search']) ? trim($_GET['search']) : null;
 
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
 
         $show_bookmarks = isset($_GET['bookmarks']) && $_GET['bookmarks'] == 1;
         if ($show_bookmarks && isset($_SESSION['user_id'])) {
@@ -997,9 +994,6 @@ class Home extends Controller {
             $title = 'সার্চ ফলাফল: ' . htmlspecialchars($search);
         }
 
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
         $bookmarked_ids = [];
         if (isset($_SESSION['user_id'])) {
             $bookmarked_ids = $adminModel->getBookmarkedQuestionIds($_SESSION['user_id']);
@@ -1032,9 +1026,6 @@ class Home extends Controller {
     }
 
     public function toggle_bookmark($question_id) {
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
 
         if (!isset($_SESSION['user_id'])) {
             header('Content-Type: application/json');

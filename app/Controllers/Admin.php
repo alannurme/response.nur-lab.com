@@ -7,9 +7,6 @@ class Admin extends Controller {
     protected $siteSettings;
 
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
 
         $uri = service('request')->getUri()->getPath();
         $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false));
