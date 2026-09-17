@@ -1108,11 +1108,11 @@ class Admin extends Controller {
             $data = [
                 'category_ids' => $_POST['category_ids'] ?? [],
                 'author_ids' => $_POST['author_ids'] ?? [],
-                'title' => $_POST['title'],
+                'title' => $_POST['title'] ?? '',
                 'slug' => trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-'),
-                'content' => $_POST['content'],
-                'excerpt' => $_POST['excerpt'],
-                'featured_image' => $_POST['featured_image'],
+                'content' => $_POST['content'] ?? '',
+                'excerpt' => $_POST['excerpt'] ?? '',
+                'featured_image' => $_POST['featured_image'] ?? '',
                 'post_type' => 'blog',
                 'fake_views' => !empty($_POST['fake_views']) ? intval($_POST['fake_views']) : 0,
                 'status' => $_POST['status'] ?? 'published',
@@ -1876,15 +1876,15 @@ class Admin extends Controller {
         $postModel = $this->model('PostModel');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $slug = !empty($_POST['slug']) ? $_POST['slug'] : $_POST['title'];
+            $slug = !empty($_POST['slug']) ? $_POST['slug'] : ($_POST['title'] ?? '');
             $data = [
                 'id' => $id,
-                'title' => $_POST['title'],
+                'title' => $_POST['title'] ?? '',
                 'category_ids' => $_POST['category_ids'] ?? [],
                 'author_ids' => $_POST['author_ids'] ?? [],
-                'content' => $_POST['content'],
-                'excerpt' => $_POST['excerpt'],
-                'featured_image' => $_POST['featured_image'],
+                'content' => $_POST['content'] ?? '',
+                'excerpt' => $_POST['excerpt'] ?? '',
+                'featured_image' => $_POST['featured_image'] ?? '',
                 'slug' => trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-'),
                 'fake_views' => !empty($_POST['fake_views']) ? intval($_POST['fake_views']) : 0,
                 'status' => $_POST['status'] ?? 'published',
