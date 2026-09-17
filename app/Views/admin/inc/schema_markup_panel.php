@@ -1,5 +1,6 @@
 <?php
-$db = \App\Config\Database::connect();
+$db = \Config\Database::pdoConnect();
+
 $social_links_stmt = $db->query("SELECT url FROM social_links ORDER BY order_index ASC, id ASC");
 $social_urls = $social_links_stmt->fetchAll(\PDO::FETCH_COLUMN) ?: [];
 ?>

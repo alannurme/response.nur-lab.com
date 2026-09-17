@@ -37,7 +37,8 @@ class App {
 
             if (strtolower($url[0]) === 'p' && isset($url[1]) && is_numeric($url[1])) {
                 require_once APPROOT . '/Config/Database.php';
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
+
                 $stmt = $db->prepare("SELECT slug FROM posts WHERE id = ? LIMIT 1");
                 $stmt->execute([$url[1]]);
                 $post = $stmt->fetch();
@@ -82,7 +83,8 @@ class App {
                 else {
                     $slug = $url[0];
                     require_once APPROOT . '/Config/Database.php';
-                    $db = \App\Config\Database::connect();
+                    $db = \Config\Database::pdoConnect();
+
                     
                     // A. Check if it's a Post Slug
                     $stmt = $db->prepare("SELECT id FROM posts WHERE slug = ? LIMIT 1");

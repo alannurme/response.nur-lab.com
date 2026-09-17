@@ -1,0 +1,12 @@
+{
+    "require": {
+        "codeigniter4/framework": "^4.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+
+}
+

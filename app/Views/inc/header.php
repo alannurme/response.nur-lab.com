@@ -154,7 +154,7 @@ if (!function_exists('getBengaliDate')) {
                     $site_logo = !empty($data['settings']['site_logo']) ? resolve_setting_image($data['settings']['site_logo']) : URLROOT . '/public/img/logo.png';
                     
                     // Dynamic Social URLs from Database
-                    $db = \App\Config\Database::connect();
+                    $db = \Config\Database::pdoConnect();
                     $social_links_stmt = $db->query("SELECT url FROM social_links ORDER BY order_index ASC, id ASC");
                     $social_urls = $social_links_stmt->fetchAll(\PDO::FETCH_COLUMN) ?: [];
                     
@@ -1786,7 +1786,7 @@ if (!function_exists('getBengaliDate')) {
                 <span class="topbar-divider" style="opacity: 0.2; color: white;">|</span>
 
                 <?php
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $social_links_stmt = $db->query("SELECT * FROM social_links ORDER BY order_index ASC, id ASC");
                 $social_links = $social_links_stmt->fetchAll();
                 ?>
@@ -1894,7 +1894,7 @@ if (!function_exists('getBengaliDate')) {
                     $top_menus = array_filter($all_menus, function($m) { return empty($m['parent_id']); });
                     usort($top_menus, function($a, $b) { return $a['order_index'] <=> $b['order_index']; });
                     
-                    $db = \App\Config\Database::connect();
+                    $db = \Config\Database::pdoConnect();
                     
                     foreach($top_menus as $menu):
                         $menu_type = $menu['menu_type'] ?? 'custom';

@@ -332,7 +332,8 @@ $favicon_url = !empty($data['settings']['site_favicon']) ? resolve_setting_image
             $db_version = 'N/A';
             $total_tables = 0;
             try {
-                $db_pdo = \App\Config\Database::connect();
+                $db_pdo = \Config\Database::pdoConnect();
+
                 $db_connected = true;
                 $db_version = $db_pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
                 $tables_query = $db_pdo->query("SHOW TABLES");

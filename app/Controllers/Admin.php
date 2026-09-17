@@ -212,7 +212,7 @@ class Admin extends Controller {
 
     public function get_folder_posts_ajax($category_id) {
         header('Content-Type: application/json; charset=utf-8');
-        $db = \App\Config\Database::connect();
+        $db = \Config\Database::pdoConnect();
         $stmt = $db->prepare("SELECT p.id, p.title, p.status, p.slug 
                               FROM posts p 
                               LEFT JOIN post_categories pc ON p.id = pc.post_id 
@@ -299,7 +299,7 @@ class Admin extends Controller {
         // Fetch posts only for the active folder tree branch to populate the tree on load
         $allPosts = [];
         if ($categoryId !== null) {
-            $db = \App\Config\Database::connect();
+            $db = \Config\Database::pdoConnect();
             $stmt_all = $db->prepare("SELECT p.id, p.title, p.status, p.slug, p.category_id 
                                     FROM posts p 
                                     LEFT JOIN post_categories pc ON p.id = pc.post_id
@@ -314,7 +314,7 @@ class Admin extends Controller {
         }
 
         // Fetch categories that contain posts to know if we should show chevron toggles
-        $db = \App\Config\Database::connect();
+        $db = \Config\Database::pdoConnect();
         $stmt_cats_with_posts = $db->query("
             SELECT category_id FROM posts WHERE category_id IS NOT NULL
             UNION
@@ -386,7 +386,7 @@ class Admin extends Controller {
     public function get_available_posts_ajax() {
         header('Content-Type: application/json; charset=utf-8');
         
-        $db = \App\Config\Database::connect();
+        $db = \Config\Database::pdoConnect();
         $stmt = $db->prepare("
             SELECT p.id, p.title, c.name as category_name, p.category_id 
             FROM posts p 
@@ -408,7 +408,7 @@ class Admin extends Controller {
             $post_ids = !empty($_POST['post_ids']) ? $_POST['post_ids'] : [];
             
             if ($folder_id !== null && !empty($post_ids)) {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $stmt_post = $db->prepare("UPDATE posts SET category_id = :folder_id WHERE id = :post_id");
                 $stmt_check = $db->prepare("SELECT COUNT(*) FROM post_categories WHERE post_id = :post_id AND category_id = :category_id");
                 $stmt_ins_cat = $db->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (:post_id, :category_id)");
@@ -934,7 +934,7 @@ class Admin extends Controller {
         @ini_set('memory_limit', '512M');
 
         try {
-            $pdo = \App\Config\Database::connect();
+            $pdo = \Config\Database::pdoConnect();
             
             // Get all tables
             $tables = [];
@@ -944,7 +944,8 @@ class Admin extends Controller {
             }
             
             // Send headers for download
-            $filename = 'backup_' . \App\Config\Database::$db . '_' . date('Y-m-d_H-i-s') . '.sql';
+            $filename = 'backup_' . \Config\Database::$default['database'] . '_' . date('Y-m-d_H-i-s') . '.sql';
+
             header('Content-Type: application/octet-stream');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
             header('Pragma: no-cache');
@@ -1328,7 +1329,7 @@ class Admin extends Controller {
                     $dbUpdateError = null;
                     $dbUpdateMessage = "";
                     try {
-                        $pdo = \App\Config\Database::connect();
+                        $pdo = \Config\Database::pdoConnect();
                         
                         // 1. Check for update.sql
                         $sqlFile = $tempExtractDir . 'update.sql';
@@ -1807,7 +1808,7 @@ class Admin extends Controller {
                 'ip_address' => $client_ip
             ];
             
-            $db = \App\Config\Database::connect();
+            $db = \Config\Database::pdoConnect();
             $stmt = $db->prepare("INSERT INTO customer_users (name, phone, email, password, ip_address) VALUES (:name, :phone, :email, :password, :ip_address)");
             try {
                 $stmt->execute($data);
@@ -3329,7 +3330,7 @@ class Admin extends Controller {
         // Handle regeneration request
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate'])) {
             try {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 
                 // Get all published posts
                 $stmt = $db->query("SELECT slug, created_at FROM posts WHERE status = 'published' ORDER BY created_at DESC");
@@ -3425,7 +3426,7 @@ class Admin extends Controller {
         }
         
         try {
-            $db = \App\Config\Database::connect();
+            $db = \Config\Database::pdoConnect();
             $data['count_posts'] = $db->query("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn();
             $data['count_categories'] = $db->query("SELECT COUNT(*) FROM categories")->fetchColumn();
             $data['count_questions'] = $db->query("SELECT COUNT(*) FROM user_questions WHERE status = 'answered'")->fetchColumn();
@@ -3460,7 +3461,7 @@ class Admin extends Controller {
             }
             
             try {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 
                 // Read SQL file content line by line to build queries
                 $queries = [];
@@ -3495,7 +3496,7 @@ class Admin extends Controller {
                 exit;
             } catch (\Exception $e) {
                 try {
-                    $db = \App\Config\Database::connect()->exec("SET FOREIGN_KEY_CHECKS=1;");
+                    $db = \Config\Database::pdoConnect()->exec("SET FOREIGN_KEY_CHECKS=1;");
                 } catch (\Exception $ex) {}
                 
                 $_SESSION['restore_error'] = 'Database restore failed: ' . $e->getMessage();

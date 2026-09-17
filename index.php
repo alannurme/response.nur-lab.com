@@ -1,14 +1,32 @@
 <?php
-/**
- * Coordinator Framework Root Entry
- */
 
-// Define project base path
-define('APPROOT', __DIR__ . '/app');
+use CodeIgniter\Boot;
+use Config\Paths;
 
-// Include initialization
-require_once APPROOT . '/init.php';
+$minPhpVersion = '8.1';
+if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
+    $message = sprintf(
+        'Your PHP version must be %s or higher to run CodeIgniter. Current version: %s',
+        $minPhpVersion,
+        PHP_VERSION
+    );
 
-use App\Core\App;
+    header('HTTP/1.1 503 Service Unavailable.', true, 503);
+    echo $message;
+    exit(1);
+}
 
-$app = new App();
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR);
+
+if (getcwd() . DIRECTORY_SEPARATOR !== __DIR__ . DIRECTORY_SEPARATOR) {
+    chdir(__DIR__);
+}
+
+require_once __DIR__ . '/app/Config/Paths.php';
+
+$paths = new Paths();
+
+require_once $paths->systemDirectory . '/Boot.php';
+
+exit(Boot::bootWeb($paths));
+

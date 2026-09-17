@@ -12,7 +12,8 @@
                     <h3>প্রয়োজনীয় লিংক</h3>
                     <ul class="nav-links" style="flex-direction: column; gap: 0.5rem;">
                         <?php
-                        $db = \App\Config\Database::connect();
+                        $db = \Config\Database::pdoConnect();
+
                         $menus_stmt = $db->query("SELECT * FROM sub_menus ORDER BY order_index ASC");
                         $footer_menus = $menus_stmt->fetchAll();
                         foreach ($footer_menus as $menu):

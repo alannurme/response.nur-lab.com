@@ -1,0 +1,317 @@
+CRITICAL - 2026-09-17 20:51:42 --> Error: Class "Config\Kint" not found
+[Method: GET, Route: /]
+in SYSTEMPATH\Autoloader\Autoloader.php on line 554.
+ 1 SYSTEMPATH\Autoloader\Autoloader.php(521): CodeIgniter\Autoloader\Autoloader->configureKint()
+ 2 SYSTEMPATH\Boot.php(385): CodeIgniter\Autoloader\Autoloader->initializeKint(true)
+ 3 SYSTEMPATH\Boot.php(160): CodeIgniter\Boot::initializeKint()
+ 4 ROOTPATH\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-09-17 20:51:42 --> ErrorException: Uncaught TypeError: CodeIgniter\HTTP\ContentSecurityPolicy::__construct(): Argument #1 ($config) must be of type Config\ContentSecurityPolicy, null given, called in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php on line 194 and defined in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\ContentSecurityPolicy.php:354
+Stack trace:
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(194): CodeIgniter\HTTP\ContentSecurityPolicy->__construct(NULL)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::csp(NULL, false)
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(189): CodeIgniter\Config\BaseService::getSharedInstance('csp', NULL)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::csp()
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#6 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('csp')
+#7 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\Response.php(160): service('csp')
+#8 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(589): CodeIgniter\HTTP\Response->__construct(Object(Config\App))
+#9 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::response(Object(Config\App), false)
+#10 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('response', Array)
+#11 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(584): CodeIgniter\Config\BaseService::getSharedInstance('response', NULL)
+#12 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::response()
+#13 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('response', Array)
+#14 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('response')
+#15 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\Exceptions.php(146): service('response')
+#16 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(Error))
+#17 {main}
+  thrown
+【Previous Exception】
+Error
+Class "Config\Kint" not found
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Autoloader\Autoloader.php(521): CodeIgniter\Autoloader\Autoloader->configureKint()
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(385): CodeIgniter\Autoloader\Autoloader->initializeKint(true)
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(160): CodeIgniter\Boot::initializeKint()
+#3 C:\xampp\htdocs\response.nur-lab.com\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#4 {main}
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\ContentSecurityPolicy.php on line 354.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-09-17 20:52:24 --> ErrorException: Undefined property: Config\App::$CSPEnabled
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\ContentSecurityPolicy.php on line 356.
+ 1 SYSTEMPATH\HTTP\ContentSecurityPolicy.php(356): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined property: Config\\App::$CSPEnabled', 'C:\\xampp\\htdocs\\response.nur-lab.com\\vendor\\codeigniter4\\framework\\system\\HTTP\\ContentSecurityPolicy.php', 356)
+ 2 SYSTEMPATH\Config\Services.php(194): CodeIgniter\HTTP\ContentSecurityPolicy->__construct(Object(Config\ContentSecurityPolicy))
+ 3 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::csp(Object(Config\ContentSecurityPolicy), false)
+ 4 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('csp', [...])
+ 5 SYSTEMPATH\Config\Services.php(189): CodeIgniter\Config\BaseService::getSharedInstance('csp', null)
+ 6 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::csp()
+ 7 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('csp', [])
+ 8 SYSTEMPATH\Common.php(1096): CodeIgniter\Config\BaseService::get('csp')
+ 9 SYSTEMPATH\Autoloader\Autoloader.php(564): service('csp')
+10 SYSTEMPATH\Autoloader\Autoloader.php(521): CodeIgniter\Autoloader\Autoloader->configureKint()
+11 SYSTEMPATH\Boot.php(385): CodeIgniter\Autoloader\Autoloader->initializeKint(true)
+12 SYSTEMPATH\Boot.php(160): CodeIgniter\Boot::initializeKint()
+13 ROOTPATH\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-09-17 20:52:24 --> ErrorException: Uncaught ErrorException: Undefined property: Config\App::$CSPEnabled in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\ContentSecurityPolicy.php:356
+Stack trace:
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\ContentSecurityPolicy.php(356): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined prope...', 'C:\\xampp\\htdocs...', 356)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(194): CodeIgniter\HTTP\ContentSecurityPolicy->__construct(Object(Config\ContentSecurityPolicy))
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::csp(Object(Config\ContentSecurityPolicy), false)
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(189): CodeIgniter\Config\BaseService::getSharedInstance('csp', NULL)
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::csp()
+#6 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#7 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('csp')
+#8 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\Response.php(160): service('csp')
+#9 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(589): CodeIgniter\HTTP\Response->__construct(Object(Config\App))
+#10 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::response(Object(Config\App), false)
+#11 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('response', Array)
+#12 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(584): CodeIgniter\Config\BaseService::getSharedInstance('response', NULL)
+#13 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::response()
+#14 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('response', Array)
+#15 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('response')
+#16 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\Exceptions.php(146): service('response')
+#17 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(ErrorException))
+#18 {main}
+  thrown
+【Previous Exception】
+ErrorException
+Undefined property: Config\App::$CSPEnabled
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\HTTP\ContentSecurityPolicy.php(356): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined prope...', 'C:\\xampp\\htdocs...', 356)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(194): CodeIgniter\HTTP\ContentSecurityPolicy->__construct(Object(Config\ContentSecurityPolicy))
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::csp(Object(Config\ContentSecurityPolicy), false)
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(189): CodeIgniter\Config\BaseService::getSharedInstance('csp', NULL)
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::csp()
+#6 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('csp', Array)
+#7 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('csp')
+#8 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Autoloader\Autoloader.php(564): service('csp')
+#9 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Autoloader\Autoloader.php(521): CodeIgniter\Autoloader\Autoloader->configureKint()
+#10 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(385): CodeIgniter\Autoloader\Autoloader->initializeKint(true)
+#11 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(160): CodeIgniter\Boot::initializeKint()
+#12 C:\xampp\htdocs\response.nur-lab.com\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+[Method: GET, Route: /]
+in SYSTEMPATH\HTTP\ContentSecurityPolicy.php on line 356.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-09-17 20:53:22 --> TypeError: CodeIgniter\Cache\CacheFactory::getHandler(): Argument #1 ($config) must be of type Config\Cache, null given, called in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php on line 129
+[Method: GET, Route: /]
+in SYSTEMPATH\Cache\CacheFactory.php on line 50.
+ 1 SYSTEMPATH\Config\Services.php(129): CodeIgniter\Cache\CacheFactory::getHandler(null)
+ 2 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::cache(null, false)
+ 3 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('cache', [...])
+ 4 SYSTEMPATH\Config\Services.php(124): CodeIgniter\Config\BaseService::getSharedInstance('cache', null)
+ 5 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::cache()
+ 6 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('cache', [])
+ 7 SYSTEMPATH\Config\Services.php(454): CodeIgniter\Config\BaseService::get('cache')
+ 8 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::responsecache(null, null, false)
+ 9 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('responsecache', [...])
+10 SYSTEMPATH\Config\Services.php(450): CodeIgniter\Config\BaseService::getSharedInstance('responsecache', null, null)
+11 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::responsecache()
+12 SYSTEMPATH\CodeIgniter.php(178): CodeIgniter\Config\BaseService::__callStatic('responsecache', [])
+13 SYSTEMPATH\Config\Services.php(164): CodeIgniter\CodeIgniter->__construct(Object(Config\App))
+14 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::codeigniter(Object(Config\App), false)
+15 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('codeigniter', [...])
+16 SYSTEMPATH\Config\Services.php(159): CodeIgniter\Config\BaseService::getSharedInstance('codeigniter', null)
+17 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::codeigniter()
+18 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('codeigniter', [])
+19 SYSTEMPATH\Common.php(1096): CodeIgniter\Config\BaseService::get('codeigniter')
+20 SYSTEMPATH\Boot.php(403): service('codeigniter')
+21 SYSTEMPATH\Boot.php(163): CodeIgniter\Boot::initializeCodeIgniter()
+22 ROOTPATH\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-09-17 20:53:22 --> ErrorException: Uncaught TypeError: CodeIgniter\Format\Format::__construct(): Argument #1 ($config) must be of type Config\Format, null given, called in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php on line 313 and defined in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Format\Format.php:26
+Stack trace:
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(313): CodeIgniter\Format\Format->__construct(NULL)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::format(NULL, false)
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('format', Array)
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(308): CodeIgniter\Config\BaseService::getSharedInstance('format', NULL)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::format()
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('format', Array)
+#6 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('format')
+#7 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\API\ResponseTrait.php(306): service('format')
+#8 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\API\ResponseTrait.php(111): CodeIgniter\Debug\ExceptionHandler->format(Array)
+#9 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\ExceptionHandler.php(95): CodeIgniter\Debug\ExceptionHandler->respond(Array, 500)
+#10 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(TypeError), Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#11 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(TypeError))
+#12 {main}
+  thrown
+【Previous Exception】
+TypeError
+CodeIgniter\Cache\CacheFactory::getHandler(): Argument #1 ($config) must be of type Config\Cache, null given, called in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php on line 129
+#0 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(129): CodeIgniter\Cache\CacheFactory::getHandler(NULL)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::cache(NULL, false)
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('cache', Array)
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(124): CodeIgniter\Config\BaseService::getSharedInstance('cache', NULL)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::cache()
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('cache', Array)
+#6 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(454): CodeIgniter\Config\BaseService::get('cache')
+#7 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::responsecache(NULL, NULL, false)
+#8 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('responsecache', Array)
+#9 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(450): CodeIgniter\Config\BaseService::getSharedInstance('responsecache', NULL, NULL)
+#10 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::responsecache()
+#11 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(178): CodeIgniter\Config\BaseService::__callStatic('responsecache', Array)
+#12 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(164): CodeIgniter\CodeIgniter->__construct(Object(Config\App))
+#13 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(325): CodeIgniter\Config\Services::codeigniter(Object(Config\App), false)
+#14 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('codeigniter', Array)
+#15 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php(159): CodeIgniter\Config\BaseService::getSharedInstance('codeigniter', NULL)
+#16 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(334): CodeIgniter\Config\Services::codeigniter()
+#17 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('codeigniter', Array)
+#18 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Common.php(1096): CodeIgniter\Config\BaseService::get('codeigniter')
+#19 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(403): service('codeigniter')
+#20 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(163): CodeIgniter\Boot::initializeCodeIgniter()
+#21 C:\xampp\htdocs\response.nur-lab.com\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#22 {main}
+[Method: GET, Route: /]
+in SYSTEMPATH\Format\Format.php on line 26.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-09-17 20:54:01 --> TypeError: CodeIgniter\Cache\CacheFactory::getHandler(): Argument #1 ($config) must be of type Config\Cache, null given, called in C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Config\Services.php on line 129
+[Method: GET, Route: /]
+in SYSTEMPATH\Cache\CacheFactory.php on line 50.
+ 1 SYSTEMPATH\Config\Services.php(129): CodeIgniter\Cache\CacheFactory::getHandler(null)
+ 2 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::cache(null, false)
+ 3 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('cache', [...])
+ 4 SYSTEMPATH\Config\Services.php(124): CodeIgniter\Config\BaseService::getSharedInstance('cache', null)
+ 5 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::cache()
+ 6 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('cache', [])
+ 7 SYSTEMPATH\Config\Services.php(454): CodeIgniter\Config\BaseService::get('cache')
+ 8 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::responsecache(null, null, false)
+ 9 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('responsecache', [...])
+10 SYSTEMPATH\Config\Services.php(450): CodeIgniter\Config\BaseService::getSharedInstance('responsecache', null, null)
+11 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::responsecache()
+12 SYSTEMPATH\CodeIgniter.php(178): CodeIgniter\Config\BaseService::__callStatic('responsecache', [])
+13 SYSTEMPATH\Config\Services.php(164): CodeIgniter\CodeIgniter->__construct(Object(Config\App))
+14 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::codeigniter(Object(Config\App), false)
+15 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('codeigniter', [...])
+16 SYSTEMPATH\Config\Services.php(159): CodeIgniter\Config\BaseService::getSharedInstance('codeigniter', null)
+17 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::codeigniter()
+18 SYSTEMPATH\Config\BaseService.php(203): CodeIgniter\Config\BaseService::__callStatic('codeigniter', [])
+19 SYSTEMPATH\Common.php(1096): CodeIgniter\Config\BaseService::get('codeigniter')
+20 SYSTEMPATH\Boot.php(403): service('codeigniter')
+21 SYSTEMPATH\Boot.php(163): CodeIgniter\Boot::initializeCodeIgniter()
+22 ROOTPATH\spark(37): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:48:42 --> Error: Undefined constant "App\Core\APPROOT"
+[Method: GET, Route: /]
+in APPPATH\Core\Controller.php on line 15.
+ 1 APPPATH\Controllers\Home.php(90): App\Core\Controller->view('home/index', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Home->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:48:42 --> ErrorException: Uncaught ErrorException: file_get_contents(C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\debug.css): Failed to open stream: No such file or directory in C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\error_exception.php:15
+Stack trace:
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'file_get_conten...', 'C:\\xampp\\htdocs...', 15)
+#1 C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\error_exception.php(15): file_get_contents('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(270): include('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(Error), 500, 'C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(Error), Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#6 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(Error))
+#7 {main}
+  thrown
+【Previous Exception】
+Error
+Undefined constant "App\Core\APPROOT"
+#0 C:\xampp\htdocs\response.nur-lab.com\app\Controllers\Home.php(90): App\Core\Controller->view('home/index', Array)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(974): App\Controllers\Home->index()
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(417): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#6 C:\xampp\htdocs\response.nur-lab.com\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#7 {main}
+[Method: GET, Route: /]
+in APPPATH\Views\errors\html\error_exception.php on line 15.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-09-17 19:48:45 --> Error: Undefined constant "App\Core\APPROOT"
+[Method: GET, Route: /]
+in APPPATH\Core\Controller.php on line 15.
+ 1 APPPATH\Controllers\Home.php(90): App\Core\Controller->view('home/index', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Home->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:48:45 --> ErrorException: Uncaught ErrorException: file_get_contents(C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\debug.css): Failed to open stream: No such file or directory in C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\error_exception.php:15
+Stack trace:
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'file_get_conten...', 'C:\\xampp\\htdocs...', 15)
+#1 C:\xampp\htdocs\response.nur-lab.com\app\Views\errors\html\error_exception.php(15): file_get_contents('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(270): include('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(Error), 500, 'C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(Error), Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#6 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(Error))
+#7 {main}
+  thrown
+【Previous Exception】
+Error
+Undefined constant "App\Core\APPROOT"
+#0 C:\xampp\htdocs\response.nur-lab.com\app\Controllers\Home.php(90): App\Core\Controller->view('home/index', Array)
+#1 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(974): App\Controllers\Home->index()
+#2 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+#3 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(417): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\response.nur-lab.com\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#6 C:\xampp\htdocs\response.nur-lab.com\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#7 {main}
+[Method: GET, Route: /]
+in APPPATH\Views\errors\html\error_exception.php on line 15.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-09-17 19:50:12 --> Error: Undefined constant "App\Core\APPROOT"
+[Method: GET, Route: /]
+in APPPATH\Core\Controller.php on line 15.
+ 1 APPPATH\Controllers\Home.php(90): App\Core\Controller->view('home/index', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Home->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:52:14 --> ErrorException: Attempt to read property "autoRoutesImproved" on null
+[Method: GET, Route: /]
+in SYSTEMPATH\Router\Router.php on line 173.
+ 1 SYSTEMPATH\Router\Router.php(173): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "autoRoutesImproved" on null', 'C:\\xampp\\htdocs\\response.nur-lab.com\\vendor\\codeigniter4\\framework\\system\\Router\\Router.php', 173)
+ 2 SYSTEMPATH\Config\Services.php(640): CodeIgniter\Router\Router->__construct(Object(CodeIgniter\Router\RouteCollection), Object(CodeIgniter\HTTP\IncomingRequest))
+ 3 SYSTEMPATH\Config\BaseService.php(325): CodeIgniter\Config\Services::router(Object(CodeIgniter\Router\RouteCollection), Object(CodeIgniter\HTTP\IncomingRequest), false)
+ 4 SYSTEMPATH\Config\BaseService.php(264): CodeIgniter\Config\BaseService::__callStatic('router', [...])
+ 5 SYSTEMPATH\Config\Services.php(634): CodeIgniter\Config\BaseService::getSharedInstance('router', Object(CodeIgniter\Router\RouteCollection), Object(CodeIgniter\HTTP\IncomingRequest))
+ 6 SYSTEMPATH\Config\BaseService.php(334): CodeIgniter\Config\Services::router(Object(CodeIgniter\Router\RouteCollection), Object(CodeIgniter\HTTP\IncomingRequest))
+ 7 SYSTEMPATH\CodeIgniter.php(845): CodeIgniter\Config\BaseService::__callStatic('router', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(464): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 9 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:53:32 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "q&a"
+[Method: GET, Route: q&a]
+in SYSTEMPATH\Router\Router.php on line 766.
+ 1 SYSTEMPATH\Router\Router.php(217): CodeIgniter\Router\Router->checkDisallowedChars('q&a')
+ 2 SYSTEMPATH\CodeIgniter.php(852): CodeIgniter\Router\Router->handle('q&a')
+ 3 SYSTEMPATH\CodeIgniter.php(464): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:55:23 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "argument-from-religious-experience-ধর্মীয়-অভিজ্ঞতার-যুক্তি"
+[Method: GET, Route: argument-from-religious-experience-%E0%A6%A7%E0%A6%B0%E0%A7%8D%E0%A6%AE%E0%A7%80%E0%A6%AF%E0%A6%BC-%E0%A6%85%E0%A6%AD%E0%A6%BF%E0%A6%9C%E0%A7%8D%E0%A6%9E%E0%A6%A4%E0%A6%BE%E0%A6%B0-%E0%A6%AF%E0%A7%81%E0%A6%95%E0%A7%8D%E0%A6%A4%E0%A6%BF]
+in SYSTEMPATH\Router\Router.php on line 766.
+ 1 SYSTEMPATH\Router\Router.php(217): CodeIgniter\Router\Router->checkDisallowedChars('argument-from-religious-experience-ধর্মীয়-অভিজ্ঞতার-যুক্তি')
+ 2 SYSTEMPATH\CodeIgniter.php(852): CodeIgniter\Router\Router->handle('argument-from-religious-experience-ধর্মীয়-অভিজ্ঞতার-যুক্তি')
+ 3 SYSTEMPATH\CodeIgniter.php(464): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-09-17 19:55:23 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "argument-from-revelation-ওহির-যুক্তি"
+[Method: GET, Route: argument-from-revelation-%E0%A6%93%E0%A6%B9%E0%A6%BF%E0%A6%B0-%E0%A6%AF%E0%A7%81%E0%A6%95%E0%A7%8D%E0%A6%A4%E0%A6%BF]
+in SYSTEMPATH\Router\Router.php on line 766.
+ 1 SYSTEMPATH\Router\Router.php(217): CodeIgniter\Router\Router->checkDisallowedChars('argument-from-revelation-ওহির-যুক্তি')
+ 2 SYSTEMPATH\CodeIgniter.php(852): CodeIgniter\Router\Router->handle('argument-from-revelation-ওহির-যুক্তি')
+ 3 SYSTEMPATH\CodeIgniter.php(464): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 ROOTPATH\index.php(31): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

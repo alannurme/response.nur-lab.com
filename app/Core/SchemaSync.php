@@ -1,7 +1,8 @@
 <?php
 namespace App\Core;
 
-use App\Config\Database;
+use Config\Database;
+
 
 class SchemaSync {
     public static function sync() {

@@ -112,7 +112,7 @@ class Home extends Controller {
             }
 
             $adminModel = $this->model('AdminModel');
-            $db = \App\Config\Database::connect();
+            $db = \Config\Database::pdoConnect();
             $stmt = $db->prepare("SELECT * FROM comments WHERE post_id = ? AND status = 'approved' ORDER BY created_at ASC");
             $stmt->execute([$post['id']]);
             $comments = $stmt->fetchAll();
@@ -180,7 +180,7 @@ class Home extends Controller {
             $category_name = 'সবগুলো নিবন্ধ';
             
             if ($category_slug !== null) {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT * FROM categories WHERE slug = :slug");
                 $stmt->execute(['slug' => $category_slug]);
                 $category = $stmt->fetch();
@@ -192,7 +192,7 @@ class Home extends Controller {
             
             if (!empty($search)) {
                 $category_name = 'সার্চ ফলাফল: ' . htmlspecialchars($search);
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
                                       FROM posts p 
                                       LEFT JOIN post_categories pc ON p.id = pc.post_id
@@ -211,7 +211,7 @@ class Home extends Controller {
                     }
                 }
             } elseif ($category_id !== null) {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
                                       FROM posts p 
                                       LEFT JOIN post_categories pc ON p.id = pc.post_id
@@ -247,7 +247,7 @@ class Home extends Controller {
             $dont_miss_posts = [];
             $dont_miss_slug = $settings['dont_miss_category'] ?? '';
             if (!empty($dont_miss_slug)) {
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
                                       FROM posts p 
                                       LEFT JOIN post_categories pc ON p.id = pc.post_id
@@ -309,7 +309,7 @@ class Home extends Controller {
         }
 
         ob_start();
-        $db = \App\Config\Database::connect();
+        $db = \Config\Database::pdoConnect();
         $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
                               FROM posts p 
                               LEFT JOIN post_categories pc ON p.id = pc.post_id
@@ -453,7 +453,7 @@ class Home extends Controller {
         }
 
         ob_start();
-        $db = \App\Config\Database::connect();
+        $db = \Config\Database::pdoConnect();
         
         $stmt_cat = $db->prepare("SELECT id, name FROM categories WHERE slug = ? LIMIT 1");
         $stmt_cat->execute([$slug]);
@@ -1089,7 +1089,7 @@ class Home extends Controller {
 
     public function sitemap() {
         try {
-            $db = \App\Config\Database::connect();
+            $db = \Config\Database::pdoConnect();
             
             // Get all published posts
             $stmt = $db->query("SELECT slug, created_at FROM posts WHERE status = 'published' ORDER BY created_at DESC");

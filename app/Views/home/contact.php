@@ -76,7 +76,8 @@
                     <h4 style="font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 15px;">আমাদের সামাজিক মাধ্যমসমূহ:</h4>
                     <div style="display: flex; gap: 12px;">
                         <?php
-                        $db = \App\Config\Database::connect();
+                        $db = \Config\Database::pdoConnect();
+
                         $social_links_stmt = $db->query("SELECT * FROM social_links ORDER BY order_index ASC, id ASC");
                         $social_links = $social_links_stmt->fetchAll();
                         foreach ($social_links as $link):

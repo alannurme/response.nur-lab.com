@@ -18,7 +18,7 @@
             </p>
             <div class="top-social" style="display: flex; gap: 15px;">
                 <?php
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $social_links_stmt = $db->query("SELECT * FROM social_links ORDER BY order_index ASC, id ASC");
                 $social_links = $social_links_stmt->fetchAll();
                 foreach ($social_links as $link): 
@@ -46,7 +46,7 @@
             <h4 style="color: #fff; margin-bottom: 25px; font-size: 1.2rem;">প্রয়োজনীয় লিংক</h4>
             <ul style="list-style: none;">
                 <?php
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $menus_stmt = $db->query("SELECT * FROM sub_menus ORDER BY order_index ASC");
                 $footer_menus = $menus_stmt->fetchAll();
                 foreach ($footer_menus as $menu):
@@ -88,7 +88,7 @@
                     }
                 }
 
-                $db = \App\Config\Database::connect();
+                $db = \Config\Database::pdoConnect();
                 $popular_posts_stmt = $db->query("
                     SELECT p.*, c.name as category_name 
                     FROM posts p 

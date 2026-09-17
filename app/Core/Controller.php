@@ -1,10 +1,12 @@
 <?php
 namespace App\Core;
 
-class Controller {
+class Controller extends \CodeIgniter\Controller {
     public function model($model) {
-        require_once APPROOT . '/Models/' . $model . '.php';
         $modelClass = "App\Models\\" . $model;
+        if (!class_exists($modelClass)) {
+            require_once APPROOT . '/Models/' . $model . '.php';
+        }
         return new $modelClass();
     }
 
@@ -13,3 +15,4 @@ class Controller {
         require_once APPROOT . '/Views/' . $view . '.php';
     }
 }
+
