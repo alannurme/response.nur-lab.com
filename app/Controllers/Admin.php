@@ -1034,13 +1034,13 @@ class Admin extends Controller {
                     'samesite' => 'Lax',
                     'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
                 ]);
-                header('Location: ' . URLROOT . '/admin');
+                header('Location: ' . base_url('admin'));
                 exit;
             }
         }
 
         if (isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin');
+            header('Location: ' . base_url('admin'));
             exit;
         }
 
