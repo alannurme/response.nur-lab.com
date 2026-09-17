@@ -11,10 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.35);
-            --bg-dark: #040814;
-            --card-bg: rgba(13, 22, 42, 0.65);
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --bg-dark: #050b14;
+            --card-bg: rgba(10, 18, 34, 0.72);
             --card-border: rgba(255, 255, 255, 0.12);
             --input-bg: rgba(255, 255, 255, 0.05);
             --input-border: rgba(255, 255, 255, 0.12);
@@ -33,25 +33,76 @@
             align-items: center; 
             justify-content: center; 
             min-height: 100vh; 
-            background: var(--bg-dark) url('<?= URLROOT ?>/public/img/dark_sky.jpg') no-repeat center center / cover;
+            background-color: var(--bg-dark);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--text-main);
             position: relative;
             overflow: hidden;
         }
 
-        /* Ethereal Glowing Orbit Ring */
+        /* Canvas Animation Background */
+        #islamicCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Floating Glowing Crescent & Stars Animation */
+        .crescent-orb {
+            position: absolute;
+            top: 8%;
+            right: 12%;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            box-shadow: -18px 18px 0 0 rgba(16, 185, 129, 0.25);
+            filter: blur(2px);
+            z-index: 2;
+            animation: floatCrescent 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .crescent-orb-glow {
+            position: absolute;
+            top: 5%;
+            right: 10%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: 1;
+            pointer-events: none;
+            animation: pulseGlow 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatCrescent {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(-10deg); }
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.15); }
+        }
+
+        /* Dynamic Rotating Arabesque Ring */
         .sky-aura {
             position: absolute;
-            width: 720px;
-            height: 720px;
+            width: 760px;
+            height: 760px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.12);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-            box-shadow: 0 0 120px rgba(56, 189, 248, 0.08);
+            box-shadow: 0 0 120px rgba(16, 185, 129, 0.08);
+            z-index: 2;
+            animation: rotateAura 60s linear infinite;
         }
 
         .sky-aura::after {
@@ -59,7 +110,12 @@
             position: absolute;
             inset: -40px;
             border-radius: 50%;
-            border: 1px dashed rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        @keyframes rotateAura {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         /* Top Left Brand Logo */
@@ -344,10 +400,15 @@
 </head>
 <body>
 
+    <!-- Canvas Animated Islamic Pattern Background -->
+    <canvas id="islamicCanvas"></canvas>
+    <div class="crescent-orb-glow"></div>
+    <div class="crescent-orb"></div>
+
     <!-- Top Left Brand Badge -->
     <a href="<?= URLROOT ?>" class="top-brand">
         <div class="top-brand-icon">
-            <i class="fas fa-cubes"></i>
+            <i class="fas fa-kaaba"></i>
         </div>
         <span><?= $data['settings']['site_title'] ?? 'Response' ?></span>
     </a>
@@ -403,22 +464,6 @@
                     Get Started
                 </button>
             </form>
-
-            <div class="divider">
-                <span>Or sign in with</span>
-            </div>
-
-            <div class="quick-actions">
-                <a href="<?= URLROOT ?>" class="action-btn" title="Main Site">
-                    <i class="fas fa-globe" style="color: #38bdf8;"></i>
-                </a>
-                <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $data['settings']['contact_phone'] ?? '') ?>" target="_blank" class="action-btn" title="Support">
-                    <i class="fab fa-whatsapp" style="color: #4ade80;"></i>
-                </a>
-                <a href="javascript:void(0)" onclick="showForgotModal()" class="action-btn" title="Help">
-                    <i class="fas fa-shield-halved" style="color: #94a3b8;"></i>
-                </a>
-            </div>
         </div>
     </div>
 
@@ -463,6 +508,105 @@
     function closeForgotModal() {
         document.getElementById('forgotModal').style.display = 'none';
     }
+
+    /* ----------------------------------------------------
+       Islamic Geometric Pattern Canvas Animation
+       ---------------------------------------------------- */
+    const canvas = document.getElementById('islamicCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let rotationAngle = 0;
+    let particles = [];
+
+    function resizeCanvas() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Create glowing star particles
+    for (let i = 0; i < 45; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 1.5 + 0.5,
+            alpha: Math.random() * 0.5 + 0.2,
+            speed: Math.random() * 0.3 + 0.1
+        });
+    }
+
+    function drawEightPointStar(cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Render Floating Particles
+        particles.forEach(p => {
+            p.y -= p.speed;
+            if (p.y < 0) p.y = height;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(16, 185, 129, ${p.alpha})`;
+            ctx.fill();
+        });
+
+        // Render Islamic Geometric Grid Patterns
+        rotationAngle += 0.0008;
+        const spacing = 180;
+        const cols = Math.ceil(width / spacing) + 2;
+        const rows = Math.ceil(height / spacing) + 2;
+
+        for (let r = -1; r < rows; r++) {
+            for (let c = -1; c < cols; c++) {
+                const cx = c * spacing + (r % 2 === 0 ? 0 : spacing / 2);
+                const cy = r * spacing * 0.866;
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate((r + c) % 2 === 0 ? rotationAngle : -rotationAngle);
+
+                // Outer Emerald Star Lattice Line
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.07)';
+                ctx.lineWidth = 1;
+                drawEightPointStar(0, 0, 8, 48, 24);
+                ctx.stroke();
+
+                // Inner Delicate Geometric Star
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                drawEightPointStar(0, 0, 8, 28, 14);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
     </script>
 </body>
 </html>
