@@ -3497,5 +3497,101 @@ class Admin extends Controller {
         }
         exit;
     }
+
+    /* -------------------------------------------------------------------------
+     * MODULES (মডিউল) MANAGEMENT
+     * ------------------------------------------------------------------------- */
+    public function modules() {
+        $data = [
+            'title' => 'Modules (মডিউল)',
+            'settings' => $this->siteSettings,
+            'current_page' => 'modules',
+            'modules' => $this->adminModel->getModules()
+        ];
+        $this->view('admin/modules', $data);
+    }
+
+    public function add_module() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title'] ?? '');
+            $icon = trim($_POST['icon'] ?? 'fas fa-cube');
+            $url = trim($_POST['url'] ?? '#');
+            $content = $_POST['content'] ?? '';
+            $order_index = intval($_POST['order_index'] ?? 0);
+            $status = $_POST['status'] ?? 'active';
+
+            if (!empty($title)) {
+                $this->adminModel->addModule([
+                    'title' => $title,
+                    'icon' => $icon,
+                    'url' => $url,
+                    'content' => $content,
+                    'order_index' => $order_index,
+                    'status' => $status
+                ]);
+                header('Location: ' . URLROOT . '/admin/modules?msg=added');
+                exit;
+            }
+        }
+
+        $data = [
+            'title' => 'Add New Module (নতুন মডিউল যোগ করুন)',
+            'settings' => $this->siteSettings,
+            'current_page' => 'modules'
+        ];
+        $this->view('admin/add_module', $data);
+    }
+
+    public function edit_module($id = null) {
+        if (!$id) {
+            header('Location: ' . URLROOT . '/admin/modules');
+            exit;
+        }
+
+        $module = $this->adminModel->getModuleById($id);
+        if (!$module) {
+            header('Location: ' . URLROOT . '/admin/modules');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title'] ?? '');
+            $icon = trim($_POST['icon'] ?? 'fas fa-cube');
+            $url = trim($_POST['url'] ?? '#');
+            $content = $_POST['content'] ?? '';
+            $order_index = intval($_POST['order_index'] ?? 0);
+            $status = $_POST['status'] ?? 'active';
+
+            if (!empty($title)) {
+                $this->adminModel->updateModule($id, [
+                    'title' => $title,
+                    'icon' => $icon,
+                    'url' => $url,
+                    'content' => $content,
+                    'order_index' => $order_index,
+                    'status' => $status
+                ]);
+                header('Location: ' . URLROOT . '/admin/modules?msg=updated');
+                exit;
+            }
+        }
+
+        $data = [
+            'title' => 'Edit Module (মডিউল এডিট করুন)',
+            'settings' => $this->siteSettings,
+            'current_page' => 'modules',
+            'module' => $module
+        ];
+        $this->view('admin/edit_module', $data);
+    }
+
+    public function delete_module($id = null) {
+        if ($id) {
+            $this->adminModel->deleteModule($id);
+        }
+        header('Location: ' . URLROOT . '/admin/modules?msg=deleted');
+        exit;
+    }
 }
+
 

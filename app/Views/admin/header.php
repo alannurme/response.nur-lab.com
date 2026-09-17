@@ -738,6 +738,9 @@ if (empty($current_page)) {
 
             <div class="nav-group">
                 <div class="nav-label">System Control</div>
+                <a href="<?= URLROOT ?>/admin/modules" class="nav-item <?= $current_page == 'modules' ? 'active' : '' ?>">
+                    <i class="fas fa-boxes-stacked"></i><span>Modules (মডিউল)</span>
+                </a>
                 <a href="<?= URLROOT ?>/admin/pages" class="nav-item <?= $current_page == 'pages' ? 'active' : '' ?>">
                     <i class="fas fa-file-alt"></i><span>Static Pages</span>
                 </a>
