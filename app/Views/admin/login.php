@@ -362,7 +362,7 @@
                 </div>
             <?php endif; ?>
             
-            <form action="<?= URLROOT ?>/admin/login" method="POST">
+            <form action="<?= base_url('admin/login') ?>" method="POST">
                 <div class="form-field">
                     <label for="username">Username or Email</label>
                     <div class="input-group">

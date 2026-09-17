@@ -7,12 +7,15 @@ class Admin extends Controller {
     protected $siteSettings;
 
     public function __construct() {
-        // Check if logged in for all methods except login
-        $uri = service('request')->getUri()->getPath();
-        $isLoginRoute = (strpos($uri, 'admin/login') !== false || strpos($uri, 'login') !== false || (isset($_GET['url']) && $_GET['url'] === 'admin/login'));
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        if (!$isLoginRoute && !isset($_SESSION['admin_id'])) {
-            header('Location: ' . URLROOT . '/admin/login');
+        $uri = service('request')->getUri()->getPath();
+        $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false));
+
+        if (!$isLoginRoute && empty($_SESSION['admin_id'])) {
+            header('Location: ' . base_url('admin/login'));
             exit;
         }
 
@@ -1070,7 +1073,7 @@ class Admin extends Controller {
                     ]);
                 }
 
-                header('Location: ' . URLROOT . '/admin');
+                header('Location: ' . base_url('admin/posts'));
                 exit;
             } else {
                 $data['error'] = 'Invalid username or password';
