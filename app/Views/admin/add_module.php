@@ -1,7 +1,6 @@
 <?php require APPROOT . '/Views/admin/header.php'; ?>
 
-<div class="main-content">
-    <div class="admin-header">
+<div class="admin-header">
         <div>
             <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
                 <i class="fas fa-plus-circle" style="color: var(--primary); margin-right: 10px;"></i> Add New Module (নতুন মডিউল)
@@ -81,6 +80,6 @@
             </div>
         </div>
     </form>
-</div>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>
+

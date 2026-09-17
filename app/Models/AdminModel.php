@@ -7,6 +7,7 @@ class AdminModel extends Model {
         parent::__construct();
         $this->migrateUsersTableColumns();
         $this->migrateCategoriesTable();
+        $this->initModulesTable();
         // Database tables are initialized once. Commented out to prevent performance overhead on every page load.
         /*
         $this->initAuthorsTable();

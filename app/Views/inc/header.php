@@ -2102,9 +2102,24 @@ if (!function_exists('getBengaliDate')) {
                 </li>
 
                 <?php
-                // Fetch active modules for front-end Mega Menu
-                $modules_stmt = $db->query("SELECT * FROM modules WHERE status = 'active' ORDER BY order_index ASC, id ASC");
-                $frontend_modules = $modules_stmt ? $modules_stmt->fetchAll() : [];
+                // Ensure modules table exists and fetch active modules for front-end Mega Menu
+                try {
+                    $db->exec("CREATE TABLE IF NOT EXISTS modules (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        title VARCHAR(255) NOT NULL,
+                        icon VARCHAR(100) DEFAULT 'fa-solid fa-cube',
+                        url VARCHAR(255) DEFAULT '#',
+                        content TEXT,
+                        order_index INT DEFAULT 0,
+                        status ENUM('active', 'inactive') DEFAULT 'active',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                    
+                    $modules_stmt = $db->query("SELECT * FROM modules WHERE status = 'active' ORDER BY order_index ASC, id ASC");
+                    $frontend_modules = $modules_stmt ? $modules_stmt->fetchAll() : [];
+                } catch (\PDOException $e) {
+                    $frontend_modules = [];
+                }
                 ?>
 
                 <!-- Module (মডিউল) Mega Menu Button after Search Bar -->

@@ -1,17 +1,13 @@
 <?php require APPROOT . '/Views/admin/header.php'; ?>
 
-<div class="main-content">
-    <div class="admin-header">
-        <div>
-            <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
-                <i class="fas fa-boxes-stacked" style="color: var(--primary); margin-right: 10px;"></i> Module Management (মডিউল)
-            </h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">Create, edit, and organize topic modules displayed in the header mega menu.</p>
-        </div>
-        <a href="<?= URLROOT ?>/admin/add_module" class="btn-visit-site" style="background: var(--primary); color: white; border: none;">
-            <i class="fas fa-plus-circle"></i> Add New Module
-        </a>
+<div class="admin-header">
+    <div>
+        <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+            <i class="fas fa-boxes-stacked" style="color: var(--primary); margin-right: 10px;"></i> Module Management (মডিউল)
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Create, edit, and organize topic modules displayed in the header mega menu.</p>
     </div>
+</div>
 
     <?php if (isset($_GET['msg'])): ?>
         <div style="padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 600;">
@@ -97,6 +93,6 @@
             </table>
         </div>
     </div>
-</div>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>
+
