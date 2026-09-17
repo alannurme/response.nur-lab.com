@@ -2300,4 +2300,14 @@ class AdminModel extends Model {
             return false;
         }
     }
+
+    public function getCommentsByPostId($post_id) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM comments WHERE post_id = :post_id AND status = 'approved' ORDER BY created_at DESC");
+            $stmt->execute(['post_id' => $post_id]);
+            return $stmt->fetchAll();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 }
