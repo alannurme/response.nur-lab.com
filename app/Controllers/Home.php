@@ -1228,7 +1228,9 @@ class Home extends Controller {
                 'menus' => $adminModel->getMenus(),
                 'sub_menus' => $adminModel->getSubMenus(),
                 'prayer_times' => $adminModel->getPrayerTimes(),
-                'sidebar_slides' => $adminModel->getSidebarSlides()
+                'sidebar_slides' => $adminModel->getSidebarSlides(),
+                'recent_questions' => $adminModel->getUserQuestions(5, 'answered'),
+                'recent_posts' => $postModel->getAllPosts(5)
             ];
 
             return $this->view('home/post', $data);
