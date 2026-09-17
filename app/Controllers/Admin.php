@@ -1071,7 +1071,7 @@ class Admin extends Controller {
                     ]);
                 }
 
-                header('Location: ' . base_url('admin/posts'));
+                header('Location: ' . base_url('admin'));
                 exit;
             } else {
                 $data['error'] = 'Invalid username or password';
