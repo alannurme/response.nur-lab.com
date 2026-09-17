@@ -433,7 +433,7 @@
                 নিরাপত্তাজনিত কারণে অ্যাডমিন পাসওয়ার্ড রিসেট করতে অনুগ্রহ করে প্রধান সিস্টেমে যোগাযোগ করুন।
             </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <a href="https://wa.me/<?= preg_replace('/[^0-9]/}{', '', $data['settings']['contact_phone'] ?? '') ?>?text=<?= urlencode('আসসালামু আলাইকুম, আমি অ্যাডমিন প্যানেলের পাসওয়ার্ড ভুলে গেছি। দয়া করে রিসেট করতে সাহায্য করুন।') ?>" target="_blank" style="background: #ffffff; color: #0f172a; padding: 13px; border-radius: 16px; text-decoration: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.925rem; box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);">
+                <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $data['settings']['contact_phone'] ?? '') ?>?text=<?= urlencode('আসসালামু আলাইকুম, আমি অ্যাডমিন প্যানেলের পাসওয়ার্ড ভুলে গেছি। দয়া করে রিসেট করতে সাহায্য করুন।') ?>" target="_blank" style="background: #ffffff; color: #0f172a; padding: 13px; border-radius: 16px; text-decoration: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.925rem; box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);">
                     <i class="fab fa-whatsapp" style="color: #22c55e; font-size: 1.1rem;"></i> হোয়াটসঅ্যাপে যোগাযোগ
                 </a>
                 <button onclick="closeForgotModal()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 12px; border-radius: 16px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">বন্ধ করুন</button>
