@@ -8,8 +8,10 @@ class Admin extends Controller {
 
     public function __construct() {
         // Check if logged in for all methods except login
-        $url = $_GET['url'] ?? '';
-        if ($url !== 'admin/login' && !isset($_SESSION['admin_id'])) {
+        $uri = service('request')->getUri()->getPath();
+        $isLoginRoute = (strpos($uri, 'admin/login') !== false || strpos($uri, 'login') !== false || (isset($_GET['url']) && $_GET['url'] === 'admin/login'));
+
+        if (!$isLoginRoute && !isset($_SESSION['admin_id'])) {
             header('Location: ' . URLROOT . '/admin/login');
             exit;
         }
