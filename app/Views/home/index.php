@@ -252,7 +252,7 @@
                 <!-- Hero Audio / Recitation Player Card Under Stats -->
                 <div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 20px; border-radius: 16px; margin-top: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div id="hero-audio-wave" style="display: flex; align-items: flex-end; gap: 4px; height: 20px; background: rgba(16, 185, 129, 0.2); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(52, 211, 153, 0.3);">
+                        <div id="hero-audio-wave" style="display: flex; align-items: flex-end; gap: 4px; height: 20px; background: rgba(16, 185, 129, 0.2); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(52, 211, 153, 0.3); opacity: 0.4;">
                             <span style="width: 4px; height: 16px; background: #6ee7b7; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out;"></span>
                             <span style="width: 4px; height: 20px; background: #fef08a; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out 0.3s;"></span>
                             <span style="width: 4px; height: 12px; background: #6ee7b7; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out 0.6s;"></span>
@@ -263,18 +263,18 @@
                                 <i class="fas fa-volume-high" style="color: #fef08a;"></i>
                                 <span><?= htmlspecialchars($data['settings']['hero_audio_label'] ?? 'কুরআন তিলাওয়াত (অডিও)') ?></span>
                             </div>
-                            <div style="font-size: 0.78rem; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 2px;">
-                                ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন
+                            <div id="hero-audio-subtext" style="font-size: 0.78rem; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 2px;">
+                                ক্লিক করে ব্যাকগ্রাউন্ডে অডিও শুনুন
                             </div>
                         </div>
                     </div>
 
-                    <button id="hero-audio-toggle" onclick="toggleHeroAudio()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; padding: 9px 20px; border-radius: 30px; font-size: 0.88rem; font-weight: 800; font-family: 'Hind Siliguri', sans-serif; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
-                        <i class="fas fa-pause" id="hero-audio-icon"></i> <span id="hero-audio-text">অডিও চলছে</span>
+                    <button id="hero-audio-toggle" onclick="toggleHeroAudio()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; padding: 9px 22px; border-radius: 30px; font-size: 0.88rem; font-weight: 800; font-family: 'Hind Siliguri', sans-serif; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                        <i class="fas fa-play" id="hero-audio-icon"></i> <span id="hero-audio-text">প্লে করুন</span>
                     </button>
                     
-                    <!-- Invisible YouTube Embed for Audio Autoplay -->
-                    <iframe id="hero-youtube-iframe" width="1" height="1" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=<?= $autoplay ?>&mute=0&loop=1&playlist=<?= $videoId ?>" frameborder="0" allow="autoplay; encrypted-media" style="position: absolute; opacity: 0; pointer-events: none;"></iframe>
+                    <!-- Hidden YouTube API Player Div -->
+                    <div id="yt-player-container" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;"></div>
                 </div>
 
                 <style>
@@ -285,25 +285,90 @@
                 </style>
 
                 <script>
-                var isPlaying = <?= $autoplay === '1' ? 'true' : 'false' ?>;
-                function toggleHeroAudio() {
-                    var iframe = document.getElementById('hero-youtube-iframe');
+                var ytPlayer;
+                var isPlaying = false;
+                var autoPlaySetting = <?= $autoplay === '1' ? 'true' : 'false' ?>;
+
+                // Load YouTube Iframe API dynamically
+                if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+                    var tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                }
+
+                function onYouTubeIframeAPIReady() {
+                    ytPlayer = new YT.Player('yt-player-container', {
+                        height: '1',
+                        width: '1',
+                        videoId: '<?= $videoId ?>',
+                        playerVars: {
+                            'autoplay': autoPlaySetting ? 1 : 0,
+                            'controls': 0,
+                            'loop': 1,
+                            'playlist': '<?= $videoId ?>'
+                        },
+                        events: {
+                            'onReady': onPlayerReady
+                        }
+                    });
+                }
+
+                function onPlayerReady(event) {
+                    if (autoPlaySetting) {
+                        event.target.playVideo();
+                        // Attempt unmuting
+                        event.target.unMute();
+                        event.target.setVolume(100);
+                        
+                        // Listen for any click on the page to unmute if browser blocked unmuted autoplay
+                        var unmuteOnFirstClick = function() {
+                            if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+                                ytPlayer.unMute();
+                                ytPlayer.setVolume(100);
+                                ytPlayer.playVideo();
+                                setUIPlayingState(true);
+                            }
+                            document.removeEventListener('click', unmuteOnFirstClick);
+                        };
+                        document.addEventListener('click', unmuteOnFirstClick, { once: true });
+                        
+                        setUIPlayingState(true);
+                    }
+                }
+
+                function setUIPlayingState(playing) {
                     var icon = document.getElementById('hero-audio-icon');
                     var text = document.getElementById('hero-audio-text');
                     var wave = document.getElementById('hero-audio-wave');
-                    
-                    if (isPlaying) {
-                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                        icon.className = 'fas fa-play';
-                        text.innerText = 'প্লে করুন';
-                        wave.style.opacity = '0.3';
-                        isPlaying = false;
-                    } else {
-                        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                    var subtext = document.getElementById('hero-audio-subtext');
+
+                    if (playing) {
                         icon.className = 'fas fa-pause';
                         text.innerText = 'অডিও চলছে';
+                        if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন';
                         wave.style.opacity = '1';
                         isPlaying = true;
+                    } else {
+                        icon.className = 'fas fa-play';
+                        text.innerText = 'প্লে করুন';
+                        if (subtext) subtext.innerText = 'ক্লিক করে তিলাওয়াত শুনুন';
+                        wave.style.opacity = '0.4';
+                        isPlaying = false;
+                    }
+                }
+
+                function toggleHeroAudio() {
+                    if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+
+                    if (isPlaying) {
+                        ytPlayer.pauseVideo();
+                        setUIPlayingState(false);
+                    } else {
+                        ytPlayer.unMute();
+                        ytPlayer.setVolume(100);
+                        ytPlayer.playVideo();
+                        setUIPlayingState(true);
                     }
                 }
                 </script>
