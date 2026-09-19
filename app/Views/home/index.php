@@ -6,7 +6,7 @@
     <div style="position: absolute; top: 0; left: 0; right: 0; height: 85px; background: #0b7c4d; clip-path: ellipse(80% 100% at 50% 0%); z-index: 1;"></div>
     
     <div style="max-width: 1320px; margin: 0 auto; position: relative; z-index: 2; padding-top: 15px;">
-        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center;">
+        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px; align-items: center;">
             
             <!-- LEFT COLUMN: Search & Quick Links -->
             <div style="text-align: left; padding: 10px 0;">
@@ -39,55 +39,61 @@
                     </div>
                 </form>
 
-                <!-- Quick Access Buttons Grid -->
+                <!-- Dynamic Real Categories Grid from Project Database -->
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; max-width: 640px;">
-                    <a href="<?= URLROOT ?>/category/quran" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #f0fdf4; color: #0b7c4d; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-quran"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">কুরআন</span>
-                    </a>
-
-                    <a href="<?= URLROOT ?>/category/hadith" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">হাদীস</span>
-                    </a>
-
-                    <a href="<?= URLROOT ?>/q&amp;a" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-balance-scale"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">মাসআলা</span>
-                    </a>
-
-                    <a href="<?= URLROOT ?>/ask" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-pen-nib"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">প্রশ্ন করুন</span>
-                    </a>
-
-                    <a href="<?= URLROOT ?>/q&amp;a" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">প্রশ্নোত্তর</span>
-                    </a>
-
-                    <a href="<?= URLROOT ?>/shop" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; min-width: 85px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                        <div style="width: 40px; height: 40px; border-radius: 12px; background: #ffedd5; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 6px;">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">মুসলিম শপ</span>
-                    </a>
+                    <?php 
+                    $db = \Config\Database::pdoConnect();
+                    $top_cats_stmt = $db->query("SELECT id, name, slug FROM categories WHERE parent_id IS NULL OR parent_id = 0 OR id IN (14, 15, 16) ORDER BY FIELD(id, 14, 15, 16, 44, 52, 48, 54, 47), order_index ASC LIMIT 6");
+                    $top_cats = $top_cats_stmt ? $top_cats_stmt->fetchAll() : [];
+                    
+                    if (!empty($top_cats)): 
+                        $color_palettes = [
+                            ['bg' => '#f0fdf4', 'text' => '#0b7c4d', 'default_icon' => 'fas fa-book-quran'],
+                            ['bg' => '#ecfdf5', 'text' => '#059669', 'default_icon' => 'fas fa-book-open-reader'],
+                            ['bg' => '#fef3c7', 'text' => '#d97706', 'default_icon' => 'fas fa-star-and-crescent'],
+                            ['bg' => '#e0f2fe', 'text' => '#0284c7', 'default_icon' => 'fas fa-atom'],
+                            ['bg' => '#fce7f3', 'text' => '#db2777', 'default_icon' => 'fas fa-flask'],
+                            ['bg' => '#ffedd5', 'text' => '#ea580c', 'default_icon' => 'fas fa-landmark']
+                        ];
+                        foreach ($top_cats as $idx => $cat):
+                            $c_style = $color_palettes[$idx % count($color_palettes)];
+                            $cat_url = URLROOT . '/category/' . ($cat['slug'] ?? $cat['id']);
+                            
+                            // Determine appropriate icon based on category name
+                            $cat_name = $cat['name'];
+                            $cat_slug = $cat['slug'];
+                            if (mb_strpos($cat_name, 'কুরআন') !== false || mb_strpos($cat_slug, 'কুরআন') !== false) {
+                                $cat_icon = 'fas fa-book-quran';
+                            } elseif (mb_strpos($cat_name, 'হাদিস') !== false || mb_strpos($cat_slug, 'হাদিস') !== false) {
+                                $cat_icon = 'fas fa-book-open-reader';
+                            } elseif (mb_strpos($cat_name, 'রাসুল') !== false || mb_strpos($cat_slug, 'রাসুল') !== false) {
+                                $cat_icon = 'fas fa-star-and-crescent';
+                            } elseif (mb_strpos($cat_name, 'স্রষ্টা') !== false || mb_strpos($cat_slug, 'স্রষ্টা') !== false) {
+                                $cat_icon = 'fas fa-atom';
+                            } elseif (mb_strpos($cat_name, 'বিজ্ঞান') !== false || mb_strpos($cat_slug, 'বিজ্ঞান') !== false) {
+                                $cat_icon = 'fas fa-flask';
+                            } elseif (mb_strpos($cat_name, 'ইতিহাস') !== false || mb_strpos($cat_slug, 'ইতিহাস') !== false) {
+                                $cat_icon = 'fas fa-landmark';
+                            } else {
+                                $cat_icon = $c_style['default_icon'];
+                            }
+                    ?>
+                        <a href="<?= $cat_url ?>" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 14px; min-width: 90px; max-width: 130px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease; text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: <?= $c_style['bg'] ?>; color: <?= $c_style['text'] ?>; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 6px;">
+                                <i class="<?= htmlspecialchars($cat_icon) ?>"></i>
+                            </div>
+                            <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;"><?= htmlspecialchars($cat_name) ?></span>
+                        </a>
+                    <?php 
+                        endforeach;
+                    endif; 
+                    ?>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Recent Questions Widget -->
-            <div>
-                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.2); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; min-height: 440px;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(11, 124, 77, 0.2), 0 8px 30px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04)';">
+            <!-- RIGHT COLUMN: Slim Portrait Recent Questions Widget -->
+            <div style="display: flex; justify-content: center;">
+                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 22px 18px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.25); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; max-width: 350px; min-height: 480px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(11, 124, 77, 0.2)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(11, 124, 77, 0.12)';">
                     
                     <style>
                     @media (max-width: 991px) {
@@ -131,24 +137,24 @@
                         animation: floatBlob2 12s infinite ease-in-out;
                     }
                     
-                    /* Premium Question Card Item */
+                    /* Question Row Design matching reference image 2 */
                     .prayer-row-3d-premium {
                         display: flex; justify-content: space-between; align-items: center; 
-                        padding: 12px 16px; background: #f8fafc; 
-                        border-radius: 16px; border: 1px solid #e2e8f0; 
+                        padding: 10px 12px; background: #f8fafc; 
+                        border-radius: 12px; border: 1px solid #e2e8f0; 
                         text-decoration: none; color: #1e293b; 
                         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
                         width: 100%; box-sizing: border-box;
                         position: relative; overflow: hidden;
                     }
                     .prayer-row-3d-premium::before {
-                        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+                        content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
                         background: #0b7c4d; opacity: 0; transition: 0.3s;
                     }
                     .prayer-row-3d-premium:hover {
-                        transform: translateX(4px);
-                        box-shadow: 0 8px 25px rgba(11, 124, 77, 0.12);
+                        transform: translateX(3px);
+                        box-shadow: 0 6px 18px rgba(11, 124, 77, 0.12);
                         border-color: #0b7c4d;
                         background: #ffffff;
                     }
@@ -157,21 +163,6 @@
                     }
                     .prayer-row-3d-premium:hover .q-title {
                         color: #0b7c4d;
-                    }
-
-                    .prayer-row-3d-premium .btn-uttor-circle {
-                        width: 28px; height: 28px; border-radius: 50%; 
-                        background: rgba(11, 124, 77, 0.1); 
-                        display: inline-flex; align-items: center; justify-content: center; 
-                        color: #0b7c4d; transition: all 0.3s; flex-shrink: 0;
-                    }
-                    .prayer-row-3d-premium:hover .btn-uttor-circle {
-                        background: #0b7c4d;
-                        color: #ffffff;
-                        transform: scale(1.1);
-                    }
-                    .prayer-row-3d-premium:hover .btn-uttor-circle i {
-                        transform: translateX(1px);
                     }
                     
                     .question-dot-premium {
@@ -188,13 +179,12 @@
                     <div class="bg-blob-2"></div>
                     
                     <div style="position: relative; z-index: 2;">
-                        <!-- Header Title inside Card -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
-                            <h3 style="font-size: 1.1rem; font-weight: 800; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0; display: flex; align-items: center; gap: 8px;">
-                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulseGreen 2s infinite;"></span>
-                                <i class="fas fa-comments" style="color: #0b7c4d;"></i> সাম্প্রতিক প্রশ্নসমূহ
-                            </h3>
-                            <span style="font-size: 0.75rem; background: #e6f4ea; color: #0b7c4d; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">Q&amp;A</span>
+                        <!-- Centered Pill Header matching Reference Image 2 -->
+                        <div style="text-align: center; margin-bottom: 18px;">
+                            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); color: #ffffff; padding: 9px 24px; border-radius: 50px; font-weight: 800; font-size: 1rem; font-family: 'Hind Siliguri', sans-serif; box-shadow: 0 6px 18px rgba(11, 124, 77, 0.25);">
+                                <div style="width: 22px; height: 22px; border-radius: 50%; background: #ffffff; color: #0b7c4d; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900;">?</div>
+                                <span>প্রশ্নসমূহ</span>
+                            </div>
                         </div>
 
                         <div class="questions-slider" style="position: relative; overflow: hidden; width: 100%; z-index: 2;">
@@ -207,9 +197,9 @@
                                     <div class="question-slide" style="width: 100%; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 2px; box-sizing: border-box;">
                                         <?php foreach ($chunk as $q): ?>
                                             <a href="<?= URLROOT ?>/question/<?= $q['id'] ?>" class="prayer-row-3d-premium">
-                                                <span class="q-title" style="font-size: 0.88rem; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; font-family: 'Hind Siliguri', sans-serif; line-height: 1.35; color: #1e293b; transition: color 0.3s; max-width: 82%; text-align: left;"><?= htmlspecialchars($q['question']) ?></span>
-                                                <span class="btn-uttor-circle">
-                                                    <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
+                                                <span class="q-title" style="font-size: 0.84rem; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; font-family: 'Hind Siliguri', sans-serif; line-height: 1.35; color: #1e293b; transition: color 0.3s; max-width: 68%; text-align: left;"><?= htmlspecialchars($q['question']) ?></span>
+                                                <span style="font-size: 0.78rem; font-weight: 800; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;">
+                                                    উত্তর দেখুন &rarr;
                                                 </span>
                                             </a>
                                         <?php endforeach; ?>
@@ -218,12 +208,12 @@
                                     endforeach; 
                                 else:
                                 ?>
-                                    <div style="text-align: center; color: #64748b; padding: 35px 15px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
-                                        <div style="width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #e6f4ea, #d1fae5); display: flex; align-items: center; justify-content: center; color: #0b7c4d; font-size: 1.8rem; box-shadow: 0 8px 20px rgba(11, 124, 77, 0.15);">
+                                    <div style="text-align: center; color: #64748b; padding: 30px 10px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #e6f4ea, #d1fae5); display: flex; align-items: center; justify-content: center; color: #0b7c4d; font-size: 1.6rem; box-shadow: 0 8px 20px rgba(11, 124, 77, 0.15);">
                                             <i class="fas fa-comments"></i>
                                         </div>
-                                        <h4 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Hind Siliguri', sans-serif;">কোনো প্রশ্ন পাওয়া যায়নি</h4>
-                                        <p style="font-size: 0.85rem; color: #64748b; margin: 0; font-family: 'Hind Siliguri', sans-serif; line-height: 1.4; max-width: 240px;">আপনার যেকোনো ইসলামিক প্রশ্ন সরাসরি আমাদের মাসআলা টিমের কাছে পাঠাতে পারেন।</p>
+                                        <h4 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Hind Siliguri', sans-serif;">কোনো প্রশ্ন পাওয়া যায়নি</h4>
+                                        <p style="font-size: 0.82rem; color: #64748b; margin: 0; font-family: 'Hind Siliguri', sans-serif; line-height: 1.4; max-width: 220px;">আপনার যেকোনো ইসলামিক প্রশ্ন সরাসরি আমাদের মাসআলা টিমের কাছে পাঠাতে পারেন।</p>
                                         <a href="<?= URLROOT ?>/ask" style="margin-top: 6px; text-decoration: none; background: linear-gradient(135deg, #0b7c4d, #10b981); color: #fff; padding: 8px 22px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; font-family: 'Hind Siliguri', sans-serif; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(11, 124, 77, 0.4)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(11, 124, 77, 0.3)';">
                                             <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> প্রশ্ন পাঠান
                                         </a>
@@ -233,7 +223,7 @@
                         </div>
          
                         <?php if (!empty($chunks) && count($chunks) > 1): ?>
-                            <div class="question-dots-container" id="question-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 16px; z-index: 2; position: relative;">
+                            <div class="question-dots-container" id="question-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 14px; z-index: 2; position: relative;">
                                 <?php foreach ($chunks as $chunkIndex => $chunk): ?>
                                     <div class="question-dot-premium <?= $chunkIndex === 0 ? 'active' : '' ?>" onclick="goToQuestionSlide(<?= $chunkIndex ?>)"></div>
                                 <?php endforeach; ?>
@@ -241,13 +231,10 @@
                         <?php endif; ?>
                     </div>
          
-                    <!-- Ask & View Buttons at the bottom side-by-side -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0; position: relative; z-index: 2; width: 100%; gap: 10px;">
-                        <a href="<?= URLROOT ?>/q&amp;a" style="flex: 1; text-align: center; text-decoration: none; color: #0b7c4d; background: #e6f4ea; border: 1px solid rgba(11, 124, 77, 0.2); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#0b7c4d'; this.style.color='#ffffff';" onmouseout="this.style.background='#e6f4ea'; this.style.color='#0b7c4d';">
-                            <i class="fas fa-list-ul"></i> সব প্রশ্ন
-                        </a>
-                        <a href="<?= URLROOT ?>/ask" style="flex: 1; text-align: center; text-decoration: none; color: #ffffff; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.25); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(11, 124, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(11, 124, 77, 0.25)';">
-                            <i class="fas fa-plus-circle"></i> প্রশ্ন করুন
+                    <!-- Full Width Bottom Button matching Reference Image 2 -->
+                    <div style="margin-top: 15px; padding-top: 14px; border-top: 1px solid #f1f5f9; position: relative; z-index: 2; width: 100%;">
+                        <a href="<?= URLROOT ?>/ask" style="display: block; width: 100%; text-align: center; text-decoration: none; color: #ffffff; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); padding: 12px 16px; border-radius: 16px; font-family: 'Hind Siliguri', sans-serif; font-weight: 800; font-size: 0.98rem; box-shadow: 0 6px 18px rgba(11, 124, 77, 0.28); transition: all 0.3s ease; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(11, 124, 77, 0.38)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 6px 18px rgba(11, 124, 77, 0.28)';">
+                            <i class="fas fa-pen-nib" style="margin-right: 6px;"></i> প্রশ্ন করুন
                         </a>
                     </div>
                 </div>

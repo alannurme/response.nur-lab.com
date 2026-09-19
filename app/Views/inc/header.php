@@ -642,7 +642,7 @@ if (!function_exists('getBengaliDate')) {
         }
 
         .glass-nav {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
@@ -651,7 +651,7 @@ if (!function_exists('getBengaliDate')) {
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(11, 124, 77, 0.12);
             position: relative;
         }
 
@@ -1357,6 +1357,8 @@ if (!function_exists('getBengaliDate')) {
                 border-left: none !important;
                 border-right: none !important;
                 border-top: none !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(11, 124, 77, 0.1) !important;
                 margin-top: 0 !important;
                 width: 100% !important;
             }
@@ -1910,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Mobile Actions Wrapper -->
             <div style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
                 <!-- Mobile Search Button -->
-                <div class="mobile-search-trigger" id="mobile-search-popup-trigger" style="color: var(--primary); font-size: 1.15rem; cursor: pointer; transition: 0.3s; width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 107, 67, 0.06); display: none; align-items: center; justify-content: center;">
+                <div class="mobile-search-trigger" id="mobile-search-popup-trigger" style="color: #ffffff; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.3);">
                     <i class="fas fa-search"></i>
                 </div>
                 
@@ -2123,7 +2125,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px;">
                     <form action="<?= URLROOT ?>/blog" method="GET" id="header-search-form" style="position: relative; display: flex; align-items: center; height: 38px;">
                         <input type="text" name="search" id="header-search-input" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." required style="padding: 7px 40px 7px 14px; border-radius: 20px; font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 0px; opacity: 0; border: none; background: transparent; transition: all 0.35s ease; box-sizing: border-box;" onblur="if(!this.value.trim()){ this.style.width='0px'; this.style.opacity='0'; this.style.border='none'; this.style.background='transparent'; }">
-                        <button type="button" id="header-search-btn" style="background: rgba(0, 107, 67, 0.06); border: none; color: var(--primary); cursor: pointer; font-size: 1rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;" onclick="const input = document.getElementById('header-search-input'); if(input.style.width === '0px' || !input.style.width || input.style.width === '0'){ input.style.width='220px'; input.style.opacity='1'; input.style.border='1px solid var(--primary)'; input.style.background='#ffffff'; input.focus(); } else { if(input.value.trim()){ document.getElementById('header-search-form').submit(); } }">
+                        <button type="button" id="header-search-btn" style="background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); border: none; color: #ffffff; cursor: pointer; font-size: 0.95rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.3);" title="সার্চ করুন" onclick="const input = document.getElementById('header-search-input'); if(input.style.width === '0px' || !input.style.width || input.style.width === '0'){ input.style.width='220px'; input.style.opacity='1'; input.style.border='1px solid var(--primary)'; input.style.background='#ffffff'; input.focus(); } else { if(input.value.trim()){ document.getElementById('header-search-form').submit(); } }">
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
