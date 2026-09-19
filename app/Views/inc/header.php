@@ -2096,11 +2096,11 @@ if (!function_exists('getBengaliDate')) {
                     <li><a href="<?= URLROOT ?>">হোম</a></li>
                 <?php endif; ?>
                 
-                <!-- Header Direct Inline Search Bar -->
+                <!-- Header Expandable Search Bar -->
                 <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px;">
-                    <form action="<?= URLROOT ?>/blog" method="GET" style="position: relative; display: flex; align-items: center;">
-                        <input type="text" name="search" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." required style="padding: 7px 35px 7px 15px; border-radius: 20px; border: 1px solid rgba(0, 107, 67, 0.2); background: rgba(0, 107, 67, 0.04); font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 200px; transition: all 0.3s;" onfocus="this.style.width='250px'; this.style.borderColor='var(--primary)'; this.style.background='#ffffff';" onblur="this.style.width='200px'; this.style.borderColor='rgba(0, 107, 67, 0.2)'; this.style.background='rgba(0, 107, 67, 0.04)';">
-                        <button type="submit" style="position: absolute; right: 8px; background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.9rem; padding: 4px;">
+                    <form action="<?= URLROOT ?>/blog" method="GET" id="header-search-form" style="position: relative; display: flex; align-items: center; height: 38px;">
+                        <input type="text" name="search" id="header-search-input" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." required style="padding: 7px 40px 7px 14px; border-radius: 20px; font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 0px; opacity: 0; border: none; background: transparent; transition: all 0.35s ease; box-sizing: border-box;" onblur="if(!this.value.trim()){ this.style.width='0px'; this.style.opacity='0'; this.style.border='none'; this.style.background='transparent'; }">
+                        <button type="button" id="header-search-btn" style="background: rgba(0, 107, 67, 0.06); border: none; color: var(--primary); cursor: pointer; font-size: 1rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;" onclick="const input = document.getElementById('header-search-input'); if(input.style.width === '0px' || !input.style.width || input.style.width === '0'){ input.style.width='220px'; input.style.opacity='1'; input.style.border='1px solid var(--primary)'; input.style.background='#ffffff'; input.focus(); } else { if(input.value.trim()){ document.getElementById('header-search-form').submit(); } }">
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
