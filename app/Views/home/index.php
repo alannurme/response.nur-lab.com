@@ -1,6 +1,86 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
-<!-- Recent Questions Section -->
+<!-- Islamic Hero Search & Quick Action Section -->
+<section class="islamic-hero-section" style="position: relative; background: #e6f4ea; padding: 60px 20px 50px 20px; overflow: hidden; border-bottom: 1px solid #bbf7d0;">
+    <!-- Top Decorative Curved Wave Accent -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 85px; background: #0b7c4d; clip-path: ellipse(80% 100% at 50% 0%); z-index: 1;"></div>
+    
+    <div style="max-width: 900px; margin: 0 auto; position: relative; z-index: 2; text-align: center; padding-top: 25px;">
+        <!-- Site Main Title -->
+        <h1 style="font-size: 2.7rem; font-weight: 900; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 10px 0; letter-spacing: -0.5px;">
+            <?= htmlspecialchars($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব') ?>
+        </h1>
+        
+        <!-- Tagline / Subtitle -->
+        <p style="font-size: 1.05rem; color: #475569; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 16px 0; line-height: 1.6;">
+            সবচেয়ে সমৃদ্ধ বাংলা ইসলামিক প্ল্যাটফর্ম — কুরআন, হাদীস, মাসায়েল ও আপনার সমস্ত ইসলামিক প্রশ্নের উত্তর
+        </p>
+
+        <!-- Date & Info Pill Badge -->
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(11, 124, 77, 0.08); border: 1px solid rgba(11, 124, 77, 0.2); padding: 5px 18px; border-radius: 30px; margin-bottom: 28px;">
+            <i class="far fa-calendar-alt" style="color: #0b7c4d; font-size: 0.9rem;"></i>
+            <span style="font-size: 0.88rem; font-weight: 700; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif;">
+                <?= function_exists('getBengaliDate') ? getBengaliDate() : date('l, d F Y') ?>
+            </span>
+        </div>
+
+        <!-- Search Bar Form -->
+        <form action="<?= URLROOT ?>/search" method="GET" style="max-width: 640px; margin: 0 auto 32px auto; position: relative;">
+            <div style="display: flex; align-items: center; background: #ffffff; border-radius: 50px; padding: 7px 10px 7px 22px; box-shadow: 0 14px 35px rgba(11, 124, 77, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04); border: 2px solid #a7f3d0; transition: all 0.3s ease;">
+                <i class="fas fa-search" style="color: #10b981; font-size: 1.15rem; margin-right: 12px;"></i>
+                <input type="text" name="q" placeholder="কুরআন, হাদীস বা যেকোনো বিষয় খুঁজুন..." style="border: none; outline: none; width: 100%; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; background: transparent; color: #1e293b;" required>
+                <button type="submit" style="background: linear-gradient(135deg, #0b7c4d, #10b981); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    <i class="fas fa-search" style="font-size: 0.95rem;"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Quick Access Buttons Grid -->
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; max-width: 720px; margin: 0 auto;">
+            <a href="<?= URLROOT ?>/category/quran" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #f0fdf4; color: #0b7c4d; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-quran"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">কুরআন</span>
+            </a>
+
+            <a href="<?= URLROOT ?>/category/hadith" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">হাদীস</span>
+            </a>
+
+            <a href="<?= URLROOT ?>/q&amp;a" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">মাসআলা</span>
+            </a>
+
+            <a href="<?= URLROOT ?>/ask" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-pen-nib"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">প্রশ্ন করুন</span>
+            </a>
+
+            <a href="<?= URLROOT ?>/q&amp;a" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #fce7f3; color: #db2777; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">প্রশ্নোত্তর</span>
+            </a>
+
+            <a href="<?= URLROOT ?>/shop" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 18px; min-width: 90px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #ffedd5; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px;">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">মুসলিম শপ</span>
+            </a>
+        </div>
+    </div>
+</section>
 <section class="section-padding" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 100%); border-bottom: 1px solid #bbf7d0; padding: 30px 0;">
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.2); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(11, 124, 77, 0.2), 0 8px 30px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04)';">
