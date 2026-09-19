@@ -3,7 +3,7 @@
 :root {
     --primary: #2563eb; /* Blue */
     --primary-hover: #1d4ed8;
-    --background: #f8fafc; /* Slate/blue background */
+    --background: #a7f3d0; /* Rich Green background */
     --card-bg: #FFFFFF;
     --text-main: #000000;
     --text-muted: #1e293b;
@@ -29,14 +29,14 @@ html, body {
 
 body {
     font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Inter', sans-serif;
-    background-color: #dcfce7 !important;
+    background-color: #a7f3d0 !important;
     background-image: 
-        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.28) 0%, transparent 65%),
-        radial-gradient(circle at 100% 0%, rgba(5, 150, 105, 0.22) 0%, transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(4, 120, 87, 0.22) 0%, transparent 55%),
-        radial-gradient(circle at 50% 0%, rgba(187, 247, 208, 0.95) 0%, transparent 100%) !important;
+        radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.35) 0%, transparent 70%),
+        radial-gradient(circle at 100% 0%, rgba(4, 120, 87, 0.30) 0%, transparent 60%),
+        radial-gradient(circle at 0% 100%, rgba(6, 78, 59, 0.25) 0%, transparent 60%),
+        radial-gradient(circle at 50% 0%, rgba(167, 243, 208, 1) 0%, transparent 100%) !important;
     background-size: 200% 200% !important;
-    animation: islamicBgGlow 14s ease infinite alternate !important;
+    animation: islamicBgGlow 12s ease infinite alternate !important;
     color: var(--text-main);
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
@@ -51,11 +51,11 @@ body::before {
     width: 100%;
     height: 100%;
     background-image: 
-        radial-gradient(circle at 100% 150%, #bbf7d0 24%, transparent 25%),
-        radial-gradient(circle at 0 150%, #bbf7d0 24%, transparent 25%),
-        radial-gradient(circle at 50% 100%, transparent 10%, #dcfce7 11%, #dcfce7 23%, transparent 24%);
+        radial-gradient(circle at 100% 150%, #6ee7b7 24%, transparent 25%),
+        radial-gradient(circle at 0 150%, #6ee7b7 24%, transparent 25%),
+        radial-gradient(circle at 50% 100%, transparent 10%, #a7f3d0 11%, #a7f3d0 23%, transparent 24%);
     background-size: 60px 30px;
-    opacity: 0.65;
+    opacity: 0.75;
     pointer-events: none;
     z-index: -1;
 }
