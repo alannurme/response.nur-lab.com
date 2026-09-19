@@ -1,28 +1,31 @@
-<footer style="background: #0f172a; color: rgba(255, 255, 255, 0.7); padding: 80px 0 30px; margin-top: 60px;">
-    <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+<footer style="background: linear-gradient(180deg, #0b1329 0%, #060b18 100%); color: #e2e8f0; padding: 75px 0 35px; border-top: 1px solid rgba(255, 255, 255, 0.08); position: relative; overflow: hidden; margin-top: 80px;">
+    <!-- Background Glow Accent -->
+    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 80%; height: 1px; background: linear-gradient(90deg, transparent 0%, #10b981 50%, transparent 100%); opacity: 0.6;"></div>
+
+    <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; position: relative; z-index: 2;">
         <!-- About Section -->
         <div>
-            <div class="footer-logo" style="margin-bottom: 25px;">
-                <a href="<?= URLROOT ?>/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <div class="footer-logo" style="margin-bottom: 20px;">
+                <a href="<?= URLROOT ?>/" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
                     <?php if (!empty($data['settings']['site_logo'])): ?>
-                        <img src="<?= resolve_setting_image($data['settings']['site_logo']) ?>" alt="Logo" style="max-height: 50px;">
+                        <img src="<?= resolve_setting_image($data['settings']['site_logo']) ?>" alt="Logo" style="max-height: 52px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
                     <?php else: ?>
-                        <i class="fas fa-mosque" style="color: #ffffff;"></i>
-                        <span style="color: #fff; font-weight: 800; font-size: 1.2rem;">NUR-LAB</span>
+                        <i class="fas fa-kaaba" style="color: #10b981; font-size: 1.8rem;"></i>
+                        <span style="color: #ffffff; font-weight: 800; font-size: 1.35rem; font-family: 'Hind Siliguri', sans-serif;">নূর<span style="color: #10b981;">ল্যাব</span></span>
                     <?php endif; ?>
                 </a>
             </div>
-            <h4 style="color: #fff; margin-bottom: 10px; font-size: 1.1rem; font-family: 'Hind Siliguri', sans-serif;">আমাদের সম্পর্কে</h4>
-            <p style="line-height: 1.8; margin-bottom: 25px; font-family: 'Hind Siliguri', sans-serif; text-align: justify; max-width: 320px;">
+            <h4 style="color: #ffffff; margin-bottom: 14px; font-size: 1.15rem; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; border-bottom: 2px solid #10b981; display: inline-block; padding-bottom: 4px;">আমাদের সম্পর্কে</h4>
+            <p style="line-height: 1.85; margin-bottom: 25px; font-family: 'Hind Siliguri', sans-serif; color: #cbd5e1; font-size: 0.96rem; text-align: justify; max-width: 320px;">
                 response with nur-lab একটি অলাভজনক অনলাইন প্ল্যাটফর্ম, যেখানে বিশ্বের বিভিন্ন প্রান্তের মুসলিম লেখকরা ইসলাম, দর্শন, বিজ্ঞান ও সমসাময়িক বিষয় নিয়ে আলোচনা ও গবেষণায় যুক্ত হন।
             </p>
-            <div class="top-social" style="display: flex; gap: 15px;">
+            <div class="top-social" style="display: flex; gap: 12px;">
                 <?php
                 $db = \Config\Database::pdoConnect();
                 $social_links_stmt = $db->query("SELECT * FROM social_links ORDER BY order_index ASC, id ASC");
                 $social_links = $social_links_stmt->fetchAll();
                 foreach ($social_links as $link): 
-                    $hover_color = '#ffffff';
+                    $hover_color = '#10b981';
                     $name_lower = strtolower($link['name']);
                     if (strpos($name_lower, 'facebook') !== false) $hover_color = '#1877F2';
                     elseif (strpos($name_lower, 'twitter') !== false || strpos($name_lower, 'x.com') !== false) $hover_color = '#1DA1F2';
@@ -34,8 +37,8 @@
                     elseif (strpos($name_lower, 'whatsapp') !== false) $hover_color = '#25D366';
                     elseif (strpos($name_lower, 'pinterest') !== false) $hover_color = '#BD081C';
                 ?>
-                    <a href="<?= $link['url'] ?>" target="_blank" title="<?= htmlspecialchars($link['name']) ?>" style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; transition: all 0.3s ease; text-decoration: none;" onmouseover="this.style.background='<?= $hover_color ?>'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';">
-                        <i class="<?= htmlspecialchars($link['icon']) ?>"></i>
+                    <a href="<?= $link['url'] ?>" target="_blank" title="<?= htmlspecialchars($link['name']) ?>" style="width: 38px; height: 38px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #f8fafc; transition: all 0.3s ease; text-decoration: none;" onmouseover="this.style.background='<?= $hover_color ?>'; this.style.borderColor='<?= $hover_color ?>'; this.style.transform='translateY(-3px)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.12)'; this.style.transform='none';">
+                        <i class="<?= htmlspecialchars($link['icon']) ?>" style="font-size: 0.95rem;"></i>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -43,8 +46,8 @@
 
         <!-- Quick Links -->
         <div>
-            <h4 style="color: #fff; margin-bottom: 25px; font-size: 1.2rem;">প্রয়োজনীয় লিংক</h4>
-            <ul style="list-style: none;">
+            <h4 style="color: #ffffff; margin-bottom: 22px; font-size: 1.15rem; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; border-bottom: 2px solid #10b981; display: inline-block; padding-bottom: 4px;">প্রয়োজনীয় লিংক</h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
                 <?php
                 $db = \Config\Database::pdoConnect();
                 $menus_stmt = $db->query("SELECT * FROM sub_menus ORDER BY order_index ASC");
@@ -54,16 +57,22 @@
                     if ($t === 'সপ' || strpos($menu['url'], 'shop') !== false || $t === 'আমাদের সাথে যুক্ত হোন' || strpos($menu['url'], 'join') !== false) continue;
                     $menu_url = (strpos($menu['url'], 'http') === 0) ? clean_localhost_url($menu['url']) : URLROOT . $menu['url'];
                 ?>
-                    <li style="margin-bottom: 12px;"><a href="<?= $menu_url ?>"><?= htmlspecialchars($menu['title']) ?></a></li>
+                    <li style="margin-bottom: 12px; display: flex; align-items: center;">
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem; color: #10b981; margin-right: 8px;"></i>
+                        <a href="<?= $menu_url ?>" style="color: #cbd5e1; font-family: 'Hind Siliguri', sans-serif; font-size: 0.98rem; text-decoration: none; font-weight: 500; transition: all 0.3s;"><?= htmlspecialchars($menu['title']) ?></a>
+                    </li>
                 <?php endforeach; ?>
-                <li style="margin-bottom: 12px;"><a href="<?= URLROOT ?>/donate">অনুদান দিন</a></li>
+                <li style="margin-bottom: 12px; display: flex; align-items: center;">
+                    <i class="fas fa-chevron-right" style="font-size: 0.75rem; color: #10b981; margin-right: 8px;"></i>
+                    <a href="<?= URLROOT ?>/donate" style="color: #cbd5e1; font-family: 'Hind Siliguri', sans-serif; font-size: 0.98rem; text-decoration: none; font-weight: 500; transition: all 0.3s;">অনুদান দিন</a>
+                </li>
             </ul>
         </div>
 
         <!-- Popular News Section -->
         <div>
-            <h4 style="color: #fff; margin-bottom: 25px; font-size: 1.2rem; font-family: 'Hind Siliguri', sans-serif;">জনপ্রিয় লেখা</h4>
-            <div style="display: flex; flex-direction: column; gap: 20px;">
+            <h4 style="color: #ffffff; margin-bottom: 22px; font-size: 1.15rem; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; border-bottom: 2px solid #10b981; display: inline-block; padding-bottom: 4px;">জনপ্রিয় লেখা</h4>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
                 <?php
                 if (!function_exists('formatBengaliDate')) {
                     function formatBengaliDate($date_str) {
@@ -102,7 +111,6 @@
                 $popular_posts = $popular_posts_stmt->fetchAll();
 
                 foreach ($popular_posts as $post):
-                    // Count comments
                     $comments_stmt = $db->prepare("SELECT COUNT(*) FROM comments WHERE post_id = ? AND status = 'approved'");
                     $comments_stmt->execute([$post['id']]);
                     $comments_count = $comments_stmt->fetchColumn();
@@ -110,29 +118,26 @@
                     $post_link = URLROOT . '/' . $post['slug'];
                     $image_src = resolve_blog_image($post['featured_image']);
                 ?>
-                    <div style="display: flex; gap: 15px; align-items: flex-start;">
-                        <div style="flex-shrink: 0; width: 80px; height: 60px; overflow: hidden; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);">
-                            <?php if (!empty($post['featured_image'])): 
-                                $image_src = resolve_blog_image($post['featured_image']);
-                            ?>
+                    <div style="display: flex; gap: 14px; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.07)'; this.style.borderColor='rgba(16, 185, 129, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.06)';">
+                        <div style="flex-shrink: 0; width: 75px; height: 55px; overflow: hidden; border-radius: 8px; background: rgba(0,0,0,0.2);">
+                            <?php if (!empty($post['featured_image'])): ?>
                                 <a href="<?= $post_link ?>" style="display: block; width: 100%; height: 100%;">
-                                    <img src="<?= $image_src ?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($post['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; transition: 0.3s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">
+                                    <img src="<?= $image_src ?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($post['title']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
                                 </a>
                             <?php else: ?>
-                                <a href="<?= $post_link ?>" style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; text-decoration: none; color: inherit;">
-                                    <i class="fa-regular fa-image" style="font-size: 1.2rem;"></i>
+                                <a href="<?= $post_link ?>" style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; text-decoration: none; color: #94a3b8;">
+                                    <i class="fa-regular fa-image" style="font-size: 1.1rem;"></i>
                                 </a>
                             <?php endif; ?>
                         </div>
-                        <div style="flex-grow: 1;">
-                            <h5 style="margin: 0 0 5px 0; font-size: 0.95rem; font-weight: 600; line-height: 1.4; font-family: 'Hind Siliguri', sans-serif;">
-                                <a href="<?= $post_link ?>" style="color: #fff; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: 0.3s;" onmouseover="this.style.color='var(--primary)';" onmouseout="this.style.color='#fff';"><?= htmlspecialchars($post['title']) ?></a>
+                        <div style="flex-grow: 1; overflow: hidden;">
+                            <h5 style="margin: 0 0 4px 0; font-size: 0.92rem; font-weight: 700; line-height: 1.35; font-family: 'Hind Siliguri', sans-serif;">
+                                <a href="<?= $post_link ?>" style="color: #f8fafc; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: 0.2s;" onmouseover="this.style.color='#10b981';" onmouseout="this.style.color='#f8fafc';"><?= htmlspecialchars($post['title']) ?></a>
                             </h5>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 0.75rem; color: rgba(255,255,255,0.5); font-family: 'Hind Siliguri', sans-serif;">
-                                <span style="color: #fff; font-weight: 700;"><?= htmlspecialchars($post['category_name'] ?? 'নিউজ') ?></span>
+                            <div style="display: flex; gap: 8px; align-items: center; font-size: 0.75rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif;">
+                                <span style="color: #10b981; font-weight: 700;"><?= htmlspecialchars($post['category_name'] ?? 'নিউজ') ?></span>
+                                <span>•</span>
                                 <span><?= formatBengaliDate($post['created_at']) ?></span>
-                                <span style="display: inline-flex; align-items: center; gap: 3px;"><i class="far fa-comment"></i> <?= toBengaliNumber($comments_count) ?></span>
-                                <span style="display: inline-flex; align-items: center; gap: 3px;"><i class="far fa-eye"></i> <?= toBengaliNumber($post['views']) ?></span>
                             </div>
                         </div>
                     </div>
@@ -146,10 +151,10 @@
         if (!empty($app_url)): 
         ?>
         <div>
-            <h4 style="color: #fff; margin-bottom: 25px; font-size: 1.2rem; font-family: 'Hind Siliguri', sans-serif;">মোবাইল অ্যাপস</h4>
+            <h4 style="color: #ffffff; margin-bottom: 22px; font-size: 1.15rem; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; border-bottom: 2px solid #10b981; display: inline-block; padding-bottom: 4px;">মোবাইল অ্যাপস</h4>
             <div style="display: flex; flex-direction: column; gap: 15px; max-width: 250px;">
-                <a href="<?= htmlspecialchars($app_url) ?>" target="_blank" class="btn-footer btn-footer-success" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #10b981; color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); margin-top: 5px;" onmouseover="this.style.background='#059669'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#10b981'; this.style.transform='none';">
-                    <i class="fab fa-android" style="font-size: 1.2rem;"></i> আমাদের অ্যাপস
+                <a href="<?= htmlspecialchars($app_url) ?>" target="_blank" class="btn-footer btn-footer-success" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 22px; border-radius: 12px; font-weight: 800; font-size: 1rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.3s; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.45)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.3)';">
+                    <i class="fab fa-android" style="font-size: 1.3rem;"></i> আমাদের অ্যাপস ডাউনলোড করুন
                 </a>
             </div>
         </div>
@@ -159,11 +164,11 @@
 
     <!-- Copyright -->
     <div class="container footer-copyright-wrapper">
-        <div style="font-size: 0.9rem;">
+        <div style="font-size: 0.92rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif;">
             <?= $data['settings']['footer_copyright'] ?? '&copy; ' . date('Y') . ' NUR-LAB. All Rights Reserved.' ?>
         </div>
-        <div style="font-size: 0.9rem;">
-            Developed with ❤️ by <a href="https://nur-lab.com/" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">NUR-LAB AGENCY</a>
+        <div style="font-size: 0.92rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif;">
+            Developed with ❤️ by <a href="https://nur-lab.com/" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: none;">NUR-LAB AGENCY</a>
         </div>
     </div>
 </footer>
