@@ -275,7 +275,7 @@
                     
                     <!-- Direct YouTube Audio Iframe Embed -->
                     <div id="hero-yt-container" style="position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; overflow: hidden; z-index: -1;">
-                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=0&mute=0&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
+                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
                     </div>
                 </div>
 
@@ -302,6 +302,7 @@
 
                 function playAudio() {
                     sendIframeMsg('unMute');
+                    sendIframeMsg('setVolume', [100]);
                     sendIframeMsg('playVideo');
                     
                     var icon = document.getElementById('hero-audio-icon');
@@ -310,8 +311,8 @@
                     var subtext = document.getElementById('hero-audio-subtext');
 
                     if (icon) icon.className = 'fas fa-pause';
-                    if (text) text.innerText = 'পজ করুন';
-                    if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত চলছে';
+                    if (text) text.innerText = 'অডিও চলছে';
+                    if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন';
                     if (wave) wave.style.opacity = '1';
                     isPlaying = true;
                 }
@@ -338,6 +339,18 @@
                         playAudio();
                     }
                 }
+
+                // Autoplay unMute trigger on first user interaction anywhere on page
+                var autoPlayOnce = function() {
+                    playAudio();
+                    ['click', 'scroll', 'touchstart', 'keydown'].forEach(function(evt) {
+                        window.removeEventListener(evt, autoPlayOnce);
+                    });
+                };
+
+                ['click', 'scroll', 'touchstart', 'keydown'].forEach(function(evt) {
+                    window.addEventListener(evt, autoPlayOnce, { passive: true });
+                });
                 </script>
                 <?php endif; endif; ?>
 
