@@ -441,32 +441,33 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script>
-// Animated Islamic Geometric Canvas Background (Login Page Canvas)
+// Highly Optimized Lightweight Animated Islamic Geometric Canvas Background
 (function() {
     const canvas = document.getElementById('islamicCanvas');
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     let width, height;
     let particles = [];
     let rotationAngle = 0;
+    let animId = null;
 
     function resizeCanvas() {
         width = canvas.width = window.innerWidth;
-        height = canvas.height = document.documentElement.scrollHeight || window.innerHeight;
+        height = canvas.height = window.innerHeight;
     }
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Create glowing star particles
-    for (let i = 0; i < 60; i++) {
+    // Reduced lightweight particles for smooth 60fps performance
+    for (let i = 0; i < 25; i++) {
         particles.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            radius: Math.random() * 2 + 0.5,
-            alpha: Math.random() * 0.6 + 0.2,
-            speed: Math.random() * 0.4 + 0.15
+            radius: Math.random() * 1.5 + 0.8,
+            alpha: Math.random() * 0.7 + 0.3,
+            speed: Math.random() * 0.3 + 0.1
         });
     }
 
@@ -496,24 +497,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function animate() {
         ctx.clearRect(0, 0, width, height);
 
-        // Render Floating Particles
+        // Render Floating Particles with sharp contrast
+        ctx.fillStyle = '#059669';
         particles.forEach(p => {
             p.y -= p.speed;
             if (p.y < 0) p.y = height;
+            ctx.globalAlpha = p.alpha;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(16, 185, 129, ${p.alpha})`;
             ctx.fill();
         });
+        ctx.globalAlpha = 1.0;
 
-        // Render Islamic Geometric Grid Patterns (Eight Point Star Lattice)
-        rotationAngle += 0.0006;
-        const spacing = 190;
-        const cols = Math.ceil(width / spacing) + 2;
-        const rows = Math.ceil(height / spacing) + 2;
+        // Optimized Grid Patterns for viewport
+        rotationAngle += 0.0008;
+        const spacing = 160;
+        const cols = Math.ceil(width / spacing) + 1;
+        const rows = Math.ceil(height / spacing) + 1;
 
-        for (let r = -1; r < rows; r++) {
-            for (let c = -1; c < cols; c++) {
+        ctx.lineWidth = 1.5;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
                 const cx = c * spacing + (r % 2 === 0 ? 0 : spacing / 2);
                 const cy = r * spacing * 0.866;
 
@@ -521,22 +525,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.translate(cx, cy);
                 ctx.rotate((r + c) % 2 === 0 ? rotationAngle : -rotationAngle);
 
-                // Outer Emerald Star Lattice Line
-                ctx.strokeStyle = 'rgba(16, 185, 129, 0.18)';
-                ctx.lineWidth = 1.2;
-                drawEightPointStar(0, 0, 8, 48, 24);
+                // Emerald Star Line Pattern with high contrast
+                ctx.strokeStyle = 'rgba(5, 150, 105, 0.45)';
+                drawEightPointStar(0, 0, 8, 42, 21);
                 ctx.stroke();
 
-                // Inner Delicate Geometric Star
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-                drawEightPointStar(0, 0, 8, 28, 14);
+                // Inner White Geometric Line Accent
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                drawEightPointStar(0, 0, 8, 24, 12);
                 ctx.stroke();
 
                 ctx.restore();
             }
         }
 
-        requestAnimationFrame(animate);
+        animId = requestAnimationFrame(animate);
     }
 
     animate();
