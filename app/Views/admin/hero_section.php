@@ -42,42 +42,7 @@
                 <small style="color: #64748b; font-size: 0.85rem; margin-top: 4px; display: block;">ফাঁকা রাখলে সাবটাইটেল দেখাবে না।</small>
             </div>
 
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">বাংলা তারিখ দেখাবেন? (Show Bengali Date Badge)</label>
-                <select name="settings[show_hero_date]" class="form-control" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-                    <option value="1" <?= ($data['settings']['show_hero_date'] ?? '0') == '1' ? 'selected' : '' ?>>হ্যাঁ (Show)</option>
-                    <option value="0" <?= ($data['settings']['show_hero_date'] ?? '0') == '0' ? 'selected' : '' ?>>না (Hide)</option>
-                </select>
-            </div>
 
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">সার্চ বার দেখাবেন? (Show Search Bar)</label>
-                <select name="settings[show_hero_search]" class="form-control" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-                    <option value="1" <?= ($data['settings']['show_hero_search'] ?? '0') == '1' ? 'selected' : '' ?>>হ্যাঁ (Show)</option>
-                    <option value="0" <?= ($data['settings']['show_hero_search'] ?? '0') == '0' ? 'selected' : '' ?>>না (Hide)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম প্রাইমারি বাটন পাঠ্য (Primary Button Text)</label>
-                <input type="text" name="settings[hero_btn_text]" value="<?= htmlspecialchars($data['settings']['hero_btn_text'] ?? 'প্রশ্ন পাঠান') ?>" class="form-control" placeholder="যেমন: প্রশ্ন পাঠান" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-                <small style="color: #64748b; font-size: 0.85rem; margin-top: 4px; display: block;">ফাঁকা রাখলে বাটন দেখাবে না।</small>
-            </div>
-
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম প্রাইমারি বাটন লিংক (Primary Button Link)</label>
-                <input type="text" name="settings[hero_btn_link]" value="<?= htmlspecialchars($data['settings']['hero_btn_link'] ?? '/ask') ?>" class="form-control" placeholder="যেমন: /ask বা https://..." style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-            </div>
-
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">সেকেন্ডারি বাটন পাঠ্য (Secondary Button Text)</label>
-                <input type="text" name="settings[hero_btn2_text]" value="<?= htmlspecialchars($data['settings']['hero_btn2_text'] ?? 'সব ফতোয়া ও উত্তর দেখুন') ?>" class="form-control" placeholder="যেমন: সব ফতোয়া ও উত্তর দেখুন" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-            </div>
-
-            <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">সেকেন্ডারি বাটন লিংক (Secondary Button Link)</label>
-                <input type="text" name="settings[hero_btn2_link]" value="<?= htmlspecialchars($data['settings']['hero_btn2_link'] ?? '/search') ?>" class="form-control" placeholder="যেমন: /search বা /blog" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-            </div>
 
             <!-- Feature Pills / Badges Settings -->
             <div class="form-group full-width" style="grid-column: 1 / -1; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
