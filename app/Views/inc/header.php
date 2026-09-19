@@ -1752,6 +1752,17 @@ if (!function_exists('getBengaliDate')) {
     100% { transform: rotate(360deg); }
 }
 </style>
+<script>
+<?php 
+$current_uri = $_GET['url'] ?? '';
+$is_homepage = empty($current_uri) || $current_uri === '/' || $current_uri === 'home' || $current_uri === 'index';
+if ($is_homepage): 
+?>
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('home-page');
+});
+<?php endif; ?>
+</script>
 
 
 
