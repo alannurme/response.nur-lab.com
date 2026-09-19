@@ -273,8 +273,10 @@
                         <i class="fas fa-play" id="hero-audio-icon"></i> <span id="hero-audio-text">প্লে করুন</span>
                     </button>
                     
-                    <!-- Hidden YouTube API Player Div -->
-                    <div id="yt-player-container" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;"></div>
+                    <!-- Direct YouTube Audio Embed Player -->
+                    <div style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; overflow: hidden;">
+                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=0&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
+                    </div>
                 </div>
 
                 <style>
@@ -285,92 +287,43 @@
                 </style>
 
                 <script>
-                var ytPlayer;
                 var isPlaying = false;
-                var autoPlaySetting = <?= $autoplay === '1' ? 'true' : 'false' ?>;
 
-                // Load YouTube Iframe API dynamically
-                if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-                    var tag = document.createElement('script');
-                    tag.src = "https://www.youtube.com/iframe_api";
-                    var firstScriptTag = document.getElementsByTagName('script')[0];
-                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                }
-
-                function onYouTubeIframeAPIReady() {
-                    ytPlayer = new YT.Player('yt-player-container', {
-                        height: '1',
-                        width: '1',
-                        videoId: '<?= $videoId ?>',
-                        playerVars: {
-                            'autoplay': autoPlaySetting ? 1 : 0,
-                            'controls': 0,
-                            'loop': 1,
-                            'playlist': '<?= $videoId ?>'
-                        },
-                        events: {
-                            'onReady': onPlayerReady
-                        }
-                    });
-                }
-
-                function onPlayerReady(event) {
-                    if (autoPlaySetting) {
-                        event.target.playVideo();
-                        // Attempt unmuting
-                        event.target.unMute();
-                        event.target.setVolume(100);
-                        
-                        // Listen for any click on the page to unmute if browser blocked unmuted autoplay
-                        var unmuteOnFirstClick = function() {
-                            if (ytPlayer && typeof ytPlayer.unMute === 'function') {
-                                ytPlayer.unMute();
-                                ytPlayer.setVolume(100);
-                                ytPlayer.playVideo();
-                                setUIPlayingState(true);
-                            }
-                            document.removeEventListener('click', unmuteOnFirstClick);
-                        };
-                        document.addEventListener('click', unmuteOnFirstClick, { once: true });
-                        
-                        setUIPlayingState(true);
-                    }
-                }
-
-                function setUIPlayingState(playing) {
+                function toggleHeroAudio() {
+                    var iframe = document.getElementById('hero-yt-iframe');
                     var icon = document.getElementById('hero-audio-icon');
                     var text = document.getElementById('hero-audio-text');
                     var wave = document.getElementById('hero-audio-wave');
                     var subtext = document.getElementById('hero-audio-subtext');
 
-                    if (playing) {
+                    if (!iframe) return;
+
+                    if (isPlaying) {
+                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                        icon.className = 'fas fa-play';
+                        text.innerText = 'প্লে করুন';
+                        if (subtext) subtext.innerText = 'ক্লিক করে অডিও শুনুন';
+                        wave.style.opacity = '0.4';
+                        isPlaying = false;
+                    } else {
+                        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+                        iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
                         icon.className = 'fas fa-pause';
                         text.innerText = 'অডিও চলছে';
                         if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন';
                         wave.style.opacity = '1';
                         isPlaying = true;
-                    } else {
-                        icon.className = 'fas fa-play';
-                        text.innerText = 'প্লে করুন';
-                        if (subtext) subtext.innerText = 'ক্লিক করে তিলাওয়াত শুনুন';
-                        wave.style.opacity = '0.4';
-                        isPlaying = false;
                     }
                 }
 
-                function toggleHeroAudio() {
-                    if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
-
-                    if (isPlaying) {
-                        ytPlayer.pauseVideo();
-                        setUIPlayingState(false);
-                    } else {
-                        ytPlayer.unMute();
-                        ytPlayer.setVolume(100);
-                        ytPlayer.playVideo();
-                        setUIPlayingState(true);
+                // Autoplay trigger on first document interaction
+                window.addEventListener('click', function autoPlayOnce() {
+                    if (!isPlaying) {
+                        toggleHeroAudio();
                     }
-                }
+                    window.removeEventListener('click', autoPlayOnce);
+                }, { once: true });
                 </script>
                 <?php endif; endif; ?>
 
