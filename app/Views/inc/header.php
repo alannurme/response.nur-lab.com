@@ -1742,7 +1742,11 @@ if (!function_exists('getBengaliDate')) {
         }
     </style>
 </head>
-<body>
+<?php 
+$current_uri = trim($_GET['url'] ?? '', '/');
+$is_homepage = empty($current_uri) || $current_uri === 'home' || $current_uri === 'index';
+?>
+<body class="<?= $is_homepage ? 'home-page' : '' ?>">
 
 
 
