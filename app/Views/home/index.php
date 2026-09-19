@@ -42,9 +42,14 @@
         </div>
 
         <!-- Recent Questions (Right Side) - Separate Elegant Card Design -->
-        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: #ffffff; border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px; box-shadow: 0 20px 45px rgba(0, 107, 67, 0.1), 0 4px 15px rgba(0, 0, 0, 0.04); border: 1px solid rgba(255, 255, 255, 0.9); transition: transform 0.4s ease, box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(0, 107, 67, 0.16), 0 8px 25px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 107, 67, 0.1), 0 4px 15px rgba(0, 0, 0, 0.04)';">
+        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px; box-shadow: 0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.2); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(11, 124, 77, 0.2), 0 8px 30px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04)';">
             
             <style>
+            @keyframes pulseGreen {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
             @keyframes floatBlob1 {
                 0% { transform: translate(0px, 0px) scale(1); }
                 50% { transform: translate(25px, -25px) scale(1.2); }
@@ -71,25 +76,33 @@
             /* Premium Question Card Item */
             .prayer-row-3d-premium {
                 display: flex; justify-content: space-between; align-items: center; 
-                padding: 10px 14px; background: #f8fafc; 
-                border-radius: 14px; border: 1px solid #e2e8f0; 
+                padding: 12px 16px; background: #f8fafc; 
+                border-radius: 16px; border: 1px solid #e2e8f0; 
                 text-decoration: none; color: #1e293b; 
-                transition: all 0.3s ease; 
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
                 width: 100%; box-sizing: border-box;
+                position: relative; overflow: hidden;
+            }
+            .prayer-row-3d-premium::before {
+                content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+                background: #0b7c4d; opacity: 0; transition: 0.3s;
             }
             .prayer-row-3d-premium:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(11, 124, 77, 0.1);
+                transform: translateX(4px);
+                box-shadow: 0 8px 25px rgba(11, 124, 77, 0.12);
                 border-color: #0b7c4d;
                 background: #ffffff;
+            }
+            .prayer-row-3d-premium:hover::before {
+                opacity: 1;
             }
             .prayer-row-3d-premium:hover .q-title {
                 color: #0b7c4d;
             }
 
             .prayer-row-3d-premium .btn-uttor-circle {
-                width: 26px; height: 26px; border-radius: 50%; 
+                width: 28px; height: 28px; border-radius: 50%; 
                 background: rgba(11, 124, 77, 0.1); 
                 display: inline-flex; align-items: center; justify-content: center; 
                 color: #0b7c4d; transition: all 0.3s; flex-shrink: 0;
@@ -120,8 +133,10 @@
                 <!-- Header Title inside Card -->
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
                     <h3 style="font-size: 1.1rem; font-weight: 800; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulseGreen 2s infinite;"></span>
                         <i class="fas fa-comments" style="color: #0b7c4d;"></i> সাম্প্রতিক প্রশ্নসমূহ
                     </h3>
+                    <span style="font-size: 0.75rem; background: #e6f4ea; color: #0b7c4d; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">Q&amp;A</span>
                 </div>
 
                 <div class="questions-slider" style="position: relative; overflow: hidden; width: 100%; z-index: 2;">
@@ -145,7 +160,16 @@
                             endforeach; 
                         else:
                         ?>
-                            <div style="text-align: center; color: #64748b; padding-top: 40px; font-style: italic; width: 100%;">কোনো প্রশ্ন পাওয়া যায়নি।</div>
+                            <div style="text-align: center; color: #64748b; padding: 45px 15px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+                                <div style="width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #e6f4ea, #d1fae5); display: flex; align-items: center; justify-content: center; color: #0b7c4d; font-size: 2rem; box-shadow: 0 8px 20px rgba(11, 124, 77, 0.15);">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h4 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0; font-family: 'Hind Siliguri', sans-serif;">কোনো প্রশ্ন পাওয়া যায়নি</h4>
+                                <p style="font-size: 0.85rem; color: #64748b; margin: 0; font-family: 'Hind Siliguri', sans-serif; line-height: 1.4; max-width: 240px;">আপনার যেকোনো ইসলামিক প্রশ্ন সরাসরি আমাদের মাসআলা টিমের কাছে পাঠাতে পারেন।</p>
+                                <a href="<?= URLROOT ?>/ask" style="margin-top: 6px; text-decoration: none; background: linear-gradient(135deg, #0b7c4d, #10b981); color: #fff; padding: 8px 22px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; font-family: 'Hind Siliguri', sans-serif; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(11, 124, 77, 0.4)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(11, 124, 77, 0.3)';">
+                                    <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> প্রশ্ন পাঠান
+                                </a>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -160,11 +184,11 @@
             </div>
  
             <!-- Ask & View Buttons at the bottom side-by-side -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; position: relative; z-index: 2; width: 100%;">
-                <a href="<?= URLROOT ?>/q&amp;a" style="text-decoration: none; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s;" onmouseover="this.style.color='#2563eb';" onmouseout="this.style.color='#0b7c4d';">
-                    <i class="fas fa-list-ul"></i> সব প্রশ্নসমূহ
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0; position: relative; z-index: 2; width: 100%; gap: 10px;">
+                <a href="<?= URLROOT ?>/q&amp;a" style="flex: 1; text-align: center; text-decoration: none; color: #0b7c4d; background: #e6f4ea; border: 1px solid rgba(11, 124, 77, 0.2); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#0b7c4d'; this.style.color='#ffffff';" onmouseout="this.style.background='#e6f4ea'; this.style.color='#0b7c4d';">
+                    <i class="fas fa-list-ul"></i> সব প্রশ্ন
                 </a>
-                <a href="<?= URLROOT ?>/ask" style="text-decoration: none; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s;" onmouseover="this.style.color='#2563eb';" onmouseout="this.style.color='#0b7c4d';">
+                <a href="<?= URLROOT ?>/ask" style="flex: 1; text-align: center; text-decoration: none; color: #ffffff; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.25); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(11, 124, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(11, 124, 77, 0.25)';">
                     <i class="fas fa-plus-circle"></i> প্রশ্ন করুন
                 </a>
             </div>
