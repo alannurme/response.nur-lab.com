@@ -420,9 +420,9 @@
     .bento-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
+        gap: 24px;
         width: 100%;
-        max-width: 1440px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: 0 15px;
         box-sizing: border-box;
