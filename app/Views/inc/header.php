@@ -1747,6 +1747,14 @@ $current_uri = trim($_GET['url'] ?? '', '/');
 $is_homepage = empty($current_uri) || $current_uri === 'home' || $current_uri === 'index';
 ?>
 <body class="<?= $is_homepage ? 'home-page' : '' ?>">
+<?php if ($is_homepage): ?>
+    <!-- Canvas Animation Background (Same as Login Page) -->
+    <canvas id="islamicCanvas" style="position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
+    
+    <!-- Floating Glowing Crescent & Stars Orbs -->
+    <div class="crescent-orb-glow" style="position: fixed; top: 12%; right: 5%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%); border-radius: 50%; filter: blur(50px); z-index: 0; pointer-events: none;"></div>
+    <div class="sky-aura" style="position: fixed; width: 800px; height: 800px; border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.15); top: 35%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 0; animation: rotateAura 60s linear infinite;"></div>
+<?php endif; ?>
 
 
 

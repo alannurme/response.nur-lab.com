@@ -440,5 +440,107 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', adjustZoom);
 });
 </script>
+<script>
+// Animated Islamic Geometric Canvas Background (Login Page Canvas)
+(function() {
+    const canvas = document.getElementById('islamicCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let rotationAngle = 0;
+
+    function resizeCanvas() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = document.documentElement.scrollHeight || window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Create glowing star particles
+    for (let i = 0; i < 60; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 2 + 0.5,
+            alpha: Math.random() * 0.6 + 0.2,
+            speed: Math.random() * 0.4 + 0.15
+        });
+    }
+
+    function drawEightPointStar(cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        let step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y);
+            rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Render Floating Particles
+        particles.forEach(p => {
+            p.y -= p.speed;
+            if (p.y < 0) p.y = height;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(16, 185, 129, ${p.alpha})`;
+            ctx.fill();
+        });
+
+        // Render Islamic Geometric Grid Patterns (Eight Point Star Lattice)
+        rotationAngle += 0.0006;
+        const spacing = 190;
+        const cols = Math.ceil(width / spacing) + 2;
+        const rows = Math.ceil(height / spacing) + 2;
+
+        for (let r = -1; r < rows; r++) {
+            for (let c = -1; c < cols; c++) {
+                const cx = c * spacing + (r % 2 === 0 ? 0 : spacing / 2);
+                const cy = r * spacing * 0.866;
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate((r + c) % 2 === 0 ? rotationAngle : -rotationAngle);
+
+                // Outer Emerald Star Lattice Line
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.18)';
+                ctx.lineWidth = 1.2;
+                drawEightPointStar(0, 0, 8, 48, 24);
+                ctx.stroke();
+
+                // Inner Delicate Geometric Star
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                drawEightPointStar(0, 0, 8, 28, 14);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+})();
+</script>
 </body>
 </html>
