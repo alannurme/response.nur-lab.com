@@ -2,12 +2,106 @@
 
 <?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 65px 20px 75px 20px; margin-top: -80px; overflow: hidden; border-bottom: 1px solid #059669;">
+<section class="islamic-hero-section" style="position: relative; background: radial-gradient(circle at 50% 30%, #065f46 0%, #044e39 45%, #022c22 100%); padding: 65px 20px 75px 20px; margin-top: -80px; overflow: hidden; border-bottom: 1px solid #059669;">
+    <!-- Authentic Islamic Geometric Pattern Overlay -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><path d=\'M40 0 L80 40 L40 80 L0 40 Z M40 10 L70 40 L40 70 L10 40 Z M40 20 L60 40 L40 60 L20 40 Z\' fill=\'none\' stroke=\'rgba(245, 158, 11, 0.07)\' stroke-width=\'1.2\'/></svg>'); background-repeat: repeat; opacity: 0.85; pointer-events: none; z-index: 1;"></div>
+    
+    <!-- Large Subtle Watermark Crescent & Star Accent -->
+    <div style="position: absolute; top: -40px; right: -50px; opacity: 0.05; color: #f59e0b; font-size: 26rem; pointer-events: none; z-index: 1; transform: rotate(-15deg);">
+        <i class="fas fa-star-and-crescent"></i>
+    </div>
+    <div style="position: absolute; bottom: -80px; left: -60px; opacity: 0.04; color: #10b981; font-size: 24rem; pointer-events: none; z-index: 1; transform: rotate(20deg);">
+        <i class="fas fa-mosque"></i>
+    </div>
+
+    <!-- SVG Mosque Architectural Dome & Minarets Silhouette Layer at Bottom -->
+    <div style="position: absolute; bottom: 0; left: 0; width: 100%; overflow: hidden; line-height: 0; pointer-events: none; z-index: 1; opacity: 0.18;">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: 100%; height: 85px; fill: #ffffff;">
+            <!-- Left Minaret -->
+            <rect x="50" y="20" width="16" height="100" rx="2" />
+            <path d="M46 20 L58 0 L70 20 Z" />
+            <circle cx="58" cy="-5" r="3" />
+            <!-- Small Domes -->
+            <path d="M120 120 Q160 50 200 120 Z" />
+            <path d="M220 120 Q280 30 340 120 Z" />
+            <!-- Center Grand Mosque Dome -->
+            <path d="M480 120 Q600 -15 720 120 Z" />
+            <path d="M590 0 Q600 -25 610 0 Z" />
+            <circle cx="600" cy="-30" r="4" fill="#f59e0b" />
+            <!-- Right Domes & Minaret -->
+            <path d="M860 120 Q920 30 980 120 Z" />
+            <path d="M1000 120 Q1040 50 1080 120 Z" />
+            <rect x="1120" y="20" width="16" height="100" rx="2" />
+            <path d="M1116 20 L1128 0 L1140 20 Z" />
+            <circle cx="1128" cy="-5" r="3" />
+        </svg>
+    </div>
+
+    <!-- Ultra Dense Animated Cosmic Space / Star Particle Layer (70 Stars + Shooting Stars) -->
+    <div class="space-particles-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1; overflow: hidden;">
+        <?php for ($i = 1; $i <= 70; $i++): ?>
+            <div class="star-particle star-gen-<?= $i ?>"></div>
+        <?php endfor; ?>
+        
+        <!-- Shooting Stars / Meteors -->
+        <div class="shooting-star meteor-1"></div>
+        <div class="shooting-star meteor-2"></div>
+        <div class="shooting-star meteor-3"></div>
+    </div>
+
+    <style>
+    @keyframes twinkleFast {
+        0%, 100% { opacity: 0.1; transform: scale(0.5); }
+        50% { opacity: 1; transform: scale(1.8); filter: drop-shadow(0 0 10px rgba(254, 240, 138, 1)); }
+    }
+    @keyframes floatCosmicWide {
+        0% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+        50% { transform: translateY(-30px) translateX(25px); opacity: 0.9; }
+        100% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+    }
+    @keyframes shootingStarAnim {
+        0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 0; width: 0px; }
+        10% { opacity: 1; width: 120px; }
+        30% { transform: translateX(-400px) translateY(280px) rotate(-35deg); opacity: 0; width: 0px; }
+        100% { opacity: 0; }
+    }
+    .star-particle {
+        position: absolute;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 14px rgba(245, 158, 11, 0.6);
+    }
+    .shooting-star {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(-45deg, rgba(255,255,255,1), rgba(245,158,11,0.8), transparent);
+        filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
+        border-radius: 999px;
+    }
+    .meteor-1 { top: 15%; right: 10%; animation: shootingStarAnim 7s infinite ease-in 1s; }
+    .meteor-2 { top: 35%; right: 35%; animation: shootingStarAnim 9s infinite ease-in 4s; }
+    .meteor-3 { top: 5%; right: 55%; animation: shootingStarAnim 11s infinite ease-in 2s; }
+
+    <?php 
+    // Generative CSS rules for 70 stars with varied coordinates, delays, sizes & colors
+    for ($i = 1; $i <= 70; $i++) {
+        $top = rand(1, 98);
+        $left = rand(1, 98);
+        $size = rand(2, 6);
+        $delay = sprintf("%.2f", rand(0, 40) / 10);
+        $duration = sprintf("%.2f", rand(20, 50) / 10);
+        $bg = ($i % 3 == 0) ? '#fef08a' : (($i % 4 == 0) ? '#6ee7b7' : '#ffffff');
+        $anim = ($i % 2 == 0) ? 'twinkleFast' : 'floatCosmicWide';
+        echo ".star-gen-{$i} { top: {$top}%; left: {$left}%; width: {$size}px; height: {$size}px; background: {$bg}; animation: {$anim} {$duration}s infinite ease-in-out {$delay}s; }\n";
+    }
+    ?>
+    </style>
+
     <!-- Extra Top Padding Space for Navbar -->
     <div style="height: 80px;"></div>
-    <!-- Modern Glow Orbs & Geometric Accents -->
-    <div style="position: absolute; top: -120px; left: -100px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 1;"></div>
-    <div style="position: absolute; bottom: -100px; right: 10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0) 70%); border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 1;"></div>
+    <!-- Modern Golden Glow Orbs & Ambient Glow -->
+    <div style="position: absolute; top: -100px; left: 15%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 1;"></div>
+    <div style="position: absolute; bottom: -120px; right: 10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(4, 78, 57, 0) 70%); border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 1;"></div>
 
     
     <div style="max-width: 1440px; margin: 0 auto; position: relative; z-index: 2; padding: 0 15px; box-sizing: border-box; width: 100%;">
@@ -52,9 +146,9 @@
                 <?php endif; ?>
 
                 <?php if (!empty($data['settings']['hero_btn_text'])): ?>
-                <!-- Custom Action Button -->
-                <div style="margin-top: 10px; margin-bottom: 25px;">
-                    <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : '#' ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #064e3b; padding: 14px 32px; border-radius: 50px; font-weight: 800; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 18px 40px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.2)';">
+                <!-- Action Button -->
+                <div style="margin-top: 15px; margin-bottom: 25px;">
+                    <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : URLROOT . '/ask' ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #064e3b; padding: 14px 34px; border-radius: 50px; font-weight: 800; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 18px 40px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.2)';">
                         <i class="fas fa-paper-plane" style="color: #059669;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_btn_text']) ?></span>
                     </a>
@@ -87,55 +181,133 @@
 
                 <!-- Islamic Quran Ayah Banner Card -->
                 <?php if (!empty($data['settings']['hero_ayah_bn'] ?? 'অতএব জ্ঞানীদের জিজ্ঞেস করো, যদি তোমরা না জানো।')): ?>
-                <div style="margin-top: 25px; padding: 22px 26px; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; overflow: hidden;">
-                    <div style="position: absolute; right: -10px; bottom: -15px; opacity: 0.08; color: #ffffff; font-size: 5rem; pointer-events: none;">
-                        <i class="fas fa-quran"></i>
+                <div style="margin-top: 25px; padding: 24px 28px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%); backdrop-filter: blur(16px); border-radius: 22px; border-left: 4px solid #f59e0b; border-top: 1px solid rgba(255, 255, 255, 0.25); border-right: 1px solid rgba(255, 255, 255, 0.25); border-bottom: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden;">
+                    <div style="position: absolute; right: 10px; bottom: -10px; opacity: 0.1; color: #f59e0b; font-size: 5.5rem; pointer-events: none;">
+                        <i class="fas fa-kaaba"></i>
                     </div>
                     <?php if (!empty($data['settings']['hero_ayah_arabic'] ?? 'فَاسْأَلُوا أَهْلَ الذِّكْرِ إِن كُنتُمْ لَا تَعْلَمُونَ')): ?>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #a7f3d0; font-family: 'Amiri', 'Meaney', serif; margin-bottom: 8px; direction: rtl; text-align: right; line-height: 1.6;">
+                    <div style="font-size: 1.35rem; font-weight: 700; color: #fef08a; font-family: 'Amiri', 'Meaney', serif; margin-bottom: 10px; direction: rtl; text-align: right; line-height: 1.7; letter-spacing: 0.5px; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">
                         <?= htmlspecialchars($data['settings']['hero_ayah_arabic'] ?? 'فَاسْأَلُوا أَهْلَ الذِّكْرِ إِن كُنتُمْ لَا تَعْلَمُونَ') ?>
                     </div>
                     <?php endif; ?>
-                    <div style="font-size: 0.98rem; font-weight: 600; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; line-height: 1.6;">
+                    <div style="font-size: 1.02rem; font-weight: 600; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; line-height: 1.65;">
                         “<?= htmlspecialchars($data['settings']['hero_ayah_bn'] ?? 'অতএব জ্ঞানীদের জিজ্ঞেস করো, যদি তোমরা না জানো।') ?>”
                     </div>
                     <?php if (!empty($data['settings']['hero_ayah_ref'] ?? 'সূরা আন-নহল: ৪৩')): ?>
-                    <div style="font-size: 0.82rem; font-weight: 700; color: #6ee7b7; margin-top: 6px; font-family: 'Hind Siliguri', sans-serif;">
-                        — <?= htmlspecialchars($data['settings']['hero_ayah_ref'] ?? 'সূরা আন-নহল: ৪৩') ?>
+                    <div style="font-size: 0.85rem; font-weight: 800; color: #f59e0b; margin-top: 8px; font-family: 'Hind Siliguri', sans-serif; display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-bookmark" style="font-size: 0.8rem;"></i>
+                        <span><?= htmlspecialchars($data['settings']['hero_ayah_ref'] ?? 'সূরা আন-নহল: ৪৩') ?></span>
                     </div>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
 
                 <!-- Quick Islamic Platform Statistics Counter Row -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
-                    <div style="text-align: left;">
-                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div style="text-align: left; background: rgba(255, 255, 255, 0.08); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
                             <?= htmlspecialchars($data['settings']['hero_stat_num_1'] ?? '১,৫০০+') ?>
                         </div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
                             <?= htmlspecialchars($data['settings']['hero_stat_lbl_1'] ?? 'ফতোয়া ও মাসআলা') ?>
                         </div>
                     </div>
 
-                    <div style="text-align: left;">
-                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                    <div style="text-align: left; background: rgba(255, 255, 255, 0.08); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
                             <?= htmlspecialchars($data['settings']['hero_stat_num_2'] ?? '৫০,০০০+') ?>
                         </div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
                             <?= htmlspecialchars($data['settings']['hero_stat_lbl_2'] ?? 'নিয়মিত পাঠকমণ্ডলী') ?>
                         </div>
                     </div>
 
-                    <div style="text-align: left;">
-                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                    <div style="text-align: left; background: rgba(255, 255, 255, 0.08); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
                             <?= htmlspecialchars($data['settings']['hero_stat_num_3'] ?? '১০০%') ?>
                         </div>
-                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
                             <?= htmlspecialchars($data['settings']['hero_stat_lbl_3'] ?? 'সহিহ উৎস ও দলিল') ?>
                         </div>
                     </div>
+
+                    <div style="text-align: left; background: rgba(255, 255, 255, 0.08); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12);">
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_num_4'] ?? '২৪/৭') ?>
+                        </div>
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_lbl_4'] ?? 'অনলাইন সাপোর্ট') ?>
+                        </div>
+                    </div>
                 </div>
+
+                <?php 
+                $youtubeUrl = $data['settings']['hero_audio_youtube_url'] ?? '';
+                if (!empty($youtubeUrl)):
+                    preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/を買]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $youtubeUrl, $match);
+                    $videoId = $match[1] ?? '';
+                    $autoplay = ($data['settings']['hero_audio_autoplay'] ?? '1') == '1' ? '1' : '0';
+                    if (!empty($videoId)):
+                ?>
+                <!-- Hero Audio / Recitation Player Card Under Stats -->
+                <div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 20px; border-radius: 16px; margin-top: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div id="hero-audio-wave" style="display: flex; align-items: flex-end; gap: 4px; height: 20px; background: rgba(16, 185, 129, 0.2); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(52, 211, 153, 0.3);">
+                            <span style="width: 4px; height: 16px; background: #6ee7b7; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out;"></span>
+                            <span style="width: 4px; height: 20px; background: #fef08a; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out 0.3s;"></span>
+                            <span style="width: 4px; height: 12px; background: #6ee7b7; border-radius: 3px; animation: audioWave 1.2s infinite ease-in-out 0.6s;"></span>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-volume-high" style="color: #fef08a;"></i>
+                                <span><?= htmlspecialchars($data['settings']['hero_audio_label'] ?? 'কুরআন তিলাওয়াত (অডিও)') ?></span>
+                            </div>
+                            <div style="font-size: 0.78rem; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 2px;">
+                                ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="hero-audio-toggle" onclick="toggleHeroAudio()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; padding: 9px 20px; border-radius: 30px; font-size: 0.88rem; font-weight: 800; font-family: 'Hind Siliguri', sans-serif; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                        <i class="fas fa-pause" id="hero-audio-icon"></i> <span id="hero-audio-text">অডিও চলছে</span>
+                    </button>
+                    
+                    <!-- Invisible YouTube Embed for Audio Autoplay -->
+                    <iframe id="hero-youtube-iframe" width="1" height="1" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=<?= $autoplay ?>&mute=0&loop=1&playlist=<?= $videoId ?>" frameborder="0" allow="autoplay; encrypted-media" style="position: absolute; opacity: 0; pointer-events: none;"></iframe>
+                </div>
+
+                <style>
+                @keyframes audioWave {
+                    0%, 100% { height: 6px; }
+                    50% { height: 18px; }
+                }
+                </style>
+
+                <script>
+                var isPlaying = <?= $autoplay === '1' ? 'true' : 'false' ?>;
+                function toggleHeroAudio() {
+                    var iframe = document.getElementById('hero-youtube-iframe');
+                    var icon = document.getElementById('hero-audio-icon');
+                    var text = document.getElementById('hero-audio-text');
+                    var wave = document.getElementById('hero-audio-wave');
+                    
+                    if (isPlaying) {
+                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                        icon.className = 'fas fa-play';
+                        text.innerText = 'প্লে করুন';
+                        wave.style.opacity = '0.3';
+                        isPlaying = false;
+                    } else {
+                        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                        icon.className = 'fas fa-pause';
+                        text.innerText = 'অডিও চলছে';
+                        wave.style.opacity = '1';
+                        isPlaying = true;
+                    }
+                }
+                </script>
+                <?php endif; endif; ?>
 
             </div>
 

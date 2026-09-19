@@ -59,14 +59,24 @@
             </div>
 
             <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম বাটন পাঠ্য (Button Text)</label>
-                <input type="text" name="settings[hero_btn_text]" value="<?= htmlspecialchars($data['settings']['hero_btn_text'] ?? '') ?>" class="form-control" placeholder="যেমন: প্রশ্ন করুন" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
-                <small style="color: #64748b; font-size: 0.85rem; margin-top: 4px; display: block;">ফাঁকা রাখলে কাস্টম বাটন দেখাবে না।</small>
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম প্রাইমারি বাটন পাঠ্য (Primary Button Text)</label>
+                <input type="text" name="settings[hero_btn_text]" value="<?= htmlspecialchars($data['settings']['hero_btn_text'] ?? 'প্রশ্ন পাঠান') ?>" class="form-control" placeholder="যেমন: প্রশ্ন পাঠান" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+                <small style="color: #64748b; font-size: 0.85rem; margin-top: 4px; display: block;">ফাঁকা রাখলে বাটন দেখাবে না।</small>
             </div>
 
             <div class="form-group">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম বাটন লিংক (Button Link)</label>
-                <input type="text" name="settings[hero_btn_link]" value="<?= htmlspecialchars($data['settings']['hero_btn_link'] ?? '') ?>" class="form-control" placeholder="যেমন: /ask বা https://..." style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">কাস্টম প্রাইমারি বাটন লিংক (Primary Button Link)</label>
+                <input type="text" name="settings[hero_btn_link]" value="<?= htmlspecialchars($data['settings']['hero_btn_link'] ?? '/ask') ?>" class="form-control" placeholder="যেমন: /ask বা https://..." style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">সেকেন্ডারি বাটন পাঠ্য (Secondary Button Text)</label>
+                <input type="text" name="settings[hero_btn2_text]" value="<?= htmlspecialchars($data['settings']['hero_btn2_text'] ?? 'সব ফতোয়া ও উত্তর দেখুন') ?>" class="form-control" placeholder="যেমন: সব ফতোয়া ও উত্তর দেখুন" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: block;">সেকেন্ডারি বাটন লিংক (Secondary Button Link)</label>
+                <input type="text" name="settings[hero_btn2_link]" value="<?= htmlspecialchars($data['settings']['hero_btn2_link'] ?? '/search') ?>" class="form-control" placeholder="যেমন: /search বা /blog" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
             </div>
 
             <!-- Feature Pills / Badges Settings -->
@@ -107,6 +117,29 @@
                 </div>
             </div>
 
+            <!-- Audio Player Settings -->
+            <div class="form-group full-width" style="grid-column: 1 / -1; background: #f0fdf4; padding: 20px; border-radius: 12px; border: 1px solid #bbf7d0; margin-top: 10px;">
+                <h4 style="margin: 0 0 15px 0; color: #166534; font-weight: 800;"><i class="fas fa-music"></i> ব্যাকগ্রাউন্ড অডিও প্লেয়ার (Hero Background Audio/Recitation Player)</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #166534;">ইউটিউব অডিও/ভিডিও লিংক (YouTube Link)</label>
+                        <input type="text" name="settings[hero_audio_youtube_url]" value="<?= htmlspecialchars($data['settings']['hero_audio_youtube_url'] ?? '') ?>" class="form-control" placeholder="যেমন: https://www.youtube.com/watch?v=..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display: block;">কুরআন তিলাওয়াত বা ইসলামিক অডিওর ইউটিউব লিংক দিন। ফাঁকা রাখলে প্লেয়ার দেখাবে না।</small>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #166534;">প্লেয়ার টাইটেল / বিবরণ (Audio Label)</label>
+                        <input type="text" name="settings[hero_audio_label]" value="<?= htmlspecialchars($data['settings']['hero_audio_label'] ?? 'কুরআন তিলাওয়াত (Surah Al-Kahf)') ?>" class="form-control" placeholder="যেমন: সূরা আর-রহমান তিলাওয়াত" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #166534;">অটো-প্লে সক্রিয় করবেন? (Auto Play)</label>
+                        <select name="settings[hero_audio_autoplay]" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                            <option value="1" <?= ($data['settings']['hero_audio_autoplay'] ?? '1') == '1' ? 'selected' : '' ?>>হ্যাঁ (Autoplay Enabled)</option>
+                            <option value="0" <?= ($data['settings']['hero_audio_autoplay'] ?? '1') == '0' ? 'selected' : '' ?>>না (Manual Click)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Counters Settings -->
             <div class="form-group full-width" style="grid-column: 1 / -1; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
                 <h4 style="margin: 0 0 15px 0; color: #0b7c4d; font-weight: 800;"><i class="fas fa-chart-line"></i> কুইক পরিসংখ্যান / স্ট্যাটস (Quick Islamic Statistics)</h4>
@@ -125,6 +158,11 @@
                         <label style="font-weight: 600; font-size: 0.88rem; color: #334155;">সংখ্যা ৩ (যেমন: ১০০%)</label>
                         <input type="text" name="settings[hero_stat_num_3]" value="<?= htmlspecialchars($data['settings']['hero_stat_num_3'] ?? '১০০%') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
                         <input type="text" name="settings[hero_stat_lbl_3]" value="<?= htmlspecialchars($data['settings']['hero_stat_lbl_3'] ?? 'সহিহ উৎস ও দলিল') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 5px;" placeholder="লেবেল">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #334155;">সংখ্যা ৪ (যেমন: ২৪/৭)</label>
+                        <input type="text" name="settings[hero_stat_num_4]" value="<?= htmlspecialchars($data['settings']['hero_stat_num_4'] ?? '২৪/৭') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <input type="text" name="settings[hero_stat_lbl_4]" value="<?= htmlspecialchars($data['settings']['hero_stat_lbl_4'] ?? 'অনলাইন সাপোর্ট') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 5px;" placeholder="লেবেল">
                     </div>
                 </div>
             </div>
