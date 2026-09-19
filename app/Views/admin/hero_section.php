@@ -69,6 +69,25 @@
                 <input type="text" name="settings[hero_btn_link]" value="<?= htmlspecialchars($data['settings']['hero_btn_link'] ?? '') ?>" class="form-control" placeholder="যেমন: /ask বা https://..." style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
             </div>
 
+            <!-- Feature Pills / Badges Settings -->
+            <div class="form-group full-width" style="grid-column: 1 / -1; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
+                <h4 style="margin: 0 0 15px 0; color: #0b7c4d; font-weight: 800;"><i class="fas fa-tags"></i> কুইক ফিচার ব্যাজসমূহ (Hero Quick Feature Pills)</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #334155;">ফিচার ১ (যেমন: কুরআন ও হাদীস)</label>
+                        <input type="text" name="settings[hero_pill_1]" value="<?= htmlspecialchars($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #334155;">ফিচার ২ (যেমন: বিশ্বস্ত ফতোয়া)</label>
+                        <input type="text" name="settings[hero_pill_2]" value="<?= htmlspecialchars($data['settings']['hero_pill_2'] ?? 'বিশ্বস্ত ফতোয়া ও সমাধান') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #334155;">ফিচার ৩ (যেমন: দ্রুত উত্তর)</label>
+                        <input type="text" name="settings[hero_pill_3]" value="<?= htmlspecialchars($data['settings']['hero_pill_3'] ?? 'সরাসরি প্রশ্ন পাঠানোর সুযোগ') ?>" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="form-actions" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">

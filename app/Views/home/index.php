@@ -2,14 +2,16 @@
 
 <?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 100px 20px 90px 20px; overflow: hidden; border-bottom: 1px solid #059669;">
+<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 60px 20px 90px 20px; margin-top: -80px; overflow: hidden; border-bottom: 1px solid #059669;">
+    <!-- Extra Top Padding Space for Navbar -->
+    <div style="height: 80px;"></div>
     <!-- Modern Glow Orbs & Geometric Accents -->
     <div style="position: absolute; top: -120px; left: -100px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 1;"></div>
     <div style="position: absolute; bottom: -100px; right: 10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0) 70%); border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 1;"></div>
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml;utf8,<svg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\"><g fill=\"%23ffffff\" fill-opacity=\"0.03\"><path d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/></g></g></svg>') repeat; pointer-events: none; opacity: 0.8; z-index: 1;"></div>
+
     
-    <div style="max-width: 1320px; margin: 0 auto; position: relative; z-index: 2;">
-        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 370px; gap: 40px; align-items: center;">
+    <div style="max-width: 1440px; margin: 0 auto; position: relative; z-index: 2; padding: 0 15px; box-sizing: border-box;">
+        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 370px; gap: 30px; align-items: stretch;">
             
             <!-- LEFT COLUMN: Dynamic Glassmorphism Card -->
             <div style="text-align: left; padding: 40px 35px; background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
@@ -51,7 +53,7 @@
 
                 <?php if (!empty($data['settings']['hero_btn_text'])): ?>
                 <!-- Custom Action Button -->
-                <div style="margin-top: 10px;">
+                <div style="margin-top: 10px; margin-bottom: 25px;">
                     <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : '#' ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #064e3b; padding: 14px 32px; border-radius: 50px; font-weight: 800; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 18px 40px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.2)';">
                         <i class="fas fa-paper-plane" style="color: #059669;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_btn_text']) ?></span>
@@ -59,11 +61,35 @@
                 </div>
                 <?php endif; ?>
 
+                <!-- Feature Badges / Highlights Row -->
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <?php if (!empty($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক')): ?>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                        <i class="fas fa-book-quran" style="color: #6ee7b7;"></i>
+                        <span><?= htmlspecialchars($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক') ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($data['settings']['hero_pill_2'] ?? 'বিশ্বস্ত ফতোয়া ও সমাধান')): ?>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                        <i class="fas fa-shield-halved" style="color: #6ee7b7;"></i>
+                        <span><?= htmlspecialchars($data['settings']['hero_pill_2'] ?? 'বিশ্বস্ত ফতোয়া ও সমাধান') ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($data['settings']['hero_pill_3'] ?? 'সরাসরি প্রশ্ন পাঠানোর সুযোগ')): ?>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                        <i class="fas fa-headset" style="color: #6ee7b7;"></i>
+                        <span><?= htmlspecialchars($data['settings']['hero_pill_3'] ?? 'সরাসরি প্রশ্ন পাঠানোর সুযোগ') ?></span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
             </div>
 
             <!-- RIGHT COLUMN: Slim Portrait Recent Questions Widget -->
-            <div style="display: flex; justify-content: center;">
-                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 35px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.25); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; max-width: 380px; min-height: 650px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(11, 124, 77, 0.2)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(11, 124, 77, 0.12)';">
+            <div style="display: flex; justify-content: center; height: 100%;">
+                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px; padding: 30px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2); border: 1.5px solid rgba(255, 255, 255, 0.3); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; height: 100%; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.2)';">
                     
                     <style>
                     @media (max-width: 991px) {
