@@ -4,7 +4,8 @@
 <section class="section-padding bento-section">
     <div class="bento-grid">
         <!-- Main Hero Slider (Left Side) -->
-        <div class="bento-item main-featured bento-item-left" style="grid-column: span 3; grid-row: span 2; position: relative; overflow: hidden; border-radius: 24px; background: #ffffff; box-shadow: 0 15px 40px rgba(0,0,0,0.05); min-height: 550px;">
+        <!-- Main Hero Slider (Left Side) - Separate 3D Shadow Card -->
+        <div class="bento-item main-featured bento-item-left" style="grid-column: span 3; grid-row: span 2; position: relative; overflow: hidden; border-radius: 24px; background: #ffffff; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); min-height: 550px; transition: transform 0.4s ease, box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(0, 0, 0, 0.18), 0 8px 25px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05)';">
             <div class="hero-slider-container" style="height: 100%; position: relative; background: #ffffff;">
                 <?php if (!empty($data['slides'])): ?>
                     <?php foreach ($data['slides'] as $index => $slide): 
@@ -25,12 +26,11 @@
                     <?php endforeach; ?>
                     
 
-
                     <!-- Slider Navigation Arrows -->
-                    <button class="slider-arrow prev" onclick="prevSlide()" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border-radius: 50%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;" onmouseover="this.style.background='rgba(37, 99, 235, 0.8)'; this.style.borderColor='#2563eb'; this.style.transform='translateY(-50%) scale(1.1)';" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(-50%) scale(1)';">
+                    <button class="slider-arrow prev" onclick="prevSlide()" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border-radius: 50%; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;" onmouseover="this.style.background='rgba(37, 99, 235, 0.85)'; this.style.borderColor='#2563eb'; this.style.transform='translateY(-50%) scale(1.1)';" onmouseout="this.style.background='rgba(0, 0, 0, 0.35)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-50%) scale(1)';">
                         <i class="fas fa-chevron-left" style="font-size: 1rem;"></i>
                     </button>
-                    <button class="slider-arrow next" onclick="clickNext()" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border-radius: 50%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;" onmouseover="this.style.background='rgba(37, 99, 235, 0.8)'; this.style.borderColor='#2563eb'; this.style.transform='translateY(-50%) scale(1.1)';" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(-50%) scale(1)';">
+                    <button class="slider-arrow next" onclick="clickNext()" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border-radius: 50%; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;" onmouseover="this.style.background='rgba(37, 99, 235, 0.85)'; this.style.borderColor='#2563eb'; this.style.transform='translateY(-50%) scale(1.1)';" onmouseout="this.style.background='rgba(0, 0, 0, 0.35)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-50%) scale(1)';">
                         <i class="fas fa-chevron-right" style="font-size: 1rem;"></i>
                     </button>
                 <?php else: ?>
@@ -41,25 +41,10 @@
             </div>
         </div>
 
-        <!-- Recent Questions (Right Side) - Premium Glassmorphic 3D Redesign -->
-        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 100%); backdrop-filter: blur(30px) saturate(160%); -webkit-backdrop-filter: blur(30px) saturate(160%); color: #1e293b; border: 2.5px solid rgba(11, 124, 77, 0.25); padding: 22px 20px; border-radius: 28px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px; animation: neonGlow 6s ease-in-out infinite; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform-style: preserve-3d; perspective: 1000px;" onmouseover="this.style.transform='translateY(-6px)';" onmouseout="this.style.transform='none';">
+        <!-- Recent Questions (Right Side) - Separate Elegant Card Design -->
+        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: #ffffff; border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px; box-shadow: 0 20px 45px rgba(0, 107, 67, 0.1), 0 4px 15px rgba(0, 0, 0, 0.04); border: 1px solid rgba(255, 255, 255, 0.9); transition: transform 0.4s ease, box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(0, 107, 67, 0.16), 0 8px 25px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 107, 67, 0.1), 0 4px 15px rgba(0, 0, 0, 0.04)';">
             
-            <!-- Animated Background Blobs -->
             <style>
-            @keyframes neonGlow {
-                0% {
-                    border-color: rgba(11, 124, 77, 0.25);
-                    box-shadow: 0 15px 30px rgba(11, 124, 77, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-                }
-                50% {
-                    border-color: rgba(37, 99, 235, 0.6);
-                    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.22), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-                }
-                100% {
-                    border-color: rgba(11, 124, 77, 0.25);
-                    box-shadow: 0 15px 30px rgba(11, 124, 77, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-                }
-            }
             @keyframes floatBlob1 {
                 0% { transform: translate(0px, 0px) scale(1); }
                 50% { transform: translate(25px, -25px) scale(1.2); }
@@ -72,46 +57,45 @@
             }
             .bg-blob-1 {
                 position: absolute; top: -60px; right: -60px; width: 190px; height: 190px; 
-                background: radial-gradient(circle, rgba(6, 182, 212, 0.28) 0%, rgba(11, 124, 77, 0.12) 60%, transparent 100%); 
+                background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(11, 124, 77, 0.08) 60%, transparent 100%); 
                 border-radius: 50%; filter: blur(25px); z-index: 0; pointer-events: none;
                 animation: floatBlob1 12s infinite ease-in-out;
             }
             .bg-blob-2 {
                 position: absolute; bottom: -60px; left: -60px; width: 190px; height: 190px; 
-                background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, rgba(6, 182, 212, 0.1) 60%, transparent 100%); 
+                background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(6, 182, 212, 0.08) 60%, transparent 100%); 
                 border-radius: 50%; filter: blur(25px); z-index: 0; pointer-events: none;
                 animation: floatBlob2 12s infinite ease-in-out;
             }
             
-            /* Premium 3D Question Card Styling */
+            /* Premium Question Card Item */
             .prayer-row-3d-premium {
                 display: flex; justify-content: space-between; align-items: center; 
-                padding: 8px 12px; background: rgba(255, 255, 255, 0.93); 
-                border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.85); 
+                padding: 10px 14px; background: #f8fafc; 
+                border-radius: 14px; border: 1px solid #e2e8f0; 
                 text-decoration: none; color: #1e293b; 
-                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-                box-shadow: 0 4px 12px rgba(11, 124, 77, 0.02); 
-                transform-style: preserve-3d;
+                transition: all 0.3s ease; 
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
                 width: 100%; box-sizing: border-box;
             }
             .prayer-row-3d-premium:hover {
-                transform: translateY(-3px) translateZ(12px);
-                box-shadow: 0 10px 25px rgba(11, 124, 77, 0.08);
-                border-color: rgba(37, 99, 235, 0.25);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(11, 124, 77, 0.1);
+                border-color: #0b7c4d;
                 background: #ffffff;
             }
             .prayer-row-3d-premium:hover .q-title {
-                color: #2563eb;
+                color: #0b7c4d;
             }
 
             .prayer-row-3d-premium .btn-uttor-circle {
-                width: 24px; height: 24px; border-radius: 50%; 
-                background: rgba(11, 124, 77, 0.08); 
+                width: 26px; height: 26px; border-radius: 50%; 
+                background: rgba(11, 124, 77, 0.1); 
                 display: inline-flex; align-items: center; justify-content: center; 
                 color: #0b7c4d; transition: all 0.3s; flex-shrink: 0;
             }
             .prayer-row-3d-premium:hover .btn-uttor-circle {
-                background: #2563eb;
+                background: #0b7c4d;
                 color: #ffffff;
                 transform: scale(1.1);
             }
@@ -121,7 +105,7 @@
             
             .question-dot-premium {
                 width: 10px; height: 6px; border-radius: 3px; 
-                background: rgba(11, 124, 77, 0.15); cursor: pointer; 
+                background: rgba(11, 124, 77, 0.2); cursor: pointer; 
                 transition: all 0.3s ease;
             }
             .question-dot-premium.active {
@@ -133,16 +117,23 @@
             <div class="bg-blob-2"></div>
             
             <div style="position: relative; z-index: 2;">
+                <!-- Header Title inside Card -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-comments" style="color: #0b7c4d;"></i> সাম্প্রতিক প্রশ্নসমূহ
+                    </h3>
+                </div>
+
                 <div class="questions-slider" style="position: relative; overflow: hidden; width: 100%; z-index: 2;">
                     <div class="questions-track" id="questions-track" style="display: flex; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); width: 100%;">
                         <?php 
-                        $chunks = array_chunk($data['recent_questions'] ?? [], 6);
+                        $chunks = array_chunk($data['recent_questions'] ?? [], 5);
                         if (!empty($chunks)): 
                             foreach ($chunks as $chunkIndex => $chunk):
                         ?>
-                            <div class="question-slide" style="width: 100%; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; padding: 2px; box-sizing: border-box;">
+                            <div class="question-slide" style="width: 100%; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 2px; box-sizing: border-box;">
                                 <?php foreach ($chunk as $q): ?>
-                                    <a href="<?= URLROOT ?>/question/<?= $q['id'] ?>" class="prayer-row-3d-premium" style="padding: 9px 12px;">
+                                    <a href="<?= URLROOT ?>/question/<?= $q['id'] ?>" class="prayer-row-3d-premium">
                                         <span class="q-title" style="font-size: 0.88rem; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; font-family: 'Hind Siliguri', sans-serif; line-height: 1.35; color: #1e293b; transition: color 0.3s; max-width: 82%; text-align: left;"><?= htmlspecialchars($q['question']) ?></span>
                                         <span class="btn-uttor-circle">
                                             <i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i>
@@ -160,7 +151,7 @@
                 </div>
  
                 <?php if (!empty($chunks) && count($chunks) > 1): ?>
-                    <div class="question-dots-container" id="question-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px; z-index: 2; position: relative;">
+                    <div class="question-dots-container" id="question-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: 16px; z-index: 2; position: relative;">
                         <?php foreach ($chunks as $chunkIndex => $chunk): ?>
                             <div class="question-dot-premium <?= $chunkIndex === 0 ? 'active' : '' ?>" onclick="goToQuestionSlide(<?= $chunkIndex ?>)"></div>
                         <?php endforeach; ?>
@@ -168,8 +159,8 @@
                 <?php endif; ?>
             </div>
  
-            <!-- Ask & View Buttons at the bottom side-by-side (small text links) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(11, 124, 77, 0.1); position: relative; z-index: 2; width: 100%;">
+            <!-- Ask & View Buttons at the bottom side-by-side -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; position: relative; z-index: 2; width: 100%;">
                 <a href="<?= URLROOT ?>/q&amp;a" style="text-decoration: none; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s;" onmouseover="this.style.color='#2563eb';" onmouseout="this.style.color='#0b7c4d';">
                     <i class="fas fa-list-ul"></i> সব প্রশ্নসমূহ
                 </a>
