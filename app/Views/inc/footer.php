@@ -415,31 +415,7 @@
     });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function adjustZoom() {
-        if (window.innerWidth > 992) {
-            const ratio = window.devicePixelRatio;
-            if (ratio === 1.25) {
-                document.body.style.zoom = "80%";
-            } else if (ratio === 1.5) {
-                document.body.style.zoom = "67%";
-            } else if (ratio === 1.75) {
-                document.body.style.zoom = "57%";
-            } else if (ratio === 2 && !(/Mobi|Android|iPhone/i.test(navigator.userAgent))) {
-                document.body.style.zoom = "50%";
-            } else {
-                document.body.style.zoom = "100%";
-            }
-        } else {
-            document.body.style.zoom = "100%";
-        }
-    }
-    
-    adjustZoom();
-    window.addEventListener('resize', adjustZoom);
-});
-</script>
+
 <script>
 // Highly Optimized Lightweight Animated Islamic Geometric Canvas Background
 (function() {

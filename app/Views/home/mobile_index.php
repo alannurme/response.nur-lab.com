@@ -164,20 +164,20 @@ body {
     display: inline-block;
     width: 4px;
     height: 18px;
-    background: #2563eb;
+    background: #0b7c4d;
     border-radius: 3px;
     flex-shrink: 0;
 }
 .m-see-all {
     font-size: 0.78rem;
-    color: #2563eb;
+    color: #0b7c4d;
     font-weight: 700;
     text-decoration: none;
     font-family: 'Hind Siliguri', sans-serif;
     display: flex;
     align-items: center;
     gap: 4px;
-    background: #eff6ff;
+    background: #e6f4ea;
     padding: 5px 10px;
     border-radius: 20px;
 }

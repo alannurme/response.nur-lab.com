@@ -1,11 +1,11 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
 <!-- Featured Bento Grid -->
-<section class="section-padding bento-section" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 50%, #f0f9ff 100%); border-bottom: 1px solid #bbf7d0;">
+<section class="section-padding bento-section" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 100%); border-bottom: 1px solid #bbf7d0;">
     <div class="bento-grid">
         <!-- Main Hero Slider (Left Side) -->
         <!-- Main Hero Slider (Left Side) - Separate 3D Shadow Card -->
-        <div class="bento-item main-featured bento-item-left" style="grid-column: span 3; grid-row: span 2; position: relative; overflow: hidden; border-radius: 24px; background: #ffffff; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); min-height: 550px; transition: transform 0.4s ease, box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(0, 0, 0, 0.18), 0 8px 25px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05)';">
+        <div class="bento-item main-featured bento-item-left" style="grid-column: span 3; grid-row: span 2; position: relative; overflow: hidden; border-radius: 24px; background: #ffffff; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); min-height: 520px; transition: transform 0.4s ease, box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(0, 0, 0, 0.18), 0 8px 25px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.12), 0 4px 15px rgba(0, 0, 0, 0.05)';">
             <div class="hero-slider-container" style="height: 100%; position: relative; background: #ffffff;">
                 <?php if (!empty($data['slides'])): ?>
                     <?php foreach ($data['slides'] as $index => $slide): 
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Recent Questions (Right Side) - Separate Elegant Card Design -->
-        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 550px; box-shadow: 0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.2); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(11, 124, 77, 0.2), 0 8px 30px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04)';">
+        <div class="bento-item prayer-widget bento-item-right" style="grid-column: span 1; grid-row: span 2; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 24px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 520px; box-shadow: 0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.2); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 30px 60px rgba(11, 124, 77, 0.2), 0 8px 30px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 50px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04)';">
             
             <style>
             @keyframes pulseGreen {
@@ -200,20 +200,20 @@
 
 <!-- Scopes Section -->
 <?php if (isset($data['settings']['show_scopes']) && $data['settings']['show_scopes'] == '1'): ?>
-<section class="scopes-section" style="padding: 80px 0; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe;">
-    <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
+<section class="scopes-section" style="padding: 80px 0; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="section-title" style="text-align: center; margin-bottom: 60px;">
             <h2 style="font-size: 2.8rem; font-weight: 800; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">
-                আমাদের <span style="color: #2563eb;">কার্যপরিধি</span>
+                আমাদের <span style="color: #0b7c4d;">কার্যপরিধি</span>
             </h2>
         </div>
 
         <div class="scopes-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; justify-content: center;">
             <?php if (!empty($data['scopes'])): ?>
                 <?php foreach ($data['scopes'] as $scope): ?>
-                <div class="scope-card scope-card-animate" style="background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; padding: 40px 30px; box-shadow: 0 10px 30px rgba(37,99,235,0.03); display: flex; flex-direction: column; align-items: flex-start;">
-                    <!-- Icon Box with light blue background -->
-                    <div style="width: 55px; height: 55px; border-radius: 16px; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(37,99,235,0.15);">
+                <div class="scope-card scope-card-animate" style="background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; padding: 40px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: flex-start;">
+                    <!-- Icon Box with light emerald background -->
+                    <div style="width: 55px; height: 55px; border-radius: 16px; background: #e6f4ea; color: #0b7c4d; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(11,124,77,0.12);">
                         <i class="<?= $scope['icon'] ?>"></i>
                     </div>
                     
@@ -267,17 +267,17 @@
 </style>
 
 <!-- Recent Posts Section -->
-<section class="posts-section" style="padding: 100px 0; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
-    <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
+<section class="posts-section" style="padding: 100px 0; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px;">
             <div>
                 <h2 style="font-size: 2.8rem; font-weight: 900; color: #1e293b; font-family: 'Hind Siliguri', sans-serif; position: relative; display: inline-block;">
-                    সাম্প্রতিক <span style="color: #2563eb;">লেখাসমূহ</span>
-                    <div style="position: absolute; bottom: -15px; left: 0; width: 80px; height: 6px; background: #2563eb; border-radius: 10px;"></div>
+                    সাম্প্রতিক <span style="color: #0b7c4d;">লেখাসমূহ</span>
+                    <div style="position: absolute; bottom: -15px; left: 0; width: 80px; height: 6px; background: #0b7c4d; border-radius: 10px;"></div>
                 </h2>
                 <p style="color: #64748b; margin-top: 25px; font-size: 1.1rem;">ইসলাম ও জীবনের সমসাময়িক বিষয়গুলো নিয়ে আমাদের আয়োজন</p>
             </div>
-            <a href="<?= URLROOT ?>/blog" style="color: #2563eb; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s;" onmouseover="this.style.transform='translateX(5px)'; this.style.background='#2563eb'; this.style.color='#fff';" onmouseout="this.style.transform='translateX(0)'; this.style.background='#fff'; this.style.color='#2563eb';">
+            <a href="<?= URLROOT ?>/blog" style="color: #0b7c4d; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s;" onmouseover="this.style.transform='translateX(5px)'; this.style.background='#0b7c4d'; this.style.color='#fff';" onmouseout="this.style.transform='translateX(0)'; this.style.background='#fff'; this.style.color='#0b7c4d';">
                 সবগুলো দেখুন <i class="fas fa-arrow-right"></i>
             </a>
         </div>
@@ -303,22 +303,20 @@
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; color: #64748b; font-size: 0.78rem; font-weight: 500; line-height: 1; flex-wrap: wrap; gap: 8px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; border-right: 1px solid #e2e8f0; padding-right: 8px;">
-                                    <i class="fas fa-calendar-alt" style="color: #2563eb;"></i>
+                                    <i class="fas fa-calendar-alt" style="color: #0b7c4d;"></i>
                                     <?= date('d M', strtotime($post['created_at'])) ?>
                                 </span>
                                 <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-user" style="color: #2563eb;"></i>
+                                    <i class="fas fa-user" style="color: #0b7c4d;"></i>
                                     এডমিন
                                 </span>
                             </div>
                             <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; color: #64748b;">
-                                <i class="fas fa-eye" style="color: #2563eb;"></i>
+                                <i class="fas fa-eye" style="color: #0b7c4d;"></i>
                                 <?= number_format($post['views']) ?> বার
                             </span>
                         </div>
 
-
- 
                         <h3 style="font-size: 1.05rem; margin-bottom: 12px; color: #000000; line-height: 1.4; font-family: 'Hind Siliguri', sans-serif; font-weight: 800; height: 2.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; transition: 0.3s;">
                             <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="text-decoration: none; color: inherit;"><?= $post['title'] ?></a>
                         </h3>
@@ -328,9 +326,9 @@
                         </p>
                         
                         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="premium-read-btn" style="color: #2563eb; text-decoration: none; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;">
+                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="premium-read-btn" style="color: #0b7c4d; text-decoration: none; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;">
                                 বিস্তারিত পড়ুন 
-                                <div style="width: 30px; height: 30px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+                                <div style="width: 30px; height: 30px; background: #e6f4ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
                                     <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i>
                                 </div>
                             </a>
@@ -338,6 +336,11 @@
                     </div>
                 </div>
                 <?php endforeach; ?>
+            <?php else: ?>
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px; background: #ffffff; border-radius: 20px; border: 2px dashed #e2e8f0;">
+                    <i class="fas fa-newspaper fa-3x mb-3 text-muted" style="color: #94a3b8;"></i>
+                    <p style="color: #64748b; margin: 0; font-family: 'Hind Siliguri', sans-serif; font-size: 1.1rem;">এখনো কোনো লেখা প্রকাশ করা হয়নি।</p>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -345,7 +348,7 @@
 
 <!-- YouTube Video Gallery Section -->
 <section class="yt-videos-section" style="padding: 80px 0; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-top: 1px solid #334155; border-bottom: 1px solid #334155;">
-    <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px;">
             <div>
                 <h2 style="font-size: 2.5rem; font-weight: 900; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; position: relative; display: inline-block;">
@@ -416,15 +419,15 @@
 </style>
 
 <style>
-    .section-padding { padding: 50px 0; width: 100%; }
+    .section-padding { padding: 40px 0; width: 100%; }
     .bento-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 24px;
         width: 100%;
-        max-width: 1400px;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 0 15px;
+        padding: 0 25px;
         box-sizing: border-box;
     }
     .slide-text-card {
@@ -906,22 +909,23 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php endif; ?>
 
     <!-- Team Members Section -->
-    <section class="team-section animate-team-section" style="padding: 80px 0; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-top: 1px solid #e2e8f0;">
-        <div class="container">
+    <?php if (!empty($data['team'])): ?>
+    <section class="team-section animate-team-section" style="padding: 80px 0; background: #ffffff; border-top: 1px solid #e2e8f0;">
+        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
             <div class="section-title" style="text-align: center; margin-bottom: 50px;">
-                <h2 style="font-size: 2.5rem; color: #1e293b; font-weight: 800;">আমাদের <span style="color: #2563eb;">টিম</span></h2>
-                <p style="color: #64748b; margin-top: 10px;">আমাদের পোর্টালে নিরলসভাবে কাজ করে যাওয়া দক্ষ সদস্যবৃন্দ</p>
+                <h2 style="font-size: 2.5rem; color: #1e293b; font-weight: 800; font-family: 'Hind Siliguri', sans-serif;">আমাদের <span style="color: #0b7c4d;">টিম</span></h2>
+                <p style="color: #64748b; margin-top: 10px; font-family: 'Hind Siliguri', sans-serif;">আমাদের পোর্টালে নিরলসভাবে কাজ করে যাওয়া দক্ষ সদস্যবৃন্দ</p>
             </div>
 
             <div class="team-grid">
                 <?php foreach($data['team'] as $member): ?>
                 <div class="team-card team-card-animate team-card-slide-in" style="background: #ffffff; border-radius: 24px; overflow: hidden; text-align: center; border: 1px solid #e2e8f0; padding: 35px 25px; box-shadow: 0 10px 35px rgba(0,0,0,0.03);">
-                    <div class="team-img-wrapper" style="width: 150px; height: 150px; margin: 0 auto 25px; border-radius: 50%; overflow: hidden; border: 3px solid #2563eb; box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);">
+                    <div class="team-img-wrapper" style="width: 150px; height: 150px; margin: 0 auto 25px; border-radius: 50%; overflow: hidden; border: 3px solid #0b7c4d; box-shadow: 0 0 20px rgba(11, 124, 77, 0.15);">
                         <img src="<?= resolve_blog_image($member['image']) ?>" alt="<?= $member['name'] ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     
-                    <h3 style="font-size: 1.3rem; color: #1e293b; margin: 0 0 8px 0; font-weight: 700; line-height: 1.2; letter-spacing: 0.5px;"><?= $member['name'] ?></h3>
-                    <p style="color: #2563eb; font-size: 0.95rem; font-weight: 700; margin: 0 0 5px 0; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.5px;"><?= $member['designation'] ?></p>
+                    <h3 style="font-size: 1.3rem; color: #1e293b; margin: 0 0 8px 0; font-weight: 700; line-height: 1.2; letter-spacing: 0.5px; font-family: 'Hind Siliguri', sans-serif;"><?= $member['name'] ?></h3>
+                    <p style="color: #0b7c4d; font-size: 0.95rem; font-weight: 700; margin: 0 0 5px 0; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Hind Siliguri', sans-serif;"><?= $member['designation'] ?></p>
                     
                     <div style="border-top: 1px solid #e2e8f0; width: 80%; margin: 20px auto;"></div>
                     
@@ -942,6 +946,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <style>
         .team-card-slide-in {
@@ -969,7 +974,7 @@ document.addEventListener('DOMContentLoaded', function() {
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
-            max-width: 1440px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         .team-card {
@@ -982,12 +987,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         .team-card:hover {
             transform: translateY(-8px) !important;
-            border-color: #2563eb !important;
-            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08) !important;
+            border-color: #0b7c4d !important;
+            box-shadow: 0 20px 40px rgba(11, 124, 77, 0.08) !important;
         }
         .team-card:hover .team-img-wrapper {
             transform: scale(1.05) !important;
-            box-shadow: 0 0 25px rgba(37, 99, 235, 0.35) !important;
+            box-shadow: 0 0 25px rgba(11, 124, 77, 0.35) !important;
         }
         
         @media (max-width: 1400px) {
@@ -1014,13 +1019,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Reviews Section -->
 <?php if (!empty($data['reviews'])): ?>
-<section class="reviews-section" style="padding: 80px 0; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-top: 1px solid #a7f3d0; border-bottom: 1px solid #a7f3d0; overflow: hidden; position: relative;">
-    <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%; position: relative; z-index: 2;">
+<section class="reviews-section" style="padding: 80px 0; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-top: 1px solid #a7f3d0; border-bottom: 1px solid #a7f3d0; overflow: hidden; position: relative;">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%; position: relative; z-index: 2;">
         <div class="section-title" style="text-align: center; margin-bottom: 50px;">
             <h2 style="font-size: 2.5rem; font-weight: 800; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">
-                কমিউনিটির <span style="color: #2563eb;">মতামত</span>
+                কমিউনিটির <span style="color: #0b7c4d;">মতামত</span>
             </h2>
-            <p style="color: #64748b; margin-top: 10px; font-size: 1.1rem;">আমাদের সম্পর্কে কমিউনিটির কিছু মূল্যবান মতামত</p>
+            <p style="color: #64748b; margin-top: 10px; font-size: 1.1rem; font-family: 'Hind Siliguri', sans-serif;">আমাদের সম্পর্কে কমিউনিটির কিছু মূল্যবান মতামত</p>
         </div>
     </div>
 
@@ -1029,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="reviews-track" style="display: flex; gap: 20px; width: max-content; animation: scrollReviews 45s linear infinite;">
             <!-- Render original reviews -->
             <?php foreach (array_merge($data['reviews'], $data['reviews']) as $index => $review): ?>
-            <div class="review-slide-card" style="background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 30px 25px; width: 300px; flex-shrink: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#2563eb';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0';">
+            <div class="review-slide-card" style="background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 30px 25px; width: 300px; flex-shrink: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#0b7c4d';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0';">
                 <!-- Stars -->
                 <div style="color: #fbbf24; display: flex; gap: 3px; font-size: 0.9rem;">
                     <?php for($i = 1; $i <= 5; $i++): ?>
@@ -1040,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p style="color: #1e293b; font-size: 0.95rem; line-height: 1.6; margin: 0; font-family: 'Hind Siliguri', sans-serif; height: 90px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;"><?= htmlspecialchars($review['review_text']) ?></p>
                 <!-- Profile -->
                 <div style="display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-                    <img src="<?= !empty($review['image']) ? $review['image'] : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($review['name']))) . '?d=mp&s=150' ?>" alt="<?= $review['name'] ?>" loading="lazy" decoding="async" style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 1.5px solid #2563eb;">
+                    <img src="<?= !empty($review['image']) ? $review['image'] : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($review['name']))) . '?d=mp&s=150' ?>" alt="<?= $review['name'] ?>" loading="lazy" decoding="async" style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 1.5px solid #0b7c4d;">
                     <div>
                         <h4 style="font-size: 0.95rem; color: #1e293b; font-weight: 700; margin: 0; font-family: 'Hind Siliguri', sans-serif;"><?= htmlspecialchars($review['name']) ?></h4>
                         <span style="font-size: 0.8rem; color: #64748b; font-family: 'Hind Siliguri', sans-serif;"><?= htmlspecialchars($review['designation'] ?? 'নিয়মিত পাঠক') ?></span>
@@ -1065,8 +1070,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- FAQ Section -->
 <?php if (!empty($data['faqs'])): ?>
-<section class="faq-section faqs-section" style="padding: 80px 0; background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%); border-top: 1px solid #bae6fd; border-bottom: 1px solid #bae6fd;">
-    <div class="container-fluid" style="max-width: 1000px; margin: 0 auto; padding: 0 40px;">
+<section class="faq-section faqs-section" style="padding: 80px 0; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="section-title" style="text-align: center; margin-bottom: 50px;">
             <h2 style="font-size: 2.8rem; font-weight: 900; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">
                 সাধারণ <span style="color: #2563eb;">জিজ্ঞাসা</span>
