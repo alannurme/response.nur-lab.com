@@ -1,5 +1,6 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
+<?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
 <section class="islamic-hero-section" style="position: relative; background: #e6f4ea; padding: 90px 20px 80px 20px; overflow: hidden; border-bottom: 1px solid #bbf7d0;">
     <!-- Top Decorative Curved Wave Accent -->
@@ -12,17 +13,54 @@
             <div style="text-align: left; padding: 10px 0;">
                 <!-- Site Main Title -->
                 <h1 style="font-size: 2.6rem; font-weight: 900; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 8px 0; letter-spacing: -0.5px;">
-                    <?= htmlspecialchars($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব') ?>
+                    <?= htmlspecialchars(!empty($data['settings']['hero_title']) ? $data['settings']['hero_title'] : ($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব')) ?>
                 </h1>
                 
+                <?php if (!empty($data['settings']['hero_subtitle'])): ?>
+                <!-- Tagline / Subtitle -->
+                <p style="font-size: 1.05rem; color: #475569; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 16px 0; line-height: 1.6; max-width: 620px;">
+                    <?= htmlspecialchars($data['settings']['hero_subtitle']) ?>
+                </p>
+                <?php endif; ?>
 
+                <?php if (($data['settings']['show_hero_date'] ?? '0') == '1'): ?>
+                <!-- Date & Info Pill Badge -->
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(11, 124, 77, 0.08); border: 1px solid rgba(11, 124, 77, 0.2); padding: 5px 18px; border-radius: 30px; margin-bottom: 24px;">
+                    <i class="far fa-calendar-alt" style="color: #0b7c4d; font-size: 0.9rem;"></i>
+                    <span style="font-size: 0.88rem; font-weight: 700; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif;">
+                        <?= function_exists('getBengaliDate') ? getBengaliDate() : date('l, d F Y') ?>
+                    </span>
+                </div>
+                <?php endif; ?>
 
+                <?php if (($data['settings']['show_hero_search'] ?? '0') == '1'): ?>
+                <!-- Search Bar Form -->
+                <form action="<?= URLROOT ?>/search" method="GET" style="max-width: 580px; margin: 0 0 28px 0; position: relative;">
+                    <div style="display: flex; align-items: center; background: #ffffff; border-radius: 50px; padding: 7px 10px 7px 22px; box-shadow: 0 14px 35px rgba(11, 124, 77, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04); border: 2px solid #a7f3d0; transition: all 0.3s ease;">
+                        <i class="fas fa-search" style="color: #10b981; font-size: 1.15rem; margin-right: 12px;"></i>
+                        <input type="text" name="q" placeholder="কুরআন, হাদীস বা যেকোনো বিষয় খুঁজুন..." style="border: none; outline: none; width: 100%; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; background: transparent; color: #1e293b;" required>
+                        <button type="submit" style="background: linear-gradient(135deg, #0b7c4d, #10b981); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                            <i class="fas fa-search" style="font-size: 0.95rem;"></i>
+                        </button>
+                    </div>
+                </form>
+                <?php endif; ?>
+
+                <?php if (!empty($data['settings']['hero_btn_text'])): ?>
+                <!-- Custom Action Button -->
+                <div style="margin-top: 10px;">
+                    <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : '#' ?>" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0b7c4d, #10b981); color: #ffffff; padding: 12px 28px; border-radius: 50px; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 10px 25px rgba(11, 124, 77, 0.25); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';">
+                        <i class="fas fa-paper-plane"></i>
+                        <span><?= htmlspecialchars($data['settings']['hero_btn_text']) ?></span>
+                    </a>
+                </div>
+                <?php endif; ?>
 
             </div>
 
             <!-- RIGHT COLUMN: Slim Portrait Recent Questions Widget -->
             <div style="display: flex; justify-content: center;">
-                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 22px 18px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.25); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; max-width: 350px; min-height: 480px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(11, 124, 77, 0.2)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(11, 124, 77, 0.12)';">
+                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; padding: 35px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(11, 124, 77, 0.12), 0 4px 20px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(16, 185, 129, 0.25); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; max-width: 380px; min-height: 650px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(11, 124, 77, 0.2)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(11, 124, 77, 0.12)';">
                     
                     <style>
                     @media (max-width: 991px) {
@@ -171,6 +209,7 @@
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 

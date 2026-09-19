@@ -784,9 +784,11 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/faqs" class="nav-item <?= $current_page == 'faqs' ? 'active' : '' ?>">
                     <i class="fas fa-question-circle"></i><span>FAQs</span>
                 </a>
-                <a href="<?= URLROOT ?>/admin/slides" class="nav-item <?= $current_page == 'slides' ? 'active' : '' ?>">
-                    <i class="fas fa-images"></i><span>Hero Slider</span>
+
+                <a href="<?= URLROOT ?>/admin/hero_section" class="nav-item <?= $current_page == 'hero_section' ? 'active' : '' ?>">
+                    <i class="fas fa-desktop"></i><span>Hero Section</span>
                 </a>
+
                 <a href="<?= URLROOT ?>/admin/sidebar_slides" class="nav-item <?= $current_page == 'sidebar_slides' ? 'active' : '' ?>">
                     <i class="fas fa-image"></i><span>Sidebar Slider (1:1)</span>
                 </a>

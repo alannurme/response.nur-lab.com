@@ -1569,14 +1569,32 @@ class Admin extends Controller {
         }
     }
 
-    public function slides() {
+    public function hero_section() {
         $adminModel = $this->model('AdminModel');
-        $slides = $adminModel->getSlides();
-        $this->view('admin/slides', [
-            'title' => 'Hero Slider Management',
-            'slides' => $slides,
-            'settings' => $this->siteSettings
+        $success = null;
+        $error = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['settings']) && is_array($_POST['settings'])) {
+                foreach ($_POST['settings'] as $key => $val) {
+                    $adminModel->updateSetting($key, $val);
+                }
+                $success = 'Hero Section settings updated successfully!';
+            }
+        }
+
+        $settings = $adminModel->getSettings();
+        $this->view('admin/hero_section', [
+            'settings' => $settings,
+            'success' => $success,
+            'error' => $error,
+            'current_page' => 'hero_section'
         ]);
+    }
+
+    public function slides() {
+        header('Location: ' . URLROOT . '/admin/dashboard');
+        exit;
     }
 
     public function add_slide() {

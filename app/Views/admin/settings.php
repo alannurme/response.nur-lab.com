@@ -92,6 +92,8 @@ $favicon_url = !empty($data['settings']['site_favicon']) ? resolve_setting_image
         </div>
 
 
+
+
         <!-- Contact Settings -->
         <div class="tab-content" id="contact">
             <div class="form-grid">
