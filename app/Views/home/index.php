@@ -2,19 +2,19 @@
 
 <?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 110px 20px 140px 20px; margin-top: -80px; min-height: 680px; overflow: hidden; border-bottom: 1px solid #059669; display: flex; flex-direction: column; justify-content: center;">
+<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 65px 20px 75px 20px; margin-top: -80px; overflow: hidden; border-bottom: 1px solid #059669;">
     <!-- Extra Top Padding Space for Navbar -->
-    <div style="height: 60px;"></div>
+    <div style="height: 80px;"></div>
     <!-- Modern Glow Orbs & Geometric Accents -->
     <div style="position: absolute; top: -120px; left: -100px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 1;"></div>
     <div style="position: absolute; bottom: -100px; right: 10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0) 70%); border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 1;"></div>
 
     
-    <div style="max-width: 1440px; margin: 0 auto; position: relative; z-index: 2; padding: 0 15px; box-sizing: border-box;">
-        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 370px; gap: 30px; align-items: stretch;">
+    <div style="max-width: 1440px; margin: 0 auto; position: relative; z-index: 2; padding: 0 15px; box-sizing: border-box; width: 100%;">
+        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; align-items: center;">
             
             <!-- LEFT COLUMN: Dynamic Clean Glassmorphism Area -->
-            <div style="text-align: left; padding: 20px 10px;">
+            <div style="text-align: left; padding: 25px 0;">
                 
                 <?php if (($data['settings']['show_hero_date'] ?? '0') == '1'): ?>
                 <!-- Date & Info Pill Badge -->
@@ -88,8 +88,8 @@
             </div>
 
             <!-- RIGHT COLUMN: Slim Portrait Recent Questions Widget -->
-            <div style="display: flex; justify-content: center; height: 100%;">
-                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px; padding: 30px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2); border: 1.5px solid rgba(255, 255, 255, 0.3); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; height: 100%; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.2)';">
+            <div style="display: flex; justify-content: center; width: 100%;">
+                <div class="bento-item prayer-widget" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px; padding: 32px 22px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25); border: 1.5px solid rgba(255, 255, 255, 0.4); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease; width: 100%; min-height: 560px; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 28px 55px rgba(0, 0, 0, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 20px 45px rgba(0, 0, 0, 0.25)';">
                     
                     <style>
                     @media (max-width: 991px) {
