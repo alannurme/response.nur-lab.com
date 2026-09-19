@@ -275,7 +275,7 @@
                     
                     <!-- Direct YouTube Audio Embed Player -->
                     <div style="position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; overflow: hidden; z-index: -1;">
-                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
+                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=0&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
                     </div>
                 </div>
 
@@ -287,7 +287,7 @@
                 </style>
 
                 <script>
-                var isPlaying = false;
+                var isPlaying = true;
 
                 function sendYtCommand(func, args) {
                     var iframe = document.getElementById('hero-yt-iframe');
@@ -340,12 +340,20 @@
                     }
                 }
 
-                // Modern Browsers require user interaction to allow unmuted audio.
-                // Trigger unMute on mouseover, scroll, touch, or click.
+                // Instant unMute poll loop upon page load
+                var tryInstantPlay = setInterval(function() {
+                    sendYtCommand('unMute');
+                    sendYtCommand('setVolume', [100]);
+                    sendYtCommand('playVideo');
+                }, 300);
+
+                setTimeout(function() {
+                    clearInterval(tryInstantPlay);
+                }, 3000);
+
+                // Fallback for strict browser policies
                 var autoPlayHandler = function() {
-                    if (!isPlaying) {
-                        playAudio();
-                    }
+                    playAudio();
                     ['click', 'scroll', 'touchstart', 'mousemove'].forEach(function(evt) {
                         window.removeEventListener(evt, autoPlayHandler);
                     });
