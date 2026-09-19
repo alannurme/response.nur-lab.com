@@ -2096,11 +2096,14 @@ if (!function_exists('getBengaliDate')) {
                     <li><a href="<?= URLROOT ?>">হোম</a></li>
                 <?php endif; ?>
                 
-                <!-- Search Button (Triggers Popup) -->
+                <!-- Header Direct Inline Search Bar -->
                 <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px;">
-                    <div id="search-popup-trigger" style="color: var(--primary); font-size: 1.15rem; cursor: pointer; transition: 0.3s; width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 107, 67, 0.06); display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--primary)'; this.style.color='white';" onmouseout="this.style.background='rgba(0, 107, 67, 0.06)'; this.style.color='var(--primary)';">
-                        <i class="fas fa-search"></i>
-                    </div>
+                    <form action="<?= URLROOT ?>/blog" method="GET" style="position: relative; display: flex; align-items: center;">
+                        <input type="text" name="search" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." required style="padding: 7px 35px 7px 15px; border-radius: 20px; border: 1px solid rgba(0, 107, 67, 0.2); background: rgba(0, 107, 67, 0.04); font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 200px; transition: all 0.3s;" onfocus="this.style.width='250px'; this.style.borderColor='var(--primary)'; this.style.background='#ffffff';" onblur="this.style.width='200px'; this.style.borderColor='rgba(0, 107, 67, 0.2)'; this.style.background='rgba(0, 107, 67, 0.04)';">
+                        <button type="submit" style="position: absolute; right: 8px; background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.9rem; padding: 4px;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </li>
 
             </ul>
