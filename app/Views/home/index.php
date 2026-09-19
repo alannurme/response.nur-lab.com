@@ -274,8 +274,8 @@
                     </button>
                     
                     <!-- Direct YouTube Audio Embed Player -->
-                    <div style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; overflow: hidden;">
-                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=0&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
+                    <div style="position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; overflow: hidden; z-index: -1;">
+                        <iframe id="hero-yt-iframe" src="https://www.youtube.com/embed/<?= $videoId ?>?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=<?= $videoId ?>" allow="autoplay; encrypted-media"></iframe>
                     </div>
                 </div>
 
@@ -289,41 +289,71 @@
                 <script>
                 var isPlaying = false;
 
-                function toggleHeroAudio() {
+                function sendYtCommand(func, args) {
                     var iframe = document.getElementById('hero-yt-iframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            'event': 'command',
+                            'func': func,
+                            'args': args || []
+                        }), '*');
+                    }
+                }
+
+                function playAudio() {
+                    sendYtCommand('unMute');
+                    sendYtCommand('setVolume', [100]);
+                    sendYtCommand('playVideo');
+                    
                     var icon = document.getElementById('hero-audio-icon');
                     var text = document.getElementById('hero-audio-text');
                     var wave = document.getElementById('hero-audio-wave');
                     var subtext = document.getElementById('hero-audio-subtext');
 
-                    if (!iframe) return;
+                    if (icon) icon.className = 'fas fa-pause';
+                    if (text) text.innerText = 'অডিও চলছে';
+                    if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন';
+                    if (wave) wave.style.opacity = '1';
+                    isPlaying = true;
+                }
 
+                function pauseAudio() {
+                    sendYtCommand('pauseVideo');
+                    
+                    var icon = document.getElementById('hero-audio-icon');
+                    var text = document.getElementById('hero-audio-text');
+                    var wave = document.getElementById('hero-audio-wave');
+                    var subtext = document.getElementById('hero-audio-subtext');
+
+                    if (icon) icon.className = 'fas fa-play';
+                    if (text) text.innerText = 'প্লে করুন';
+                    if (subtext) subtext.innerText = 'ক্লিক করে অডিও শুনুন';
+                    if (wave) wave.style.opacity = '0.4';
+                    isPlaying = false;
+                }
+
+                function toggleHeroAudio() {
                     if (isPlaying) {
-                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                        icon.className = 'fas fa-play';
-                        text.innerText = 'প্লে করুন';
-                        if (subtext) subtext.innerText = 'ক্লিক করে অডিও শুনুন';
-                        wave.style.opacity = '0.4';
-                        isPlaying = false;
+                        pauseAudio();
                     } else {
-                        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                        iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
-                        icon.className = 'fas fa-pause';
-                        text.innerText = 'অডিও চলছে';
-                        if (subtext) subtext.innerText = 'ব্যাকগ্রাউন্ডে তিলাওয়াত উপভোগ করুন';
-                        wave.style.opacity = '1';
-                        isPlaying = true;
+                        playAudio();
                     }
                 }
 
-                // Autoplay trigger on first document interaction
-                window.addEventListener('click', function autoPlayOnce() {
+                // Modern Browsers require user interaction to allow unmuted audio.
+                // Trigger unMute on mouseover, scroll, touch, or click.
+                var autoPlayHandler = function() {
                     if (!isPlaying) {
-                        toggleHeroAudio();
+                        playAudio();
                     }
-                    window.removeEventListener('click', autoPlayOnce);
-                }, { once: true });
+                    ['click', 'scroll', 'touchstart', 'mousemove'].forEach(function(evt) {
+                        window.removeEventListener(evt, autoPlayHandler);
+                    });
+                };
+
+                ['click', 'scroll', 'touchstart', 'mousemove'].forEach(function(evt) {
+                    window.addEventListener(evt, autoPlayHandler, { passive: true });
+                });
                 </script>
                 <?php endif; endif; ?>
 
