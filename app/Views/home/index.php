@@ -238,6 +238,22 @@
                                     <div class="question-dot-premium <?= $chunkIndex === 0 ? 'active' : '' ?>" onclick="goToQuestionSlide(<?= $chunkIndex ?>)"></div>
                                 <?php endforeach; ?>
                             </div>
+                        <?php endif; ?>
+                    </div>
+         
+                    <!-- Ask & View Buttons at the bottom side-by-side -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0; position: relative; z-index: 2; width: 100%; gap: 10px;">
+                        <a href="<?= URLROOT ?>/q&amp;a" style="flex: 1; text-align: center; text-decoration: none; color: #0b7c4d; background: #e6f4ea; border: 1px solid rgba(11, 124, 77, 0.2); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#0b7c4d'; this.style.color='#ffffff';" onmouseout="this.style.background='#e6f4ea'; this.style.color='#0b7c4d';">
+                            <i class="fas fa-list-ul"></i> সব প্রশ্ন
+                        </a>
+                        <a href="<?= URLROOT ?>/ask" style="flex: 1; text-align: center; text-decoration: none; color: #ffffff; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); padding: 9px 12px; border-radius: 12px; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.25); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(11, 124, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(11, 124, 77, 0.25)';">
+                            <i class="fas fa-plus-circle"></i> প্রশ্ন করুন
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 
