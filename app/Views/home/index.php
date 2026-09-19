@@ -39,56 +39,6 @@
                     </div>
                 </form>
 
-                <!-- Dynamic Real Categories Grid from Project Database -->
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; max-width: 640px;">
-                    <?php 
-                    $db = \Config\Database::pdoConnect();
-                    $top_cats_stmt = $db->query("SELECT id, name, slug FROM categories WHERE parent_id IS NULL OR parent_id = 0 OR id IN (14, 15, 16) ORDER BY FIELD(id, 14, 15, 16, 44, 52, 48, 54, 47), order_index ASC LIMIT 6");
-                    $top_cats = $top_cats_stmt ? $top_cats_stmt->fetchAll() : [];
-                    
-                    if (!empty($top_cats)): 
-                        $color_palettes = [
-                            ['bg' => '#f0fdf4', 'text' => '#0b7c4d', 'default_icon' => 'fas fa-book-quran'],
-                            ['bg' => '#ecfdf5', 'text' => '#059669', 'default_icon' => 'fas fa-book-open-reader'],
-                            ['bg' => '#fef3c7', 'text' => '#d97706', 'default_icon' => 'fas fa-star-and-crescent'],
-                            ['bg' => '#e0f2fe', 'text' => '#0284c7', 'default_icon' => 'fas fa-atom'],
-                            ['bg' => '#fce7f3', 'text' => '#db2777', 'default_icon' => 'fas fa-flask'],
-                            ['bg' => '#ffedd5', 'text' => '#ea580c', 'default_icon' => 'fas fa-landmark']
-                        ];
-                        foreach ($top_cats as $idx => $cat):
-                            $c_style = $color_palettes[$idx % count($color_palettes)];
-                            $cat_url = URLROOT . '/category/' . ($cat['slug'] ?? $cat['id']);
-                            
-                            // Determine appropriate icon based on category name
-                            $cat_name = $cat['name'];
-                            $cat_slug = $cat['slug'];
-                            if (mb_strpos($cat_name, 'কুরআন') !== false || mb_strpos($cat_slug, 'কুরআন') !== false) {
-                                $cat_icon = 'fas fa-book-quran';
-                            } elseif (mb_strpos($cat_name, 'হাদিস') !== false || mb_strpos($cat_slug, 'হাদিস') !== false) {
-                                $cat_icon = 'fas fa-book-open-reader';
-                            } elseif (mb_strpos($cat_name, 'রাসুল') !== false || mb_strpos($cat_slug, 'রাসুল') !== false) {
-                                $cat_icon = 'fas fa-star-and-crescent';
-                            } elseif (mb_strpos($cat_name, 'স্রষ্টা') !== false || mb_strpos($cat_slug, 'স্রষ্টা') !== false) {
-                                $cat_icon = 'fas fa-atom';
-                            } elseif (mb_strpos($cat_name, 'বিজ্ঞান') !== false || mb_strpos($cat_slug, 'বিজ্ঞান') !== false) {
-                                $cat_icon = 'fas fa-flask';
-                            } elseif (mb_strpos($cat_name, 'ইতিহাস') !== false || mb_strpos($cat_slug, 'ইতিহাস') !== false) {
-                                $cat_icon = 'fas fa-landmark';
-                            } else {
-                                $cat_icon = $c_style['default_icon'];
-                            }
-                    ?>
-                        <a href="<?= $cat_url ?>" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 14px; min-width: 90px; max-width: 130px; text-decoration: none; color: #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease; text-align: center;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 8px 25px rgba(11, 124, 77, 0.15)';" onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
-                            <div style="width: 42px; height: 42px; border-radius: 12px; background: <?= $c_style['bg'] ?>; color: <?= $c_style['text'] ?>; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 6px;">
-                                <i class="<?= htmlspecialchars($cat_icon) ?>"></i>
-                            </div>
-                            <span style="font-size: 0.82rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;"><?= htmlspecialchars($cat_name) ?></span>
-                        </a>
-                    <?php 
-                        endforeach;
-                    endif; 
-                    ?>
-                </div>
             </div>
 
             <!-- RIGHT COLUMN: Slim Portrait Recent Questions Widget -->
