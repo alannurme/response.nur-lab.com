@@ -3502,11 +3502,12 @@ class Admin extends Controller {
      * MODULES (মডিউল) MANAGEMENT
      * ------------------------------------------------------------------------- */
     public function modules() {
+        $modules = $this->adminModel->getModules();
         $data = [
             'title' => 'Modules (মডিউল)',
             'settings' => $this->siteSettings,
             'current_page' => 'modules',
-            'modules' => $this->adminModel->getModules()
+            'modules' => $modules
         ];
         $this->view('admin/modules', $data);
     }

@@ -2316,6 +2316,7 @@ class AdminModel extends Model {
         $this->db->query("CREATE TABLE IF NOT EXISTS modules (
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NULL,
             icon VARCHAR(100) DEFAULT 'fa-solid fa-cube',
             url VARCHAR(255) DEFAULT '#',
             content LONGTEXT NULL,
@@ -2323,52 +2324,38 @@ class AdminModel extends Model {
             status VARCHAR(50) DEFAULT 'active',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        try {
+            $this->db->query("SELECT slug FROM modules LIMIT 1");
+        } catch (\PDOException $e) {
+            try {
+                $this->db->query("ALTER TABLE modules ADD COLUMN slug VARCHAR(255) NULL DEFAULT NULL");
+            } catch (\PDOException $ex) {}
+        }
     }
 
     public function getModules() {
-        $this->initModulesTable();
-        $stmt = $this->db->query("SELECT * FROM modules ORDER BY order_index ASC, id ASC");
-        return $stmt->fetchAll();
+        $moduleModel = new \App\Models\ModuleModel();
+        return $moduleModel->getAllModules();
     }
 
     public function getModuleById($id) {
-        $this->initModulesTable();
-        $stmt = $this->db->prepare("SELECT * FROM modules WHERE id = :id LIMIT 1");
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch();
+        $moduleModel = new \App\Models\ModuleModel();
+        return $moduleModel->getModuleById($id);
     }
 
     public function addModule($data) {
-        $this->initModulesTable();
-        $stmt = $this->db->prepare("INSERT INTO modules (title, icon, url, content, order_index, status) VALUES (:title, :icon, :url, :content, :order_index, :status)");
-        return $stmt->execute([
-            'title' => $data['title'],
-            'icon' => !empty($data['icon']) ? $data['icon'] : 'fa-solid fa-cube',
-            'url' => !empty($data['url']) ? $data['url'] : '#',
-            'content' => $data['content'] ?? '',
-            'order_index' => isset($data['order_index']) ? intval($data['order_index']) : 0,
-            'status' => $data['status'] ?? 'active'
-        ]);
+        $moduleModel = new \App\Models\ModuleModel();
+        return $moduleModel->addModule($data);
     }
 
     public function updateModule($id, $data) {
-        $this->initModulesTable();
-        $data['id'] = $id;
-        $stmt = $this->db->prepare("UPDATE modules SET title = :title, icon = :icon, url = :url, content = :content, order_index = :order_index, status = :status WHERE id = :id");
-        return $stmt->execute([
-            'id' => $id,
-            'title' => $data['title'],
-            'icon' => !empty($data['icon']) ? $data['icon'] : 'fa-solid fa-cube',
-            'url' => !empty($data['url']) ? $data['url'] : '#',
-            'content' => $data['content'] ?? '',
-            'order_index' => isset($data['order_index']) ? intval($data['order_index']) : 0,
-            'status' => $data['status'] ?? 'active'
-        ]);
+        $moduleModel = new \App\Models\ModuleModel();
+        return $moduleModel->updateModule($id, $data);
     }
 
     public function deleteModule($id) {
-        $this->initModulesTable();
-        $stmt = $this->db->prepare("DELETE FROM modules WHERE id = :id");
-        return $stmt->execute(['id' => $id]);
+        $moduleModel = new \App\Models\ModuleModel();
+        return $moduleModel->deleteModule($id);
     }
 }

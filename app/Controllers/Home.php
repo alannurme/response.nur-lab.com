@@ -1245,8 +1245,9 @@ class Home extends Controller {
             return $this->blog($slug);
         }
 
-        // 3. Fallback to 404
+        // 4. Fallback to 404
         throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Page or Post not found: " . $slug);
     }
 }
+
 

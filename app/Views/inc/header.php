@@ -1007,6 +1007,8 @@ if (!function_exists('getBengaliDate')) {
         .megamenu-content {
             flex: 1;
             padding-left: 30px;
+            max-height: 480px;
+            overflow-y: auto;
         }
 
         .mega-tab-pane {
@@ -2101,100 +2103,6 @@ if (!function_exists('getBengaliDate')) {
                     </div>
                 </li>
 
-                <?php
-                // Ensure modules table exists and fetch active modules for front-end Mega Menu
-                try {
-                    $db->exec("CREATE TABLE IF NOT EXISTS modules (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        title VARCHAR(255) NOT NULL,
-                        icon VARCHAR(100) DEFAULT 'fa-solid fa-cube',
-                        url VARCHAR(255) DEFAULT '#',
-                        content TEXT,
-                        order_index INT DEFAULT 0,
-                        status ENUM('active', 'inactive') DEFAULT 'active',
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                    
-                    $modules_stmt = $db->query("SELECT * FROM modules WHERE status = 'active' ORDER BY order_index ASC, id ASC");
-                    $frontend_modules = $modules_stmt ? $modules_stmt->fetchAll() : [];
-                } catch (\PDOException $e) {
-                    $frontend_modules = [];
-                }
-                ?>
-
-                <!-- Module (মডিউল) Mega Menu Button after Search Bar -->
-                <li class="nav-item-megamenu" style="list-style: none; margin-left: 10px;">
-                    <a href="#" class="megamenu-trigger" style="background: var(--primary); color: white; padding: 8px 18px; border-radius: 50px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25); transition: 0.3s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-                        <i class="fas fa-boxes-stacked" style="font-size: 0.95rem;"></i>
-                        <span>মডিউল</span>
-                        <i class="fas fa-chevron-down" style="font-size: 11px;"></i>
-                    </a>
-
-                    <div class="megamenu-dropdown">
-                        <div class="megamenu-inner">
-                            <?php if (!empty($frontend_modules)): ?>
-                                <!-- Left Sidebar Tabs -->
-                                <div class="megamenu-sidebar-wrapper">
-                                    <div class="megamenu-sidebar">
-                                        <?php 
-                                        $mod_first = true;
-                                        foreach ($frontend_modules as $mod): 
-                                            $mod_tab_slug = 'mod-tab-' . $mod['id'];
-                                        ?>
-                                            <div class="mega-tab-btn <?= $mod_first ? 'active' : '' ?>" data-tab="<?= $mod_tab_slug ?>" data-link="<?= (strpos($mod['url'], 'http') === 0) ? $mod['url'] : (trim($mod['url']) === '#' ? '#' : URLROOT . $mod['url']) ?>">
-                                                <i class="<?= htmlspecialchars($mod['icon'] ?: 'fas fa-cube') ?>"></i>
-                                                <span><?= htmlspecialchars($mod['title']) ?></span>
-                                            </div>
-                                        <?php 
-                                            $mod_first = false;
-                                        endforeach; 
-                                        ?>
-                                    </div>
-                                    <div class="megamenu-scroll-indicator"><i class="fas fa-chevron-down"></i> আরও দেখুন</div>
-                                </div>
-
-                                <!-- Right Content Section -->
-                                <div class="megamenu-content">
-                                    <?php 
-                                    $mod_first = true;
-                                    foreach ($frontend_modules as $mod): 
-                                        $mod_tab_slug = 'mod-tab-' . $mod['id'];
-                                    ?>
-                                        <div class="mega-tab-pane <?= $mod_first ? 'active' : '' ?>" id="pane-<?= $mod_tab_slug ?>">
-                                            <h3 class="pane-title">
-                                                <i class="<?= htmlspecialchars($mod['icon'] ?: 'fas fa-cube') ?>"></i> 
-                                                <?= htmlspecialchars($mod['title']) ?>
-                                            </h3>
-                                            <div style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.7; font-family: 'Hind Siliguri', sans-serif;">
-                                                <?php if (!empty($mod['content'])): ?>
-                                                    <?= $mod['content'] ?>
-                                                <?php else: ?>
-                                                    <p style="color: #94a3b8; font-style: italic;">এই মডিউলে কোন বিস্তারিত তথ্য যোগ করা হয়নি।</p>
-                                                <?php endif; ?>
-                                            </div>
-                                            <?php if (!empty($mod['url']) && $mod['url'] !== '#'): ?>
-                                                <div style="margin-top: 20px;">
-                                                    <a href="<?= (strpos($mod['url'], 'http') === 0) ? $mod['url'] : URLROOT . $mod['url'] ?>" style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
-                                                        <span>বিস্তারিত ভিজিট করুন</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </a>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php 
-                                        $mod_first = false;
-                                    endforeach; 
-                                    ?>
-                                </div>
-                            <?php else: ?>
-                                <div style="padding: 40px; text-align: center; color: #94a3b8; width: 100%;">
-                                    <i class="fas fa-boxes-stacked" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5;"></i>
-                                    <p style="font-size: 1rem; font-family: 'Hind Siliguri', sans-serif;">কোন মডিউল যুক্ত করা হয়নি। অ্যাডমিন প্যানেল থেকে "মডিউল" যুক্ত করুন।</p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </li>
             </ul>
 
 
