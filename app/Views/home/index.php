@@ -425,7 +425,7 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 24px;
         width: 100%;
-        max-width: 100%;
+        max-width: 1280px;
         margin: 0 auto;
         padding: 0 25px;
         box-sizing: border-box;
