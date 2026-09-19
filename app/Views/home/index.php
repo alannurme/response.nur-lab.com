@@ -2,9 +2,9 @@
 
 <?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 60px 20px 90px 20px; margin-top: -80px; overflow: hidden; border-bottom: 1px solid #059669;">
+<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 110px 20px 140px 20px; margin-top: -80px; min-height: 680px; overflow: hidden; border-bottom: 1px solid #059669; display: flex; flex-direction: column; justify-content: center;">
     <!-- Extra Top Padding Space for Navbar -->
-    <div style="height: 80px;"></div>
+    <div style="height: 60px;"></div>
     <!-- Modern Glow Orbs & Geometric Accents -->
     <div style="position: absolute; top: -120px; left: -100px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 1;"></div>
     <div style="position: absolute; bottom: -100px; right: 10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0) 70%); border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 1;"></div>
@@ -13,8 +13,8 @@
     <div style="max-width: 1440px; margin: 0 auto; position: relative; z-index: 2; padding: 0 15px; box-sizing: border-box;">
         <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 370px; gap: 30px; align-items: stretch;">
             
-            <!-- LEFT COLUMN: Dynamic Glassmorphism Card -->
-            <div style="text-align: left; padding: 40px 35px; background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+            <!-- LEFT COLUMN: Dynamic Clean Glassmorphism Area -->
+            <div style="text-align: left; padding: 20px 10px;">
                 
                 <?php if (($data['settings']['show_hero_date'] ?? '0') == '1'): ?>
                 <!-- Date & Info Pill Badge -->
@@ -62,7 +62,7 @@
                 <?php endif; ?>
 
                 <!-- Feature Badges / Highlights Row -->
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; padding-top: 10px;">
                     <?php if (!empty($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক')): ?>
                     <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-book-quran" style="color: #6ee7b7;"></i>
