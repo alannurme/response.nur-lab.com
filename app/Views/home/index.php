@@ -1,7 +1,7 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
 <!-- Featured Bento Grid -->
-<section class="section-padding bento-section">
+<section class="section-padding bento-section" style="background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 50%, #f0f9ff 100%); border-bottom: 1px solid #bbf7d0;">
     <div class="bento-grid">
         <!-- Main Hero Slider (Left Side) -->
         <!-- Main Hero Slider (Left Side) - Separate 3D Shadow Card -->
@@ -176,7 +176,7 @@
 
 <!-- Scopes Section -->
 <?php if (isset($data['settings']['show_scopes']) && $data['settings']['show_scopes'] == '1'): ?>
-<section class="scopes-section" style="padding: 80px 0; background: #f0f9ff; border-top: 1px solid #e0f2fe; border-bottom: 1px solid #e0f2fe;">
+<section class="scopes-section" style="padding: 80px 0; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe;">
     <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
         <div class="section-title" style="text-align: center; margin-bottom: 60px;">
             <h2 style="font-size: 2.8rem; font-weight: 800; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">
@@ -243,7 +243,7 @@
 </style>
 
 <!-- Recent Posts Section -->
-<section class="posts-section" style="padding: 100px 0; background: #f8fafc;">
+<section class="posts-section" style="padding: 100px 0; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
     <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
         <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px;">
             <div>
@@ -253,7 +253,7 @@
                 </h2>
                 <p style="color: #64748b; margin-top: 25px; font-size: 1.1rem;">ইসলাম ও জীবনের সমসাময়িক বিষয়গুলো নিয়ে আমাদের আয়োজন</p>
             </div>
-            <a href="<?= URLROOT ?>/blog" style="color: #2563eb; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s;" onmouseover="this.style.transform='translateX(5px)'; this.style.background='#2563eb'; this.style.color='#fff';" onmouseout="this.style.transform='translateX(0)'; this.style.background='#fff'; this.style.color='#2563eb';">
+            <a href="<?= URLROOT ?>/blog" style="color: #2563eb; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s;" onmouseover="this.style.transform='translateX(5px)'; this.style.background='#2563eb'; this.style.color='#fff';" onmouseout="this.style.transform='translateX(0)'; this.style.background='#fff'; this.style.color='#2563eb';">
                 সবগুলো দেখুন <i class="fas fa-arrow-right"></i>
             </a>
         </div>
@@ -320,21 +320,21 @@
 </section>
 
 <!-- YouTube Video Gallery Section -->
-<section class="yt-videos-section" style="padding: 80px 0; background: #fff;">
+<section class="yt-videos-section" style="padding: 80px 0; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-top: 1px solid #334155; border-bottom: 1px solid #334155;">
     <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%;">
         <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px;">
             <div>
-                <h2 style="font-size: 2.5rem; font-weight: 900; color: #1e293b; font-family: 'Hind Siliguri', sans-serif; position: relative; display: inline-block;">
-                    ইউটিউব <span style="color: #ff0000;">ভিডিওসমূহ</span>
-                    <div style="position: absolute; bottom: -10px; left: 0; width: 60px; height: 5px; background: #ff0000; border-radius: 10px;"></div>
+                <h2 style="font-size: 2.5rem; font-weight: 900; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; position: relative; display: inline-block;">
+                    ইউটিউব <span style="color: #ff4d4d;">ভিডিওসমূহ</span>
+                    <div style="position: absolute; bottom: -10px; left: 0; width: 60px; height: 5px; background: #ff4d4d; border-radius: 10px;"></div>
                 </h2>
-                <p style="color: #64748b; margin-top: 20px; font-size: 1.1rem;">আমাদের অফিশিয়াল ইউটিউব চ্যানেলের সর্বশেষ ভিডিওগুলো এখানে দেখুন</p>
+                <p style="color: #94a3b8; margin-top: 20px; font-size: 1.1rem;">আমাদের অফিশিয়াল ইউটিউব চ্যানেলের সর্বশেষ ভিডিওগুলো এখানে দেখুন</p>
             </div>
             <div style="display: flex; gap: 15px;">
-                <a href="<?= URLROOT ?>/videos" style="color: #1e293b; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; border: 2px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.3s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#fff';">
+                <a href="<?= URLROOT ?>/videos" style="color: #ffffff; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: rgba(255,255,255,0.08); border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.08)';">
                     সবগুলো ভিডিও <i class="fas fa-play-circle"></i>
                 </a>
-                <a href="<?= !empty($data['settings']['youtube_channel_url']) ? $data['settings']['youtube_channel_url'] : 'https://www.youtube.com' ?>" target="_blank" style="color: #ff0000; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; border: 2px solid #fff5f5; box-shadow: 0 4px 15px rgba(255,0,0,0.05); transition: 0.3s;" onmouseover="this.style.background='#ff0000'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#ff0000';">
+                <a href="<?= !empty($data['settings']['youtube_channel_url']) ? $data['settings']['youtube_channel_url'] : 'https://www.youtube.com' ?>" target="_blank" style="color: #ffffff; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #ff0000; border-radius: 12px; border: 1px solid #ff0000; box-shadow: 0 4px 15px rgba(255,0,0,0.3); transition: 0.3s;" onmouseover="this.style.background='#cc0000'; this.style.borderColor='#cc0000';" onmouseout="this.style.background='#ff0000'; this.style.borderColor='#ff0000';">
                     ইউটিউবে দেখুন <i class="fab fa-youtube"></i>
                 </a>
             </div>
@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php endif; ?>
 
     <!-- Team Members Section -->
-    <section class="team-section animate-team-section" style="padding: 80px 0; background: #f8fafc; margin-top: 50px;">
+    <section class="team-section animate-team-section" style="padding: 80px 0; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-top: 1px solid #e2e8f0;">
         <div class="container">
             <div class="section-title" style="text-align: center; margin-bottom: 50px;">
                 <h2 style="font-size: 2.5rem; color: #1e293b; font-weight: 800;">আমাদের <span style="color: #2563eb;">টিম</span></h2>
@@ -990,7 +990,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Reviews Section -->
 <?php if (!empty($data['reviews'])): ?>
-<section class="reviews-section" style="padding: 80px 0; background: #f8fafc; border-top: 1px solid #e2e8f0; overflow: hidden; position: relative;">
+<section class="reviews-section" style="padding: 80px 0; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-top: 1px solid #a7f3d0; border-bottom: 1px solid #a7f3d0; overflow: hidden; position: relative;">
     <div class="container-fluid" style="max-width: 1440px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; width: 100%; position: relative; z-index: 2;">
         <div class="section-title" style="text-align: center; margin-bottom: 50px;">
             <h2 style="font-size: 2.5rem; font-weight: 800; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">
@@ -1041,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- FAQ Section -->
 <?php if (!empty($data['faqs'])): ?>
-<section class="faq-section faqs-section" style="padding: 80px 0; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+<section class="faq-section faqs-section" style="padding: 80px 0; background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%); border-top: 1px solid #bae6fd; border-bottom: 1px solid #bae6fd;">
     <div class="container-fluid" style="max-width: 1000px; margin: 0 auto; padding: 0 40px;">
         <div class="section-title" style="text-align: center; margin-bottom: 50px;">
             <h2 style="font-size: 2.8rem; font-weight: 900; color: #1e293b; font-family: 'Hind Siliguri', sans-serif;">

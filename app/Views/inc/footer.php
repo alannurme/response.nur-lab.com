@@ -509,13 +509,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         ctx.globalAlpha = 1.0;
 
-        // Optimized Grid Patterns for viewport
-        rotationAngle += 0.0008;
-        const spacing = 160;
+        // Optimized Grid Patterns for viewport (Small & Elegant Stars)
+        rotationAngle += 0.0004;
+        const spacing = 110;
         const cols = Math.ceil(width / spacing) + 1;
         const rows = Math.ceil(height / spacing) + 1;
 
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 0.8;
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const cx = c * spacing + (r % 2 === 0 ? 0 : spacing / 2);
@@ -525,14 +525,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 ctx.translate(cx, cy);
                 ctx.rotate((r + c) % 2 === 0 ? rotationAngle : -rotationAngle);
 
-                // Emerald Star Line Pattern with high contrast
-                ctx.strokeStyle = 'rgba(5, 150, 105, 0.45)';
-                drawEightPointStar(0, 0, 8, 42, 21);
+                // Small Subtle Emerald Star Pattern
+                ctx.strokeStyle = 'rgba(5, 150, 105, 0.12)';
+                drawEightPointStar(0, 0, 8, 16, 8);
                 ctx.stroke();
 
-                // Inner White Geometric Line Accent
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                drawEightPointStar(0, 0, 8, 24, 12);
+                // Small Delicate Inner Star Accent
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                drawEightPointStar(0, 0, 8, 8, 4);
                 ctx.stroke();
 
                 ctx.restore();
