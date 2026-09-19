@@ -2,45 +2,48 @@
 
 <?php if (($data['settings']['show_hero_section'] ?? '1') == '1'): ?>
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: #e6f4ea; padding: 90px 20px 80px 20px; overflow: hidden; border-bottom: 1px solid #bbf7d0;">
-    <!-- Top Decorative Curved Wave Accent -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; height: 85px; background: #0b7c4d; clip-path: ellipse(80% 100% at 50% 0%); z-index: 1;"></div>
+<section class="islamic-hero-section" style="position: relative; background: linear-gradient(135deg, #064e3b 0%, #0b7c4d 50%, #047857 100%); padding: 100px 20px 90px 20px; overflow: hidden; border-bottom: 1px solid #059669;">
+    <!-- Modern Glow Orbs & Geometric Accents -->
+    <div style="position: absolute; top: -120px; left: -100px; width: 380px; height: 380px; background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0) 70%); border-radius: 50%; filter: blur(40px); pointer-events: none; z-index: 1;"></div>
+    <div style="position: absolute; bottom: -100px; right: 10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0) 70%); border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 1;"></div>
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml;utf8,<svg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\"><g fill=\"%23ffffff\" fill-opacity=\"0.03\"><path d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/></g></g></svg>') repeat; pointer-events: none; opacity: 0.8; z-index: 1;"></div>
     
-    <div style="max-width: 1320px; margin: 0 auto; position: relative; z-index: 2; padding-top: 15px;">
-        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px; align-items: center;">
+    <div style="max-width: 1320px; margin: 0 auto; position: relative; z-index: 2;">
+        <div class="hero-split-grid" style="display: grid; grid-template-columns: 1fr 370px; gap: 40px; align-items: center;">
             
-            <!-- LEFT COLUMN: Search & Quick Links -->
-            <div style="text-align: left; padding: 10px 0;">
-                <!-- Site Main Title -->
-                <h1 style="font-size: 2.6rem; font-weight: 900; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 8px 0; letter-spacing: -0.5px;">
-                    <?= htmlspecialchars(!empty($data['settings']['hero_title']) ? $data['settings']['hero_title'] : ($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব')) ?>
-                </h1>
+            <!-- LEFT COLUMN: Dynamic Glassmorphism Card -->
+            <div style="text-align: left; padding: 40px 35px; background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
                 
-                <?php if (!empty($data['settings']['hero_subtitle'])): ?>
-                <!-- Tagline / Subtitle -->
-                <p style="font-size: 1.05rem; color: #475569; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 16px 0; line-height: 1.6; max-width: 620px;">
-                    <?= htmlspecialchars($data['settings']['hero_subtitle']) ?>
-                </p>
-                <?php endif; ?>
-
                 <?php if (($data['settings']['show_hero_date'] ?? '0') == '1'): ?>
                 <!-- Date & Info Pill Badge -->
-                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(11, 124, 77, 0.08); border: 1px solid rgba(11, 124, 77, 0.2); padding: 5px 18px; border-radius: 30px; margin-bottom: 24px;">
-                    <i class="far fa-calendar-alt" style="color: #0b7c4d; font-size: 0.9rem;"></i>
-                    <span style="font-size: 0.88rem; font-weight: 700; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif;">
+                <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); padding: 7px 20px; border-radius: 30px; margin-bottom: 22px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <i class="far fa-calendar-alt" style="color: #6ee7b7; font-size: 0.95rem;"></i>
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; letter-spacing: 0.2px;">
                         <?= function_exists('getBengaliDate') ? getBengaliDate() : date('l, d F Y') ?>
                     </span>
                 </div>
                 <?php endif; ?>
 
+                <!-- Site Main Title -->
+                <h1 style="font-size: 2.8rem; font-weight: 900; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 12px 0; letter-spacing: -0.5px; line-height: 1.25; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);">
+                    <?= htmlspecialchars(!empty($data['settings']['hero_title']) ? $data['settings']['hero_title'] : ($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব')) ?>
+                </h1>
+                
+                <?php if (!empty($data['settings']['hero_subtitle'])): ?>
+                <!-- Tagline / Subtitle -->
+                <p style="font-size: 1.1rem; color: #d1fae5; font-weight: 500; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 24px 0; line-height: 1.7; max-width: 650px;">
+                    <?= htmlspecialchars($data['settings']['hero_subtitle']) ?>
+                </p>
+                <?php endif; ?>
+
                 <?php if (($data['settings']['show_hero_search'] ?? '0') == '1'): ?>
                 <!-- Search Bar Form -->
-                <form action="<?= URLROOT ?>/search" method="GET" style="max-width: 580px; margin: 0 0 28px 0; position: relative;">
-                    <div style="display: flex; align-items: center; background: #ffffff; border-radius: 50px; padding: 7px 10px 7px 22px; box-shadow: 0 14px 35px rgba(11, 124, 77, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04); border: 2px solid #a7f3d0; transition: all 0.3s ease;">
-                        <i class="fas fa-search" style="color: #10b981; font-size: 1.15rem; margin-right: 12px;"></i>
-                        <input type="text" name="q" placeholder="কুরআন, হাদীস বা যেকোনো বিষয় খুঁজুন..." style="border: none; outline: none; width: 100%; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; background: transparent; color: #1e293b;" required>
-                        <button type="submit" style="background: linear-gradient(135deg, #0b7c4d, #10b981); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
-                            <i class="fas fa-search" style="font-size: 0.95rem;"></i>
+                <form action="<?= URLROOT ?>/search" method="GET" style="max-width: 580px; margin: 0 0 24px 0; position: relative;">
+                    <div style="display: flex; align-items: center; background: rgba(255, 255, 255, 0.95); border-radius: 50px; padding: 7px 10px 7px 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.8); transition: all 0.3s ease;">
+                        <i class="fas fa-search" style="color: #059669; font-size: 1.2rem; margin-right: 14px;"></i>
+                        <input type="text" name="q" placeholder="কুরআন, হাদীস বা যেকোনো বিষয় খুঁজুন..." style="border: none; outline: none; width: 100%; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; background: transparent; color: #0f172a;" required>
+                        <button type="submit" style="background: linear-gradient(135deg, #059669, #10b981); border: none; width: 46px; height: 46px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                            <i class="fas fa-search" style="font-size: 1rem;"></i>
                         </button>
                     </div>
                 </form>
@@ -49,8 +52,8 @@
                 <?php if (!empty($data['settings']['hero_btn_text'])): ?>
                 <!-- Custom Action Button -->
                 <div style="margin-top: 10px;">
-                    <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : '#' ?>" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0b7c4d, #10b981); color: #ffffff; padding: 12px 28px; border-radius: 50px; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 10px 25px rgba(11, 124, 77, 0.25); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';">
-                        <i class="fas fa-paper-plane"></i>
+                    <a href="<?= !empty($data['settings']['hero_btn_link']) ? htmlspecialchars($data['settings']['hero_btn_link']) : '#' ?>" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #064e3b; padding: 14px 32px; border-radius: 50px; font-weight: 800; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 18px 40px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.2)';">
+                        <i class="fas fa-paper-plane" style="color: #059669;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_btn_text']) ?></span>
                     </a>
                 </div>
