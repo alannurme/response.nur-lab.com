@@ -62,27 +62,79 @@
                 <?php endif; ?>
 
                 <!-- Feature Badges / Highlights Row -->
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; padding-top: 10px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px;">
                     <?php if (!empty($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক')): ?>
-                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.88rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-book-quran" style="color: #6ee7b7;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_pill_1'] ?? 'কুরআন ও সুন্নাহ ভিত্তিক') ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if (!empty($data['settings']['hero_pill_2'] ?? 'বিশ্বস্ত ফতোয়া ও সমাধান')): ?>
-                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.88rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-shield-halved" style="color: #6ee7b7;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_pill_2'] ?? 'বিশ্বস্ত ফতোয়া ও সমাধান') ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if (!empty($data['settings']['hero_pill_3'] ?? 'সরাসরি প্রশ্ন পাঠানোর সুযোগ')): ?>
-                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); color: #e6f4ea; font-size: 0.85rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.22); color: #ffffff; font-size: 0.88rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-headset" style="color: #6ee7b7;"></i>
                         <span><?= htmlspecialchars($data['settings']['hero_pill_3'] ?? 'সরাসরি প্রশ্ন পাঠানোর সুযোগ') ?></span>
                     </div>
                     <?php endif; ?>
+                </div>
+
+                <!-- Islamic Quran Ayah Banner Card -->
+                <?php if (!empty($data['settings']['hero_ayah_bn'] ?? 'অতএব জ্ঞানীদের জিজ্ঞেস করো, যদি তোমরা না জানো।')): ?>
+                <div style="margin-top: 25px; padding: 22px 26px; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; overflow: hidden;">
+                    <div style="position: absolute; right: -10px; bottom: -15px; opacity: 0.08; color: #ffffff; font-size: 5rem; pointer-events: none;">
+                        <i class="fas fa-quran"></i>
+                    </div>
+                    <?php if (!empty($data['settings']['hero_ayah_arabic'] ?? 'فَاسْأَلُوا أَهْلَ الذِّكْرِ إِن كُنتُمْ لَا تَعْلَمُونَ')): ?>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #a7f3d0; font-family: 'Amiri', 'Meaney', serif; margin-bottom: 8px; direction: rtl; text-align: right; line-height: 1.6;">
+                        <?= htmlspecialchars($data['settings']['hero_ayah_arabic'] ?? 'فَاسْأَلُوا أَهْلَ الذِّكْرِ إِن كُنتُمْ لَا تَعْلَمُونَ') ?>
+                    </div>
+                    <?php endif; ?>
+                    <div style="font-size: 0.98rem; font-weight: 600; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; line-height: 1.6;">
+                        “<?= htmlspecialchars($data['settings']['hero_ayah_bn'] ?? 'অতএব জ্ঞানীদের জিজ্ঞেস করো, যদি তোমরা না জানো।') ?>”
+                    </div>
+                    <?php if (!empty($data['settings']['hero_ayah_ref'] ?? 'সূরা আন-নহল: ৪৩')): ?>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #6ee7b7; margin-top: 6px; font-family: 'Hind Siliguri', sans-serif;">
+                        — <?= htmlspecialchars($data['settings']['hero_ayah_ref'] ?? 'সূরা আন-নহল: ৪৩') ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <!-- Quick Islamic Platform Statistics Counter Row -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_num_1'] ?? '১,৫০০+') ?>
+                        </div>
+                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_lbl_1'] ?? 'ফতোয়া ও মাসআলা') ?>
+                        </div>
+                    </div>
+
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_num_2'] ?? '৫০,০০০+') ?>
+                        </div>
+                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_lbl_2'] ?? 'নিয়মিত পাঠকমণ্ডলী') ?>
+                        </div>
+                    </div>
+
+                    <div style="text-align: left;">
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff; font-family: 'Outfit', 'Hind Siliguri', sans-serif; line-height: 1;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_num_3'] ?? '১০০%') ?>
+                        </div>
+                        <div style="font-size: 0.82rem; font-weight: 600; color: #a7f3d0; font-family: 'Hind Siliguri', sans-serif; margin-top: 4px;">
+                            <?= htmlspecialchars($data['settings']['hero_stat_lbl_3'] ?? 'সহিহ উৎস ও দলিল') ?>
+                        </div>
+                    </div>
                 </div>
 
             </div>
