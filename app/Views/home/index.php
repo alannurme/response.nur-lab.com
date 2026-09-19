@@ -1,7 +1,7 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
 <!-- Islamic Hero & Recent Questions Split Section -->
-<section class="islamic-hero-section" style="position: relative; background: #e6f4ea; padding: 50px 20px; overflow: hidden; border-bottom: 1px solid #bbf7d0;">
+<section class="islamic-hero-section" style="position: relative; background: #e6f4ea; padding: 90px 20px 80px 20px; overflow: hidden; border-bottom: 1px solid #bbf7d0;">
     <!-- Top Decorative Curved Wave Accent -->
     <div style="position: absolute; top: 0; left: 0; right: 0; height: 85px; background: #0b7c4d; clip-path: ellipse(80% 100% at 50% 0%); z-index: 1;"></div>
     
@@ -15,29 +15,8 @@
                     <?= htmlspecialchars($data['settings']['site_title'] ?? 'রেসপন্স উইথ নূর-ল্যাব') ?>
                 </h1>
                 
-                <!-- Tagline / Subtitle -->
-                <p style="font-size: 1.05rem; color: #475569; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 16px 0; line-height: 1.6; max-width: 620px;">
-                    সবচেয়ে সমৃদ্ধ বাংলা ইসলামিক প্ল্যাটফর্ম — কুরআন, হাদীস, মাসায়েল ও আপনার সমস্ত ইসলামিক প্রশ্নের উত্তর
-                </p>
 
-                <!-- Date & Info Pill Badge -->
-                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(11, 124, 77, 0.08); border: 1px solid rgba(11, 124, 77, 0.2); padding: 5px 18px; border-radius: 30px; margin-bottom: 24px;">
-                    <i class="far fa-calendar-alt" style="color: #0b7c4d; font-size: 0.9rem;"></i>
-                    <span style="font-size: 0.88rem; font-weight: 700; color: #0b7c4d; font-family: 'Hind Siliguri', sans-serif;">
-                        <?= function_exists('getBengaliDate') ? getBengaliDate() : date('l, d F Y') ?>
-                    </span>
-                </div>
 
-                <!-- Search Bar Form -->
-                <form action="<?= URLROOT ?>/search" method="GET" style="max-width: 580px; margin: 0 0 28px 0; position: relative;">
-                    <div style="display: flex; align-items: center; background: #ffffff; border-radius: 50px; padding: 7px 10px 7px 22px; box-shadow: 0 14px 35px rgba(11, 124, 77, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04); border: 2px solid #a7f3d0; transition: all 0.3s ease;">
-                        <i class="fas fa-search" style="color: #10b981; font-size: 1.15rem; margin-right: 12px;"></i>
-                        <input type="text" name="q" placeholder="কুরআন, হাদীস বা যেকোনো বিষয় খুঁজুন..." style="border: none; outline: none; width: 100%; font-size: 1.05rem; font-family: 'Hind Siliguri', sans-serif; background: transparent; color: #1e293b;" required>
-                        <button type="submit" style="background: linear-gradient(135deg, #0b7c4d, #10b981); border: none; width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease; box-shadow: 0 4px 15px rgba(11, 124, 77, 0.3); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
-                            <i class="fas fa-search" style="font-size: 0.95rem;"></i>
-                        </button>
-                    </div>
-                </form>
 
             </div>
 

@@ -498,10 +498,25 @@ $dc   = ['#2563eb','#8b5cf6','#ec4899','#f97316','#22c55e','#06b6d4','#f59e0b','
 </div>
 
 <script>
-const cd={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
-new Chart(document.getElementById('weekChart'),{type:'line',data:{labels:<?= json_encode($data['chartData']['labels']) ?>,datasets:[{data:<?= json_encode($data['chartData']['data']) ?>,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:2.5,tension:.4,fill:true,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointRadius:4,pointHoverRadius:6}]},options:{...cd,scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}}});
-new Chart(document.getElementById('monthChart'),{type:'bar',data:{labels:<?= json_encode($data['monthly_chart']['labels']) ?>,datasets:[{data:<?= json_encode($data['monthly_chart']['data']) ?>,backgroundColor:'rgba(16,185,129,.75)',borderRadius:6,borderSkipped:false}]},options:{...cd,scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
-new Chart(document.getElementById('catDonut'),{type:'doughnut',data:{labels:<?= json_encode(array_column($data['category_distribution'],'name')) ?>,datasets:[{data:<?= json_encode(array_column($data['category_distribution'],'post_count')) ?>,backgroundColor:['#2563eb','#8b5cf6','#ec4899','#f97316','#22c55e','#06b6d4','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{...cd,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} posts`}}}}});
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart !== 'undefined') {
+        const cd = {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}};
+        const weekEl = document.getElementById('weekChart');
+        if (weekEl) {
+            new Chart(weekEl, {type:'line',data:{labels:<?= json_encode($data['chartData']['labels'] ?? []) ?>,datasets:[{data:<?= json_encode($data['chartData']['data'] ?? []) ?>,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:2.5,tension:.4,fill:true,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointRadius:4,pointHoverRadius:6}]},options:{...cd,scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}}});
+        }
+        const monthEl = document.getElementById('monthChart');
+        if (monthEl) {
+            new Chart(monthEl, {type:'bar',data:{labels:<?= json_encode($data['monthly_chart']['labels'] ?? []) ?>,datasets:[{data:<?= json_encode($data['monthly_chart']['data'] ?? []) ?>,backgroundColor:'rgba(16,185,129,.75)',borderRadius:6,borderSkipped:false}]},options:{...cd,scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+        }
+        const donutEl = document.getElementById('catDonut');
+        if (donutEl) {
+            new Chart(donutEl, {type:'doughnut',data:{labels:<?= json_encode(array_column($data['category_distribution'] ?? [],'name')) ?>,datasets:[{data:<?= json_encode(array_column($data['category_distribution'] ?? [],'post_count')) ?>,backgroundColor:['#2563eb','#8b5cf6','#ec4899','#f97316','#22c55e','#06b6d4','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{...cd,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} posts`}}}}});
+        }
+    } else {
+        console.warn('Chart.js is not loaded. Dashboard charts disabled.');
+    }
+});
 </script>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>

@@ -78,6 +78,8 @@ if (empty($current_page)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= URLROOT ?>/public/css/admin.css?v=<?= time() ?>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>if(typeof Chart==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');}</script>
+    <script>if(typeof Chart==='undefined'){document.write('<script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js"><\/script>');}</script>
     <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
@@ -592,6 +594,10 @@ if (empty($current_page)) {
 
     <script>
         window.onerror = function(msg, url, line) {
+            if (msg && (msg.indexOf('Chart is not defined') !== -1 || msg.indexOf('Script error') !== -1)) {
+                console.warn("Handled Non-Fatal Admin Script Error:", msg, "at line:", line);
+                return true;
+            }
             alert("Global Admin Script Error:\n" + msg + "\nURL: " + url + "\nLine: " + line);
             return false;
         };
