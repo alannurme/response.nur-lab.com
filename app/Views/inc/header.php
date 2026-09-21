@@ -155,12 +155,12 @@ if (!function_exists('getBengaliDate')) {
             }
         }
     </script>
-    <!-- Google Fonts: Noto Sans Bengali for Bengali -->
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&family=Noto+Serif+Bengali:wght@400;500;600;700;800&family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 Icon Library (CDN Mirrors) -->
+    <!-- Google Fonts Preconnect & Font Awesome Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 Icon Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.6.0/css/all.css">
     
     <!-- Facebook Pixel Code -->
     <?php if (isset($data['settings']['facebook_pixel_status']) && $data['settings']['facebook_pixel_status'] === 'enabled' && !empty($data['settings']['facebook_pixel_code'])): ?>

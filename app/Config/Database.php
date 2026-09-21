@@ -17,7 +17,7 @@ class Database extends FrameworkDbConfig
         'database'     => 'response',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
-        'pConnect'     => false,
+        'pConnect'     => true,
         'DBDebug'      => true,
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
@@ -36,6 +36,8 @@ class Database extends FrameworkDbConfig
         ],
     ];
 
+    private static $pdoInstance = null;
+
     public function __construct()
     {
         parent::__construct();
@@ -51,6 +53,10 @@ class Database extends FrameworkDbConfig
     }
 
     public static function pdoConnect() {
+        if (self::$pdoInstance !== null) {
+            return self::$pdoInstance;
+        }
+
         try {
             $host = 'localhost';
             $db   = 'response';
@@ -72,10 +78,12 @@ class Database extends FrameworkDbConfig
                 $pass = env('database.default.password', '');
             }
 
-            $pdo = new \PDO("mysql:host={$host};dbname={$db};charset=utf8mb4", $user, $pass);
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-            return $pdo;
+            self::$pdoInstance = new \PDO("mysql:host={$host};dbname={$db};charset=utf8mb4", $user, $pass, [
+                \PDO::ATTR_PERSISTENT => true,
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC
+            ]);
+            return self::$pdoInstance;
         } catch (\PDOException $e) {
             die("Connection failed: " . $e->getMessage());
         }
