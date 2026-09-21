@@ -12,6 +12,6 @@
 return [
     'host' => 'localhost',
     'user' => 'root',
-    'pass' => '',
+    'pass' => 'Al04@95annur',
     'db'   => 'response',
 ];

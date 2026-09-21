@@ -703,9 +703,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof tinymce !== 'undefined') {
             tinymce.init({
-                selector: '#main-post-content',
+                selector: 'textarea[name="content"]',
                 plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen',
-                toolbar: 'save_bg | undo redo | blocks | bold italic underline strikethrough | forecolor blockquote | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | fullscreen',
+                toolbar: 'undo redo | blocks | bold italic underline strikethrough | forecolor blockquote | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | fullscreen',
                 height: 550,
                 branding: false,
                 promotion: false,
@@ -727,14 +727,6 @@
                     }
                 },
                 setup: function (editor) {
-                    editor.ui.registry.addButton('save_bg', {
-                        text: 'Save',
-                        icon: 'save',
-                        onAction: function () {
-                            saveBackground();
-                        }
-                    });
-
                     document.addEventListener('focusin', function (e) {
                         if (e.target.closest('#mediaPickerModal')) {
                             e.stopImmediatePropagation();
