@@ -745,6 +745,11 @@
             promotion: false,
             contextmenu: false,
             content_style: 'img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
+            init_instance_callback: function (editor) {
+                if (initialContent) {
+                    editor.setContent(initialContent);
+                }
+            },
             file_picker_callback: function (callback, value, meta) {
                 if (meta.filetype === 'image') {
                     const targetInput = document.createElement('input');
