@@ -179,15 +179,8 @@
     }
 
     /* Sidebar Tree & TOC Independent Scroll Limits */
-    #sidebar-posts-subcontent::-webkit-scrollbar {
-        width: 4px;
-    }
-    #sidebar-posts-subcontent::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-    }
     #sidebar-tree-card > .folder-tree-list {
-        max-height: 280px;
+        max-height: 480px;
         overflow-y: auto;
         padding-right: 4px;
     }
@@ -203,7 +196,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 12px 16px;
-        max-height: 200px;
+        max-height: 400px;
         overflow-y: auto;
         font-family: 'Noto Serif Bengali', serif !important;
         font-size: 14px;
@@ -3422,14 +3415,16 @@ if (!function_exists('renderCategoryDropdownOptions')) {
             }
 
             // Auto scroll sidebar navigation to top so All Posts is visible at top
-            const sidebarNav = document.querySelector('.sidebar-nav') || document.querySelector('.sidebar');
-            if (sidebarNav) {
-                sidebarNav.scrollTop = 0;
-            }
-            const activeNav = document.querySelector('.nav-item.active');
-            if (activeNav) {
-                activeNav.scrollIntoView({ block: 'start', behavior: 'instant' });
-            }
+            setTimeout(function() {
+                const sidebarNav = document.querySelector('.sidebar-nav') || document.querySelector('.sidebar');
+                if (sidebarNav) {
+                    sidebarNav.scrollTop = 0;
+                }
+                const allPostsNav = document.querySelector('.nav-item-sub-wrapper') || document.querySelector('a[href*="/admin/posts"]');
+                if (allPostsNav) {
+                    allPostsNav.scrollIntoView({ block: 'start', behavior: 'instant' });
+                }
+            }, 50);
         }
     });
 })();
