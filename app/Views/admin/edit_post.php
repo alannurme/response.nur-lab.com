@@ -733,6 +733,21 @@
             .replace(/'/g, '&#039;');
     }
 
+    function toggleEditorMode(id) {
+        const textarea = document.getElementById(`part-content-${id}`);
+        const editor = typeof tinymce !== 'undefined' ? tinymce.get(`part-content-${id}`) : null;
+        if (editor) {
+            if (editor.isHidden()) {
+                editor.show();
+            } else {
+                editor.hide();
+                if (textarea) textarea.style.display = 'block';
+            }
+        } else if (textarea) {
+            textarea.style.display = (textarea.style.display === 'none') ? 'block' : 'none';
+        }
+    }
+
     function createPartCardHTML(id, title = '', content = '') {
         return `
         <div class="part-item-card" id="part-card-${id}" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; position: relative; margin-bottom: 15px;">
@@ -751,17 +766,32 @@
                 <input type="text" class="form-control part-title-input" value="${title.replace(/"/g, '&quot;')}" placeholder="অনুচ্ছেদের শিরোনাম লিখুন (যেমন: মুজিযা বলতে কী বোঝায়?)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px;">
             </div>
             <div class="form-group">
-                <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
-                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${escapeHTML(content)}</textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569; margin: 0;">Content</label>
+                    <button type="button" onclick="toggleEditorMode(${id})" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #2563eb; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px;">
+                        <i class="fas fa-edit"></i> ভিজ্যুয়াল / টেক্সট এডিটর মোড পরিবর্তন
+                    </button>
+                </div>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="min-height: 300px; width: 100%; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px; font-size: 15px; line-height: 1.7; box-sizing: border-box; font-family: sans-serif;">${escapeHTML(content)}</textarea>
             </div>
         </div>
         `;
     }
 
     function initTinyMCEForPart(id, initialContent = '') {
+        const textarea = document.getElementById(`part-content-${id}`);
+        if (textarea) {
+            textarea.style.display = 'block';
+        }
+
         if (typeof tinymce === 'undefined') {
             return;
         }
+
+        if (tinymce.get(`part-content-${id}`)) {
+            tinymce.get(`part-content-${id}`).destroy();
+        }
+
         tinymce.init({
             selector: `#part-content-${id}`,
             plugins: 'anchor autolink codesample image link lists media searchreplace table visualblocks wordcount fullscreen',
@@ -771,7 +801,7 @@
             branding: false,
             promotion: false,
             contextmenu: false,
-            content_style: 'img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
+            content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; padding: 10px; } img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
             init_instance_callback: function (editor) {
                 if (initialContent) {
                     editor.setContent(initialContent);
