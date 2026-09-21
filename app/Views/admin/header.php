@@ -708,14 +708,9 @@ if (empty($current_page)) {
 
             <div class="nav-group">
                 <div class="nav-label">Content Management</div>
-                <div class="dropdown-wrapper">
-                    <a href="<?= URLROOT ?>/admin/posts" class="nav-item has-dropdown <?= $current_page == 'posts' ? 'active' : '' ?>">
-                        <i class="fas fa-newspaper"></i><span>All Posts</span>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
-                    </a>
-                    <div class="dropdown-content" id="all-posts-submenu" <?= $current_page == 'posts' ? 'style="display: block; padding: 10px; max-height: 75vh; overflow-y: auto;"' : '' ?>>
-                    </div>
-                </div>
+                <a href="<?= URLROOT ?>/admin/posts" class="nav-item <?= $current_page == 'posts' ? 'active' : '' ?>">
+                    <i class="fas fa-newspaper"></i><span>All Posts</span>
+                </a>
                 <a href="<?= URLROOT ?>/admin/add_post" class="nav-item <?= $current_page == 'add_post' ? 'active' : '' ?>">
                     <i class="fas fa-plus-circle"></i><span>Add New Post</span>
                 </a>

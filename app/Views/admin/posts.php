@@ -397,28 +397,32 @@
     }
 
     .explorer-layout {
-        display: grid;
-        grid-template-columns: 332px 1fr;
-        gap: 24px;
-        align-items: start;
+        display: block;
+        position: relative;
     }
 
     .explorer-main {
-        grid-column: 2;
+        margin-left: 356px;
+        transition: margin-left 0.3s ease;
+    }
+
+    body.sidebar-collapsed .explorer-main {
+        margin-left: 356px;
     }
 
     /* Sidebar Styles */
     .explorer-sidebar {
         position: fixed;
-        top: 12px;
+        top: 24px;
         left: calc(280px + 24px);
-        width: 368px;
-        max-height: calc(100vh - 24px);
+        width: 332px;
+        max-height: calc(100vh - 48px);
         overflow: hidden;
         z-index: 10;
         display: flex;
         flex-direction: column;
         gap: 16px;
+        transition: left 0.3s ease;
     }
 
     body.sidebar-collapsed .explorer-sidebar {
@@ -3389,19 +3393,6 @@ if (!function_exists('renderCategoryDropdownOptions')) {
             return;
         }
         loadCategoryPage(window.location.href, false);
-    });
-
-    // Move sidebar tree card & TOC container into left menu submenu (#all-posts-submenu)
-    document.addEventListener('DOMContentLoaded', function() {
-        const submenu = document.getElementById('all-posts-submenu');
-        const sidebarTreeCard = document.getElementById('sidebar-tree-card');
-        const tocContainer = document.getElementById('quickViewTocContainer');
-        if (submenu && sidebarTreeCard) {
-            submenu.appendChild(sidebarTreeCard);
-            if (tocContainer) {
-                submenu.appendChild(tocContainer);
-            }
-        }
     });
 })();
 </script>
