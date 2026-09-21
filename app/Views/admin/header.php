@@ -712,7 +712,7 @@ if (empty($current_page)) {
                     <a href="<?= URLROOT ?>/admin/posts" class="nav-item <?= $current_page == 'posts' ? 'active' : '' ?>">
                         <i class="fas fa-newspaper"></i><span>All Posts</span>
                     </a>
-                    <div id="sidebar-posts-subcontent" style="padding-left: 10px; margin-top: 5px; <?= $current_page == 'posts' ? '' : 'display: none;' ?>"></div>
+                    <div id="sidebar-posts-subcontent" style="padding-left: 0px; margin-top: 5px; max-height: calc(100vh - 220px); overflow-y: auto; overflow-x: hidden; <?= $current_page == 'posts' ? '' : 'display: none;' ?>"></div>
                 </div>
                 <a href="<?= URLROOT ?>/admin/add_post" class="nav-item <?= $current_page == 'add_post' ? 'active' : '' ?>">
                     <i class="fas fa-plus-circle"></i><span>Add New Post</span>

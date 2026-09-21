@@ -179,12 +179,19 @@
     }
 
     /* Sidebar TOC Styles */
+    #sidebar-posts-subcontent::-webkit-scrollbar {
+        width: 4px;
+    }
+    #sidebar-posts-subcontent::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
     #quickViewTocContainer .post-toc-box {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 12px 16px;
-        max-height: 350px;
+        max-height: 250px;
         overflow-y: auto;
         font-family: 'Noto Serif Bengali', serif !important;
         font-size: 14px;
@@ -513,7 +520,7 @@
 
     .folder-tree-list {
         list-style: none;
-        padding-left: 14px;
+        padding-left: 10px;
         margin: 4px 0;
     }
 
@@ -521,8 +528,8 @@
         display: none !important;
     }
 
-    .explorer-sidebar > .folder-tree-list {
-        padding-left: 0;
+    #sidebar-posts-subcontent > .sidebar-card > .folder-tree-list {
+        padding-left: 0 !important;
     }
 
     .folder-tree-item {
