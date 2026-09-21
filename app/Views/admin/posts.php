@@ -398,35 +398,21 @@
 
     .explorer-layout {
         display: block;
-        position: relative;
+        width: 100%;
     }
 
     .explorer-main {
-        margin-left: 356px;
-        transition: margin-left 0.3s ease;
+        margin-left: 0 !important;
+        width: 100% !important;
     }
 
     body.sidebar-collapsed .explorer-main {
-        margin-left: 356px;
+        margin-left: 0 !important;
+        width: 100% !important;
     }
 
-    /* Sidebar Styles */
     .explorer-sidebar {
-        position: fixed;
-        top: 24px;
-        left: calc(280px + 24px);
-        width: 332px;
-        max-height: calc(100vh - 48px);
-        overflow: hidden;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        transition: left 0.3s ease;
-    }
-
-    body.sidebar-collapsed .explorer-sidebar {
-        left: calc(80px + 24px);
+        display: none !important;
     }
 
     .sidebar-card {
@@ -3393,6 +3379,29 @@ if (!function_exists('renderCategoryDropdownOptions')) {
             return;
         }
         loadCategoryPage(window.location.href, false);
+    });
+
+    // Cleanly populate left main menu sub-container
+    document.addEventListener('DOMContentLoaded', function() {
+        const targetContainer = document.getElementById('sidebar-posts-subcontent');
+        const sidebarTreeCard = document.getElementById('sidebar-tree-card');
+        const tocContainer = document.getElementById('quickViewTocContainer');
+        
+        if (targetContainer && sidebarTreeCard) {
+            sidebarTreeCard.style.border = 'none';
+            sidebarTreeCard.style.padding = '5px 0';
+            sidebarTreeCard.style.background = 'transparent';
+            sidebarTreeCard.style.boxShadow = 'none';
+            targetContainer.appendChild(sidebarTreeCard);
+            
+            if (tocContainer) {
+                tocContainer.style.border = 'none';
+                tocContainer.style.padding = '5px 0';
+                tocContainer.style.background = 'transparent';
+                tocContainer.style.boxShadow = 'none';
+                targetContainer.appendChild(tocContainer);
+            }
+        }
     });
 })();
 </script>
