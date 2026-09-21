@@ -737,11 +737,17 @@
         const textarea = document.getElementById(`part-content-${id}`);
         const editor = typeof tinymce !== 'undefined' ? tinymce.get(`part-content-${id}`) : null;
         if (editor) {
-            if (editor.isHidden()) {
-                editor.show();
+            const container = editor.getContainer();
+            if (container) {
+                if (container.style.display === 'none') {
+                    container.style.display = 'block';
+                    if (textarea) textarea.style.display = 'none';
+                } else {
+                    container.style.display = 'none';
+                    if (textarea) textarea.style.display = 'block';
+                }
             } else {
-                editor.hide();
-                if (textarea) textarea.style.display = 'block';
+                if (editor.isHidden()) editor.show(); else { editor.hide(); if (textarea) textarea.style.display = 'block'; }
             }
         } else if (textarea) {
             textarea.style.display = (textarea.style.display === 'none') ? 'block' : 'none';
@@ -789,69 +795,77 @@
         }
 
         if (tinymce.get(`part-content-${id}`)) {
-            tinymce.get(`part-content-${id}`).destroy();
+            try { tinymce.get(`part-content-${id}`).destroy(); } catch(e){}
         }
 
-        tinymce.init({
-            selector: `#part-content-${id}`,
-            plugins: 'anchor autolink codesample image link lists media searchreplace table visualblocks wordcount fullscreen',
-            toolbar: 'save_bg | undo redo | blocks | bold italic underline strikethrough | forecolor blockquote | link image media table | align lineheight | numlist bullist indent outdent | fullscreen',
-            height: 350,
-            toolbar_mode: 'wrap',
-            branding: false,
-            promotion: false,
-            contextmenu: false,
-            content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; padding: 10px; } img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
-            init_instance_callback: function (editor) {
-                if (initialContent) {
-                    editor.setContent(initialContent);
-                }
-            },
-            file_picker_callback: function (callback, value, meta) {
-                if (meta.filetype === 'image') {
-                    const targetInput = document.createElement('input');
-                    targetInput.id = 'tinymce_media_target';
-                    targetInput.type = 'hidden';
-                    document.body.appendChild(targetInput);
-                    
-                    targetInput.addEventListener('input', function () {
-                        callback(targetInput.value, { alt: '' });
-                        targetInput.remove();
-                    });
-                    
-                    openMediaPicker('tinymce_media_target', null);
-                }
-            },
-            setup: function (editor) {
-                editor.on('init', function () {
+        try {
+            tinymce.init({
+                selector: `#part-content-${id}`,
+                base_url: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2',
+                skin_url: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/skins/ui/oxide',
+                content_css: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/skins/content/default/content.min.css',
+                plugins: 'anchor autolink codesample image link lists media searchreplace table visualblocks wordcount fullscreen',
+                toolbar: 'save_bg | undo redo | blocks | bold italic underline strikethrough | forecolor blockquote | link image media table | align lineheight | numlist bullist indent outdent | fullscreen',
+                height: 350,
+                toolbar_mode: 'wrap',
+                branding: false,
+                promotion: false,
+                contextmenu: false,
+                content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; padding: 10px; } img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
+                init_instance_callback: function (editor) {
                     if (initialContent) {
                         editor.setContent(initialContent);
                     }
-                });
+                },
+                file_picker_callback: function (callback, value, meta) {
+                    if (meta.filetype === 'image') {
+                        const targetInput = document.createElement('input');
+                        targetInput.id = 'tinymce_media_target';
+                        targetInput.type = 'hidden';
+                        document.body.appendChild(targetInput);
+                        
+                        targetInput.addEventListener('input', function () {
+                            callback(targetInput.value, { alt: '' });
+                            targetInput.remove();
+                        });
+                        
+                        openMediaPicker('tinymce_media_target', null);
+                    }
+                },
+                setup: function (editor) {
+                    editor.on('init', function () {
+                        if (initialContent) {
+                            editor.setContent(initialContent);
+                        }
+                    });
 
-                editor.ui.registry.addButton('save_bg', {
-                    text: 'Save',
-                    icon: 'save',
-                    onAction: function () {
-                        saveBackground();
-                    }
-                });
+                    editor.ui.registry.addButton('save_bg', {
+                        text: 'Save',
+                        icon: 'save',
+                        onAction: function () {
+                            saveBackground();
+                        }
+                    });
 
-                document.addEventListener('focusin', function (e) {
-                    if (e.target.closest('#mediaPickerModal')) {
-                        e.stopImmediatePropagation();
-                    }
-                }, true);
-                
-                editor.on('FullscreenStateChanged', function (e) {
-                    if (e.state) {
-                        document.body.classList.add('editor-fullscreen-active');
-                    } else {
-                        document.body.classList.remove('editor-fullscreen-active');
-                    }
-                });
-            }
-        });
+                    document.addEventListener('focusin', function (e) {
+                        if (e.target.closest('#mediaPickerModal')) {
+                            e.stopImmediatePropagation();
+                        }
+                    }, true);
+                    
+                    editor.on('FullscreenStateChanged', function (e) {
+                        if (e.state) {
+                            document.body.classList.add('editor-fullscreen-active');
+                        } else {
+                            document.body.classList.remove('editor-fullscreen-active');
+                        }
+                    });
+                }
+            });
+        } catch(err) {
+            console.error('TinyMCE init error:', err);
+            if (textarea) textarea.style.display = 'block';
+        }
     }
 
     function addNewPart(title = '', content = '') {
