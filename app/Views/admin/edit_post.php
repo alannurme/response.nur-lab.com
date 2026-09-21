@@ -714,9 +714,6 @@
                     });
                 </script>
 
-
-
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
     if (typeof tinymce === 'undefined') {
@@ -725,6 +722,16 @@
 </script>
 <script>
     let partCounter = 0;
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
     function createPartCardHTML(id, title = '', content = '') {
         return `
@@ -745,13 +752,13 @@
             </div>
             <div class="form-group">
                 <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
-                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${content}</textarea>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${escapeHTML(content)}</textarea>
             </div>
         </div>
         `;
     }
 
-    function initTinyMCEForPart(id) {
+    function initTinyMCEForPart(id, initialContent = '') {
         if (typeof tinymce === 'undefined') {
             return;
         }
@@ -781,6 +788,12 @@
                 }
             },
             setup: function (editor) {
+                editor.on('init', function () {
+                    if (initialContent) {
+                        editor.setContent(initialContent);
+                    }
+                });
+
                 editor.ui.registry.addButton('save_bg', {
                     text: 'Save',
                     icon: 'save',
@@ -812,7 +825,7 @@
         const list = document.getElementById('parts-list');
         
         const wrapper = document.createElement('div');
-        wrapper.innerHTML = createPartCardHTML(id, title, '');
+        wrapper.innerHTML = createPartCardHTML(id, title, content);
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
 
@@ -821,7 +834,7 @@
             textarea.value = content;
         }
         
-        initTinyMCEForPart(id);
+        initTinyMCEForPart(id, content);
         updatePartIndexes();
     }
 
@@ -866,13 +879,13 @@
             
             card.parentNode.insertBefore(card, previous);
             
-            initTinyMCEForPart(id);
+            initTinyMCEForPart(id, currentContent);
             setTimeout(() => {
                 if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${id}`)) tinymce.get(`part-content-${id}`).setContent(currentContent);
                 else if (document.getElementById(`part-content-${id}`)) document.getElementById(`part-content-${id}`).value = currentContent;
             }, 100);
             
-            initTinyMCEForPart(prevId);
+            initTinyMCEForPart(prevId, prevContent);
             setTimeout(() => {
                 if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${prevId}`)) tinymce.get(`part-content-${prevId}`).setContent(prevContent);
                 else if (document.getElementById(`part-content-${prevId}`)) document.getElementById(`part-content-${prevId}`).value = prevContent;
@@ -897,16 +910,16 @@
             
             card.parentNode.insertBefore(next, card);
             
-            initTinyMCEForPart(id);
+            initTinyMCEForPart(id, currentContent);
             setTimeout(() => {
                 if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${id}`)) tinymce.get(`part-content-${id}`).setContent(currentContent);
                 else if (document.getElementById(`part-content-${id}`)) document.getElementById(`part-content-${id}`).value = currentContent;
             }, 100);
             
-            initTinyMCEForPart(nextId);
+            initTinyMCEForPart(nextId, nextContent);
             setTimeout(() => {
-                if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${nextId}`)) tinymce.get(`part-content-${nextId}`).setContent(currentContent);
-                else if (document.getElementById(`part-content-${nextId}`)) document.getElementById(`part-content-${nextId}`).value = currentContent;
+                if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${nextId}`)) tinymce.get(`part-content-${nextId}`).setContent(nextContent);
+                else if (document.getElementById(`part-content-${nextId}`)) document.getElementById(`part-content-${nextId}`).value = nextContent;
             }, 100);
             
             updatePartIndexes();
@@ -964,7 +977,7 @@
             let sibling = doc.body.firstChild;
             let prependedContent = '';
             while (sibling && sibling !== firstHeaderTop) {
-                prependedContent += sibling.outerHTML || sibling.textContent || '';
+                prependedContent += sibling.nodeType === 1 ? sibling.outerHTML : (sibling.textContent || '');
                 sibling = sibling.nextSibling;
             }
             if (prependedContent.trim() !== '') {
@@ -981,14 +994,14 @@
                 let nextSibling = headerEl.nextSibling;
                 if (currentTop !== headerEl) {
                     while (nextSibling) {
-                        contentHtml += nextSibling.outerHTML || nextSibling.textContent || '';
+                        contentHtml += nextSibling.nodeType === 1 ? nextSibling.outerHTML : (nextSibling.textContent || '');
                         nextSibling = nextSibling.nextSibling;
                     }
                     nextSibling = currentTop.nextSibling;
                 }
                 
                 while (nextSibling && nextSibling !== nextHeaderTop) {
-                    contentHtml += nextSibling.outerHTML || nextSibling.textContent || '';
+                    contentHtml += nextSibling.nodeType === 1 ? nextSibling.outerHTML : (nextSibling.textContent || '');
                     nextSibling = nextSibling.nextSibling;
                 }
                 

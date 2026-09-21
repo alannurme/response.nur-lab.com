@@ -696,6 +696,16 @@
 <script>
     let partCounter = 0;
 
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function createPartCardHTML(id, title = '', content = '') {
         return `
         <div class="part-item-card" id="part-card-${id}" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; position: relative; margin-bottom: 15px;">
@@ -715,13 +725,13 @@
             </div>
             <div class="form-group">
                 <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
-                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${content}</textarea>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${escapeHTML(content)}</textarea>
             </div>
         </div>
         `;
     }
 
-    function initTinyMCEForPart(id) {
+    function initTinyMCEForPart(id, initialContent = '') {
         if (typeof tinymce === 'undefined') {
             return;
         }
@@ -751,6 +761,12 @@
                 }
             },
             setup: function (editor) {
+                editor.on('init', function () {
+                    if (initialContent) {
+                        editor.setContent(initialContent);
+                    }
+                });
+
                 editor.ui.registry.addButton('save_bg', {
                     text: 'Save',
                     icon: 'save',
@@ -782,7 +798,7 @@
         const list = document.getElementById('parts-list');
         
         const wrapper = document.createElement('div');
-        wrapper.innerHTML = createPartCardHTML(id, title, '');
+        wrapper.innerHTML = createPartCardHTML(id, title, content);
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
 
@@ -791,7 +807,7 @@
             textarea.value = content;
         }
         
-        initTinyMCEForPart(id);
+        initTinyMCEForPart(id, content);
         updatePartIndexes();
     }
 
