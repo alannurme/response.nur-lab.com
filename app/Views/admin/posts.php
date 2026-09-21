@@ -3388,8 +3388,20 @@ if (!function_exists('renderCategoryDropdownOptions')) {
         if (currentUrlWithoutHash === lastUrlWithoutHash) {
             return;
         }
-        lastUrlWithoutHash = currentUrlWithoutHash;
         loadCategoryPage(window.location.href, false);
+    });
+
+    // Move sidebar tree card & TOC container into left menu submenu (#all-posts-submenu)
+    document.addEventListener('DOMContentLoaded', function() {
+        const submenu = document.getElementById('all-posts-submenu');
+        const sidebarTreeCard = document.getElementById('sidebar-tree-card');
+        const tocContainer = document.getElementById('quickViewTocContainer');
+        if (submenu && sidebarTreeCard) {
+            submenu.appendChild(sidebarTreeCard);
+            if (tocContainer) {
+                submenu.appendChild(tocContainer);
+            }
+        }
     });
 })();
 </script>
