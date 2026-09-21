@@ -180,7 +180,7 @@
 
     /* Sidebar Tree & TOC Independent Scroll Limits */
     #sidebar-tree-card > .folder-tree-list {
-        max-height: 480px;
+        max-height: 320px;
         overflow-y: auto;
         padding-right: 4px;
     }
@@ -196,7 +196,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 12px 16px;
-        max-height: 400px;
+        max-height: 260px;
         overflow-y: auto;
         font-family: 'Noto Serif Bengali', serif !important;
         font-size: 14px;
