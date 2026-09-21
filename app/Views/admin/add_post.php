@@ -782,9 +782,14 @@
         const list = document.getElementById('parts-list');
         
         const wrapper = document.createElement('div');
-        wrapper.innerHTML = createPartCardHTML(id, title, content);
+        wrapper.innerHTML = createPartCardHTML(id, title, '');
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
+
+        const textarea = cardNode.querySelector('.part-content-textarea');
+        if (textarea) {
+            textarea.value = content;
+        }
         
         initTinyMCEForPart(id);
         updatePartIndexes();

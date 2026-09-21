@@ -812,9 +812,14 @@
         const list = document.getElementById('parts-list');
         
         const wrapper = document.createElement('div');
-        wrapper.innerHTML = createPartCardHTML(id, title, content);
+        wrapper.innerHTML = createPartCardHTML(id, title, '');
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
+
+        const textarea = cardNode.querySelector('.part-content-textarea');
+        if (textarea) {
+            textarea.value = content;
+        }
         
         initTinyMCEForPart(id);
         updatePartIndexes();
@@ -900,8 +905,8 @@
             
             initTinyMCEForPart(nextId);
             setTimeout(() => {
-                if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${nextId}`)) tinymce.get(`part-content-${nextId}`).setContent(nextContent);
-                else if (document.getElementById(`part-content-${nextId}`)) document.getElementById(`part-content-${nextId}`).value = nextContent;
+                if (typeof tinymce !== 'undefined' && tinymce.get(`part-content-${nextId}`)) tinymce.get(`part-content-${nextId}`).setContent(currentContent);
+                else if (document.getElementById(`part-content-${nextId}`)) document.getElementById(`part-content-${nextId}`).value = currentContent;
             }, 100);
             
             updatePartIndexes();
@@ -933,6 +938,11 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const initialContent = document.querySelector('textarea[name="content"]').value;
+        if (!initialContent || !initialContent.trim()) {
+            addNewPart('', '');
+            return;
+        }
+
         const doc = new DOMParser().parseFromString(initialContent, 'text/html');
         let headerElements = Array.from(doc.querySelectorAll('h2'));
         
@@ -943,11 +953,18 @@
         if (headerElements.length === 0) {
             addNewPart('', initialContent);
         } else {
-            const firstHeader = headerElements[0];
+            function getTopLevelNode(node) {
+                while (node && node.parentNode && node.parentNode !== doc.body) {
+                    node = node.parentNode;
+                }
+                return node;
+            }
+
+            const firstHeaderTop = getTopLevelNode(headerElements[0]);
             let sibling = doc.body.firstChild;
             let prependedContent = '';
-            while (sibling && sibling !== firstHeader) {
-                prependedContent += sibling.outerHTML || sibling.textContent;
+            while (sibling && sibling !== firstHeaderTop) {
+                prependedContent += sibling.outerHTML || sibling.textContent || '';
                 sibling = sibling.nextSibling;
             }
             if (prependedContent.trim() !== '') {
@@ -957,12 +974,24 @@
             headerElements.forEach((headerEl, idx) => {
                 const title = headerEl.textContent.trim();
                 let contentHtml = '';
+                
+                const currentTop = getTopLevelNode(headerEl);
+                const nextHeaderTop = headerElements[idx + 1] ? getTopLevelNode(headerElements[idx + 1]) : null;
+                
                 let nextSibling = headerEl.nextSibling;
-                const nextHeader = headerElements[idx + 1];
-                while (nextSibling && nextSibling !== nextHeader) {
-                    contentHtml += nextSibling.outerHTML || nextSibling.textContent;
+                if (currentTop !== headerEl) {
+                    while (nextSibling) {
+                        contentHtml += nextSibling.outerHTML || nextSibling.textContent || '';
+                        nextSibling = nextSibling.nextSibling;
+                    }
+                    nextSibling = currentTop.nextSibling;
+                }
+                
+                while (nextSibling && nextSibling !== nextHeaderTop) {
+                    contentHtml += nextSibling.outerHTML || nextSibling.textContent || '';
                     nextSibling = nextSibling.nextSibling;
                 }
+                
                 addNewPart(title, contentHtml);
             });
         }
