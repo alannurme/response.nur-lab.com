@@ -221,6 +221,9 @@
 <div class="justify-content-between d-flex align-items-center mb-5 header-container" style="border-bottom: 1px solid var(--border); padding-bottom: 20px;">
     <h3 class="m-0"><i class="fas fa-edit" style="color: var(--primary); margin-right: 8px;"></i>Edit Post</h3>
     <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; border-radius: 30px; background: #2563eb; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); font-size: 15px; cursor: pointer;">
+            🚀 Update Article
+        </button>
         <button type="button" id="toggle-sidebar-btn" class="btn btn-secondary" onclick="toggleRightSidebar()">
             <i class="fas fa-indent"></i> Hide Sidebar
         </button>
@@ -717,16 +720,37 @@
 
 
 
-<!-- Suyati LineControl Editor Dependencies -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-control/1.1.0/editor.css" onerror="this.onerror=null;">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/line-control/1.1.0/editor.js"></script>
+<!-- Quill.js Editor Dependencies -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+<style>
+    .ql-container {
+        font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
+        font-size: 15px !important;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        background: #ffffff;
+    }
+    .ql-toolbar {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        background: #f8fafc;
+        border-color: #cbd5e1 !important;
+    }
+    .ql-editor {
+        min-height: 250px;
+        line-height: 1.8;
+    }
+</style>
 
 <script>
     function escapeHTML(str) {
         if (!str) return '';
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
+
+    const quillInstances = {};
 
     function createPartCardHTML(id, title = '', content = '') {
         return `
@@ -747,7 +771,8 @@
             </div>
             <div class="form-group">
                 <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
-                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%; font-family: 'Hind Siliguri', sans-serif; font-size: 15px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">${escapeHTML(content)}</textarea>
+                <div id="quill-editor-${id}">${content}</div>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="display: none;">${escapeHTML(content)}</textarea>
             </div>
         </div>
         `;
@@ -755,59 +780,36 @@
 
     let partCounter = 0;
 
-    function initEditorForPart(id, initialContent = '') {
-        const textarea = document.getElementById(`part-content-${id}`);
-        if (textarea) {
-            textarea.value = initialContent;
+    function initQuillEditor(id, initialContent = '') {
+        if (typeof Quill === 'undefined') {
+            setTimeout(() => initQuillEditor(id, initialContent), 50);
+            return;
         }
 
-        if (window.jQuery && jQuery.fn && jQuery.fn.Editor) {
-            const $editorEl = jQuery(`#part-content-${id}`);
-            try {
-                $editorEl.Editor({
-                    'texteffects': true,
-                    'aligneffects': true,
-                    'textstyle': true,
-                    'fontsize': true,
-                    'formatblock': true,
-                    'fonteffects': true,
-                    'htmlpalette': true,
-                    'color': true,
-                    'ol': true,
-                    'ul': true,
-                    'undo': true,
-                    'redo': true,
-                    'inserttable': true,
-                    'insertimage': true,
-                    'insertlink': true,
-                    'unlink': true,
-                    'rm_format': true,
-                    'print': false,
-                    'source': true
-                });
-            } catch(err) {
-                console.warn('LineControl init error:', err);
+        const editorContainer = document.getElementById(`quill-editor-${id}`);
+        if (!editorContainer) return;
+
+        const quill = new Quill(`#quill-editor-${id}`, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, 4, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
             }
+        });
 
-            const setEditorText = () => {
-                if (!initialContent) return;
-                try {
-                    $editorEl.Editor('setText', initialContent);
-                } catch(e) {}
-                
-                const cardNode = document.getElementById(`part-card-${id}`);
-                if (cardNode) {
-                    const editable = cardNode.querySelector('.Editor-editor') || cardNode.querySelector('[contenteditable="true"]');
-                    if (editable) {
-                        editable.innerHTML = initialContent;
-                    }
-                }
-            };
-
-            setEditorText();
-            setTimeout(setEditorText, 100);
-            setTimeout(setEditorText, 300);
+        if (initialContent) {
+            quill.clipboard.dangerouslyPasteHTML(initialContent);
         }
+
+        quillInstances[id] = quill;
     }
 
     function addNewPart(title = '', content = '') {
@@ -820,21 +822,16 @@
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
         
-        initEditorForPart(id, content);
+        initQuillEditor(id, content);
         updatePartIndexes();
     }
 
     function getEditorContent(id) {
-        if (window.jQuery && jQuery.fn.Editor) {
-            try {
-                const text = jQuery(`#part-content-${id}`).Editor('getText');
-                if (text && text.trim() !== '') return text;
-            } catch(e) {}
+        if (quillInstances[id]) {
+            return quillInstances[id].root.innerHTML;
         }
-        const container = document.querySelector(`#part-card-${id} .Editor-editor`);
-        if (container) return container.innerHTML;
-        const el = document.getElementById(`part-content-${id}`);
-        return el ? el.value : '';
+        const textarea = document.getElementById(`part-content-${id}`);
+        return textarea ? textarea.value : '';
     }
 
     function removePart(id) {
@@ -843,6 +840,7 @@
             if (card) {
                 card.remove();
             }
+            delete quillInstances[id];
             updatePartIndexes();
         }
     }
@@ -870,8 +868,8 @@
             
             card.parentNode.insertBefore(card, previous);
             
-            initEditorForPart(id, currentContent);
-            initEditorForPart(prevId, prevContent);
+            initQuillEditor(id, currentContent);
+            initQuillEditor(prevId, prevContent);
             
             updatePartIndexes();
         }
@@ -887,8 +885,8 @@
             
             card.parentNode.insertBefore(next, card);
             
-            initEditorForPart(id, currentContent);
-            initEditorForPart(nextId, nextContent);
+            initQuillEditor(id, currentContent);
+            initQuillEditor(nextId, nextContent);
             
             updatePartIndexes();
         }
@@ -922,7 +920,6 @@
         if (!mainTextarea) return;
         
         let initialContent = mainTextarea.value || '';
-        // Decode HTML entities if encoded inside value attribute
         const txt = document.createElement('textarea');
         txt.innerHTML = initialContent;
         initialContent = txt.value;
@@ -936,15 +933,15 @@
 
         const container = document.createElement('div');
         container.innerHTML = initialContent;
-        const h2Elements = Array.from(container.querySelectorAll('h2'));
+        const headingElements = Array.from(container.querySelectorAll('h2'));
         
-        if (h2Elements.length === 0) {
+        if (headingElements.length === 0) {
             addNewPart('', initialContent);
         } else {
-            let firstH2 = h2Elements[0];
+            let firstHeading = headingElements[0];
             let currNode = container.firstChild;
             let prependedHtml = '';
-            while (currNode && currNode !== firstH2) {
+            while (currNode && currNode !== firstHeading) {
                 if (currNode.nodeType === Node.ELEMENT_NODE) {
                     prependedHtml += currNode.outerHTML;
                 } else if (currNode.nodeType === Node.TEXT_NODE) {
@@ -957,13 +954,13 @@
                 addNewPart('', prependedHtml);
             }
 
-            h2Elements.forEach((h2, idx) => {
-                const title = h2.textContent ? h2.textContent.trim() : '';
+            headingElements.forEach((heading, idx) => {
+                const title = heading.textContent ? heading.textContent.trim() : '';
                 let contentHtml = '';
-                let nextNode = h2.nextSibling;
-                const nextH2 = h2Elements[idx + 1];
+                let nextNode = heading.nextSibling;
+                const nextHeading = headingElements[idx + 1];
 
-                while (nextNode && nextNode !== nextH2) {
+                while (nextNode && nextNode !== nextHeading) {
                     if (nextNode.nodeType === Node.ELEMENT_NODE) {
                         contentHtml += nextNode.outerHTML;
                     } else if (nextNode.nodeType === Node.TEXT_NODE) {

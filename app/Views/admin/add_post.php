@@ -220,6 +220,9 @@
 <div class="justify-content-between d-flex align-items-center mb-5 header-container" style="border-bottom: 1px solid var(--border); padding-bottom: 20px;">
     <h3 class="m-0"><i class="fas fa-edit" style="color: var(--primary); margin-right: 8px;"></i>Create New Article</h3>
     <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; border-radius: 30px; background: #2563eb; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); font-size: 15px; cursor: pointer;">
+            🚀 Publish Article
+        </button>
         <button type="button" id="toggle-sidebar-btn" class="btn btn-secondary" onclick="toggleRightSidebar()">
             <i class="fas fa-indent"></i> Hide Sidebar
         </button>
@@ -687,13 +690,33 @@
 </script>
 
 
-<!-- Suyati LineControl Editor Dependencies -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/line-control@1.1.0/editor.css">
-<script src="https://cdn.jsdelivr.net/npm/line-control@1.1.0/editor.js"></script>
+<!-- Quill.js Editor Dependencies -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+<style>
+    .ql-container {
+        font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
+        font-size: 15px !important;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        background: #ffffff;
+    }
+    .ql-toolbar {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        background: #f8fafc;
+        border-color: #cbd5e1 !important;
+    }
+    .ql-editor {
+        min-height: 250px;
+        line-height: 1.8;
+    }
+</style>
 
 <script>
     let partCounter = 0;
+    const quillInstances = {};
 
     function escapeHTML(str) {
         if (!str) return '';
@@ -719,45 +742,43 @@
             </div>
             <div class="form-group">
                 <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
-                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%;">${escapeHTML(content)}</textarea>
+                <div id="quill-editor-${id}">${content}</div>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="display: none;">${escapeHTML(content)}</textarea>
             </div>
         </div>
         `;
     }
 
-    function initEditorForPart(id, initialContent = '') {
-        const textarea = document.getElementById(`part-content-${id}`);
-        if (textarea && initialContent) {
-            textarea.value = initialContent;
+    function initQuillEditor(id, initialContent = '') {
+        if (typeof Quill === 'undefined') {
+            setTimeout(() => initQuillEditor(id, initialContent), 50);
+            return;
         }
 
-        if (window.jQuery && jQuery.fn.Editor) {
-            jQuery(`#part-content-${id}`).Editor({
-                'texteffects': true,
-                'aligneffects': true,
-                'textstyle': true,
-                'fontsize': true,
-                'formatblock': true,
-                'fonteffects': true,
-                'htmlpalette': true,
-                'color': true,
-                'ol': true,
-                'ul': true,
-                'undo': true,
-                'redo': true,
-                'inserttable': true,
-                'insertimage': true,
-                'insertlink': true,
-                'unlink': true,
-                'rm_format': true,
-                'print': false,
-                'source': true
-            });
+        const editorContainer = document.getElementById(`quill-editor-${id}`);
+        if (!editorContainer) return;
 
-            if (initialContent) {
-                jQuery(`#part-content-${id}`).Editor('setText', initialContent);
+        const quill = new Quill(`#quill-editor-${id}`, {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, 4, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
             }
+        });
+
+        if (initialContent) {
+            quill.clipboard.dangerouslyPasteHTML(initialContent);
         }
+
+        quillInstances[id] = quill;
     }
 
     function addNewPart(title = '', content = '') {
@@ -770,21 +791,16 @@
         const cardNode = wrapper.firstElementChild;
         list.appendChild(cardNode);
         
-        initEditorForPart(id, content);
+        initQuillEditor(id, content);
         updatePartIndexes();
     }
 
     function getEditorContent(id) {
-        if (window.jQuery && jQuery.fn.Editor) {
-            try {
-                return jQuery(`#part-content-${id}`).Editor('getText') || '';
-            } catch(e) {
-                const el = document.getElementById(`part-content-${id}`);
-                return el ? el.value : '';
-            }
+        if (quillInstances[id]) {
+            return quillInstances[id].root.innerHTML;
         }
-        const el = document.getElementById(`part-content-${id}`);
-        return el ? el.value : '';
+        const textarea = document.getElementById(`part-content-${id}`);
+        return textarea ? textarea.value : '';
     }
 
     function removePart(id) {
@@ -793,6 +809,7 @@
             if (card) {
                 card.remove();
             }
+            delete quillInstances[id];
             updatePartIndexes();
         }
     }
@@ -820,8 +837,8 @@
             
             card.parentNode.insertBefore(card, previous);
             
-            initEditorForPart(id, currentContent);
-            initEditorForPart(prevId, prevContent);
+            initQuillEditor(id, currentContent);
+            initQuillEditor(prevId, prevContent);
             
             updatePartIndexes();
         }
@@ -837,8 +854,8 @@
             
             card.parentNode.insertBefore(next, card);
             
-            initEditorForPart(id, currentContent);
-            initEditorForPart(nextId, nextContent);
+            initQuillEditor(id, currentContent);
+            initQuillEditor(nextId, nextContent);
             
             updatePartIndexes();
         }
