@@ -1223,9 +1223,13 @@ class Admin extends Controller {
         $this->view('admin/add_post', [
             'categories' => $categories,
             'authors' => $authors,
-            'settings' => $this->siteSettings
+            'settings' => $this->siteSettings,
+            'current_page' => 'add_post'
         ]);
     }
+
+
+
 
     public function import_doc() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['doc_file'])) {
@@ -2028,6 +2032,7 @@ class Admin extends Controller {
         $post_author_ids = $adminModel->getPostAuthorIds($id);
         
         $this->view('admin/edit_post', [
+            'current_page' => 'edit_post',
             'post' => $post,
             'categories' => $categories,
             'authors' => $authors,

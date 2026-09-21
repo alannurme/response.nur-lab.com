@@ -82,7 +82,8 @@ if (empty($current_page)) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>if(typeof Chart==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');}</script>
     <script>if(typeof Chart==='undefined'){document.write('<script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js"><\/script>');}</script>
-    <!-- Cropper.js -->
+    <!-- jQuery & Cropper.js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <style>

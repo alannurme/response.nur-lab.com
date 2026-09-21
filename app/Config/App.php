@@ -16,7 +16,17 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'https://response.nur-lab.com/';
+    public string $baseURL = '';
+
+    public function __construct()
+    {
+        parent::__construct();
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $script_dir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+        $clean_dir = rtrim(str_replace('\\', '/', $script_dir), '/');
+        $this->baseURL = $protocol . $host . $clean_dir . '/';
+    }
 
 
     /**

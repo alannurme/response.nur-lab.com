@@ -256,8 +256,29 @@
                 </div>
 
                 <div class="form-group mb-4">
-                    <label class="form-label-premium"><i class="fas fa-file-alt"></i> Content</label>
-                    <textarea id="main-post-content" name="content" class="form-control" style="min-height: 500px; width: 100%; border-radius: 12px; font-size: 15px; line-height: 1.7; padding: 15px; border: 1.5px solid #cbd5e1; font-family: 'Hind Siliguri', sans-serif;"><?= htmlspecialchars($data['post']['content']) ?></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="form-label-premium" style="margin-bottom: 0;"><i class="fas fa-file-alt"></i> Content</label>
+                    </div>
+                    <textarea name="content" class="form-control" style="display: none;"><?= htmlspecialchars($data['post']['content'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+
+                    <!-- Parts Builder Interface -->
+                    <div id="parts-builder-container" style="border: 1px solid var(--border); border-radius: 16px; padding: 25px; background: #f8fafc; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="margin: 0; font-weight: 800; color: var(--text-main); font-family: sans-serif; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-cubes" style="color: var(--primary);"></i>পোস্ট অনুচ্ছেদ/পর্বসমূহ (Article Parts)
+                            </h4>
+                        </div>
+                        
+                        <div id="parts-list" style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Dynamic parts go here -->
+                        </div>
+
+                        <div style="margin-top: 20px; text-align: right;">
+                            <button type="button" class="btn btn-primary" onclick="addNewPart()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;">
+                                <i class="fas fa-plus"></i> Add Another Part
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -693,57 +714,287 @@
                     });
                 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+
+
+
+<!-- Suyati LineControl Editor Dependencies -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-control/1.1.0/editor.css" onerror="this.onerror=null;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/line-control/1.1.0/editor.js"></script>
+
 <script>
-    if (typeof tinymce === 'undefined') {
-        document.write('<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js"><\/script>');
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof tinymce !== 'undefined') {
-            tinymce.init({
-                selector: 'textarea[name="content"]',
-                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen',
-                toolbar: 'undo redo | blocks | bold italic underline strikethrough | forecolor blockquote | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | fullscreen',
-                height: 550,
-                branding: false,
-                promotion: false,
-                contextmenu: false,
-                content_style: 'body { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; padding: 15px; } img { max-width: 100%; height: auto; display: block; margin: 10px auto; }',
-                file_picker_callback: function (callback, value, meta) {
-                    if (meta.filetype === 'image') {
-                        const targetInput = document.createElement('input');
-                        targetInput.id = 'tinymce_media_target';
-                        targetInput.type = 'hidden';
-                        document.body.appendChild(targetInput);
-                        
-                        targetInput.addEventListener('input', function () {
-                            callback(targetInput.value, { alt: '' });
-                            targetInput.remove();
-                        });
-                        
-                        openMediaPicker('tinymce_media_target', null);
+
+    function createPartCardHTML(id, title = '', content = '') {
+        return `
+        <div class="part-item-card" id="part-card-${id}" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; position: relative; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <strong style="color: #1e293b;" class="part-index-label">পর্ব</strong>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-sm" onclick="movePartUp(${id})" style="background: #f1f5f9; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;"><i class="fas fa-arrow-up"></i></button>
+                    <button type="button" class="btn btn-sm" onclick="movePartDown(${id})" style="background: #f1f5f9; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;"><i class="fas fa-arrow-down"></i></button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removePart(${id})" style="background: #ef4444; color: #ffffff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;"><i class="fas fa-trash"></i> Remove</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Part Title / Heading (H2)</label>
+                <input type="text" class="form-control part-title-input" value="${escapeHTML(title)}" placeholder="অনুচ্ছেদের শিরোনাম লিখুন (যেমন: মুজিযা বলতে কী বোঝায়?)" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">Content</label>
+                <textarea id="part-content-${id}" class="part-content-textarea" style="height: 350px; width: 100%; font-family: 'Hind Siliguri', sans-serif; font-size: 15px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">${escapeHTML(content)}</textarea>
+            </div>
+        </div>
+        `;
+    }
+
+    let partCounter = 0;
+
+    function initEditorForPart(id, initialContent = '') {
+        const textarea = document.getElementById(`part-content-${id}`);
+        if (textarea) {
+            textarea.value = initialContent;
+        }
+
+        if (window.jQuery && jQuery.fn && jQuery.fn.Editor) {
+            const $editorEl = jQuery(`#part-content-${id}`);
+            try {
+                $editorEl.Editor({
+                    'texteffects': true,
+                    'aligneffects': true,
+                    'textstyle': true,
+                    'fontsize': true,
+                    'formatblock': true,
+                    'fonteffects': true,
+                    'htmlpalette': true,
+                    'color': true,
+                    'ol': true,
+                    'ul': true,
+                    'undo': true,
+                    'redo': true,
+                    'inserttable': true,
+                    'insertimage': true,
+                    'insertlink': true,
+                    'unlink': true,
+                    'rm_format': true,
+                    'print': false,
+                    'source': true
+                });
+            } catch(err) {
+                console.warn('LineControl init error:', err);
+            }
+
+            const setEditorText = () => {
+                if (!initialContent) return;
+                try {
+                    $editorEl.Editor('setText', initialContent);
+                } catch(e) {}
+                
+                const cardNode = document.getElementById(`part-card-${id}`);
+                if (cardNode) {
+                    const editable = cardNode.querySelector('.Editor-editor') || cardNode.querySelector('[contenteditable="true"]');
+                    if (editable) {
+                        editable.innerHTML = initialContent;
                     }
-                },
-                setup: function (editor) {
-                    document.addEventListener('focusin', function (e) {
-                        if (e.target.closest('#mediaPickerModal')) {
-                            e.stopImmediatePropagation();
-                        }
-                    }, true);
-                    
-                    editor.on('FullscreenStateChanged', function (e) {
-                        if (e.state) {
-                            document.body.classList.add('editor-fullscreen-active');
-                        } else {
-                            document.body.classList.remove('editor-fullscreen-active');
-                        }
-                    });
                 }
+            };
+
+            setEditorText();
+            setTimeout(setEditorText, 100);
+            setTimeout(setEditorText, 300);
+        }
+    }
+
+    function addNewPart(title = '', content = '') {
+        partCounter++;
+        const id = partCounter;
+        const list = document.getElementById('parts-list');
+        
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = createPartCardHTML(id, title, content);
+        const cardNode = wrapper.firstElementChild;
+        list.appendChild(cardNode);
+        
+        initEditorForPart(id, content);
+        updatePartIndexes();
+    }
+
+    function getEditorContent(id) {
+        if (window.jQuery && jQuery.fn.Editor) {
+            try {
+                const text = jQuery(`#part-content-${id}`).Editor('getText');
+                if (text && text.trim() !== '') return text;
+            } catch(e) {}
+        }
+        const container = document.querySelector(`#part-card-${id} .Editor-editor`);
+        if (container) return container.innerHTML;
+        const el = document.getElementById(`part-content-${id}`);
+        return el ? el.value : '';
+    }
+
+    function removePart(id) {
+        if (confirm('Are you sure you want to remove this part? All content inside this part will be lost.')) {
+            const card = document.getElementById(`part-card-${id}`);
+            if (card) {
+                card.remove();
+            }
+            updatePartIndexes();
+        }
+    }
+
+    function updatePartIndexes() {
+        const banglaDigits = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+        const toBangla = (num) => num.toString().split('').map(digit => banglaDigits[digit] || digit).join('');
+        
+        const cards = document.querySelectorAll('.part-item-card');
+        cards.forEach((card, idx) => {
+            const label = card.querySelector('.part-index-label');
+            if (label) {
+                label.textContent = toBangla(idx + 1);
+            }
+        });
+    }
+
+    function movePartUp(id) {
+        const card = document.getElementById(`part-card-${id}`);
+        const previous = card.previousElementSibling;
+        if (previous) {
+            const currentContent = getEditorContent(id);
+            const prevId = previous.id.replace('part-card-', '');
+            const prevContent = getEditorContent(prevId);
+            
+            card.parentNode.insertBefore(card, previous);
+            
+            initEditorForPart(id, currentContent);
+            initEditorForPart(prevId, prevContent);
+            
+            updatePartIndexes();
+        }
+    }
+
+    function movePartDown(id) {
+        const card = document.getElementById(`part-card-${id}`);
+        const next = card.nextElementSibling;
+        if (next) {
+            const currentContent = getEditorContent(id);
+            const nextId = next.id.replace('part-card-', '');
+            const nextContent = getEditorContent(nextId);
+            
+            card.parentNode.insertBefore(next, card);
+            
+            initEditorForPart(id, currentContent);
+            initEditorForPart(nextId, nextContent);
+            
+            updatePartIndexes();
+        }
+    }
+
+    function compileContent() {
+        let finalHtml = '';
+        const cards = document.querySelectorAll('.part-item-card');
+        cards.forEach(card => {
+            const titleInput = card.querySelector('.part-title-input');
+            const titleText = titleInput.value.trim();
+            const editorId = card.querySelector('.part-content-textarea').id.replace('part-content-', '');
+            const editorContent = getEditorContent(editorId);
+            
+            if (titleText !== '') {
+                finalHtml += '<h2>' + titleText + '</h2>\n';
+            }
+            finalHtml += editorContent + '\n';
+        });
+        
+        const mainTextarea = document.querySelector('textarea[name="content"]');
+        if (mainTextarea) {
+            mainTextarea.value = finalHtml;
+        }
+    }
+
+    let isPartsInitialized = false;
+    function safeInitEditPageParts() {
+        if (isPartsInitialized) return;
+        const mainTextarea = document.querySelector('textarea[name="content"]');
+        if (!mainTextarea) return;
+        
+        let initialContent = mainTextarea.value || '';
+        // Decode HTML entities if encoded inside value attribute
+        const txt = document.createElement('textarea');
+        txt.innerHTML = initialContent;
+        initialContent = txt.value;
+
+        isPartsInitialized = true;
+
+        if (!initialContent || initialContent.trim() === '') {
+            addNewPart('', '');
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.innerHTML = initialContent;
+        const h2Elements = Array.from(container.querySelectorAll('h2'));
+        
+        if (h2Elements.length === 0) {
+            addNewPart('', initialContent);
+        } else {
+            let firstH2 = h2Elements[0];
+            let currNode = container.firstChild;
+            let prependedHtml = '';
+            while (currNode && currNode !== firstH2) {
+                if (currNode.nodeType === Node.ELEMENT_NODE) {
+                    prependedHtml += currNode.outerHTML;
+                } else if (currNode.nodeType === Node.TEXT_NODE) {
+                    prependedHtml += currNode.textContent;
+                }
+                currNode = currNode.nextSibling;
+            }
+
+            if (prependedHtml.trim() !== '') {
+                addNewPart('', prependedHtml);
+            }
+
+            h2Elements.forEach((h2, idx) => {
+                const title = h2.textContent ? h2.textContent.trim() : '';
+                let contentHtml = '';
+                let nextNode = h2.nextSibling;
+                const nextH2 = h2Elements[idx + 1];
+
+                while (nextNode && nextNode !== nextH2) {
+                    if (nextNode.nodeType === Node.ELEMENT_NODE) {
+                        contentHtml += nextNode.outerHTML;
+                    } else if (nextNode.nodeType === Node.TEXT_NODE) {
+                        contentHtml += nextNode.textContent;
+                    }
+                    nextNode = nextNode.nextSibling;
+                }
+
+                addNewPart(title, contentHtml);
+            });
+        }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        safeInitEditPageParts();
+    } else {
+        document.addEventListener('DOMContentLoaded', safeInitEditPageParts);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                compileContent();
             });
         }
     });
+
+    function toggleFullscreen() {
+        // Fullscreen command now handled on individual editors
+    }
 
     function toggleRightSidebar() {
         const grid = document.getElementById('post-form-grid');
@@ -752,7 +1003,7 @@
         
         if (sidebar.style.display === 'none') {
             sidebar.style.display = 'flex';
-            grid.style.gridTemplateColumns = '1fr 380px';
+            grid.style.gridTemplateColumns = '1fr 320px';
             toggleBtn.innerHTML = '<i class="fas fa-indent"></i> Hide Sidebar';
         } else {
             sidebar.style.display = 'none';
@@ -762,9 +1013,7 @@
     }
 
     function saveBackground() {
-        if (typeof tinymce !== 'undefined') {
-            tinymce.triggerSave();
-        }
+        compileContent();
         
         if (typeof validateForm === 'function' && !validateForm()) {
             return;
