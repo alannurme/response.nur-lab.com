@@ -159,8 +159,9 @@ if (!function_exists('getBengaliDate')) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 Icon Library -->
+    <!-- Font Awesome 6 Icon Library (Robust CDN Mirrors) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
     
     <!-- Facebook Pixel Code -->
     <?php if (isset($data['settings']['facebook_pixel_status']) && $data['settings']['facebook_pixel_status'] === 'enabled' && !empty($data['settings']['facebook_pixel_code'])): ?>
