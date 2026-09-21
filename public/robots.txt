@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /app/
+Disallow: /public/uploads/
+Allow: /
+
+Sitemap: https://islamic.nur-lab.com/sitemap.xml

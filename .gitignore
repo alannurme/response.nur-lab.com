@@ -1,0 +1,26 @@
+# Composer vendor directory (Composer dependencies are re-installed on server or deployed via git if needed)
+vendor/
+
+# Writable directory generated files
+writable/cache/
+writable/debugbar/
+writable/logs/
+writable/session/
+writable/uploads/
+writable/*
+
+# Sensitive environment configuration
+.env
+
+# Legacy cache
+app/cache/
+
+# Backups and SQL dumps
+*.zip
+*.sql
+*.phar
+composer-setup.php
+
+# OS generated files
+.DS_Store
+Thumbs.db
