@@ -194,7 +194,7 @@ if (empty($current_page)) {
             overflow-x: hidden;
         }
         .sidebar {
-            width: 280px;
+            width: 320px;
             height: 100vh;
             background: #ffffff;
             position: fixed;
@@ -204,7 +204,7 @@ if (empty($current_page)) {
             border-right: 1px solid #e2e8f0;
         }
         .main-content {
-            margin-left: 280px;
+            margin-left: 320px;
             padding: 3rem;
             min-height: 100vh;
             background: var(--bg-light);
@@ -242,8 +242,8 @@ if (empty($current_page)) {
         #admin-3d-canvas {
             position: fixed;
             top: 0;
-            left: 280px;
-            width: calc(100% - 280px);
+            left: 320px;
+            width: calc(100% - 320px);
             height: 100%;
             z-index: 0;
             opacity: 0.1;
@@ -398,7 +398,7 @@ if (empty($current_page)) {
     <style>
         /* Modernized Sidebar Scrollbar & Shell */
         .sidebar {
-            width: 280px;
+            width: 320px;
             height: 100vh;
             background: #ffffff;
             position: fixed;

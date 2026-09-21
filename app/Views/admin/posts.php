@@ -178,11 +178,23 @@
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     }
 
-    /* Sidebar TOC Styles */
+    /* Sidebar Tree & TOC Independent Scroll Limits */
     #sidebar-posts-subcontent::-webkit-scrollbar {
         width: 4px;
     }
     #sidebar-posts-subcontent::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    #sidebar-tree-card > .folder-tree-list {
+        max-height: 280px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar {
+        width: 4px;
+    }
+    #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 4px;
     }
@@ -191,7 +203,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 12px 16px;
-        max-height: 250px;
+        max-height: 200px;
         overflow-y: auto;
         font-family: 'Noto Serif Bengali', serif !important;
         font-size: 14px;
@@ -3407,6 +3419,16 @@ if (!function_exists('renderCategoryDropdownOptions')) {
                 tocContainer.style.background = 'transparent';
                 tocContainer.style.boxShadow = 'none';
                 targetContainer.appendChild(tocContainer);
+            }
+
+            // Auto scroll sidebar navigation to top so All Posts is visible at top
+            const sidebarNav = document.querySelector('.sidebar-nav') || document.querySelector('.sidebar');
+            if (sidebarNav) {
+                sidebarNav.scrollTop = 0;
+            }
+            const activeNav = document.querySelector('.nav-item.active');
+            if (activeNav) {
+                activeNav.scrollIntoView({ block: 'start', behavior: 'instant' });
             }
         }
     });
