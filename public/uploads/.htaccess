@@ -1,0 +1,19 @@
+# Disable PHP execution in uploads directory
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Block access to script extensions directly
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|phar|pl|py|cgi|asp|aspx|exe|bat|cmd|sh|vbs)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent script execution via Handler override
+SetHandler default-handler

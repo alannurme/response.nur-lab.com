@@ -1376,11 +1376,16 @@ class Admin extends Controller {
                 }
 
                 foreach (['site_logo', 'site_favicon'] as $file_key) {
-                    if (!empty($_FILES[$file_key]['name'])) {
-                        $file_name = time() . '_' . $_FILES[$file_key]['name'];
-                        $target_file = $upload_dir . $file_name;
-                        if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_file)) {
-                            $settings[$file_key] = 'public/uploads/settings/' . $file_name;
+                    if (!empty($_FILES[$file_key]['name']) && $_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION));
+                        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico', 'svg'];
+                        if (in_array($ext, $allowed_exts, true)) {
+                            $safe_name = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($_FILES[$file_key]['name'], PATHINFO_FILENAME));
+                            $file_name = time() . '_' . $safe_name . '.' . $ext;
+                            $target_file = $upload_dir . $file_name;
+                            if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_file)) {
+                                $settings[$file_key] = 'public/uploads/settings/' . $file_name;
+                            }
                         }
                     }
                 }
@@ -2744,30 +2749,39 @@ class Admin extends Controller {
             $image_url = $_POST['image_url'] ?? '';
             
             // Handle image upload
-            if (!empty($_FILES['image']['name'])) {
-                $upload_dir = \PUBROOT . '/uploads/products/';
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0777, true);
-                }
-                $file_name = time() . '_' . $_FILES['image']['name'];
-                $target_file = $upload_dir . $file_name;
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                    $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+            if (!empty($_FILES['image']['name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $allowed_img_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                if (in_array($ext, $allowed_img_exts, true)) {
+                    $upload_dir = \PUBROOT . '/uploads/products/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0777, true);
+                    }
+                    $safe_name = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($_FILES['image']['name'], PATHINFO_FILENAME));
+                    $file_name = time() . '_' . $safe_name . '.' . $ext;
+                    $target_file = $upload_dir . $file_name;
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                        $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+                    }
                 }
             }
 
             $pdf_preview = $_POST['pdf_preview_url'] ?? '';
             
             // Handle PDF upload
-            if (!empty($_FILES['pdf_preview']['name'])) {
-                $upload_dir = \PUBROOT . '/uploads/pdf/';
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0777, true);
-                }
-                $file_name = time() . '_' . str_replace(' ', '_', $_FILES['pdf_preview']['name']);
-                $target_file = $upload_dir . $file_name;
-                if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
-                    $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+            if (!empty($_FILES['pdf_preview']['name']) && $_FILES['pdf_preview']['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($_FILES['pdf_preview']['name'], PATHINFO_EXTENSION));
+                if ($ext === 'pdf') {
+                    $upload_dir = \PUBROOT . '/uploads/pdf/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0777, true);
+                    }
+                    $safe_name = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($_FILES['pdf_preview']['name'], PATHINFO_FILENAME));
+                    $file_name = time() . '_' . $safe_name . '.pdf';
+                    $target_file = $upload_dir . $file_name;
+                    if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
+                        $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+                    }
                 }
             }
 
@@ -2809,30 +2823,39 @@ class Admin extends Controller {
             $image_url = $_POST['image_url'] ?? '';
             
             // Handle image upload
-            if (!empty($_FILES['image']['name'])) {
-                $upload_dir = \PUBROOT . '/uploads/products/';
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0777, true);
-                }
-                $file_name = time() . '_' . $_FILES['image']['name'];
-                $target_file = $upload_dir . $file_name;
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                    $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+            if (!empty($_FILES['image']['name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                $allowed_img_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                if (in_array($ext, $allowed_img_exts, true)) {
+                    $upload_dir = \PUBROOT . '/uploads/products/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0777, true);
+                    }
+                    $safe_name = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($_FILES['image']['name'], PATHINFO_FILENAME));
+                    $file_name = time() . '_' . $safe_name . '.' . $ext;
+                    $target_file = $upload_dir . $file_name;
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                        $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+                    }
                 }
             }
 
             $pdf_preview = $_POST['pdf_preview_url'] ?? '';
             
             // Handle PDF upload
-            if (!empty($_FILES['pdf_preview']['name'])) {
-                $upload_dir = \PUBROOT . '/uploads/pdf/';
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0777, true);
-                }
-                $file_name = time() . '_' . str_replace(' ', '_', $_FILES['pdf_preview']['name']);
-                $target_file = $upload_dir . $file_name;
-                if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
-                    $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+            if (!empty($_FILES['pdf_preview']['name']) && $_FILES['pdf_preview']['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($_FILES['pdf_preview']['name'], PATHINFO_EXTENSION));
+                if ($ext === 'pdf') {
+                    $upload_dir = \PUBROOT . '/uploads/pdf/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0777, true);
+                    }
+                    $safe_name = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', pathinfo($_FILES['pdf_preview']['name'], PATHINFO_FILENAME));
+                    $file_name = time() . '_' . $safe_name . '.pdf';
+                    $target_file = $upload_dir . $file_name;
+                    if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
+                        $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+                    }
                 }
             }
 

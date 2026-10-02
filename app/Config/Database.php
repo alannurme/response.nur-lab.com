@@ -11,7 +11,7 @@ class Database extends FrameworkDbConfig
 
     public array $default = [
         'DSN'          => '',
-        'hostname'     => 'localhost',
+        'hostname'     => '127.0.0.1',
         'username'     => 'root',
         'password'     => 'Al04@95annur',
         'database'     => 'response',
@@ -58,7 +58,7 @@ class Database extends FrameworkDbConfig
         }
 
         try {
-            $host = 'localhost';
+            $host = '127.0.0.1';
             $db   = 'response';
             $user = 'root';
             $pass = 'Al04@95annur';
