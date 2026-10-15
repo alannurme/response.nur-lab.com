@@ -216,12 +216,81 @@
         background-color: #fff;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
     }
+
+    /* Modal Styling for Add Post Page */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.show {
+        display: flex !important;
+    }
+    .modal-content {
+        background: #fff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalScale {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .modal-close {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .modal-close:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+    }
+    .modal-body {
+        padding: 20px 24px;
+    }
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #f1f5f9;
+        background: #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
-<div class="justify-content-between d-flex align-items-center mb-5 header-container" style="border-bottom: 1px solid var(--border); padding-bottom: 20px;">
+<div class="justify-content-between d-flex align-items-center mb-4 header-container" style="border-bottom: 1px solid var(--border); padding-bottom: 20px;">
     <h3 class="m-0"><i class="fas fa-edit" style="color: var(--primary); margin-right: 8px;"></i>Create New Article</h3>
     <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
         <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; border-radius: 30px; background: #2563eb; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); font-size: 15px; cursor: pointer;">
             🚀 Publish Article
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="handleDirectPasteOnAddPage()" style="display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border-color: #86efac; color: #166534; font-weight: 600; cursor: pointer;" title="Paste copied post data">
+            <i class="fas fa-paste" style="color: #16a34a;"></i> Paste Post
         </button>
         <button type="button" id="toggle-sidebar-btn" class="btn btn-secondary" onclick="toggleRightSidebar()">
             <i class="fas fa-indent"></i> Hide Sidebar
@@ -233,6 +302,40 @@
         }
         ?>
         <a href="<?= $backUrl ?>" id="back-to-list-top" class="btn btn-secondary">&larr; Back to list</a>
+    </div>
+</div>
+
+<div id="pasted-post-banner-container"></div>
+
+<!-- Modal: Paste Post Data on Add Post Page -->
+<div class="modal-overlay" id="addPagePasteModal">
+    <div class="modal-content" style="max-width: 620px; width: 95%;">
+        <div class="modal-header">
+            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-paste" style="color: #16a34a;"></i> Paste Copied Post
+            </h3>
+            <button type="button" class="modal-close" onclick="closeAddPagePasteModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group mb-3">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="addPagePasteTextarea" style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 0;">Post JSON Data</label>
+                    <button type="button" class="btn btn-secondary" onclick="readClipboardIntoAddPageModal()" style="padding: 4px 10px; font-size: 12px; height: auto; gap: 4px;">
+                        <i class="fas fa-clipboard"></i> Read from Clipboard
+                    </button>
+                </div>
+                <textarea id="addPagePasteTextarea" class="form-control" rows="8" placeholder='{"_type": "nur_post_export", ...}' style="font-family: monospace; font-size: 12px; line-height: 1.4; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
+                <div id="addPagePasteError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin-top: 6px;"></div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-secondary" onclick="closeAddPagePasteModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="submitAddPagePasteModal()" style="background: #16a34a; border-color: #16a34a; font-weight: 600;">
+                <i class="fas fa-check"></i> Apply Post Data
+            </button>
+        </div>
     </div>
 </div>
     <div id="post-form-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; transition: all 0.3s ease;">
@@ -451,7 +554,7 @@
             if (dropzone) dropzone.style.display = 'none';
             if (container) container.style.display = 'block';
             if (preview) {
-                preview.src = path;
+                preview.src = (path.indexOf('http://') === 0 || path.indexOf('https://') === 0 || path.indexOf('<?= URLROOT ?>') === 0) ? path : '<?= URLROOT ?>/public/img/' + path;
                 preview.style.display = 'block';
             }
         } else {
@@ -643,6 +746,17 @@
             if (option) option.style.display = 'block';
         }
 
+        window.addAuthor = addAuthor;
+        window.clearAllAuthors = function() {
+            selectedAuthors.forEach(id => {
+                const option = authorSelect.querySelector(`option[value="${id}"]`);
+                if (option) option.style.display = 'block';
+            });
+            selectedAuthors.clear();
+            tagsContainer.innerHTML = '';
+            inputsContainer.innerHTML = '';
+        };
+
         authorSelect.addEventListener('change', function() {
             const id = this.value;
             if (!id) return;
@@ -665,6 +779,9 @@
         const titleInput = document.querySelector('input[name="title"]');
         const slugInput = document.querySelector('input[name="slug"]');
         let isSlugEdited = false;
+        window.setIsSlugEdited = function(val) {
+            isSlugEdited = val;
+        };
 
         if (titleInput && slugInput) {
             slugInput.addEventListener('input', function() {
@@ -883,8 +1000,395 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const pendingData = sessionStorage.getItem('pending_paste_post');
+        if (pendingData) {
+            sessionStorage.removeItem('pending_paste_post');
+            try {
+                const parsed = JSON.parse(pendingData);
+                const post = parsed.post || parsed;
+                waitForQuillAndPopulate(post);
+                return;
+            } catch(e) {
+                console.error('Error applying pending pasted post:', e);
+            }
+        }
         addNewPart('', '');
     });
+
+    function waitForQuillAndPopulate(post) {
+        if (typeof Quill === 'undefined' || typeof window.addAuthor === 'undefined') {
+            setTimeout(() => waitForQuillAndPopulate(post), 50);
+            return;
+        }
+        populateFormWithPostData(post);
+    }
+
+    function populateFormWithPostData(post) {
+        if (!post) return;
+
+        // 1. Title
+        const titleInput = document.querySelector('input[name="title"]');
+        if (titleInput && post.title) {
+            titleInput.value = post.title;
+        }
+
+        // 2. Slug
+        const slugInput = document.querySelector('input[name="slug"]');
+        if (slugInput && post.slug) {
+            slugInput.value = post.slug;
+            if (typeof window.setIsSlugEdited === 'function') {
+                window.setIsSlugEdited(true);
+            }
+        }
+
+        // 3. Status
+        const statusSelect = document.querySelector('select[name="status"]');
+        if (statusSelect && post.status) {
+            statusSelect.value = post.status;
+        }
+
+        // 4. Created at / Publish date
+        const createdAtInput = document.querySelector('input[name="created_at"]');
+        if (createdAtInput && post.created_at) {
+            try {
+                const d = new Date(post.created_at);
+                if (!isNaN(d.getTime())) {
+                    const pad = (n) => String(n).padStart(2, '0');
+                    createdAtInput.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
+            } catch(e) {}
+        }
+
+        // 5. Views
+        const viewsInput = document.querySelector('input[name="views"]');
+        if (viewsInput) {
+            viewsInput.value = post.views || post.fake_views || 0;
+        }
+
+        // 6. Featured Image
+        const imgInput = document.getElementById('post_image_path');
+        if (imgInput && post.featured_image) {
+            imgInput.value = post.featured_image;
+            if (typeof updateFeaturedImageUI === 'function') {
+                updateFeaturedImageUI();
+            }
+        }
+
+        // 7. SEO Fields
+        const seoTitleInput = document.querySelector('input[name="seo_title"]');
+        if (seoTitleInput && post.seo_title) seoTitleInput.value = post.seo_title;
+
+        const seoDescInput = document.querySelector('textarea[name="seo_description"]');
+        if (seoDescInput && post.seo_description) seoDescInput.value = post.seo_description;
+
+        const seoKwInput = document.querySelector('input[name="seo_keywords"]');
+        if (seoKwInput && post.seo_keywords) seoKwInput.value = post.seo_keywords;
+
+        // 8. Schema Data
+        const schemaInput = document.getElementById('schema_data_input');
+        if (schemaInput && post.schema_data) {
+            schemaInput.value = typeof post.schema_data === 'string' ? post.schema_data : JSON.stringify(post.schema_data);
+            try {
+                const schemaObj = (typeof post.schema_data === 'string') ? JSON.parse(post.schema_data) : post.schema_data;
+                const typeSelect = document.getElementById('schema_type_select');
+                if (typeSelect && schemaObj && schemaObj.type) {
+                    typeSelect.value = schemaObj.type;
+                    if (typeof renderFields === 'function') {
+                        renderFields(schemaObj.type);
+                    }
+                    if (typeof updatePreviewAndScore === 'function') {
+                        updatePreviewAndScore();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 9. Categories matching
+        // Uncheck all categories first
+        document.querySelectorAll('input[name="category_ids[]"]').forEach(cb => {
+            cb.checked = false;
+            const wrapper = cb.closest('.category-tree-item-wrapper');
+            if (wrapper) {
+                const badgeContainer = wrapper.querySelector('.main-cat-badge-container');
+                if (badgeContainer) badgeContainer.style.display = 'none';
+                const radio = wrapper.querySelector('input[name="main_category_id"]');
+                if (radio) radio.checked = false;
+            }
+        });
+
+        const targetCategoryNames = Array.isArray(post.category_names) ? post.category_names.map(n => n.toLowerCase().trim()) : [];
+        const targetCategoryIds = Array.isArray(post.category_ids) ? post.category_ids.map(id => String(id)) : [];
+        const mainCatName = (post.main_category_name || '').toLowerCase().trim();
+        const mainCatId = post.main_category_id ? String(post.main_category_id) : '';
+
+        let matchedAnyCat = false;
+        let mainMatched = false;
+
+        document.querySelectorAll('.category-tree-item-wrapper').forEach(wrapper => {
+            const cb = wrapper.querySelector('input[name="category_ids[]"]');
+            const label = wrapper.querySelector('label');
+            const radio = wrapper.querySelector('input[name="main_category_id"]');
+            if (!cb || !label) return;
+
+            const catName = label.textContent.toLowerCase().trim();
+            const catId = String(cb.value);
+
+            const isMatched = (targetCategoryNames.length > 0 && targetCategoryNames.includes(catName)) ||
+                              (targetCategoryIds.length > 0 && targetCategoryIds.includes(catId));
+
+            if (isMatched) {
+                cb.checked = true;
+                matchedAnyCat = true;
+                const badge = wrapper.querySelector('.main-cat-badge-container');
+                if (badge) badge.style.display = 'inline-flex';
+
+                if ((mainCatName && catName === mainCatName) || (mainCatId && catId === mainCatId)) {
+                    if (radio) {
+                        radio.checked = true;
+                        mainMatched = true;
+                    }
+                }
+            }
+        });
+
+        if (matchedAnyCat && !mainMatched) {
+            const firstCheckedRadio = document.querySelector('input[name="category_ids[]"]:checked')?.closest('.category-tree-item-wrapper')?.querySelector('input[name="main_category_id"]');
+            if (firstCheckedRadio) {
+                firstCheckedRadio.checked = true;
+            }
+        }
+        if (!matchedAnyCat) {
+            const firstCb = document.querySelector('input[name="category_ids[]"]');
+            if (firstCb) {
+                firstCb.checked = true;
+                const wrapper = firstCb.closest('.category-tree-item-wrapper');
+                if (wrapper) {
+                    const badge = wrapper.querySelector('.main-cat-badge-container');
+                    if (badge) badge.style.display = 'inline-flex';
+                    const radio = wrapper.querySelector('input[name="main_category_id"]');
+                    if (radio) radio.checked = true;
+                }
+            }
+        }
+
+        // 10. Authors matching
+        const authorSelect = document.getElementById('author_select');
+        if (typeof window.clearAllAuthors === 'function') {
+            window.clearAllAuthors();
+        }
+        if (authorSelect && typeof window.addAuthor === 'function') {
+            const targetAuthorNames = Array.isArray(post.author_names) ? post.author_names.map(n => n.toLowerCase().trim()) : [];
+            const targetAuthorIds = Array.isArray(post.author_ids) ? post.author_ids.map(id => String(id)) : [];
+            let matchedAnyAuthor = false;
+
+            Array.from(authorSelect.options).forEach(opt => {
+                if (!opt.value) return;
+                const optName = (opt.getAttribute('data-name') || opt.textContent).toLowerCase().trim();
+                const optId = String(opt.value);
+
+                const isMatched = (targetAuthorNames.length > 0 && targetAuthorNames.some(tan => optName.includes(tan) || tan.includes(optName))) ||
+                                  (targetAuthorIds.length > 0 && targetAuthorIds.includes(optId));
+
+                if (isMatched) {
+                    window.addAuthor(opt.value, opt.getAttribute('data-name') || opt.textContent.trim(), opt.getAttribute('data-email') || '');
+                    matchedAnyAuthor = true;
+                }
+            });
+
+            if (!matchedAnyAuthor) {
+                const adminOption = Array.from(authorSelect.options).find(opt => opt.text.trim().toLowerCase().startsWith('admin'));
+                if (adminOption && adminOption.value) {
+                    window.addAuthor(adminOption.value, adminOption.getAttribute('data-name'), adminOption.getAttribute('data-email'));
+                } else if (authorSelect.options.length > 1) {
+                    const firstOpt = authorSelect.options[1];
+                    window.addAuthor(firstOpt.value, firstOpt.getAttribute('data-name'), firstOpt.getAttribute('data-email'));
+                }
+            }
+        }
+
+        // 11. Content & Parts
+        const rawContent = post.content || '';
+        const mainTextarea = document.querySelector('textarea[name="content"]');
+        if (mainTextarea) {
+            mainTextarea.value = rawContent;
+        }
+
+        const partsList = document.getElementById('parts-list');
+        if (partsList) {
+            partsList.innerHTML = '';
+        }
+        partCounter = 0;
+        if (typeof quillInstances !== 'undefined') {
+            for (let key in quillInstances) {
+                delete quillInstances[key];
+            }
+        }
+
+        if (!rawContent || rawContent.trim() === '') {
+            addNewPart('', '');
+        } else {
+            const container = document.createElement('div');
+            container.innerHTML = rawContent;
+            const headingElements = Array.from(container.querySelectorAll('h2'));
+            
+            if (headingElements.length === 0) {
+                addNewPart('', rawContent);
+            } else {
+                let firstHeading = headingElements[0];
+                let currNode = container.firstChild;
+                let prependedHtml = '';
+                while (currNode && currNode !== firstHeading) {
+                    if (currNode.nodeType === Node.ELEMENT_NODE) {
+                        prependedHtml += currNode.outerHTML;
+                    } else if (currNode.nodeType === Node.TEXT_NODE) {
+                        prependedHtml += currNode.textContent;
+                    }
+                    currNode = currNode.nextSibling;
+                }
+
+                if (prependedHtml.trim() !== '') {
+                    addNewPart('', prependedHtml);
+                }
+
+                headingElements.forEach((heading, idx) => {
+                    const title = heading.textContent ? heading.textContent.trim() : '';
+                    let contentHtml = '';
+                    let nextNode = heading.nextSibling;
+                    const nextHeading = headingElements[idx + 1];
+
+                    while (nextNode && nextNode !== nextHeading) {
+                        if (nextNode.nodeType === Node.ELEMENT_NODE) {
+                            contentHtml += nextNode.outerHTML;
+                        } else if (nextNode.nodeType === Node.TEXT_NODE) {
+                            contentHtml += nextNode.textContent;
+                        }
+                        nextNode = nextNode.nextSibling;
+                    }
+
+                    addNewPart(title, contentHtml);
+                });
+            }
+        }
+
+        if (typeof compileContent === 'function') {
+            compileContent();
+        }
+
+        showPastedBanner(post.title);
+    }
+
+    function showPastedBanner(postTitle) {
+        const container = document.getElementById('pasted-post-banner-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div id="pasted-post-banner" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 15px; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.12);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #16a34a; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #166534; font-size: 14.5px;">পোস্টের সকল ডাটা সফলভাবে পেস্ট করা হয়েছে!</div>
+                        <div style="color: #15803d; font-size: 12.5px; margin-top: 2px;">
+                            "${escapeHTML(postTitle || 'পোস্ট')}" — শিরোনাম, অনুচ্ছেদ/পর্বসমূহ, ক্যাটাগরি, লেখক ও SEO সেটিংস সেম টু সেম লোড হয়েছে। এখন আপনি প্রয়োজনমতো দেখে নিয়ে 'Publish Article' বাটনে ক্লিক করতে পারবেন।
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('pasted-post-banner').remove()" style="background: none; border: none; color: #166534; font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;">&times;</button>
+            </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleDirectPasteOnAddPage() {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText()
+                .then(text => {
+                    const cleaned = (text || '').trim();
+                    if (cleaned && (cleaned.startsWith('{') || cleaned.startsWith('['))) {
+                        try {
+                            const parsed = JSON.parse(cleaned);
+                            if (parsed && (parsed._type === 'nur_post_export' || parsed.post || parsed.title)) {
+                                const post = parsed.post || parsed;
+                                waitForQuillAndPopulate(post);
+                                return;
+                            }
+                        } catch(e) {}
+                    }
+                    openAddPagePasteModal(cleaned);
+                })
+                .catch(err => {
+                    console.warn('Clipboard read error/denied:', err);
+                    openAddPagePasteModal();
+                });
+        } else {
+            openAddPagePasteModal();
+        }
+    }
+
+    function openAddPagePasteModal(initialValue = '') {
+        const modal = document.getElementById('addPagePasteModal');
+        const textarea = document.getElementById('addPagePasteTextarea');
+        const errorEl = document.getElementById('addPagePasteError');
+        if (errorEl) errorEl.style.display = 'none';
+        if (textarea) textarea.value = initialValue || '';
+        if (modal) {
+            modal.classList.add('show');
+            if (textarea) textarea.focus();
+        }
+    }
+
+    function closeAddPagePasteModal() {
+        const modal = document.getElementById('addPagePasteModal');
+        if (modal) modal.classList.remove('show');
+    }
+
+    function readClipboardIntoAddPageModal() {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText()
+                .then(text => {
+                    const textarea = document.getElementById('addPagePasteTextarea');
+                    if (textarea) {
+                        textarea.value = text;
+                        textarea.focus();
+                    }
+                })
+                .catch(err => {
+                    alert('ক্লিপবোর্ড রিড করার পারমিশন পাওয়া যায়নি। কিবোর্ড থেকে Ctrl + V দিয়ে পেস্ট করুন।');
+                });
+        } else {
+            alert('আপনার ব্রাউজারে অটো-রিড সাপোর্ট নেই। সরাসরি বক্সে Ctrl + V দিয়ে পেস্ট করুন।');
+        }
+    }
+
+    function submitAddPagePasteModal() {
+        const textarea = document.getElementById('addPagePasteTextarea');
+        const errorEl = document.getElementById('addPagePasteError');
+        const raw = textarea ? textarea.value.trim() : '';
+
+        if (!raw) {
+            if (errorEl) {
+                errorEl.textContent = 'অনুগ্রহ করে কপি করা পোস্টের ডাটা পেস্ট করুন।';
+                errorEl.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (!parsed || (!parsed._type && !parsed.post && !parsed.title)) {
+                throw new Error('পেস্ট করা ডাটা সঠিক পোস্ট ফরম্যাট নয়।');
+            }
+            const post = parsed.post || parsed;
+            closeAddPagePasteModal();
+            waitForQuillAndPopulate(post);
+        } catch(e) {
+            if (errorEl) {
+                errorEl.textContent = 'ভুল ডাটা: ' + e.message;
+                errorEl.style.display = 'block';
+            }
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');

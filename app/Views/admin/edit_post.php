@@ -224,6 +224,9 @@
         <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; border-radius: 30px; background: #2563eb; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); font-size: 15px; cursor: pointer;">
             🚀 Update Article
         </button>
+        <button type="button" class="btn btn-secondary" onclick="copyCurrentEditPostData(<?= $data['post']['id'] ?>, this)" style="display: inline-flex; align-items: center; gap: 6px; color: #4f46e5; font-weight: 600;" title="Copy Post Data (Local to Live Transfer)">
+            <i class="far fa-copy"></i> Copy Post
+        </button>
         <button type="button" id="toggle-sidebar-btn" class="btn btn-secondary" onclick="toggleRightSidebar()">
             <i class="fas fa-indent"></i> Hide Sidebar
         </button>
@@ -1079,6 +1082,80 @@
             toast.style.transform = 'translateY(100px)';
             toast.style.opacity = '0';
         }, 3000);
+    }
+
+    function copyCurrentEditPostData(postId, btn) {
+        if (!postId) return;
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: #4f46e5;"></i>';
+            btn.disabled = true;
+        }
+
+        fetch('<?= URLROOT ?>/admin/export_post_json/' + postId)
+            .then(res => {
+                if (!res.ok) throw new Error('HTTP Status ' + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (!data.success || !data.data) {
+                    throw new Error(data.error || 'Failed to export post data');
+                }
+                const postJsonStr = JSON.stringify(data.data, null, 2);
+                const postTitle = (data.data.post && data.data.post.title) ? data.data.post.title : 'Post';
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(postJsonStr)
+                        .then(() => {
+                            if (btn) {
+                                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i>';
+                                setTimeout(() => {
+                                    btn.innerHTML = origHtml;
+                                    btn.disabled = false;
+                                }, 2000);
+                            }
+                            showToast('📋 "' + postTitle + '" এর ডাটা কপি হয়েছে! লাইভ সাইটে গিয়ে Paste Post করুন।', 'success');
+                        })
+                        .catch(err => {
+                            fallbackCopy(postJsonStr, btn, origHtml, postTitle);
+                        });
+                } else {
+                    fallbackCopy(postJsonStr, btn, origHtml, postTitle);
+                }
+            })
+            .catch(err => {
+                alert('পোস্ট ডাটা কপি করতে সমস্যা হয়েছে: ' + err.message);
+                if (btn) {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }
+            });
+    }
+
+    function fallbackCopy(text, btn, origHtml, postTitle) {
+        let textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        let successful = false;
+        try {
+            successful = document.execCommand('copy');
+        } catch (err) {
+            successful = false;
+        }
+        document.body.removeChild(textArea);
+        if (btn) {
+            btn.innerHTML = successful ? '<i class="fas fa-check" style="color: #16a34a;"></i>' : origHtml;
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+            }, 2000);
+        }
+        showToast(successful ? '📋 "' + postTitle + '" এর ডাটা কপি হয়েছে!' : 'ডাটা কপি ব্যর্থ হয়েছে।', successful ? 'success' : 'error');
     }
 </script>
 

@@ -22,8 +22,16 @@ class Cache extends BaseConfig
      * The name of the preferred handler that should be used. If for some reason
      * it is not available, the $backupHandler will be used in its place.
      */
-    public string $handler = 'redis';
+    public string $handler = 'file';
     public string $backupHandler = 'file';
+
+    public function __construct()
+    {
+        parent::__construct();
+        if (extension_loaded('redis')) {
+            $this->handler = 'redis';
+        }
+    }
 
     /**
      * --------------------------------------------------------------------------

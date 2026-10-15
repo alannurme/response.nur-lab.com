@@ -18,7 +18,7 @@ class Database extends FrameworkDbConfig
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => true,
-        'DBDebug'      => true,
+        'DBDebug'      => (ENVIRONMENT !== 'production'),
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
         'swapPre'      => '',
