@@ -191,7 +191,7 @@ class Admin extends Controller {
                 'success' => true,
                 'id' => $post['id'],
                 'title' => $post['title'] ?? '',
-                'content' => $post['content'] ?? '',
+                'content' => !empty($post['content']) ? preg_replace('/<\/blockquote>\s*<blockquote[^>]*>/i', '<br>', $post['content']) : '',
                 'image' => !empty($post['featured_image']) ? URLROOT . '/' . $post['featured_image'] : '',
                 'created_at' => !empty($post['created_at']) ? date('Y/m/d', strtotime($post['created_at'])) : '',
                 'status' => $post['status'] ?? 'published',
@@ -212,40 +212,7 @@ class Admin extends Controller {
         }
         exit;
     }
-
-
-    public function get_post_api_info() {
-        header('Content-Type: application/json; charset=utf-8');
-        $settings = $this->adminModel->getSettings();
-        $apiKey = $settings['post_api_key'] ?? '';
-        if (empty($apiKey)) {
-            $apiKey = 'nur_' . bin2hex(random_bytes(16));
-            $this->adminModel->updateSettings(['post_api_key' => $apiKey]);
-        }
-        echo json_encode([
-            'success' => true,
-            'api_key' => $apiKey,
-            'endpoint_url' => URLROOT . '/api/post/create'
-        ]);
-        exit;
-    }
-
-    public function regenerate_post_api_key() {
-        header('Content-Type: application/json; charset=utf-8');
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['success' => false, 'error' => 'POST method required']);
-            exit;
-        }
-        $newKey = 'nur_' . bin2hex(random_bytes(16));
-        $this->adminModel->updateSettings(['post_api_key' => $newKey]);
-        echo json_encode([
-            'success' => true,
-            'api_key' => $newKey,
-            'endpoint_url' => URLROOT . '/api/post/create',
-            'message' => 'New API Key generated successfully!'
-        ]);
-        exit;
-    }
+        
 
     public function get_folder_posts_ajax($category_id) {
         header('Content-Type: application/json; charset=utf-8');
@@ -1232,7 +1199,7 @@ class Admin extends Controller {
                 'author_ids' => $_POST['author_ids'] ?? [],
                 'title' => $_POST['title'] ?? '',
                 'slug' => trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-'),
-                'content' => $_POST['content'] ?? '',
+                'content' => !empty($_POST['content']) ? preg_replace('/<\/blockquote>\s*<blockquote[^>]*>/i', '<br>', $_POST['content']) : '',
                 'excerpt' => $_POST['excerpt'] ?? '',
                 'featured_image' => $_POST['featured_image'] ?? '',
                 'post_type' => 'blog',
@@ -2043,7 +2010,7 @@ class Admin extends Controller {
                 'title' => $_POST['title'] ?? '',
                 'category_ids' => $_POST['category_ids'] ?? [],
                 'author_ids' => $_POST['author_ids'] ?? [],
-                'content' => $_POST['content'] ?? '',
+                'content' => !empty($_POST['content']) ? preg_replace('/<\/blockquote>\s*<blockquote[^>]*>/i', '<br>', $_POST['content']) : '',
                 'excerpt' => $_POST['excerpt'] ?? '',
                 'featured_image' => $_POST['featured_image'] ?? '',
                 'slug' => trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-'),

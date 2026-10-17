@@ -520,6 +520,9 @@
                     }
 
                     function validateForm() {
+                        if (typeof compileContent === 'function') {
+                            compileContent();
+                        }
                         if (typeof tinymce !== 'undefined') {
                             tinymce.triggerSave();
                         }

@@ -119,8 +119,21 @@
         padding: 24px 30px 24px 44px;
         margin: 30px 0;
         font-style: normal;
+        line-height: 1.8;
+        font-size: 1rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .post-body blockquote + blockquote {
+        margin-top: -24px !important;
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+        padding-top: 8px !important;
+    }
+
+    .post-body blockquote + blockquote::before {
+        display: none !important;
     }
 
     .post-body blockquote::before {
@@ -1540,9 +1553,6 @@ if (!empty($data['breadcrumbs'])) {
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openNewFolderModal()">
                         <i class="fas fa-folder-plus"></i> New Folder
                     </button>
-                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; border-color: #c7d2fe; color: #4338ca; font-weight: 600;" onclick="openPostApiModal()" title="Post Creation REST API & Key">
-                        <i class="fas fa-plug" style="color: #6366f1;"></i> Post API
-                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
@@ -1796,84 +1806,6 @@ if (!empty($data['breadcrumbs'])) {
         </div>
     </div>
 </div>
-
-
-<!-- Modal: Post REST API & Key -->
-<div class="modal-overlay" id="postApiModal">
-    <div class="modal-content" style="max-width: 660px; width: 95%;">
-        <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc, #eff6ff); border-bottom: 1px solid #e2e8f0;">
-            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px; color: #1e293b;">
-                <i class="fas fa-plug" style="color: #6366f1;"></i> Post Creation REST API
-            </h3>
-            <button type="button" class="modal-close" onclick="closePostApiModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body" style="padding: 20px 24px; max-height: 80vh; overflow-y: auto;">
-            <!-- Loading Indicator -->
-            <div id="apiInfoLoading" style="text-align: center; padding: 30px 0;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #6366f1;"></i>
-                <p style="margin-top: 10px; font-size: 13px; color: #64748b;">Loading API details...</p>
-            </div>
-
-            <div id="apiInfoContent" style="display: none;">
-                <!-- Endpoint URL -->
-                <div class="modal-form-group mb-3">
-                    <label style="font-weight: 600; font-size: 12.5px; color: #334155; margin-bottom: 6px; display: block;">
-                        API Endpoint URL (POST)
-                    </label>
-                    <div style="display: flex; gap: 6px;">
-                        <input type="text" id="apiEndpointUrl" readonly class="modal-input" style="font-family: monospace; font-size: 12.5px; background: #f8fafc; color: #0f172a; font-weight: 500;" value="<?= URLROOT ?>/api/post/create">
-                        <button type="button" class="btn-explorer btn-explorer-secondary" onclick="copyApiEndpoint(this)" style="padding: 0 14px; white-space: nowrap; gap: 6px;">
-                            <i class="far fa-copy"></i> Copy URL
-                        </button>
-                    </div>
-                </div>
-
-                <!-- API Key -->
-                <div class="modal-form-group mb-3">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <label style="font-weight: 600; font-size: 12.5px; color: #334155; margin-bottom: 0;">
-                            Secret API Key (X-API-KEY)
-                        </label>
-                        <button type="button" onclick="regenerateApiKey()" style="background: none; border: none; color: #dc2626; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                            <i class="fas fa-sync-alt" id="regenSpinIcon"></i> Regenerate Key
-                        </button>
-                    </div>
-                    <div style="display: flex; gap: 6px; position: relative;">
-                        <input type="password" id="apiSecretKey" readonly class="modal-input" style="font-family: monospace; font-size: 13px; letter-spacing: 0.5px; background: #f8fafc; color: #0f172a; padding-right: 40px;">
-                        <button type="button" onclick="toggleApiKeyVisibility()" title="Show/Hide Key" style="position: absolute; right: 100px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;">
-                            <i class="far fa-eye" id="toggleApiKeyIcon"></i>
-                        </button>
-                        <button type="button" class="btn-explorer btn-explorer-secondary" onclick="copyApiKey(this)" style="padding: 0 14px; white-space: nowrap; gap: 6px;">
-                            <i class="far fa-copy"></i> Copy Key
-                        </button>
-                    </div>
-                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
-                        ⚠️ Keep this key secure. Pass it in your requests as header: <code>X-API-KEY: your_key</code>
-                    </small>
-                </div>
-
-                <!-- Usage Documentation / Examples Accordion -->
-                <div style="margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-                    <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                        <span><i class="fas fa-code" style="color: #6366f1;"></i> Example cURL Request</span>
-                        <button type="button" class="btn-explorer btn-explorer-secondary" onclick="copyCurlExample(this)" style="padding: 2px 10px; font-size: 11.5px; height: auto;">
-                            <i class="far fa-copy"></i> Copy cURL
-                        </button>
-                    </div>
-                    <pre id="curlExampleBox" style="background: #0f172a; color: #f8fafc; padding: 12px 14px; border-radius: 8px; font-size: 11.5px; line-height: 1.45; overflow-x: auto; margin-bottom: 14px; font-family: 'Consolas', monospace;"></pre>
-
-                    <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                        <span><i class="fas fa-file-code" style="color: #059669;"></i> JSON Payload Format</span>
-                        <button type="button" class="btn-explorer btn-explorer-secondary" onclick="copyJsonPayloadExample(this)" style="padding: 2px 10px; font-size: 11.5px; height: auto;">
-                            <i class="far fa-copy"></i> Copy JSON
-                        </button>
-                    </div>
-                    <pre id="jsonPayloadExampleBox" style="background: #1e293b; color: #94a3b8; padding: 12px 14px; border-radius: 8px; font-size: 11.5px; line-height: 1.45; overflow-x: auto; margin: 0; font-family: 'Consolas', monospace;"></pre>
-                </div>
-            </div>
-        </div>
         <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; justify-content: flex-end;">
             <button type="button" class="btn-explorer btn-explorer-secondary" onclick="closePostApiModal()">Close</button>
         </div>
@@ -2255,175 +2187,6 @@ if (!function_exists('renderCategoryDropdownOptions')) {
         document.getElementById('importDocModal').classList.remove('show');
     }
 
-    // --- Post Creation REST API Modal Handlers ---
-    function openPostApiModal() {
-        const modal = document.getElementById('postApiModal');
-        const loading = document.getElementById('apiInfoLoading');
-        const content = document.getElementById('apiInfoContent');
-        if (loading) loading.style.display = 'block';
-        if (content) content.style.display = 'none';
-        if (modal) modal.classList.add('show');
-
-        fetch('<?= URLROOT ?>/admin/get_post_api_info')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const endpointInput = document.getElementById('apiEndpointUrl');
-                    const keyInput = document.getElementById('apiSecretKey');
-                    if (endpointInput) endpointInput.value = data.endpoint_url;
-                    if (keyInput) keyInput.value = data.api_key;
-                    updateApiExamples(data.endpoint_url, data.api_key);
-                    if (loading) loading.style.display = 'none';
-                    if (content) content.style.display = 'block';
-                } else {
-                    alert('Failed to load API info: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(err => {
-                console.error('API info error:', err);
-                alert('Network error loading API info');
-            });
-    }
-
-    function closePostApiModal() {
-        const modal = document.getElementById('postApiModal');
-        if (modal) modal.classList.remove('show');
-    }
-
-    function toggleApiKeyVisibility() {
-        const keyInput = document.getElementById('apiSecretKey');
-        const icon = document.getElementById('toggleApiKeyIcon');
-        if (!keyInput) return;
-        if (keyInput.type === 'password') {
-            keyInput.type = 'text';
-            if (icon) icon.className = 'far fa-eye-slash';
-        } else {
-            keyInput.type = 'password';
-            if (icon) icon.className = 'far fa-eye';
-        }
-    }
-
-    function copyApiEndpoint(btn) {
-        const input = document.getElementById('apiEndpointUrl');
-        if (!input) return;
-        copyToClipboard(input.value, btn, 'URL Copied!');
-    }
-
-    function copyApiKey(btn) {
-        const input = document.getElementById('apiSecretKey');
-        if (!input) return;
-        copyToClipboard(input.value, btn, 'Key Copied!');
-    }
-
-    function regenerateApiKey() {
-        if (!confirm('Are you sure you want to regenerate your API Key?\nAny external scripts, AI prompts, or integrations using the current key will stop working until updated with the new key.')) {
-            return;
-        }
-        const regenIcon = document.getElementById('regenSpinIcon');
-        if (regenIcon) regenIcon.classList.add('fa-spin');
-
-        fetch('<?= URLROOT ?>/admin/regenerate_post_api_key', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (regenIcon) regenIcon.classList.remove('fa-spin');
-            if (data.success) {
-                const keyInput = document.getElementById('apiSecretKey');
-                if (keyInput) keyInput.value = data.api_key;
-                updateApiExamples(data.endpoint_url, data.api_key);
-                alert('New API Key generated successfully!');
-            } else {
-                alert('Failed to regenerate: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(err => {
-            if (regenIcon) regenIcon.classList.remove('fa-spin');
-            console.error('Regenerate error:', err);
-            alert('Failed to regenerate API key due to network error');
-        });
-    }
-
-    function updateApiExamples(url, key) {
-        const curlBox = document.getElementById('curlExampleBox');
-        const jsonBox = document.getElementById('jsonPayloadExampleBox');
-
-        const curlCode = `curl -X POST "${url}" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-KEY: ${key}" \\
-  -d '{
-    "title": "আপনার পোস্টের শিরোনাম",
-    "content": "<h2>১. পরিচিতি</h2><p>এখানে বিস্তারিত বিষয়বস্তু লিখুন...</p>",
-    "categories": ["কুরআন সম্পর্কিত"],
-    "author": "Admin",
-    "status": "published"
-  }'`;
-
-        const sampleJson = `{
-  "title": "পোস্টের সম্পূর্ণ শিরোনাম (Required)",
-  "content": "<h2>১. ভূমিকা</h2><p>পোস্টের এইচটিএমএল বা টেক্সট...</p> (Required)",
-  "slug": "custom-english-or-bangla-slug (Optional)",
-  "categories": ["কুরআন সম্পর্কিত", "বিজ্ঞান ও দর্শন"] (Optional),
-  "main_category": "কুরআন সম্পর্কিত (Optional)",
-  "author": "Admin (Optional: Name or ID)",
-  "status": "published (Optional: published / draft)",
-  "featured_image": "https://example.com/image.jpg (Optional)",
-  "excerpt": "পোস্টের সংক্ষিপ্ত বিবরণ (Optional)",
-  "seo_title": "SEO ফ্রেন্ডলি শিরোনাম (Optional)",
-  "seo_description": "মেটা ডেসক্রিপশন (Optional)",
-  "seo_keywords": "ইসলাম, বিজ্ঞান, মহাবিশ্ব (Optional)"
-}`;
-
-        if (curlBox) curlBox.textContent = curlCode;
-        if (jsonBox) jsonBox.textContent = sampleJson;
-    }
-
-    function copyCurlExample(btn) {
-        const curlBox = document.getElementById('curlExampleBox');
-        if (curlBox) copyToClipboard(curlBox.textContent, btn, 'cURL Copied!');
-    }
-
-    function copyJsonPayloadExample(btn) {
-        const jsonBox = document.getElementById('jsonPayloadExampleBox');
-        if (jsonBox) copyToClipboard(jsonBox.textContent, btn, 'JSON Copied!');
-    }
-
-    function copyToClipboard(text, btn, successMsg) {
-        if (!text) return;
-        const origHtml = btn ? btn.innerHTML : '';
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                if (btn) {
-                    btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> ' + (successMsg || 'Copied!');
-                    setTimeout(() => { btn.innerHTML = origHtml; }, 2000);
-                }
-            }).catch(() => {
-                fallbackExecCopy(text, btn, origHtml, successMsg);
-            });
-        } else {
-            fallbackExecCopy(text, btn, origHtml, successMsg);
-        }
-    }
-
-    function fallbackExecCopy(text, btn, origHtml, successMsg) {
-        let ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        try {
-            document.execCommand('copy');
-            if (btn) {
-                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> ' + (successMsg || 'Copied!');
-                setTimeout(() => { btn.innerHTML = origHtml; }, 2000);
-            }
-        } catch(e) {}
-        document.body.removeChild(ta);
-    }
-
 
     // Open Rename Modal
     function openRenameModal(e, folderId, folderName) {
@@ -2644,7 +2407,9 @@ if (!function_exists('renderCategoryDropdownOptions')) {
         titleEl.textContent = data.title;
         
         // Parse and format double brackets into footnotes
-        let contentHtml = data.content;
+        let contentHtml = data.content || '';
+        // Merge consecutive blockquotes split by editors into a single unified blockout box
+        contentHtml = contentHtml.replace(/<\/blockquote>\s*<blockquote[^>]*>/gi, '<br>');
         const regex = /\(\(\s*([^)]+?)\s*\)\)/g;
         let match;
         const footnotes = [];

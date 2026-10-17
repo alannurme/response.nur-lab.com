@@ -404,16 +404,18 @@ if (!function_exists('resolve_blog_image')) {
         padding: 24px 30px 24px 44px;
         margin: 30px 0;
         font-style: normal;
+        line-height: 1.8;
+        font-size: 1rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
     }
-    blockquote + blockquote {
-        margin-top: -30px !important;
+    .post-body blockquote + blockquote {
+        margin-top: -24px !important;
         border-top-left-radius: 0 !important;
         border-top-right-radius: 0 !important;
-        padding-top: 10px !important;
+        padding-top: 8px !important;
     }
-    blockquote + blockquote::before {
+    .post-body blockquote + blockquote::before {
         display: none !important;
     }
 
@@ -736,7 +738,7 @@ if (!function_exists('resolve_blog_image')) {
             </div>
 
             <div class="post-body">
-                <?= $data['post']['content'] ?>
+                <?= preg_replace('/<\/blockquote>\s*<blockquote[^>]*>/i', '<br>', $data['post']['content']) ?>
             </div>
 
             <div class="post-share-card">
@@ -1387,7 +1389,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Parsing double-bracket references and moving them to footnotes
     const postBodyEl = document.querySelector('.post-body');
     if (postBodyEl) {
-        let contentHtml = postBodyEl.innerHTML;
+        let contentHtml = postBodyEl.innerHTML.replace(/<\/blockquote>\s*<blockquote[^>]*>/gi, '<br>');
         // Regex to match (( text )) or (( text | link ))
         const regex = /\(\(\s*([^)]+?)\s*\)\)/g;
         let match;
