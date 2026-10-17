@@ -407,6 +407,15 @@ if (!function_exists('resolve_blog_image')) {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
     }
+    blockquote + blockquote {
+        margin-top: -30px !important;
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+        padding-top: 10px !important;
+    }
+    blockquote + blockquote::before {
+        display: none !important;
+    }
 
     .post-body blockquote::before {
         content: "\f10d";

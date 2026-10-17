@@ -221,6 +221,9 @@
 <div class="justify-content-between d-flex align-items-center mb-4 header-container" style="border-bottom: 1px solid var(--border); padding-bottom: 20px;">
     <h3 class="m-0"><i class="fas fa-edit" style="color: var(--primary); margin-right: 8px;"></i>Create New Article</h3>
     <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="btn btn-warning" onclick="toggleSmartPastePanel(true)" style="padding: 10px 18px; font-weight: 700; border-radius: 30px; background: #f59e0b; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); font-size: 14px; cursor: pointer;">
+            <i class="fas fa-magic"></i> ⚡ Smart Auto-Paste
+        </button>
         <button type="submit" class="btn btn-primary" style="padding: 10px 22px; font-weight: 700; border-radius: 30px; background: #2563eb; color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); font-size: 15px; cursor: pointer;">
             🚀 Publish Article
         </button>
@@ -240,6 +243,40 @@
     <div id="post-form-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; transition: all 0.3s ease;">
         <!-- Left Column: Content and SEO Settings -->
         <div>
+            <!-- Smart Auto-Paste Panel -->
+            <div class="admin-card" id="smart-paste-container" style="border: 2px dashed #3b82f6 !important; background: #eff6ff !important; margin-bottom: 24px; padding: 20px !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div>
+                            <strong style="font-size: 16px; color: #1e3a8a; display: block; font-weight: 700;">⚡ এক ক্লিকে সম্পূর্ণ পোস্ট অটো-ইমপোর্ট (Smart Auto Paste)</strong>
+                            <span style="font-size: 13px; color: #3b82f6;">Markdown (.md) বা যেকোনো পোস্টের সম্পূর্ণ লেখা এখানে পেস্ট করলেই টাইটেল, স্লাগ, এসইও এবং ৬টি পার্ট স্বয়ংক্রিয়ভাবে ফিল হয়ে যাবে!</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="toggleSmartPastePanel()" id="btn-toggle-paste" style="border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600;">
+                        <i class="fas fa-clipboard"></i> পেস্ট প্যানেল খুলুন / বন্ধ করুন
+                    </button>
+                </div>
+                <div id="smart-paste-panel" style="margin-top: 15px;">
+                    <textarea id="smart-paste-input" class="form-control" rows="8" placeholder="এখানে আপনার .md ফাইলের সম্পূর্ণ লেখাটি পেস্ট (Ctrl+V) করুন..." style="font-family: 'Hind Siliguri', 'Segoe UI', monospace; font-size: 14px; line-height: 1.6; border: 1.5px solid #93c5fd; background: #ffffff;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 10px;">
+                        <div style="font-size: 12px; color: #64748b;">
+                            <i class="fas fa-info-circle" style="color: #3b82f6;"></i> সাপোর্ট করে: Markdown (# শিরোনাম, ## অংশ, ### উপশিরোনাম, > উদ্ধৃতি, **বোল্ড**) ও প্লেইন টেক্সট।
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="clearSmartPaste()" style="padding: 8px 16px;">
+                                <i class="fas fa-trash"></i> ক্লিয়ার
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="processSmartPaste()" style="background: #2563eb; padding: 8px 20px; font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
+                                <i class="fas fa-bolt"></i> ✨ সম্পূর্ণ পোস্ট অটো-ফিল করুন (Auto-Fill Now)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Main Form Section -->
             <div class="admin-card">
                 <div class="form-group mb-4">
@@ -884,7 +921,10 @@
             const titleInput = card.querySelector('.part-title-input');
             const titleText = titleInput.value.trim();
             const editorId = card.querySelector('.part-content-textarea').id.replace('part-content-', '');
-            const editorContent = getEditorContent(editorId);
+            let editorContent = getEditorContent(editorId);
+            
+            // Merge consecutive blockquotes split by Quill into a single blockout box
+            editorContent = editorContent.replace(/<\/blockquote>\s*<blockquote[^>]*>/gi, '<br>');
             
             if (titleText !== '') {
                 finalHtml += '<h2>' + titleText + '</h2>\n';
@@ -969,6 +1009,331 @@
             saveBtn.innerHTML = originalHTML;
         });
     }
+
+    
+    // ==========================================
+    // SMART AUTO-PASTE & IMPORT SYSTEM
+    // ==========================================
+    function toggleSmartPastePanel(forceOpen = false) {
+        const panel = document.getElementById('smart-paste-panel');
+        if (!panel) return;
+        if (forceOpen || panel.style.display === 'none') {
+            panel.style.display = 'block';
+            const input = document.getElementById('smart-paste-input');
+            if (input) input.focus();
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    function clearSmartPaste() {
+        const input = document.getElementById('smart-paste-input');
+        if (input) input.value = '';
+    }
+
+    function processSmartPaste() {
+        const input = document.getElementById('smart-paste-input');
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) {
+            alert('অনুগ্রহ করে প্রথমে Markdown বা পোস্টের টেক্সট পেস্ট করুন।');
+            return;
+        }
+
+        let raw = text;
+        let metadata = {
+            title: '',
+            slug: '',
+            seo_title: '',
+            seo_description: '',
+            seo_keywords: ''
+        };
+
+        // 1. Parse YAML Frontmatter if present
+        const yamlMatch = raw.match(/^---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---\s*[\r\n]+([\s\S]*)$/);
+        if (yamlMatch) {
+            const yaml = yamlMatch[1];
+            raw = yamlMatch[2];
+            yaml.split('\n').forEach(line => {
+                const idx = line.indexOf(':');
+                if (idx > -1) {
+                    const key = line.substring(0, idx).trim().toLowerCase();
+                    const val = line.substring(idx + 1).trim().replace(/^['"]|['"]$/g, '');
+                    if (key in metadata) metadata[key] = val;
+                }
+            });
+        }
+
+        // 2. Extract blockquote-style SEO metadata if present
+        const seoTitleMatch = raw.match(/>\s*\*\*SEO Title:\*\*\s*(.*)/i);
+        if (seoTitleMatch && !metadata.seo_title) metadata.seo_title = seoTitleMatch[1].trim();
+        
+        const seoDescMatch = raw.match(/>\s*\*\*SEO Description:\*\*\s*(.*)/i);
+        if (seoDescMatch && !metadata.seo_description) metadata.seo_description = seoDescMatch[1].trim();
+
+        const seoKeywordsMatch = raw.match(/>\s*\*\*SEO Keywords:\*\*\s*(.*)/i);
+        if (seoKeywordsMatch && !metadata.seo_keywords) metadata.seo_keywords = seoKeywordsMatch[1].trim();
+
+        // 3. Extract Main Article Title
+        if (!metadata.title) {
+            const h1Match = raw.match(/^#\s+(.*)$/m);
+            if (h1Match) {
+                metadata.title = h1Match[1].trim();
+            } else {
+                const firstLine = raw.split('\n').find(l => l.trim().length > 0 && !l.trim().startsWith('>'));
+                if (firstLine) metadata.title = firstLine.replace(/^#+\s*/, '').trim();
+            }
+        }
+
+        // Remove H1 title line from raw body so it doesn't get repeated
+        raw = raw.replace(/^#\s+.*$/m, '').trim();
+        raw = raw.replace(/^---\s*$/m, '').trim();
+
+        // 4. Fill Main Form Fields
+        const titleInput = document.querySelector('input[name="title"]');
+        const slugInput = document.querySelector('input[name="slug"]');
+        const seoTitleInput = document.querySelector('input[name="seo_title"]');
+        const seoDescTextarea = document.querySelector('textarea[name="seo_description"]');
+        const seoKeywordsInput = document.querySelector('input[name="seo_keywords"]');
+
+        if (titleInput && metadata.title) {
+            titleInput.value = metadata.title;
+        }
+
+        if (slugInput) {
+            if (metadata.slug) {
+                slugInput.value = metadata.slug;
+                if (window.setIsSlugEdited) window.setIsSlugEdited(true);
+            } else if (titleInput && titleInput.value) {
+                const autoSlug = titleInput.value.toString().toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^\u0980-\u09FFa-zA-Z0-9\-]/g, '-')
+                    .replace(/\-\-+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
+                slugInput.value = autoSlug;
+            }
+        }
+
+        if (seoTitleInput) {
+            seoTitleInput.value = metadata.seo_title || metadata.title;
+        }
+
+        if (seoDescTextarea) {
+            if (metadata.seo_description) {
+                seoDescTextarea.value = metadata.seo_description;
+            } else {
+                const firstP = raw.split('\n\n').find(p => p.trim() && !p.trim().startsWith('#') && !p.trim().startsWith('>'));
+                if (firstP) {
+                    const cleanP = firstP.replace(/[*_#\[\]\(\)]/g, '').trim();
+                    seoDescTextarea.value = cleanP.substring(0, 160) + (cleanP.length > 160 ? '...' : '');
+                }
+            }
+        }
+
+        if (seoKeywordsInput && metadata.seo_keywords) {
+            seoKeywordsInput.value = metadata.seo_keywords;
+        }
+
+        // 5. Split Content into Parts (H2 / ##)
+        let parsedParts = [];
+
+        // Check if raw content is HTML with <h2>
+        if (raw.includes('<h2') || raw.includes('<H2')) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = raw;
+            const h2Elements = Array.from(tempDiv.querySelectorAll('h2'));
+            if (h2Elements.length > 0) {
+                h2Elements.forEach((h2, idx) => {
+                    const pTitle = h2.textContent.trim();
+                    let pHtml = '';
+                    let next = h2.nextSibling;
+                    const nextH2 = h2Elements[idx + 1];
+                    while (next && next !== nextH2) {
+                        if (next.nodeType === Node.ELEMENT_NODE) {
+                            pHtml += next.outerHTML;
+                        } else if (next.nodeType === Node.TEXT_NODE) {
+                            pHtml += next.textContent;
+                        }
+                        next = next.nextSibling;
+                    }
+                    parsedParts.push({ title: pTitle, html: pHtml.trim() });
+                });
+            }
+        }
+
+        // If not HTML or no <h2> found, split by Markdown ##
+        if (parsedParts.length === 0) {
+            const lines = raw.split('\n');
+            let curTitle = '';
+            let curLines = [];
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const h2Match = trimmed.match(/^##\s+(.*)$/);
+                if (h2Match) {
+                    if (curTitle !== '' || curLines.length > 0) {
+                        if (curTitle !== '' || curLines.some(l => l.trim().length > 0)) {
+                            parsedParts.push({
+                                title: curTitle,
+                                html: convertMarkdownToQuillHtml(curLines.join('\n'))
+                            });
+                        }
+                    }
+                    curTitle = h2Match[1].trim();
+                    curLines = [];
+                } else {
+                    curLines.push(line);
+                }
+            });
+
+            if (curTitle !== '' || curLines.length > 0) {
+                parsedParts.push({
+                    title: curTitle,
+                    html: convertMarkdownToQuillHtml(curLines.join('\n'))
+                });
+            }
+        }
+
+        parsedParts = parsedParts.filter(p => p.title.trim() !== '' || p.html.replace(/<[^>]*>/g, '').trim() !== '');
+
+        if (parsedParts.length === 0) {
+            parsedParts.push({
+                title: '',
+                html: convertMarkdownToQuillHtml(raw)
+            });
+        }
+
+        // 6. Clear existing parts list
+        const partsList = document.getElementById('parts-list');
+        if (partsList) {
+            partsList.innerHTML = '';
+        }
+        Object.keys(quillInstances).forEach(k => delete quillInstances[k]);
+        partCounter = 0;
+
+        // 7. Add parts sequentially
+        parsedParts.forEach((part, index) => {
+            addNewPart(part.title, part.html);
+        });
+
+        // 8. Update UI feedback
+        showToast('🎉 সফল! সম্পূর্ণ পোস্ট ' + parsedParts.length + 'টি অংশে বিভক্ত হয়ে অটো-ফিল হয়েছে।', 'success');
+        
+        if (titleInput) {
+            titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function convertMarkdownToQuillHtml(mdText) {
+        if (!mdText) return '';
+        const lines = mdText.split('\n');
+        let htmlParts = [];
+        let inBq = false;
+        let bqLines = [];
+        let inUl = false;
+        let inOl = false;
+
+        function flushBq() {
+            if (inBq && bqLines.length > 0) {
+                // Join blockquote lines with <br> so it forms ONE single blockquote box
+                const formattedLines = bqLines.map(l => formatInlineMarkdown(l.trim())).filter(l => l.length > 0);
+                htmlParts.push('<blockquote>' + formattedLines.join('<br>') + '</blockquote>');
+                bqLines = [];
+                inBq = false;
+            }
+        }
+
+        function flushList() {
+            if (inUl) { htmlParts.push('</ul>'); inUl = false; }
+            if (inOl) { htmlParts.push('</ol>'); inOl = false; }
+        }
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+
+            if (/^>\s?(.*)$/.test(line)) {
+                flushList();
+                inBq = true;
+                const m = line.match(/^>\s?(.*)$/);
+                bqLines.push(m ? m[1] : '');
+                return;
+            } else {
+                flushBq();
+            }
+
+            if (trimmed === '') {
+                flushList();
+                return;
+            }
+
+            if (/^###\s+(.*)$/.test(trimmed)) {
+                flushList();
+                const m = trimmed.match(/^###\s+(.*)$/);
+                htmlParts.push('<h3>' + formatInlineMarkdown(m[1]) + '</h3>');
+                return;
+            }
+            if (/^####\s+(.*)$/.test(trimmed)) {
+                flushList();
+                const m = trimmed.match(/^####\s+(.*)$/);
+                htmlParts.push('<h4>' + formatInlineMarkdown(m[1]) + '</h4>');
+                return;
+            }
+            if (/^#####\s+(.*)$/.test(trimmed)) {
+                flushList();
+                const m = trimmed.match(/^#####\s+(.*)$/);
+                htmlParts.push('<h5>' + formatInlineMarkdown(m[1]) + '</h5>');
+                return;
+            }
+
+            if (/^(\-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+                flushList();
+                htmlParts.push('<hr>');
+                return;
+            }
+
+            if (/^[\-\*]\s+(.*)$/.test(trimmed)) {
+                if (inOl) { htmlParts.push('</ol>'); inOl = false; }
+                if (!inUl) { htmlParts.push('<ul>'); inUl = true; }
+                const m = trimmed.match(/^[\-\*]\s+(.*)$/);
+                htmlParts.push('<li>' + formatInlineMarkdown(m[1]) + '</li>');
+                return;
+            }
+
+            if (/^\d+[\.\)]\s+(.*)$/.test(trimmed)) {
+                if (inUl) { htmlParts.push('</ul>'); inUl = false; }
+                if (!inOl) { htmlParts.push('<ol>'); inOl = true; }
+                const m = trimmed.match(/^\d+[\.\)]\s+(.*)$/);
+                htmlParts.push('<li>' + formatInlineMarkdown(m[1]) + '</li>');
+                return;
+            }
+
+            flushList();
+            htmlParts.push('<p>' + formatInlineMarkdown(trimmed) + '</p>');
+        });
+
+        flushBq();
+        flushList();
+
+        return htmlParts.join('\n');
+    }
+
+    function formatInlineMarkdown(text) {
+        if (!text) return '';
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+        text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        return text;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const pasteInput = document.getElementById('smart-paste-input');
+        if (pasteInput) {
+            pasteInput.addEventListener('paste', function(e) {
+                setTimeout(processSmartPaste, 150);
+            });
+        }
+    });
 
     function showToast(message, type = 'success') {
         let toast = document.getElementById('bg-save-toast');
@@ -1055,6 +1420,29 @@
             background: transparent !important;
             margin: 0 !important;
         }
+    }
+    /* Unified unbroken blockquote display in Quill Editor */
+    .ql-editor blockquote {
+        border-left: 4px solid #2563eb !important;
+        background: #f8fafc !important;
+        color: #1e293b !important;
+        padding: 3px 16px 3px 18px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-style: normal !important;
+    }
+    .ql-editor *:not(blockquote) + blockquote,
+    .ql-editor > blockquote:first-child {
+        margin-top: 14px !important;
+        padding-top: 10px !important;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+    }
+    .ql-editor blockquote:last-child {
+        margin-bottom: 14px !important;
+        padding-bottom: 10px !important;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
     }
 </style>
 

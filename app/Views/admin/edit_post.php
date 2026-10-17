@@ -899,7 +899,10 @@
             const titleInput = card.querySelector('.part-title-input');
             const titleText = titleInput.value.trim();
             const editorId = card.querySelector('.part-content-textarea').id.replace('part-content-', '');
-            const editorContent = getEditorContent(editorId);
+            let editorContent = getEditorContent(editorId);
+            
+            // Merge consecutive blockquotes split by Quill into a single blockout box
+            editorContent = editorContent.replace(/<\/blockquote>\s*<blockquote[^>]*>/gi, '<br>');
             
             if (titleText !== '') {
                 finalHtml += '<h2>' + titleText + '</h2>\n';
@@ -1130,6 +1133,29 @@
             background: transparent !important;
             margin: 0 !important;
         }
+    }
+    /* Unified unbroken blockquote display in Quill Editor */
+    .ql-editor blockquote {
+        border-left: 4px solid #2563eb !important;
+        background: #f8fafc !important;
+        color: #1e293b !important;
+        padding: 3px 16px 3px 18px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-style: normal !important;
+    }
+    .ql-editor *:not(blockquote) + blockquote,
+    .ql-editor > blockquote:first-child {
+        margin-top: 14px !important;
+        padding-top: 10px !important;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+    }
+    .ql-editor blockquote:last-child {
+        margin-bottom: 14px !important;
+        padding-bottom: 10px !important;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
     }
 </style>
 
