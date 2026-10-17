@@ -481,7 +481,7 @@ class AdminModel extends Model {
                 }
             }
             \App\Helpers\Cache::clear();
-            return true;
+            return $post_id;
         }
         return false;
     }
