@@ -38,7 +38,7 @@ $routes->post('sync_islamic_data.php', 'Home::run_sync_script');
 
 // Post REST API Routes
 $routes->options('api/post/create', 'Api::options');
-$routes->post('api/post/create', 'Api::create_post');
+$routes->match(['get', 'post'], 'api/post/create', 'Api::create_post');
 $routes->get('api/post/info', 'Api::info');
 
 // Admin Routes
