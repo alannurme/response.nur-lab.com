@@ -1540,9 +1540,6 @@ if (!empty($data['breadcrumbs'])) {
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openNewFolderModal()">
                         <i class="fas fa-folder-plus"></i> New Folder
                     </button>
-                    <button type="button" class="btn-explorer btn-explorer-secondary" onclick="handlePastePostClick()" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border-color: #86efac; color: #166534;" title="Paste copied post data to create a new article">
-                        <i class="fas fa-paste" style="color: #16a34a;"></i> Paste Post
-                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
@@ -1634,13 +1631,10 @@ if (!empty($data['breadcrumbs'])) {
                                         <?php else: ?>
                                             <span class="post-badge post-badge-published">Published</span>
                                         <?php endif; ?>
-                                                               <!-- Mobile Inline Actions under Title -->
+                                        <!-- Mobile Inline Actions under Title -->
                                         <div class="mobile-row-actions" style="display: none; margin-top: 8px; gap: 12px; align-items: center;">
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                                                  <i class="far fa-eye"></i> View
-                                             </a>
-                                             <a href="javascript:void(0)" onclick="copyPostData(<?= $post['id'] ?>, this)" style="color: #4f46e5; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;" title="Copy Post Data (Local to Live Transfer)">
-                                                 <i class="far fa-copy"></i> Copy
                                              </a>
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" style="color: #059669; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                                                  <i class="far fa-edit"></i> Edit
@@ -1700,9 +1694,6 @@ if (!empty($data['breadcrumbs'])) {
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="btn-row-action" title="View on Live Site">
                                                  <i class="far fa-eye"></i>
                                              </a>
-                                             <button type="button" class="btn-row-action" onclick="copyPostData(<?= $post['id'] ?>, this)" title="Copy Post Data (Local to Live Transfer)" style="background: none; border: none; cursor: pointer; color: #4f46e5;">
-                                                 <i class="far fa-copy"></i>
-                                             </button>
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" class="btn-row-action" title="Edit Article">
                                                  <i class="far fa-edit"></i>
                                              </a>
@@ -1710,7 +1701,7 @@ if (!empty($data['breadcrumbs'])) {
                                                  <i class="far fa-trash-alt"></i>
                                              </a>
                                         </div>
-                                    </td>               </td>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -1754,9 +1745,6 @@ if (!empty($data['breadcrumbs'])) {
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">Share:</span>
                             <button type="button" id="btnCopyLink" onclick="copyPostPublicLink()" title="Copy Public Link" class="btn-explorer btn-explorer-secondary" style="padding: 4px 8px; font-size: 12px; height: auto; gap: 4px;">
                                 <i class="fas fa-link"></i> <span id="copyLinkText">Copy Link</span>
-                            </button>
-                            <button type="button" id="btnCopyDetailPost" onclick="copyCurrentDetailPost(this)" title="Copy Post Data (Local to Live Transfer)" class="btn-explorer btn-explorer-secondary" style="padding: 4px 8px; font-size: 12px; height: auto; gap: 4px; color: #4f46e5;">
-                                <i class="far fa-copy"></i> <span id="copyDetailPostText">Copy Post</span>
                             </button>
                             <a id="shareFB" href="#" target="_blank" title="Share on Facebook" class="btn-explorer" style="padding: 4px 8px; font-size: 12px; background: #1877f2; color: white; border: none; height: auto;">
                                 <i class="fab fa-facebook-f"></i>
@@ -1806,63 +1794,6 @@ if (!empty($data['breadcrumbs'])) {
     </div>
 </div>
 
-<!-- Modal: Paste Post Data -->
-<div class="modal-overlay" id="pastePostModal">
-    <div class="modal-content" style="max-width: 620px; width: 95%;">
-        <div class="modal-header">
-            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-paste" style="color: #16a34a;"></i> Paste Copied Post
-            </h3>
-            <button type="button" class="modal-close" onclick="closePastePostModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="modal-form-group mb-3">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <label for="pastePostTextarea" style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 0;">Post JSON Data</label>
-                    <button type="button" class="btn-explorer btn-explorer-secondary" onclick="readClipboardIntoModal()" style="padding: 3px 10px; font-size: 12px; height: auto; gap: 4px;">
-                        <i class="fas fa-clipboard"></i> Read from Clipboard
-                    </button>
-                </div>
-                <textarea id="pastePostTextarea" class="modal-input" rows="8" placeholder='{"_type": "nur_post_export", ...}' style="font-family: monospace; font-size: 12px; line-height: 1.4; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
-                <div id="pastePostError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin-top: 6px;"></div>
-            </div>
-        </div>
-        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-            <button type="button" class="btn-explorer btn-explorer-secondary" onclick="closePastePostModal()">Cancel</button>
-            <button type="button" class="btn-explorer btn-explorer-primary" onclick="submitPasteModalData()" style="background: #16a34a; border-color: #16a34a; font-weight: 600;">
-                <i class="fas fa-arrow-right"></i> Continue to Add Post
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Copy Post Fallback -->
-<div class="modal-overlay" id="copyFallbackModal">
-    <div class="modal-content" style="max-width: 620px; width: 95%;">
-        <div class="modal-header">
-            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
-                <i class="far fa-copy" style="color: #4f46e5;"></i> Copy Post Data
-            </h3>
-            <button type="button" class="modal-close" onclick="closeCopyFallbackModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
-                নিচের বক্সে পুরো পোস্টের ডাটা রয়েছে। <strong>Ctrl + C</strong> চেপে কপি করুন:
-            </p>
-            <textarea id="copyFallbackTextarea" class="modal-input" rows="8" readonly style="font-family: monospace; font-size: 12px; width: 100%; box-sizing: border-box;" onclick="this.select()"></textarea>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-explorer btn-explorer-secondary" onclick="closeCopyFallbackModal()">Close</button>
-            <button type="button" class="btn-explorer btn-explorer-primary" onclick="copyFallbackFromModal()">
-                <i class="fas fa-check"></i> Copy Text
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Modal: Import DOC -->
 <div class="modal-overlay" id="importDocModal">
@@ -2239,267 +2170,6 @@ if (!function_exists('renderCategoryDropdownOptions')) {
         document.getElementById('importDocModal').classList.remove('show');
     }
 
-    // --- Post Copy & Paste System (Local to Live Transfer) ---
-    function copyPostData(postId, btn) {
-        if (!postId) return;
-        const origHtml = btn ? btn.innerHTML : '';
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: #4f46e5;"></i>';
-            btn.disabled = true;
-        }
-
-        fetch('<?= URLROOT ?>/admin/export_post_json/' + postId)
-            .then(res => {
-                if (!res.ok) throw new Error('HTTP Status ' + res.status);
-                return res.json();
-            })
-            .then(data => {
-                if (!data.success || !data.data) {
-                    throw new Error(data.error || 'Failed to export post data');
-                }
-                const postJsonStr = JSON.stringify(data.data, null, 2);
-                const postTitle = (data.data.post && data.data.post.title) ? data.data.post.title : 'Post';
-
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(postJsonStr)
-                        .then(() => {
-                            handleCopySuccess(btn, origHtml, postTitle);
-                        })
-                        .catch(err => {
-                            console.warn('Clipboard writeText failed, trying execCommand fallback:', err);
-                            fallbackCopyText(postJsonStr, btn, origHtml, postTitle);
-                        });
-                } else {
-                    fallbackCopyText(postJsonStr, btn, origHtml, postTitle);
-                }
-            })
-            .catch(err => {
-                console.error('Error copying post:', err);
-                alert('পোস্ট ডাটা কপি করতে সমস্যা হয়েছে: ' + err.message);
-                if (btn) {
-                    btn.innerHTML = origHtml;
-                    btn.disabled = false;
-                }
-            });
-    }
-
-    function handleCopySuccess(btn, origHtml, postTitle) {
-        if (btn) {
-            btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i>';
-            setTimeout(() => {
-                btn.innerHTML = origHtml;
-                btn.disabled = false;
-            }, 2000);
-        }
-        showPostToast('📋 "' + postTitle + '" এর সম্পূর্ণ ডাটা কপি হয়েছে! লাইভ সাইটে গিয়ে "Paste Post" বাটনে ক্লিক করুন।', 'success');
-    }
-
-    function fallbackCopyText(text, btn, origHtml, postTitle) {
-        let textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        let successful = false;
-        try {
-            successful = document.execCommand('copy');
-        } catch (err) {
-            successful = false;
-        }
-        document.body.removeChild(textArea);
-        if (successful) {
-            handleCopySuccess(btn, origHtml, postTitle);
-        } else {
-            openCopyFallbackModal(text);
-            if (btn) {
-                btn.innerHTML = origHtml;
-                btn.disabled = false;
-            }
-        }
-    }
-
-    function copyCurrentDetailPost(btn) {
-        if (!window.currentQuickViewPostId) {
-            alert('No post is currently selected.');
-            return;
-        }
-        copyPostData(window.currentQuickViewPostId, btn);
-    }
-
-    function handlePastePostClick() {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText()
-                .then(text => {
-                    const cleaned = (text || '').trim();
-                    if (cleaned && (cleaned.startsWith('{') || cleaned.startsWith('['))) {
-                        try {
-                            const parsed = JSON.parse(cleaned);
-                            if (parsed && (parsed._type === 'nur_post_export' || parsed.post || parsed.title)) {
-                                proceedWithPastedData(parsed);
-                                return;
-                            }
-                        } catch(e) {}
-                    }
-                    openPastePostModal(cleaned);
-                })
-                .catch(err => {
-                    console.warn('Clipboard read error/denied:', err);
-                    openPastePostModal();
-                });
-        } else {
-            openPastePostModal();
-        }
-    }
-
-    function openPastePostModal(initialValue = '') {
-        const modal = document.getElementById('pastePostModal');
-        const textarea = document.getElementById('pastePostTextarea');
-        const errorEl = document.getElementById('pastePostError');
-        if (errorEl) errorEl.style.display = 'none';
-        if (textarea) {
-            textarea.value = initialValue || '';
-        }
-        if (modal) {
-            modal.classList.add('show');
-            if (textarea) textarea.focus();
-        }
-    }
-
-    function closePastePostModal() {
-        const modal = document.getElementById('pastePostModal');
-        if (modal) modal.classList.remove('show');
-    }
-
-    function readClipboardIntoModal() {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText()
-                .then(text => {
-                    const textarea = document.getElementById('pastePostTextarea');
-                    if (textarea) {
-                        textarea.value = text;
-                        textarea.focus();
-                    }
-                })
-                .catch(err => {
-                    alert('ক্লিপবোর্ড রিড করার পারমিশন পাওয়া যায়নি। কিবোর্ড থেকে Ctrl + V দিয়ে পেস্ট করুন।');
-                });
-        } else {
-            alert('আপনার ব্রাউজারে অটো-রিড সাপোর্ট নেই। সরাসরি বক্সে Ctrl + V দিয়ে পেস্ট করুন।');
-        }
-    }
-
-    function submitPasteModalData() {
-        const textarea = document.getElementById('pastePostTextarea');
-        const errorEl = document.getElementById('pastePostError');
-        const raw = textarea ? textarea.value.trim() : '';
-
-        if (!raw) {
-            if (errorEl) {
-                errorEl.textContent = 'অনুগ্রহ করে কপি করা পোস্টের ডাটা পেস্ট করুন।';
-                errorEl.style.display = 'block';
-            }
-            return;
-        }
-
-        try {
-            const parsed = JSON.parse(raw);
-            if (!parsed || (!parsed._type && !parsed.post && !parsed.title)) {
-                throw new Error('পেস্ট করা ডাটা সঠিক পোস্ট ফরম্যাট নয়।');
-            }
-            closePastePostModal();
-            proceedWithPastedData(parsed);
-        } catch(e) {
-            if (errorEl) {
-                errorEl.textContent = 'ভুল ডাটা: ' + e.message;
-                errorEl.style.display = 'block';
-            }
-        }
-    }
-
-    function proceedWithPastedData(data) {
-        try {
-            sessionStorage.setItem('pending_paste_post', JSON.stringify(data));
-            showPostToast('🚀 পোস্টের ডাটা প্রসেস হচ্ছে! Add Post পেজে নিয়ে যাওয়া হচ্ছে...', 'success');
-            setTimeout(() => {
-                window.location.href = '<?= URLROOT ?>/admin/add_post?pasted=1';
-            }, 300);
-        } catch(e) {
-            console.error('Failed to store in sessionStorage', e);
-            alert('ডাটা প্রসেস করতে সমস্যা হয়েছে: ' + e.message);
-        }
-    }
-
-    function openCopyFallbackModal(jsonStr) {
-        const modal = document.getElementById('copyFallbackModal');
-        const textarea = document.getElementById('copyFallbackTextarea');
-        if (textarea) textarea.value = jsonStr;
-        if (modal) {
-            modal.classList.add('show');
-            if (textarea) {
-                setTimeout(() => {
-                    textarea.focus();
-                    textarea.select();
-                }, 100);
-            }
-        }
-    }
-
-    function closeCopyFallbackModal() {
-        const modal = document.getElementById('copyFallbackModal');
-        if (modal) modal.classList.remove('show');
-    }
-
-    function copyFallbackFromModal() {
-        const textarea = document.getElementById('copyFallbackTextarea');
-        if (textarea) {
-            textarea.select();
-            document.execCommand('copy');
-            showPostToast('ডাটা ক্লিপবোর্ডে কপি করা হয়েছে!', 'success');
-            setTimeout(closeCopyFallbackModal, 800);
-        }
-    }
-
-    function showPostToast(message, type = 'success') {
-        let toast = document.getElementById('post-custom-toast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'post-custom-toast';
-            document.body.appendChild(toast);
-        }
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 12px 20px;
-            background: ${type === 'success' ? '#059669' : '#dc2626'};
-            color: #ffffff;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 13.5px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-            z-index: 999999;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-            transform: translateY(100px);
-            opacity: 0;
-            pointer-events: none;
-        `;
-        toast.offsetHeight;
-        toast.style.transform = 'translateY(0)';
-        toast.style.opacity = '1';
-        
-        clearTimeout(window.postToastTimeout);
-        window.postToastTimeout = setTimeout(() => {
-            toast.style.transform = 'translateY(100px)';
-            toast.style.opacity = '0';
-        }, 3500);
-    }
 
     // Open Rename Modal
     function openRenameModal(e, folderId, folderName) {
@@ -2915,7 +2585,6 @@ if (!function_exists('renderCategoryDropdownOptions')) {
     }
 
     function openQuickView(e, id) {
-        window.currentQuickViewPostId = id;
         e.preventDefault();
         e.stopPropagation();
         
@@ -3015,7 +2684,6 @@ if (!function_exists('renderCategoryDropdownOptions')) {
     }
 
     function closePostDetailView() {
-        window.currentQuickViewPostId = null;
         stopAudioReader();
         const listPanel = document.getElementById('explorerListView');
         const detailPanel = document.getElementById('explorerPostDetailView');
