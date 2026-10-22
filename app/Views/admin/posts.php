@@ -1528,9 +1528,9 @@ if (!empty($data['breadcrumbs'])) {
                             <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openMoveModal(event, <?= $data['categoryId'] ?>, '<?= htmlspecialchars($data['currentCategory']['name'], ENT_QUOTES) ?>')">
                                 <i class="fas fa-arrows-alt"></i> Move
                             </button>
-                            <a href="<?= URLROOT ?>/admin/delete_folder/<?= $data['categoryId'] ?>?parent_id=<?= $data['currentCategory']['parent_id'] ?? '' ?>" class="btn-explorer btn-explorer-secondary" style="padding: 4px 10px; font-size: 12px; border-color: #fca5a5; color: #dc2626; text-decoration: none;" onclick="return confirm('Are you sure you want to delete this folder?')">
+                            <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 4px 10px; font-size: 12px; border-color: #fca5a5; color: #dc2626; text-decoration: none; cursor: pointer; background: transparent;" onclick="deleteFolder(<?= $data['categoryId'] ?>, '<?= $data['currentCategory']['parent_id'] ?? '' ?>')">
                                 <i class="fas fa-trash-alt"></i> Delete
-                            </a>
+                            </button>
                             <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openSelectPostsModal(<?= $data['categoryId'] ?>)">
                                 <i class="fas fa-tasks"></i> Select Posts
                             </button>
@@ -1652,9 +1652,9 @@ if (!empty($data['breadcrumbs'])) {
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" style="color: #059669; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                                                  <i class="far fa-edit"></i> Edit
                                              </a>
-                                             <a href="<?= URLROOT ?>/admin/delete_post/<?= $post['id'] ?>" style="color: #dc2626; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;" onclick="return confirm('Are you sure you want to delete this article?')">
+                                             <button type="button" onclick="deletePost(<?= $post['id'] ?>)" style="color: #dc2626; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
                                                  <i class="far fa-trash-alt"></i> Delete
-                                             </a>
+                                             </button>
                                         </div>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle; position: relative;" id="post-cat-cell-<?= $post['id'] ?>" data-post-id="<?= $post['id'] ?>">
@@ -1724,9 +1724,9 @@ if (!empty($data['breadcrumbs'])) {
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" class="btn-row-action" title="Edit Article">
                                                  <i class="far fa-edit"></i>
                                              </a>
-                                             <a href="<?= URLROOT ?>/admin/delete_post/<?= $post['id'] ?>" class="btn-row-action btn-row-action-delete" title="Move to Trash" onclick="return confirm('Are you sure you want to delete this article?')">
+                                             <button type="button" class="btn-row-action btn-row-action-delete" title="Move to Trash" onclick="deletePost(<?= $post['id'] ?>)">
                                                  <i class="far fa-trash-alt"></i>
-                                             </a>
+                                             </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -2539,6 +2539,33 @@ if (!function_exists('renderManageCategoryTree')) {
         return confirm("Are you sure you want to delete this folder? This will move its subfolders to the parent level!");
     }
 
+    function deletePost(id) {
+        if (confirm('Are you sure you want to delete this article?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<?= URLROOT ?>/admin/delete_post/' + id;
+            
+            const redirectInput = document.createElement('input');
+            redirectInput.type = 'hidden';
+            redirectInput.name = 'redirect_url';
+            redirectInput.value = window.location.href;
+            form.appendChild(redirectInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function deleteFolder(id, parentId) {
+        if (confirm("Are you sure you want to delete this folder? This will move its subfolders to the parent level!")) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<?= URLROOT ?>/admin/delete_folder/' + id + (parentId ? '?parent_id=' + parentId : '');
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
     // Toggle tree branch collapse/expand
     function toggleTreeBranch(e, element) {
         e.stopPropagation();
@@ -2644,7 +2671,18 @@ if (!function_exists('renderManageCategoryTree')) {
             }
             if (confirm(`Are you sure you want to move ${selectedCheckbox.length} selected post(s) to trash?`)) {
                 const ids = Array.from(selectedCheckbox).map(cb => cb.value);
-                window.location.href = '<?= URLROOT ?>/admin/delete_post/' + ids.join(',');
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?= URLROOT ?>/admin/delete_post/' + ids.join(',');
+                
+                const redirectInput = document.createElement('input');
+                redirectInput.type = 'hidden';
+                redirectInput.name = 'redirect_url';
+                redirectInput.value = window.location.href;
+                form.appendChild(redirectInput);
+                
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     }

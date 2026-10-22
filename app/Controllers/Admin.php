@@ -527,6 +527,11 @@ class Admin extends Controller {
     }
 
     public function delete_folder($id = null) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . URLROOT . '/admin/posts');
+            exit;
+        }
+
         $adminModel = $this->model('AdminModel');
         $id = $id !== null ? (int)$id : (isset($_GET['id']) ? (int)$_GET['id'] : null);
         $parent_id = isset($_GET['parent_id']) && $_GET['parent_id'] !== '' ? (int)$_GET['parent_id'] : null;
@@ -2201,6 +2206,11 @@ class Admin extends Controller {
     }
 
     public function delete_post($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . URLROOT . '/admin/posts');
+            exit;
+        }
+
         $adminModel = $this->model('AdminModel');
         $ids = explode(',', $id);
         foreach ($ids as $singleId) {
@@ -2209,7 +2219,13 @@ class Admin extends Controller {
                 $adminModel->deletePost($singleId);
             }
         }
-        header('Location: ' . URLROOT . '/admin/posts');
+
+        $redirectUrl = !empty($_POST['redirect_url']) ? $_POST['redirect_url'] : URLROOT . '/admin/posts';
+        if (strpos($redirectUrl, URLROOT) !== 0 && strpos($redirectUrl, '/') !== 0) {
+            $redirectUrl = URLROOT . '/admin/posts';
+        }
+
+        header('Location: ' . $redirectUrl);
         exit;
     }
 
