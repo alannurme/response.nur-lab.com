@@ -7,7 +7,43 @@ class Admin extends Controller {
     protected $siteSettings;
 
     public function __construct() {
+        if (ini_get('session.gc_maxlifetime') < 31536000) {
+            @ini_set('session.gc_maxlifetime', '31536000');
+        }
+
         service('session');
+
+        $this->adminModel = $this->model('AdminModel');
+
+        // Seamless auto-login if session dropped but valid remember cookie exists
+        if (empty($_SESSION['admin_id']) && !empty($_COOKIE['admin_remember'])) {
+            $user = $this->adminModel->getUserByRememberToken($_COOKIE['admin_remember']);
+            if ($user) {
+                $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                // Refresh cookie expiration for another year
+                setcookie('admin_remember', $_COOKIE['admin_remember'], [
+                    'expires' => time() + (365 * 24 * 3600),
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                ]);
+            }
+        }
+
+        // If currently logged in but doesn't have remember cookie yet, grant one automatically
+        if (!empty($_SESSION['admin_id']) && empty($_COOKIE['admin_remember'])) {
+            $token = bin2hex(random_bytes(32));
+            $this->adminModel->saveRememberToken($_SESSION['admin_id'], $token);
+            setcookie('admin_remember', $token, [
+                'expires' => time() + (365 * 24 * 3600),
+                'path' => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            ]);
+        }
 
         $uri = service('request')->getUri()->getPath();
         $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false));
@@ -17,7 +53,6 @@ class Admin extends Controller {
             exit;
         }
 
-        $this->adminModel = $this->model('AdminModel');
         $this->siteSettings = $this->adminModel->getSettings();
     }
 
@@ -229,6 +264,123 @@ class Admin extends Controller {
             'success' => true,
             'posts' => $posts
         ]);
+        exit;
+    }
+
+    public function get_post_categories_ajax($post_id) {
+        header('Content-Type: application/json; charset=utf-8');
+        $post_id = (int)$post_id;
+        $db = \Config\Database::pdoConnect();
+        
+        $stmt_main = $db->prepare("SELECT id, title, category_id FROM posts WHERE id = :post_id");
+        $stmt_main->execute(['post_id' => $post_id]);
+        $post = $stmt_main->fetch();
+        
+        if (!$post) {
+            echo json_encode(['success' => false, 'error' => 'Post not found']);
+            exit;
+        }
+        
+        $stmt_cats = $db->prepare("SELECT category_id FROM post_categories WHERE post_id = :post_id");
+        $stmt_cats->execute(['post_id' => $post_id]);
+        $assigned_ids = $stmt_cats->fetchAll(\PDO::FETCH_COLUMN);
+        
+        if (!empty($post['category_id']) && !in_array((int)$post['category_id'], $assigned_ids)) {
+            $assigned_ids[] = (int)$post['category_id'];
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'post_id' => (int)$post['id'],
+            'title' => $post['title'],
+            'main_category_id' => !empty($post['category_id']) ? (int)$post['category_id'] : null,
+            'category_ids' => array_map('intval', $assigned_ids)
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    public function update_post_categories_ajax() {
+        header('Content-Type: application/json; charset=utf-8');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            $input = $_POST;
+        }
+
+        $post_id = !empty($input['post_id']) ? (int)$input['post_id'] : null;
+        $category_ids = isset($input['category_ids']) && is_array($input['category_ids']) ? array_map('intval', $input['category_ids']) : [];
+        $main_category_id = !empty($input['main_category_id']) ? (int)$input['main_category_id'] : null;
+
+        if (!$post_id) {
+            echo json_encode(['success' => false, 'error' => 'Post ID is required']);
+            exit;
+        }
+
+        if (!empty($category_ids)) {
+            if (!$main_category_id || !in_array($main_category_id, $category_ids)) {
+                $main_category_id = $category_ids[0];
+            }
+        } else {
+            $main_category_id = null;
+        }
+
+        $db = \Config\Database::pdoConnect();
+
+        // 1. Update main category on posts table
+        $stmt_post = $db->prepare("UPDATE posts SET category_id = :cat_id WHERE id = :post_id");
+        $stmt_post->execute([
+            'cat_id' => $main_category_id,
+            'post_id' => $post_id
+        ]);
+
+        // 2. Delete existing relations
+        $stmt_del = $db->prepare("DELETE FROM post_categories WHERE post_id = :post_id");
+        $stmt_del->execute(['post_id' => $post_id]);
+
+        // 3. Insert new relations
+        if (!empty($category_ids)) {
+            $stmt_ins = $db->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (:post_id, :cat_id)");
+            foreach ($category_ids as $cid) {
+                if ($cid > 0) {
+                    $stmt_ins->execute(['post_id' => $post_id, 'cat_id' => $cid]);
+                }
+            }
+        }
+
+        \App\Helpers\Cache::clear();
+
+        // Fetch updated category details for live UI response
+        $main_cat_name = null;
+        $other_cat_names = [];
+        
+        if ($main_category_id) {
+            $stmt_m = $db->prepare("SELECT name FROM categories WHERE id = :id");
+            $stmt_m->execute(['id' => $main_category_id]);
+            $main_cat_name = $stmt_m->fetchColumn() ?: null;
+        }
+
+        if (!empty($category_ids)) {
+            $other_ids = array_values(array_filter($category_ids, fn($id) => (int)$id !== (int)$main_category_id));
+            if (!empty($other_ids)) {
+                $in = implode(',', array_map('intval', $other_ids));
+                $stmt_o = $db->query("SELECT name FROM categories WHERE id IN ($in) ORDER BY name ASC");
+                $other_cat_names = $stmt_o->fetchAll(\PDO::FETCH_COLUMN);
+            }
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Categories updated successfully',
+            'post_id' => $post_id,
+            'main_category_id' => $main_category_id,
+            'main_category' => $main_cat_name,
+            'other_categories' => $other_cat_names,
+            'category_ids' => $category_ids
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -1147,18 +1299,16 @@ class Admin extends Controller {
                 $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
 
-                // Set a long-lived remember-me cookie (1 year) if checked
-                if (isset($_POST['remember'])) {
-                    $token = bin2hex(random_bytes(32));
-                    $adminModel->saveRememberToken($user['id'], $token);
-                    setcookie('admin_remember', $token, [
-                        'expires' => time() + (365 * 24 * 3600),
-                        'path' => '/',
-                        'httponly' => true,
-                        'samesite' => 'Lax',
-                        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-                    ]);
-                }
+                // Always persist remember-me session (1 year) unless manual logout
+                $token = bin2hex(random_bytes(32));
+                $adminModel->saveRememberToken($user['id'], $token);
+                setcookie('admin_remember', $token, [
+                    'expires' => time() + (365 * 24 * 3600),
+                    'path' => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                ]);
 
                 header('Location: ' . base_url('admin'));
                 exit;
@@ -1183,8 +1333,10 @@ class Admin extends Controller {
                 'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
             ]);
         }
+        unset($_SESSION['admin_id']);
+        unset($_SESSION['username']);
         session_destroy();
-        header('Location: ' . URLROOT . '/admin/login');
+        header('Location: ' . base_url('admin/login'));
         exit;
     }
 

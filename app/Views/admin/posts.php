@@ -1657,7 +1657,7 @@ if (!empty($data['breadcrumbs'])) {
                                              </a>
                                         </div>
                                     </td>
-                                    <td style="text-align: center; vertical-align: middle; position: relative;">
+                                    <td style="text-align: center; vertical-align: middle; position: relative;" id="post-cat-cell-<?= $post['id'] ?>" data-post-id="<?= $post['id'] ?>">
                                         <?php 
                                         $otherCats = [];
                                         if (!empty($post['secondary_categories'])) {
@@ -1671,33 +1671,47 @@ if (!empty($data['breadcrumbs'])) {
                                         $hasCategory = !empty($post['main_category']) || !empty($otherCats);
                                         ?>
                                         
-                                        <?php if ($hasCategory): ?>
-                                            <div class="cat-drop-wrapper">
-                                                <div class="cat-trigger-icon" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #2563eb; cursor: pointer; transition: all 0.2s; border: 1px solid #dbeafe;" onmouseover="this.style.background='#2563eb'; this.style.color='#ffffff';" onmouseout="this.style.background='#eff6ff'; this.style.color='#2563eb';">
-                                                    <i class="fas fa-tags" style="font-size: 14px;"></i>
-                                                </div>
-                                                <div class="cat-drop-menu" style="min-width: 190px; text-align: left; left: 50%; transform: translateX(-50%);">
+                                        <div class="cat-drop-wrapper">
+                                            <button type="button" class="cat-trigger-icon <?= $hasCategory ? '' : 'is-empty' ?>" 
+                                                    title="ক্লিক করে ক্যাটাগরি যোগ/মুছুন (Manage Categories)"
+                                                    onclick="openManagePostCategoriesModal(<?= $post['id'] ?>, <?= htmlspecialchars(json_encode($post['title']), ENT_QUOTES, 'UTF-8') ?>)"
+                                                    style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: <?= $hasCategory ? '#eff6ff' : '#f8fafc' ?>; color: <?= $hasCategory ? '#2563eb' : '#94a3b8' ?>; cursor: pointer; transition: all 0.2s; border: 1px <?= $hasCategory ? 'solid #dbeafe' : 'dashed #cbd5e1' ?>;"
+                                                    onmouseover="this.style.background='#2563eb'; this.style.color='#ffffff'; this.style.borderColor='#2563eb';" 
+                                                    onmouseout="this.style.background='<?= $hasCategory ? '#eff6ff' : '#f8fafc' ?>'; this.style.color='<?= $hasCategory ? '#2563eb' : '#94a3b8' ?>'; this.style.borderColor='<?= $hasCategory ? '#dbeafe' : '#cbd5e1' ?>';">
+                                                <i class="fas <?= $hasCategory ? 'fa-tags' : 'fa-plus' ?>" style="font-size: 13px;"></i>
+                                            </button>
+                                            <div class="cat-drop-menu" style="min-width: 200px; text-align: left; left: 50%; transform: translateX(-50%);">
+                                                <div class="cat-drop-list">
                                                     <?php if (!empty($post['main_category'])): ?>
                                                         <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; font-size: 12px; white-space: nowrap;">
                                                             <i class="fas fa-folder" style="color: #ea580c; font-size: 11px;"></i> 
-                                                            <span><?= htmlspecialchars($post['main_category']) ?></span>
+                                                            <span class="main-cat-text"><?= htmlspecialchars($post['main_category']) ?></span>
                                                             <span style="font-size: 9px; font-weight: 800; background: #fff7ed; color: #c2410c; padding: 1px 4px; border-radius: 4px; border: 1px solid #ffedd5; margin-left: auto;">MAIN</span>
                                                         </div>
                                                     <?php endif; ?>
                                                     
                                                     <?php if (!empty($otherCats)): ?>
-                                                        <?php foreach ($otherCats as $subCat): ?>
-                                                            <div class="cat-drop-item" style="font-size: 11px; margin-bottom: 4px; padding: 4px 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; white-space: nowrap;">
-                                                                <i class="far fa-folder" style="color: #94a3b8; margin-right: 4px;"></i>
-                                                                <?= htmlspecialchars($subCat) ?>
-                                                            </div>
-                                                        <?php endforeach; ?>
+                                                        <div class="other-cats-list">
+                                                            <?php foreach ($otherCats as $subCat): ?>
+                                                                <div class="cat-drop-item" style="font-size: 11px; margin-bottom: 4px; padding: 4px 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; white-space: nowrap;">
+                                                                    <i class="far fa-folder" style="color: #94a3b8; margin-right: 4px;"></i>
+                                                                    <?= htmlspecialchars($subCat) ?>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    <?php endif; ?>
+
+                                                    <?php if (!$hasCategory): ?>
+                                                        <div style="color: #94a3b8; font-size: 12px; padding: 4px 0; font-style: italic;">কোনো ক্যাটাগরি যুক্ত নেই</div>
                                                     <?php endif; ?>
                                                 </div>
+                                                <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #f1f5f9; text-align: center;">
+                                                    <button type="button" onclick="openManagePostCategoriesModal(<?= $post['id'] ?>, <?= htmlspecialchars(json_encode($post['title']), ENT_QUOTES, 'UTF-8') ?>)" style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; width: 100%; justify-content: center;">
+                                                        <i class="fas fa-edit"></i> ক্যাটাগরি পরিবর্তন করুন
+                                                    </button>
+                                                </div>
                                             </div>
-                                        <?php else: ?>
-                                            <span style="color: #cbd5e1; font-style: italic;">—</span>
-                                        <?php endif; ?>
+                                        </div>
                                     </td>
                                     <td style="color: #64748b; font-size: 13px;">
                                         <?= date('Y/m/d', strtotime($post['created_at'])) ?>
@@ -1999,8 +2013,393 @@ if (!function_exists('renderCategoryDropdownOptions')) {
     </div>
 </div>
 
+<!-- Modal: Manage Post Categories (Click to Add / Remove Categories) -->
+<?php
+if (!function_exists('renderManageCategoryTree')) {
+    function renderManageCategoryTree($categories, $parentId = null, $level = 0) {
+        $html = '';
+        foreach ($categories as $cat) {
+            $catParent = $cat['parent_id'] ? (int)$cat['parent_id'] : null;
+            $filterParent = $parentId ? (int)$parentId : null;
+            if ($catParent === $filterParent) {
+                $paddingLeft = $level * 20;
+                $html .= '<div class="mpc-cat-item" data-cat-id="' . (int)$cat['id'] . '" data-name="' . htmlspecialchars(mb_strtolower($cat['name'], 'UTF-8')) . '" style="padding: 7px 10px 7px ' . ($paddingLeft + 10) . 'px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; border-radius: 6px;">';
+                
+                // Left side: Checkbox and Label
+                $html .= '<label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; flex: 1; user-select: none;">';
+                $html .= '<input type="checkbox" class="mpc-checkbox" value="' . (int)$cat['id'] . '" data-name="' . htmlspecialchars($cat['name']) . '" onchange="handleMpcCheckboxChange(this)" style="cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb;">';
+                $html .= '<i class="fas fa-folder' . ($level > 0 ? '-open' : '') . '" style="color: ' . ($level === 0 ? '#3b82f6' : '#ea580c') . '; font-size: 13px;"></i>';
+                $html .= '<span class="mpc-cat-name" style="font-size: 13px; font-weight: 500; color: #1e293b;">' . htmlspecialchars($cat['name']) . '</span>';
+                $html .= '</label>';
+                
+                // Right side: Main Category Radio / Badge
+                $html .= '<div class="mpc-main-badge-wrap" style="display: none; align-items: center; gap: 4px;">';
+                $html .= '<label class="mpc-main-radio-label" title="প্রধান ফোল্ডার হিসেবে সেট করুন (Set as Main)" style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #ffffff; color: #64748b; transition: all 0.2s;">';
+                $html .= '<input type="radio" name="mpc_main_cat" value="' . (int)$cat['id'] . '" class="mpc-main-radio" onchange="handleMpcMainRadioChange(this)" style="margin: 0; width: 12px; height: 12px; accent-color: #ea580c;">';
+                $html .= '<span class="mpc-main-label-text">Main</span>';
+                $html .= '</label>';
+                $html .= '</div>';
+
+                $html .= '</div>';
+                
+                $html .= renderManageCategoryTree($categories, $cat['id'], $level + 1);
+            }
+        }
+        return $html;
+    }
+}
+?>
+<div class="modal-overlay" id="managePostCategoriesModal">
+    <div class="modal-content" style="max-width: 520px; width: 92%;">
+        <div class="modal-header">
+            <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-tags" style="color: #2563eb;"></i> 
+                <span>ক্যাটাগরি ম্যানেজ করুন (Categories)</span>
+            </h3>
+            <button type="button" class="modal-close" onclick="closeManagePostCategoriesModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="mpc_post_id" value="">
+            
+            <!-- Article Title Preview -->
+            <div style="margin-bottom: 16px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                    <i class="far fa-file-alt"></i> আর্টিকেল শিরোনাম
+                </div>
+                <div id="mpc_post_title" style="font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.4;">
+                    Loading title...
+                </div>
+            </div>
+
+            <!-- Search Filter Input -->
+            <div style="position: relative; margin-bottom: 12px;">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; pointer-events: none;"></i>
+                <input type="text" id="mpc_search" placeholder="ক্যাটাগরি খুঁজুন (Search category)..." class="modal-input" oninput="filterMpcCategories()" style="padding-left: 36px; height: 38px; font-size: 13px; width: 100%;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-bottom: 8px; padding: 0 4px;">
+                <span><i class="fas fa-check-square" style="color: #2563eb;"></i> টিক দিয়ে যোগ/বাদ দিন</span>
+                <span><i class="fas fa-star" style="color: #ea580c;"></i> প্রধান ফোল্ডারের জন্য <strong>Main</strong> সিলেক্ট করুন</span>
+            </div>
+
+            <!-- Categories Tree Container -->
+            <div id="mpc_tree_container" style="max-height: 280px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px; background: #ffffff; display: flex; flex-direction: column;">
+                <div id="mpc_loading" style="text-align: center; color: #64748b; padding: 30px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 18px; color: #2563eb;"></i>
+                    <div style="margin-top: 8px; font-size: 13px;">ক্যাটাগরি তালিকা লোড হচ্ছে...</div>
+                </div>
+                <div id="mpc_tree_list" style="display: none;">
+                    <?= renderManageCategoryTree($data['allCategories'] ?? []) ?>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 14px 20px;">
+            <button type="button" class="btn-explorer btn-explorer-secondary" onclick="closeManagePostCategoriesModal()">বাতিল (Cancel)</button>
+            <button type="button" id="mpc_save_btn" class="btn-explorer btn-explorer-primary" onclick="savePostCategories()" style="background: #2563eb; border-color: #2563eb; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fas fa-save"></i> <span>সেভ করুন (Save Changes)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     let availablePosts = [];
+    
+    // Toast Notification Utility
+    function showAdminToast(message, type = 'success') {
+        let toast = document.getElementById('admin-floating-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'admin-floating-toast';
+            document.body.appendChild(toast);
+        }
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            padding: 12px 20px;
+            background: ${type === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(20px);
+            opacity: 0;
+        `;
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> <span>${message}</span>`;
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+        });
+        setTimeout(() => {
+            toast.style.transform = 'translateY(20px)';
+            toast.style.opacity = '0';
+        }, 3200);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Modal: Manage Post Categories Functions
+    function openManagePostCategoriesModal(postId, postTitle) {
+        const modal = document.getElementById('managePostCategoriesModal');
+        if (!modal) return;
+
+        document.getElementById('mpc_post_id').value = postId;
+        document.getElementById('mpc_post_title').textContent = postTitle || ('Post #' + postId);
+        document.getElementById('mpc_search').value = '';
+        
+        document.querySelectorAll('.mpc-cat-item').forEach(el => el.style.display = 'flex');
+
+        document.getElementById('mpc_loading').style.display = 'block';
+        document.getElementById('mpc_tree_list').style.display = 'none';
+
+        document.querySelectorAll('.mpc-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.mpc-main-badge-wrap').forEach(w => w.style.display = 'none');
+        document.querySelectorAll('.mpc-main-radio').forEach(r => r.checked = false);
+        document.querySelectorAll('.mpc-main-radio-label').forEach(lbl => {
+            lbl.style.background = '#ffffff';
+            lbl.style.borderColor = '#cbd5e1';
+            lbl.style.color = '#64748b';
+            lbl.style.fontWeight = '600';
+        });
+
+        modal.classList.add('show');
+
+        fetch('<?= URLROOT ?>/admin/get_post_categories_ajax/' + postId)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('mpc_loading').style.display = 'none';
+                document.getElementById('mpc_tree_list').style.display = 'block';
+
+                if (data.success) {
+                    const assignedIds = data.category_ids || [];
+                    const mainId = data.main_category_id;
+
+                    assignedIds.forEach(cid => {
+                        const cb = document.querySelector(`.mpc-checkbox[value="${cid}"]`);
+                        if (cb) {
+                            cb.checked = true;
+                            const item = cb.closest('.mpc-cat-item');
+                            if (item) {
+                                const badgeWrap = item.querySelector('.mpc-main-badge-wrap');
+                                if (badgeWrap) badgeWrap.style.display = 'inline-flex';
+                            }
+                        }
+                    });
+
+                    if (mainId) {
+                        const mainRadio = document.querySelector(`.mpc-main-radio[value="${mainId}"]`);
+                        if (mainRadio) {
+                            mainRadio.checked = true;
+                            updateMpcMainLabelStyle(mainRadio);
+                        }
+                    } else if (assignedIds.length > 0) {
+                        const firstRadio = document.querySelector(`.mpc-main-radio[value="${assignedIds[0]}"]`);
+                        if (firstRadio) {
+                            firstRadio.checked = true;
+                            updateMpcMainLabelStyle(firstRadio);
+                        }
+                    }
+                } else {
+                    alert(data.error || 'Failed to load post categories');
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching categories:', err);
+                document.getElementById('mpc_loading').innerHTML = '<div style="color: #ef4444; padding: 20px;">ক্যাটাগরি তথ্য লোড করতে সমস্যা হয়েছে!</div>';
+            });
+    }
+
+    function closeManagePostCategoriesModal() {
+        const modal = document.getElementById('managePostCategoriesModal');
+        if (modal) modal.classList.remove('show');
+    }
+
+    function handleMpcCheckboxChange(checkbox) {
+        const item = checkbox.closest('.mpc-cat-item');
+        if (!item) return;
+        const badgeWrap = item.querySelector('.mpc-main-badge-wrap');
+        const radio = item.querySelector('.mpc-main-radio');
+
+        if (checkbox.checked) {
+            if (badgeWrap) badgeWrap.style.display = 'inline-flex';
+            const checkedMain = document.querySelector('.mpc-main-radio:checked');
+            if (!checkedMain && radio) {
+                radio.checked = true;
+                updateMpcMainLabelStyle(radio);
+            }
+        } else {
+            if (badgeWrap) badgeWrap.style.display = 'none';
+            if (radio && radio.checked) {
+                radio.checked = false;
+                updateMpcMainLabelStyle(null);
+                const firstCheckedCb = document.querySelector('.mpc-checkbox:checked');
+                if (firstCheckedCb) {
+                    const nextItem = firstCheckedCb.closest('.mpc-cat-item');
+                    const nextRadio = nextItem.querySelector('.mpc-main-radio');
+                    if (nextRadio) {
+                        nextRadio.checked = true;
+                        updateMpcMainLabelStyle(nextRadio);
+                    }
+                }
+            }
+        }
+    }
+
+    function handleMpcMainRadioChange(radio) {
+        updateMpcMainLabelStyle(radio);
+    }
+
+    function updateMpcMainLabelStyle(activeRadio) {
+        document.querySelectorAll('.mpc-main-radio-label').forEach(lbl => {
+            lbl.style.background = '#ffffff';
+            lbl.style.borderColor = '#cbd5e1';
+            lbl.style.color = '#64748b';
+            lbl.style.fontWeight = '600';
+        });
+
+        if (activeRadio && activeRadio.checked) {
+            const activeLabel = activeRadio.closest('.mpc-main-radio-label');
+            if (activeLabel) {
+                activeLabel.style.background = '#fff7ed';
+                activeLabel.style.borderColor = '#ea580c';
+                activeLabel.style.color = '#c2410c';
+                activeLabel.style.fontWeight = '800';
+            }
+        }
+    }
+
+    function filterMpcCategories() {
+        const q = (document.getElementById('mpc_search').value || '').trim().toLowerCase();
+        document.querySelectorAll('.mpc-cat-item').forEach(item => {
+            const name = item.getAttribute('data-name') || '';
+            if (q === '' || name.includes(q)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function savePostCategories() {
+        const postId = document.getElementById('mpc_post_id').value;
+        if (!postId) return;
+
+        const checkedBoxes = Array.from(document.querySelectorAll('.mpc-checkbox:checked'));
+        const categoryIds = checkedBoxes.map(cb => parseInt(cb.value));
+
+        const mainRadio = document.querySelector('.mpc-main-radio:checked');
+        const mainCategoryId = (mainRadio && mainRadio.closest('.mpc-cat-item').querySelector('.mpc-checkbox').checked)
+            ? parseInt(mainRadio.value)
+            : (categoryIds.length > 0 ? categoryIds[0] : null);
+
+        const saveBtn = document.getElementById('mpc_save_btn');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+
+        fetch('<?= URLROOT ?>/admin/update_post_categories_ajax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                post_id: postId,
+                category_ids: categoryIds,
+                main_category_id: mainCategoryId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+
+            if (data.success) {
+                showAdminToast('ক্যাটাগরি সফলভাবে আপডেট করা হয়েছে!', 'success');
+                closeManagePostCategoriesModal();
+                updatePostTableCellCategories(postId, data.main_category, data.other_categories, data.category_ids);
+            } else {
+                alert(data.error || 'Failed to update categories');
+            }
+        })
+        .catch(err => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            console.error('Error saving categories:', err);
+            alert('সার্ভারে সেভ করতে সমস্যা হয়েছে।');
+        });
+    }
+
+    function updatePostTableCellCategories(postId, mainCat, otherCats, categoryIds) {
+        const cell = document.getElementById('post-cat-cell-' + postId);
+        if (!cell) return;
+
+        const hasCat = categoryIds && categoryIds.length > 0;
+        const triggerBtn = cell.querySelector('.cat-trigger-icon');
+        const dropList = cell.querySelector('.cat-drop-list');
+
+        if (triggerBtn) {
+            if (hasCat) {
+                triggerBtn.style.background = '#eff6ff';
+                triggerBtn.style.color = '#2563eb';
+                triggerBtn.style.border = '1px solid #dbeafe';
+                triggerBtn.innerHTML = '<i class="fas fa-tags" style="font-size: 13px;"></i>';
+                triggerBtn.classList.remove('is-empty');
+                triggerBtn.onmouseout = () => {
+                    triggerBtn.style.background = '#eff6ff';
+                    triggerBtn.style.color = '#2563eb';
+                    triggerBtn.style.borderColor = '#dbeafe';
+                };
+            } else {
+                triggerBtn.style.background = '#f8fafc';
+                triggerBtn.style.color = '#94a3b8';
+                triggerBtn.style.border = '1px dashed #cbd5e1';
+                triggerBtn.innerHTML = '<i class="fas fa-plus" style="font-size: 12px;"></i>';
+                triggerBtn.classList.add('is-empty');
+                triggerBtn.onmouseout = () => {
+                    triggerBtn.style.background = '#f8fafc';
+                    triggerBtn.style.color = '#94a3b8';
+                    triggerBtn.style.borderColor = '#cbd5e1';
+                };
+            }
+        }
+
+        if (dropList) {
+            let html = '';
+            if (mainCat) {
+                html += `<div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; font-size: 12px; white-space: nowrap;">
+                    <i class="fas fa-folder" style="color: #ea580c; font-size: 11px;"></i> 
+                    <span class="main-cat-text">${escapeHtml(mainCat)}</span>
+                    <span style="font-size: 9px; font-weight: 800; background: #fff7ed; color: #c2410c; padding: 1px 4px; border-radius: 4px; border: 1px solid #ffedd5; margin-left: auto;">MAIN</span>
+                </div>`;
+            }
+            if (otherCats && otherCats.length > 0) {
+                html += '<div class="other-cats-list">';
+                otherCats.forEach(cat => {
+                    html += `<div class="cat-drop-item" style="font-size: 11px; margin-bottom: 4px; padding: 4px 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; color: #475569; font-weight: 600; white-space: nowrap;">
+                        <i class="far fa-folder" style="color: #94a3b8; margin-right: 4px;"></i>
+                        ${escapeHtml(cat)}
+                    </div>`;
+                });
+                html += '</div>';
+            }
+            if (!mainCat && (!otherCats || otherCats.length === 0)) {
+                html = '<div style="color: #94a3b8; font-size: 12px; padding: 4px 0; font-style: italic;">কোনো ক্যাটাগরি যুক্ত নেই</div>';
+            }
+            dropList.innerHTML = html;
+        }
+    }
     
     function openSelectPostsModal(folderId) {
         document.getElementById('select_posts_folder_id').value = folderId;

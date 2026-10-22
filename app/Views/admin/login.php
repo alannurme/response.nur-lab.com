@@ -295,9 +295,71 @@
         }
 
         .forgot-row {
-            text-align: right;
-            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.5rem;
             margin-bottom: 1.5rem;
+            user-select: none;
+        }
+
+        .remember-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .remember-label:hover {
+            color: #ffffff;
+        }
+
+        .remember-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 17px;
+            height: 17px;
+            border: 1.5px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            cursor: pointer;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .remember-checkbox:hover {
+            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .remember-checkbox:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .remember-checkbox:checked::after {
+            content: '';
+            width: 4px;
+            height: 8px;
+            border: solid #ffffff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -2px;
+        }
+
+        .remember-checkbox:focus-visible {
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
         .forgot-pass {
@@ -459,6 +521,10 @@
                 </div>
 
                 <div class="forgot-row">
+                    <label class="remember-label" for="remember">
+                        <input type="checkbox" name="remember" id="remember" value="1" class="remember-checkbox" checked>
+                        <span>Remember me</span>
+                    </label>
                     <a href="javascript:void(0)" onclick="showForgotModal()" class="forgot-pass">Forgot password?</a>
                 </div>
 
