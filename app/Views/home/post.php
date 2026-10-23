@@ -692,7 +692,7 @@ if (!function_exists('resolve_blog_image')) {
         <!-- Main Post Content -->
         <main class="post-main">
             <div class="post-header-card">
-                <?php if (($data['post']['status'] ?? 'published') !== 'published'): ?>
+                <?php if (!empty($data['post']) && ($data['post']['status'] ?? 'published') !== 'published'): ?>
                 <div class="unlisted-notice-banner" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fffbeb; border: 1.5px dashed #f59e0b; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #fef3c7; color: #d97706; font-size: 13px; flex-shrink: 0;">

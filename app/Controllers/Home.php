@@ -1736,8 +1736,8 @@ class Home extends Controller {
 
         $db = \Config\Database::pdoConnect();
 
-        // 1. Check if slug matches a post
-        $stmt = $db->prepare("SELECT * FROM posts WHERE slug = :slug AND status = 'published' LIMIT 1");
+        // 1. Check if slug matches a post (supports both published and unlisted/draft posts via direct link)
+        $stmt = $db->prepare("SELECT * FROM posts WHERE slug = :slug LIMIT 1");
         $stmt->execute(['slug' => $slug]);
         $post = $stmt->fetch();
 
@@ -1757,6 +1757,7 @@ class Home extends Controller {
                 'title' => $post['title'],
                 'post' => $post,
                 'category_name' => $cat_name,
+                'post_categories' => $postModel->getPostCategories($post['id']),
                 'post_authors' => $postModel->getPostAuthors($post['id']),
                 'popular_posts' => $postModel->getPopularPosts(5),
                 'related_posts' => $postModel->getRelatedPosts($post['category_id'], $post['id'], 3),
