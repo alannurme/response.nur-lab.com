@@ -973,78 +973,55 @@
         color: #64748b;
     }
 
-    /* Status Toggle Switch Button */
-    .status-toggle-btn {
+    /* Status Toggle inside Action Buttons */
+    .btn-row-action-status {
+        width: 38px;
+        height: 24px;
+        padding: 0;
+        border-radius: 9999px;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 3px 8px 3px 4px;
-        border-radius: 9999px;
-        font-size: 11px;
-        font-weight: 600;
+        justify-content: center;
         cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        user-select: none;
-        line-height: 1;
+        border: none;
         background: transparent;
         outline: none;
-        vertical-align: middle;
-        margin-left: 6px;
-    }
-
-    .status-toggle-btn:focus-visible {
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
-    }
-
-    .status-toggle-btn.is-published {
-        background: #ecfdf5;
-        color: #059669;
-        border-color: #a7f3d0;
-    }
-
-    .status-toggle-btn.is-published:hover {
-        background: #d1fae5;
-        border-color: #6ee7b7;
-        box-shadow: 0 2px 5px rgba(16, 185, 129, 0.15);
-    }
-
-    .status-toggle-btn.is-draft {
-        background: #fffbeb;
-        color: #b45309;
-        border-color: #fde68a;
-    }
-
-    .status-toggle-btn.is-draft:hover {
-        background: #fef3c7;
-        border-color: #fcd34d;
-        box-shadow: 0 2px 5px rgba(245, 158, 11, 0.15);
-    }
-
-    .status-toggle-track {
-        width: 26px;
-        height: 15px;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        padding: 1.5px;
-        transition: background-color 0.25s ease;
-        position: relative;
-        box-sizing: border-box;
+        transition: transform 0.2s ease, opacity 0.2s ease;
         flex-shrink: 0;
     }
 
-    .status-toggle-btn.is-published .status-toggle-track {
+    .btn-row-action-status:focus-visible {
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-row-action-status .status-toggle-track {
+        width: 32px;
+        height: 18px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        padding: 2px;
+        transition: background-color 0.25s ease, box-shadow 0.2s ease;
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    .btn-row-action-status.is-published .status-toggle-track {
         background-color: #10b981;
     }
 
-    .status-toggle-btn.is-draft .status-toggle-track {
+    .btn-row-action-status.is-draft .status-toggle-track {
         background-color: #cbd5e1;
     }
 
-    .status-toggle-thumb {
-        width: 12px;
-        height: 12px;
+    .btn-row-action-status:hover .status-toggle-track {
+        filter: brightness(0.95);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-row-action-status .status-toggle-thumb {
+        width: 14px;
+        height: 14px;
         background-color: #ffffff;
         border-radius: 50%;
         transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1052,33 +1029,26 @@
         display: block;
     }
 
-    .status-toggle-btn.is-published .status-toggle-thumb {
-        transform: translateX(11px);
+    .btn-row-action-status.is-published .status-toggle-thumb {
+        transform: translateX(14px);
     }
 
-    .status-toggle-btn.is-draft .status-toggle-thumb {
+    .btn-row-action-status.is-draft .status-toggle-thumb {
         transform: translateX(0);
     }
 
-    .status-toggle-btn.loading {
-        opacity: 0.55;
+    .btn-row-action-status.loading {
+        opacity: 0.5;
         pointer-events: none;
     }
 
-    .status-toggle-btn.loading .status-toggle-thumb {
-        animation: pulseThumb 0.8s infinite alternate;
+    .btn-row-action-status.loading .status-toggle-thumb {
+        animation: pulseThumb 0.6s infinite alternate;
     }
 
     @keyframes pulseThumb {
         0% { transform: scale(0.9); }
         100% { transform: scale(1.1); }
-    }
-
-    .status-toggle-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
     }
 
     /* Toast Notification */
@@ -1760,7 +1730,7 @@ if (!empty($data['breadcrumbs'])) {
                                 <th>Title</th>
                                 <th style="width: 100px; text-align: center;">Category</th>
                                 <th>Date</th>
-                                <th style="width: 120px; text-align: right;">Actions</th>
+                                <th style="width: 175px; text-align: right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1776,21 +1746,22 @@ if (!empty($data['breadcrumbs'])) {
                                             <i class="far fa-file-alt" style="color: #64748b;"></i>
                                             <span><?= htmlspecialchars($post['title']) ?></span>
                                         </a>
-                                        <button type="button" 
-                                                class="status-toggle-btn <?= $isDraft ? 'is-draft' : 'is-published' ?>" 
-                                                id="status-toggle-<?= $post['id'] ?>"
-                                                onclick="togglePostStatus(<?= $post['id'] ?>, event)"
-                                                title="<?= $isDraft ? 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' ?>">
-                                            <span class="status-toggle-track">
-                                                <span class="status-toggle-thumb"></span>
-                                            </span>
-                                            <span class="status-toggle-label">
-                                                <i class="fas <?= $isDraft ? 'fa-link' : 'fa-check' ?>"></i>
-                                                <span class="status-text"><?= $isDraft ? 'Unpublished' : 'Published' ?></span>
-                                            </span>
-                                        </button>
+                                        <?php if ($isDraft): ?>
+                                            <span class="post-badge post-badge-draft" id="post-badge-<?= $post['id'] ?>">Draft</span>
+                                        <?php else: ?>
+                                            <span class="post-badge post-badge-published" id="post-badge-<?= $post['id'] ?>">Published</span>
+                                        <?php endif; ?>
                                         <!-- Mobile Inline Actions under Title -->
                                         <div class="mobile-row-actions" style="display: none; margin-top: 8px; gap: 12px; align-items: center;">
+                                             <button type="button" 
+                                                     class="btn-row-action btn-row-action-status <?= $isDraft ? 'is-draft' : 'is-published' ?>" 
+                                                     id="mobile-status-toggle-<?= $post['id'] ?>"
+                                                     onclick="togglePostStatus(<?= $post['id'] ?>, event)"
+                                                     title="<?= $isDraft ? 'বর্তমানে আনপাবলিশড। ক্লিক করে পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন।' ?>">
+                                                 <span class="status-toggle-track">
+                                                     <span class="status-toggle-thumb"></span>
+                                                 </span>
+                                             </button>
                                              <button type="button" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)" style="color: #6366f1; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
                                                  <i class="far fa-copy"></i> Copy Link
                                              </button>
@@ -1865,7 +1836,16 @@ if (!empty($data['breadcrumbs'])) {
                                         <?= date('Y/m/d', strtotime($post['created_at'])) ?>
                                     </td>
                                     <td class="desktop-actions-cell">
-                                        <div class="row-actions-group" style="justify-content: flex-end;">
+                                        <div class="row-actions-group" style="justify-content: flex-end; align-items: center; gap: 6px;">
+                                             <button type="button" 
+                                                     class="btn-row-action btn-row-action-status <?= $isDraft ? 'is-draft' : 'is-published' ?>" 
+                                                     id="status-toggle-<?= $post['id'] ?>"
+                                                     onclick="togglePostStatus(<?= $post['id'] ?>, event)"
+                                                     title="<?= $isDraft ? 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' ?>">
+                                                 <span class="status-toggle-track">
+                                                     <span class="status-toggle-thumb"></span>
+                                                 </span>
+                                             </button>
                                              <button type="button" class="btn-row-action" title="Copy Direct Link (সরাসরি লিঙ্ক কপি করুন)" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)">
                                                  <i class="far fa-copy"></i>
                                              </button>
@@ -2892,15 +2872,22 @@ if (!function_exists('renderManageCategoryTree')) {
             btn.classList.remove('loading');
             if (data.success) {
                 const isPub = data.is_published;
-                btn.className = 'status-toggle-btn ' + (isPub ? 'is-published' : 'is-draft');
-                btn.title = isPub ? 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' : 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।';
+                const newClass = 'btn-row-action btn-row-action-status ' + (isPub ? 'is-published' : 'is-draft');
+                const newTitle = isPub ? 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' : 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।';
 
-                const label = btn.querySelector('.status-toggle-label');
-                if (label) {
-                    label.innerHTML = `
-                        <i class="fas ${isPub ? 'fa-check' : 'fa-link'}"></i>
-                        <span class="status-text">${isPub ? 'Published' : 'Unpublished'}</span>
-                    `;
+                btn.className = newClass;
+                btn.title = newTitle;
+
+                const mobileBtn = document.getElementById('mobile-status-toggle-' + postId);
+                if (mobileBtn) {
+                    mobileBtn.className = newClass;
+                    mobileBtn.title = newTitle;
+                }
+
+                const badge = document.getElementById('post-badge-' + postId);
+                if (badge) {
+                    badge.className = isPub ? 'post-badge post-badge-published' : 'post-badge post-badge-draft';
+                    badge.textContent = isPub ? 'Published' : 'Draft';
                 }
 
                 showToast(data.message || (isPub ? 'আর্টিকেলটি পাবলিক করা হয়েছে' : 'আর্টিকেলটি আনপাবলিশ করা হয়েছে'));
