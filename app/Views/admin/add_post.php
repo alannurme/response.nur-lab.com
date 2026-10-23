@@ -328,11 +328,14 @@
                 </h4>
                 
                 <div class="form-group mb-3">
-                    <label class="form-label-premium" style="font-size: 11px !important;"><i class="fas fa-toggle-on"></i> Status</label>
+                    <label class="form-label-premium" style="font-size: 11px !important;"><i class="fas fa-toggle-on"></i> Status (স্ট্যাটাস)</label>
                     <select name="status" class="form-control" style="width: 100%;">
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
+                        <option value="published">Published (পাবলিক - সব জায়গায় দেখাবে)</option>
+                        <option value="draft">Unpublished / Draft (আনপাবলিশড - শুধুমাত্র লিঙ্কের মাধ্যমে দেখা যাবে)</option>
                     </select>
+                    <small style="display: block; margin-top: 5px; color: #64748b; font-size: 11px;">
+                        <i class="fas fa-info-circle"></i> আনপাবলিশড থাকলে ওয়েবসাইট বা সার্চে আসবে না, কিন্তু সরাসরি লিঙ্ক দিয়ে ভিজিটর বা পাঠকরা পড়তে পারবেন।
+                    </small>
                 </div>
                 
                 <div class="form-group mb-3">

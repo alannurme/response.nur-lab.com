@@ -692,6 +692,21 @@ if (!function_exists('resolve_blog_image')) {
         <!-- Main Post Content -->
         <main class="post-main">
             <div class="post-header-card">
+                <?php if (($data['post']['status'] ?? 'published') !== 'published'): ?>
+                <div class="unlisted-notice-banner" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fffbeb; border: 1.5px dashed #f59e0b; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #fef3c7; color: #d97706; font-size: 13px; flex-shrink: 0;">
+                            <i class="fas fa-link"></i>
+                        </span>
+                        <div>
+                            <strong>আনপাবলিশড আর্টিকেল (Unlisted):</strong> এই পোস্টটি সরাসরি হোমপেজ বা ক্যাটাগরিতে দৃশ্যমান নয়, শুধুমাত্র এই লিঙ্কের মাধ্যমে দেখা যাবে।
+                        </div>
+                    </div>
+                    <button type="button" onclick="navigator.clipboard.writeText(window.location.href); this.innerHTML='<i class=\'fas fa-check\'></i> কপি হয়েছে!'; setTimeout(()=>{ this.innerHTML='<i class=\'far fa-copy\'></i> লিঙ্ক কপি'; }, 2000);" style="background: #f59e0b; color: #ffffff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: 0.2s;">
+                        <i class="far fa-copy"></i> লিঙ্ক কপি
+                    </button>
+                </div>
+                <?php endif; ?>
                 <?php if (!empty($data['post']['featured_image'])): ?>
                 <img src="<?=resolve_blog_image($data['post']['featured_image'])?>" loading="lazy" decoding="async" class="post-featured-img" alt="<?= $data['post']['title'] ?>">
                 <?php endif; ?>

@@ -593,6 +593,38 @@ class AdminModel extends Model {
         return $res;
     }
 
+    public function updatePostStatus($id, $status) {
+        $validStatuses = ['published', 'draft'];
+        if (!in_array($status, $validStatuses)) {
+            return false;
+        }
+        $stmt = $this->db->prepare("UPDATE posts SET status = :status WHERE id = :id");
+        $success = $stmt->execute([
+            'status' => $status,
+            'id' => (int)$id
+        ]);
+        if ($success) {
+            \App\Helpers\Cache::clear();
+        }
+        return $success;
+    }
+
+    public function bulkUpdatePostStatus($ids, $status) {
+        $validStatuses = ['published', 'draft'];
+        if (!in_array($status, $validStatuses) || empty($ids) || !is_array($ids)) {
+            return false;
+        }
+        $clean_ids = array_map('intval', $ids);
+        $in = implode(',', $clean_ids);
+        if (empty($in)) return false;
+        $stmt = $this->db->prepare("UPDATE posts SET status = :status WHERE id IN ($in)");
+        $success = $stmt->execute(['status' => $status]);
+        if ($success) {
+            \App\Helpers\Cache::clear();
+        }
+        return $success;
+    }
+
     public function getPostCategoryIds($post_id) {
         $stmt = $this->db->prepare("SELECT category_id FROM post_categories WHERE post_id = :post_id");
         $stmt->execute(['post_id' => $post_id]);

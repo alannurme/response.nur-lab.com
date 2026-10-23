@@ -973,6 +973,141 @@
         color: #64748b;
     }
 
+    /* Status Toggle Switch Button */
+    .status-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 8px 3px 4px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        line-height: 1;
+        background: transparent;
+        outline: none;
+        vertical-align: middle;
+        margin-left: 6px;
+    }
+
+    .status-toggle-btn:focus-visible {
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+    }
+
+    .status-toggle-btn.is-published {
+        background: #ecfdf5;
+        color: #059669;
+        border-color: #a7f3d0;
+    }
+
+    .status-toggle-btn.is-published:hover {
+        background: #d1fae5;
+        border-color: #6ee7b7;
+        box-shadow: 0 2px 5px rgba(16, 185, 129, 0.15);
+    }
+
+    .status-toggle-btn.is-draft {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: #fde68a;
+    }
+
+    .status-toggle-btn.is-draft:hover {
+        background: #fef3c7;
+        border-color: #fcd34d;
+        box-shadow: 0 2px 5px rgba(245, 158, 11, 0.15);
+    }
+
+    .status-toggle-track {
+        width: 26px;
+        height: 15px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        padding: 1.5px;
+        transition: background-color 0.25s ease;
+        position: relative;
+        box-sizing: border-box;
+        flex-shrink: 0;
+    }
+
+    .status-toggle-btn.is-published .status-toggle-track {
+        background-color: #10b981;
+    }
+
+    .status-toggle-btn.is-draft .status-toggle-track {
+        background-color: #cbd5e1;
+    }
+
+    .status-toggle-thumb {
+        width: 12px;
+        height: 12px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        display: block;
+    }
+
+    .status-toggle-btn.is-published .status-toggle-thumb {
+        transform: translateX(11px);
+    }
+
+    .status-toggle-btn.is-draft .status-toggle-thumb {
+        transform: translateX(0);
+    }
+
+    .status-toggle-btn.loading {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    .status-toggle-btn.loading .status-toggle-thumb {
+        animation: pulseThumb 0.8s infinite alternate;
+    }
+
+    @keyframes pulseThumb {
+        0% { transform: scale(0.9); }
+        100% { transform: scale(1.1); }
+    }
+
+    .status-toggle-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    /* Toast Notification */
+    .admin-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        background: #0f172a;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 99999;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+    }
+
+    .admin-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
     /* Actions inside row */
     .row-actions-group {
         display: flex;
@@ -1604,6 +1739,8 @@ if (!empty($data['breadcrumbs'])) {
                     <div class="bulk-action-bar">
                         <select class="explorer-select" id="bulkActionSelect">
                             <option value="-1">Bulk Actions</option>
+                            <option value="publish">Mark as Published (পাবলিশ)</option>
+                            <option value="unpublish">Mark as Unpublished (আনপাবলিশ - লিঙ্ক অনলি)</option>
                             <option value="delete">Move to Trash</option>
                         </select>
                         <button class="btn-explorer btn-explorer-secondary" onclick="applyBulkAction()" style="padding: 6px 12px;">Apply</button>
@@ -1639,13 +1776,24 @@ if (!empty($data['breadcrumbs'])) {
                                             <i class="far fa-file-alt" style="color: #64748b;"></i>
                                             <span><?= htmlspecialchars($post['title']) ?></span>
                                         </a>
-                                        <?php if ($isDraft): ?>
-                                            <span class="post-badge post-badge-draft">Draft</span>
-                                        <?php else: ?>
-                                            <span class="post-badge post-badge-published">Published</span>
-                                        <?php endif; ?>
+                                        <button type="button" 
+                                                class="status-toggle-btn <?= $isDraft ? 'is-draft' : 'is-published' ?>" 
+                                                id="status-toggle-<?= $post['id'] ?>"
+                                                onclick="togglePostStatus(<?= $post['id'] ?>, event)"
+                                                title="<?= $isDraft ? 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' ?>">
+                                            <span class="status-toggle-track">
+                                                <span class="status-toggle-thumb"></span>
+                                            </span>
+                                            <span class="status-toggle-label">
+                                                <i class="fas <?= $isDraft ? 'fa-link' : 'fa-check' ?>"></i>
+                                                <span class="status-text"><?= $isDraft ? 'Unpublished' : 'Published' ?></span>
+                                            </span>
+                                        </button>
                                         <!-- Mobile Inline Actions under Title -->
                                         <div class="mobile-row-actions" style="display: none; margin-top: 8px; gap: 12px; align-items: center;">
+                                             <button type="button" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)" style="color: #6366f1; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
+                                                 <i class="far fa-copy"></i> Copy Link
+                                             </button>
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                                                  <i class="far fa-eye"></i> View
                                              </a>
@@ -1661,12 +1809,12 @@ if (!empty($data['breadcrumbs'])) {
                                         <?php 
                                         $otherCats = [];
                                         if (!empty($post['secondary_categories'])) {
-                                            $subCats = explode(', ', $post['secondary_categories']);
-                                            foreach ($subCats as $subCat) {
-                                                if ($subCat !== $post['main_category']) {
-                                                    $otherCats[] = $subCat;
-                                                }
-                                            }
+                                             $subCats = explode(', ', $post['secondary_categories']);
+                                             foreach ($subCats as $subCat) {
+                                                 if ($subCat !== $post['main_category']) {
+                                                     $otherCats[] = $subCat;
+                                                 }
+                                             }
                                         }
                                         $hasCategory = !empty($post['main_category']) || !empty($otherCats);
                                         ?>
@@ -1718,6 +1866,9 @@ if (!empty($data['breadcrumbs'])) {
                                     </td>
                                     <td class="desktop-actions-cell">
                                         <div class="row-actions-group" style="justify-content: flex-end;">
+                                             <button type="button" class="btn-row-action" title="Copy Direct Link (সরাসরি লিঙ্ক কপি করুন)" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)">
+                                                 <i class="far fa-copy"></i>
+                                             </button>
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="btn-row-action" title="View on Live Site">
                                                  <i class="far fa-eye"></i>
                                              </a>
@@ -2663,14 +2814,16 @@ if (!function_exists('renderManageCategoryTree')) {
 
     function applyBulkAction() {
         const action = document.getElementById('bulkActionSelect').value;
+        const selectedCheckbox = document.querySelectorAll('.post-checkbox:checked');
+        if (selectedCheckbox.length === 0) {
+            alert('No posts selected.');
+            return;
+        }
+
+        const ids = Array.from(selectedCheckbox).map(cb => cb.value);
+
         if (action === 'delete') {
-            const selectedCheckbox = document.querySelectorAll('.post-checkbox:checked');
-            if (selectedCheckbox.length === 0) {
-                alert('No posts selected.');
-                return;
-            }
             if (confirm(`Are you sure you want to move ${selectedCheckbox.length} selected post(s) to trash?`)) {
-                const ids = Array.from(selectedCheckbox).map(cb => cb.value);
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '<?= URLROOT ?>/admin/delete_post/' + ids.join(',');
@@ -2684,7 +2837,123 @@ if (!function_exists('renderManageCategoryTree')) {
                 document.body.appendChild(form);
                 form.submit();
             }
+        } else if (action === 'publish' || action === 'unpublish') {
+            const targetStatus = (action === 'publish') ? 'published' : 'draft';
+            const statusLabel = (action === 'publish') ? 'পাবলিশ (Published - সবার জন্য দৃশ্যমান)' : 'আনপাবলিশ (Unpublished - লিঙ্ক অনলি)';
+            if (confirm(`নির্বাচিত ${selectedCheckbox.length}টি আর্টিকেল ${statusLabel} করতে চান?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?= URLROOT ?>/admin/bulk_post_status';
+
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status';
+                statusInput.value = targetStatus;
+                form.appendChild(statusInput);
+
+                const idsInput = document.createElement('input');
+                idsInput.type = 'hidden';
+                idsInput.name = 'ids';
+                idsInput.value = ids.join(',');
+                form.appendChild(idsInput);
+
+                const redirectInput = document.createElement('input');
+                redirectInput.type = 'hidden';
+                redirectInput.name = 'redirect_url';
+                redirectInput.value = window.location.href;
+                form.appendChild(redirectInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
+    }
+
+    function togglePostStatus(postId, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const btn = document.getElementById('status-toggle-' + postId);
+        if (!btn || btn.classList.contains('loading')) return;
+
+        btn.classList.add('loading');
+
+        fetch('<?= URLROOT ?>/admin/toggle_post_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: postId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.classList.remove('loading');
+            if (data.success) {
+                const isPub = data.is_published;
+                btn.className = 'status-toggle-btn ' + (isPub ? 'is-published' : 'is-draft');
+                btn.title = isPub ? 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)।' : 'বর্তমানে আনপাবলিশড (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)। ক্লিক করে সবার জন্য পাবলিশ করুন।';
+
+                const label = btn.querySelector('.status-toggle-label');
+                if (label) {
+                    label.innerHTML = `
+                        <i class="fas ${isPub ? 'fa-check' : 'fa-link'}"></i>
+                        <span class="status-text">${isPub ? 'Published' : 'Unpublished'}</span>
+                    `;
+                }
+
+                showToast(data.message || (isPub ? 'আর্টিকেলটি পাবলিক করা হয়েছে' : 'আর্টিকেলটি আনপাবলিশ করা হয়েছে'));
+
+                if (window.postCache && window.postCache[postId]) {
+                    window.postCache[postId].status = data.status;
+                }
+            } else {
+                alert(data.message || 'স্ট্যাটাস আপডেট করা সম্ভব হয়নি।');
+            }
+        })
+        .catch(err => {
+            btn.classList.remove('loading');
+            console.error('Toggle status error:', err);
+            alert('সার্ভার এরর! দয়া করে আবার চেষ্টা করুন।');
+        });
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('admin-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'admin-toast';
+            toast.className = 'admin-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fas fa-info-circle" style="color: #38bdf8;"></i> <span>${msg}</span>`;
+        toast.classList.add('show');
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3200);
+    }
+
+    function copyPostLink(url, btn) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('📋 পোস্টের লিঙ্ক কপি করা হয়েছে!');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-check';
+                    icon.style.color = '#10b981';
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                        icon.style.color = '';
+                    }, 2000);
+                }
+            }
+        }).catch(err => {
+            console.error('Copy link error:', err);
+            prompt('পোস্টের সরাসরি লিঙ্ক কপি করুন:', url);
+        });
     }
 
     function toggleTreeBranch(e, element) {

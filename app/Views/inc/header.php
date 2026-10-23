@@ -87,6 +87,9 @@ if (!function_exists('getBengaliDate')) {
     <meta name="description" content="<?= htmlspecialchars(strip_tags($meta_description)) ?>">
     <meta name="keywords" content="<?= htmlspecialchars(strip_tags($meta_keywords)) ?>">
     <meta name="author" content="<?= htmlspecialchars($meta_author) ?>">
+    <?php if (isset($data['post']) && !empty($data['post']) && ($data['post']['status'] ?? 'published') !== 'published'): ?>
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <?php endif; ?>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="<?= isset($data['post']) ? 'article' : 'website' ?>">

@@ -2229,6 +2229,77 @@ class Admin extends Controller {
         exit;
     }
 
+    public function toggle_post_status() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit;
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = $input['id'] ?? $_POST['id'] ?? null;
+        $targetStatus = $input['status'] ?? $_POST['status'] ?? null;
+
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'Post ID is required']);
+            exit;
+        }
+
+        $postModel = $this->model('PostModel');
+        $post = $postModel->getPostById((int)$id);
+        if (!$post) {
+            echo json_encode(['success' => false, 'message' => 'Post not found']);
+            exit;
+        }
+
+        if (!$targetStatus) {
+            $currentStatus = strtolower($post['status'] ?? 'published');
+            $newStatus = ($currentStatus === 'published') ? 'draft' : 'published';
+        } else {
+            $newStatus = ($targetStatus === 'published') ? 'published' : 'draft';
+        }
+
+        $adminModel = $this->model('AdminModel');
+        if ($adminModel->updatePostStatus($id, $newStatus)) {
+            echo json_encode([
+                'success' => true,
+                'id' => (int)$id,
+                'status' => $newStatus,
+                'is_published' => ($newStatus === 'published'),
+                'status_label' => ($newStatus === 'published') ? 'Published' : 'Unpublished',
+                'message' => ($newStatus === 'published')
+                    ? 'আর্টিকেলটি সবার জন্য দৃশ্যমান করা হয়েছে (Published)'
+                    : 'আর্টিকেলটি আনপাবলিশ করা হয়েছে (শুধুমাত্র লিঙ্ক দিয়ে দেখা যাবে)'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'message' => 'Failed to update post status']);
+        exit;
+    }
+
+    public function bulk_post_status() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . URLROOT . '/admin/posts');
+            exit;
+        }
+
+        $status = $_POST['status'] ?? '';
+        $ids = $_POST['ids'] ?? '';
+        if (in_array($status, ['published', 'draft']) && !empty($ids)) {
+            $idArray = explode(',', $ids);
+            $adminModel = $this->model('AdminModel');
+            $adminModel->bulkUpdatePostStatus($idArray, $status);
+        }
+
+        $redirectUrl = !empty($_POST['redirect_url']) ? $_POST['redirect_url'] : URLROOT . '/admin/posts';
+        header('Location: ' . $redirectUrl);
+        exit;
+    }
+
     public function team() {
         $adminModel = $this->model('AdminModel');
         $members = $adminModel->getTeamMembers();
