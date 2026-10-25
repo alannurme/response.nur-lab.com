@@ -252,7 +252,8 @@ class Admin extends Controller {
     public function ajax_search_posts() {
         header('Content-Type: application/json; charset=utf-8');
         
-        if (!isset($_SESSION['user_id'])) {
+        // Check for admin session (admin uses admin_id or user_id)
+        if (empty($_SESSION['admin_id']) && empty($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'error' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -267,7 +268,8 @@ class Admin extends Controller {
                 'success' => true,
                 'total' => 0,
                 'posts' => [],
-                'questions_count' => 0
+                'questions_count' => 0,
+                'questions' => []
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -281,7 +283,8 @@ class Admin extends Controller {
         ]);
 
         $questions = \App\Helpers\SearchHelper::searchQuestions($query, [
-            'limit' => 5
+            'limit' => 20,
+            'status' => null // Admin sees both answered and pending questions
         ]);
 
         echo json_encode([
