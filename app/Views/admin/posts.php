@@ -2667,25 +2667,6 @@ if (!function_exists('renderManageCategoryTree')) {
     }
 
     // -------------------------------------------------------------
-    // Live AJAX Search for Admin Posts Explorer
-    // -------------------------------------------------------------
-    let adminSearchTimer = null;
-    let initialTbodyHTML = null;
-    let initialSubFoldersDisplay = null;
-
-    function captureInitialExplorerState() {
-        if (initialTbodyHTML === null) {
-            const tbody = document.querySelector('.explorer-table tbody');
-            if (tbody) initialTbodyHTML = tbody.innerHTML;
-            
-            const subFolders = document.querySelector('.folder-grid');
-            if (subFolders && subFolders.parentElement) {
-                initialSubFoldersDisplay = subFolders.parentElement.style.display || '';
-            }
-        }
-    }
-
-    // -------------------------------------------------------------
     // Live AJAX Search for Admin Posts Explorer & Dropdown
     // -------------------------------------------------------------
     let adminSearchTimer = null;

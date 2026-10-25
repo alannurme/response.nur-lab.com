@@ -48,7 +48,14 @@ class Admin extends Controller {
         $uri = service('request')->getUri()->getPath();
         $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false));
 
+        $isAjaxRoute = (strpos($uri, 'ajax_') !== false);
+
         if (!$isLoginRoute && empty($_SESSION['admin_id'])) {
+            if ($isAjaxRoute) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+                exit;
+            }
             header('Location: ' . base_url('admin/login'));
             exit;
         }
