@@ -1964,6 +1964,11 @@ if (!empty($data['breadcrumbs'])) {
                     <span id="detailViewStatus" class=""></span>
                 </div>
                 
+                <!-- Hidden featured image elements to maintain JS selector safety without displaying huge image -->
+                <div id="detailViewImageContainer" style="display: none !important;">
+                    <img id="detailViewImage" src="" alt="" style="display: none !important;">
+                </div>
+                
                 <div id="detailViewContent" class="post-body">
                     <!-- Content will load dynamically -->
                 </div>
@@ -3127,7 +3132,7 @@ if (!function_exists('renderManageCategoryTree')) {
         const tocContent = document.getElementById('quickViewTocContent');
         const fontDisplayEl = document.getElementById('fontSizeDisplay');
 
-        titleEl.textContent = data.title;
+        if (titleEl) titleEl.textContent = data.title || '';
         
         // Parse and format double brackets into footnotes
         let contentHtml = data.content || '';
@@ -3166,9 +3171,8 @@ if (!function_exists('renderManageCategoryTree')) {
             index++;
         }
         
-        bodyEl.innerHTML = contentHtml;
-
         const wrapPartsIntoCards = (containerEl) => {
+            if (!containerEl) return;
             const children = Array.from(containerEl.childNodes);
             containerEl.innerHTML = '';
             
@@ -3193,13 +3197,20 @@ if (!function_exists('renderManageCategoryTree')) {
                 currentCard.appendChild(child);
             });
         };
-        wrapPartsIntoCards(bodyEl);
 
-        dateEl.textContent = data.created_at;
-        statusEl.textContent = data.status.toUpperCase();
-        statusEl.className = data.status === 'published' ? 'post-badge post-badge-published' : 'post-badge post-badge-draft';
+        if (bodyEl) {
+            bodyEl.innerHTML = contentHtml;
+            wrapPartsIntoCards(bodyEl);
+        }
+
+        if (dateEl) dateEl.textContent = data.created_at || '';
+        if (statusEl) {
+            const st = (data.status || 'published').toLowerCase();
+            statusEl.textContent = st.toUpperCase();
+            statusEl.className = st === 'published' ? 'post-badge post-badge-published' : 'post-badge post-badge-draft';
+        }
         
-        if (footnotes.length > 0) {
+        if (footnotes.length > 0 && bodyEl) {
             const footnoteContainer = document.createElement('div');
             footnoteContainer.className = 'post-footnotes-box';
             footnoteContainer.style.marginTop = '40px';
@@ -3253,12 +3264,16 @@ if (!function_exists('renderManageCategoryTree')) {
         const shortLink = publicBase + '/p/' + data.id;
         window.currentPostPublicLink = publicLink;
         
-        // Set social media links
-        document.getElementById('shareFB').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(publicLink);
-        document.getElementById('shareWA').href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + '\n' + publicLink);
-        document.getElementById('shareTwitter').href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(publicLink) + '&text=' + encodeURIComponent(data.title);
+        // Set social media links safely
+        const shareFB = document.getElementById('shareFB');
+        if (shareFB) shareFB.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(publicLink);
+        const shareWA = document.getElementById('shareWA');
+        if (shareWA) shareWA.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + '\n' + publicLink);
+        const shareTwitter = document.getElementById('shareTwitter');
+        if (shareTwitter) shareTwitter.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(publicLink) + '&text=' + encodeURIComponent(data.title);
         
-        document.getElementById('detailShareGroup').style.display = 'flex';
+        const detailShareGroup = document.getElementById('detailShareGroup');
+        if (detailShareGroup) detailShareGroup.style.display = 'flex';
         
         window.currentPostDetailData = data;
 
@@ -3403,7 +3418,7 @@ if (!function_exists('renderManageCategoryTree')) {
             const fontDisplayEl = document.getElementById('fontSizeDisplay');
             
             currentQuickViewFontSize = 18;
-            bodyEl.style.fontSize = '18px';
+            if (bodyEl) bodyEl.style.fontSize = '18px';
             if (fontDisplayEl) {
                 fontDisplayEl.textContent = '18px';
             }
@@ -3416,12 +3431,14 @@ if (!function_exists('renderManageCategoryTree')) {
             if (postCache[id] && postCache[id] !== 'fetching') {
                 renderPostDetail(postCache[id]);
             } else {
-                titleEl.textContent = "Loading...";
-                bodyEl.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #2563eb;"></i></div>';
-                imgContainer.style.display = 'none';
-                dateEl.textContent = '';
-                statusEl.textContent = '';
-                statusEl.className = '';
+                if (titleEl) titleEl.textContent = "Loading...";
+                if (bodyEl) bodyEl.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #2563eb;"></i></div>';
+                if (imgContainer) imgContainer.style.display = 'none';
+                if (dateEl) dateEl.textContent = '';
+                if (statusEl) {
+                    statusEl.textContent = '';
+                    statusEl.className = '';
+                }
                 
                 const tocContainer = document.getElementById('quickViewTocContainer');
                 if (tocContainer) {
@@ -3437,19 +3454,21 @@ if (!function_exists('renderManageCategoryTree')) {
                         return res.json();
                     })
                     .then(data => {
-                        if (data.success) {
+                        if (data && data.success) {
                             postCache[id] = data;
                             renderPostDetail(data);
                         } else {
-                            titleEl.textContent = "Error";
-                            bodyEl.innerHTML = '<p style="color: #ef4444;">' + (data.error || 'Failed to load post content.') + '</p>';
-                            document.getElementById('detailShareGroup').style.display = 'none';
+                            if (titleEl) titleEl.textContent = "Error";
+                            if (bodyEl) bodyEl.innerHTML = '<p style="color: #ef4444;">' + ((data && data.error) || 'Failed to load post content.') + '</p>';
+                            const shareGroup = document.getElementById('detailShareGroup');
+                            if (shareGroup) shareGroup.style.display = 'none';
                         }
                     })
                     .catch(err => {
-                        titleEl.textContent = "Error";
-                        bodyEl.innerHTML = '<p style="color: #ef4444;">An error occurred while fetching the post: ' + err.message + '</p>';
-                        document.getElementById('detailShareGroup').style.display = 'none';
+                        if (titleEl) titleEl.textContent = "Error";
+                        if (bodyEl) bodyEl.innerHTML = '<p style="color: #ef4444;">An error occurred while fetching the post: ' + err.message + '</p>';
+                        const shareGroup = document.getElementById('detailShareGroup');
+                        if (shareGroup) shareGroup.style.display = 'none';
                     });
             }
         } catch (err) {
