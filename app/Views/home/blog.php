@@ -979,129 +979,257 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
         <!-- Left Column -->
         <div class="np-col-70">
             <?php if (true): // Always show category style design (clean grid cards) ?>
-                <!-- Clean Modern Card Grid for Category & Search Pages -->
-                <div style="margin-bottom: 25px;">
-                    <h2 style="font-family: 'Noto Serif Bengali', serif; font-size: 1.8rem; font-weight: 800; color: var(--newspaper-text-main); margin-bottom: 5px;"><?= htmlspecialchars($data['title']) ?></h2>
-                    <div style="width: 50px; height: 3px; background: var(--newspaper-accent); border-radius: 2px; margin-bottom: 20px;"></div>
-                </div>
-                
-                <?php if (!empty($all_posts)): ?>
-                    <div class="clean-grid">
-                        <?php foreach ($all_posts as $post): 
-                            $blog_img = resolve_blog_image($post['featured_image']);
-                            $excerpt = strip_tags(!empty($post['excerpt']) ? $post['excerpt'] : $post['content']);
-                            if (mb_strlen($excerpt) > 120) {
-                                $excerpt = mb_substr($excerpt, 0, 120) . '...';
-                            }
-                        ?>
-                            <div class="clean-card">
-                                <div class="clean-card-image">
-                                    <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="display: block; width: 100%; height: 100%; text-decoration: none;">
-                                        <?php if (!empty($post['featured_image'])): ?>
-                                            <img src="<?=$blog_img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($post['title']) ?>">
-                                        <?php else: ?>
-                                            <div class="no-image-placeholder">
-                                                <span><?= htmlspecialchars($post['title']) ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </a>
-                                </div>
-                                <div class="clean-card-content">
-                                    <div class="clean-card-meta">
-                                        <span><i class="far fa-calendar-alt"></i> <?= date('d M', strtotime($post['created_at'])) ?></span>
-                                        <span><i class="far fa-user"></i> এডমিন</span>
-                                        <span><i class="far fa-eye"></i> <?= number_format($post['views'] ?? 0) ?> বার</span>
-                                    </div>
-                                    <h3 class="clean-card-title">
-                                        <a href="<?= URLROOT ?>/<?= $post['slug'] ?>"><?= htmlspecialchars($post['title']) ?></a>
-                                    </h3>
-                                    <p class="clean-card-excerpt"><?= $excerpt ?></p>
-                                </div>
-                                <div class="clean-card-footer">
-                                    <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="clean-card-link">বিস্তারিত পড়ুন</a>
-                                    <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="clean-card-btn">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
+                <?php if (!empty($data['search'])): ?>
+                    <!-- Rich Search Results Header with Tabs -->
+                    <div class="search-results-header" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px 24px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 12px;">
+                            <div>
+                                <span style="font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Search Results</span>
+                                <h1 style="font-family: 'Noto Serif Bengali', serif; font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 4px 0 0 0;">
+                                    "<?= htmlspecialchars($data['search']) ?>" এর অনুসন্ধান ফলাফল
+                                </h1>
                             </div>
-                        <?php endforeach; ?>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" class="search-tab-pill active" id="tab-pill-posts" onclick="filterBlogSearchTab('posts')" style="padding: 6px 14px; border-radius: 20px; border: none; background: #2563eb; color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
+                                    <i class="fas fa-file-alt"></i> পোস্টসমূহ (<?= $data['search_posts_count'] ?? count($all_posts) ?>)
+                                </button>
+                                <button type="button" class="search-tab-pill" id="tab-pill-qa" onclick="filterBlogSearchTab('qa')" style="padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
+                                    <i class="fas fa-question-circle"></i> প্রশ্নোত্তর (<?= $data['search_questions_count'] ?? 0 ?>)
+                                </button>
+                                <button type="button" class="search-tab-pill" id="tab-pill-all" onclick="filterBlogSearchTab('all')" style="padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
+                                    সবগুলো
+                                </button>
+                            </div>
+                        </div>
+                        <p style="margin: 0; font-size: 13px; color: #64748b;">
+                            বাংলা, বাংলিশ ও ইংরেজি শব্দের মিল এবং প্রাসঙ্গিকতা অনুযায়ী সাজানো হয়েছে।
+                        </p>
                     </div>
-                    
-                    <!-- Pagination -->
-                    <?php if (isset($data['total_pages']) && $data['total_pages'] > 1): ?>
-                        <div class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 40px; margin-bottom: 20px;">
-                            <?php 
-                            $curr_page = $data['current_page'];
-                            $tot_pages = $data['total_pages'];
-                            
-                            // Helper to build page url
-                            $get_page_url = function($p) use ($data) {
-                                $query = $_GET;
-                                $query['page'] = $p;
-                                $slug = $data['category_slug'] ?? '';
-                                if (!empty($slug)) {
-                                    return URLROOT . '/' . $slug . '?' . http_build_query($query);
-                                } else {
-                                    return URLROOT . '/blog?' . http_build_query($query);
+                <?php else: ?>
+                    <div style="margin-bottom: 25px;">
+                        <h2 style="font-family: 'Noto Serif Bengali', serif; font-size: 1.8rem; font-weight: 800; color: var(--newspaper-text-main); margin-bottom: 5px;"><?= htmlspecialchars($data['title']) ?></h2>
+                        <div style="width: 50px; height: 3px; background: var(--newspaper-accent); border-radius: 2px; margin-bottom: 20px;"></div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Posts Section -->
+                <div id="blog-search-posts-section">
+                    <?php if (!empty($all_posts)): ?>
+                        <div class="clean-grid">
+                            <?php foreach ($all_posts as $post): 
+                                $blog_img = resolve_blog_image($post['featured_image']);
+                                $excerpt = strip_tags(!empty($post['excerpt']) ? $post['excerpt'] : $post['content']);
+                                if (mb_strlen($excerpt) > 130) {
+                                    $excerpt = mb_substr($excerpt, 0, 130) . '...';
                                 }
-                            };
-                            
-                            if (!function_exists('toBengaliNumberLocal')) {
-                                function toBengaliNumberLocal($number) {
-                                    $en_num = ['0','1','2','3','4','5','6','7','8','9'];
-                                    $bn_num = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-                                    return str_replace($en_num, $bn_num, $number);
+                                
+                                $title_display = !empty($post['highlighted_title']) ? $post['highlighted_title'] : htmlspecialchars($post['title']);
+                                $snippet_display = !empty($post['highlighted_snippet']) ? $post['highlighted_snippet'] : htmlspecialchars($excerpt);
+
+                                $matchBadgeHtml = '';
+                                if (!empty($post['match_badge'])) {
+                                    if ($post['match_badge'] === 'Title Match') {
+                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> Title Match</span>';
+                                    } elseif ($post['match_badge'] === 'Keyword Match') {
+                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> Tag Match</span>';
+                                    }
                                 }
-                            }
                             ?>
-                            
-                            <?php if ($curr_page > 1): ?>
-                                <a href="<?= $get_page_url($curr_page - 1) ?>" class="blog-page-link" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;"><i class="fas fa-chevron-left"></i> পূর্ববর্তী</a>
-                            <?php endif; ?>
-                            
-                            <?php 
-                            $start = max(1, $curr_page - 2);
-                            $end = min($tot_pages, $curr_page + 2);
-                            
-                            if ($start > 1) {
-                                echo '<a href="' . $get_page_url(1) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">১</a>';
-                                if ($start > 2) {
-                                    echo '<span style="color: #94a3b8; padding: 0 4px;">...</span>';
-                                }
-                            }
-                            
-                            for ($i = $start; $i <= $end; $i++) {
-                                $active_style = ($i == $curr_page) 
-                                    ? 'background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important;' 
-                                    : 'background: #fff; color: #475569; border-color: #e2e8f0;';
-                                echo '<a href="' . $get_page_url($i) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; ' . $active_style . '">' . toBengaliNumberLocal($i) . '</a>';
-                            }
-                            
-                            if ($end < $tot_pages) {
-                                if ($end < $tot_pages - 1) {
-                                    echo '<span style="color: #94a3b8; padding: 0 4px;">...</span>';
-                                }
-                                echo '<a href="' . $get_page_url($tot_pages) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">' . toBengaliNumberLocal($tot_pages) . '</a>';
-                            }
-                            ?>
-                            
-                            <?php if ($curr_page < $tot_pages): ?>
-                                <a href="<?= $get_page_url($curr_page + 1) ?>" class="blog-page-link" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">পরবর্তী <i class="fas fa-chevron-right"></i></a>
-                            <?php endif; ?>
+                                <div class="clean-card">
+                                    <div class="clean-card-image">
+                                        <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+                                            <?php if (!empty($post['featured_image'])): ?>
+                                                <img src="<?=$blog_img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($post['title']) ?>">
+                                            <?php else: ?>
+                                                <div class="no-image-placeholder">
+                                                    <span><?= htmlspecialchars($post['title']) ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </a>
+                                    </div>
+                                    <div class="clean-card-content">
+                                        <div class="clean-card-meta">
+                                            <span><i class="far fa-calendar-alt"></i> <?= date('d M, Y', strtotime($post['created_at'])) ?></span>
+                                            <span><i class="far fa-eye"></i> <?= number_format($post['views'] ?? 0) ?> বার</span>
+                                            <?php if (!empty($post['category_name'])): ?>
+                                                <span style="color: var(--primary); font-weight: 600;"><i class="far fa-folder"></i> <?= htmlspecialchars($post['category_name']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <h3 class="clean-card-title">
+                                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>"><?= $title_display ?></a>
+                                            <?= $matchBadgeHtml ?>
+                                        </h3>
+                                        <p class="clean-card-excerpt"><?= $snippet_display ?></p>
+                                    </div>
+                                    <div class="clean-card-footer">
+                                        <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="clean-card-link">বিস্তারিত পড়ুন</a>
+                                        <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="clean-card-btn">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                         
-                        <style>
-                            .blog-page-link:hover {
-                                border-color: var(--primary) !important;
-                                color: var(--primary) !important;
-                                background: #f8fafc !important;
-                            }
-                        </style>
+                        <!-- Pagination -->
+                        <?php if (isset($data['total_pages']) && $data['total_pages'] > 1): ?>
+                            <div class="pagination-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 40px; margin-bottom: 20px;">
+                                <?php 
+                                $curr_page = $data['current_page'];
+                                $tot_pages = $data['total_pages'];
+                                
+                                $get_page_url = function($p) use ($data) {
+                                    $query = $_GET;
+                                    $query['page'] = $p;
+                                    $slug = $data['category_slug'] ?? '';
+                                    if (!empty($slug)) {
+                                        return URLROOT . '/' . $slug . '?' . http_build_query($query);
+                                    } else {
+                                        return URLROOT . '/blog?' . http_build_query($query);
+                                    }
+                                };
+                                
+                                if (!function_exists('toBengaliNumberLocal')) {
+                                    function toBengaliNumberLocal($number) {
+                                        $en_num = ['0','1','2','3','4','5','6','7','8','9'];
+                                        $bn_num = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+                                        return str_replace($en_num, $bn_num, $number);
+                                    }
+                                }
+                                ?>
+                                
+                                <?php if ($curr_page > 1): ?>
+                                    <a href="<?= $get_page_url($curr_page - 1) ?>" class="blog-page-link" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;"><i class="fas fa-chevron-left"></i> পূর্ববর্তী</a>
+                                <?php endif; ?>
+                                
+                                <?php 
+                                $start = max(1, $curr_page - 2);
+                                $end = min($tot_pages, $curr_page + 2);
+                                
+                                if ($start > 1) {
+                                    echo '<a href="' . $get_page_url(1) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">১</a>';
+                                    if ($start > 2) {
+                                        echo '<span style="color: #94a3b8; padding: 0 4px;">...</span>';
+                                    }
+                                }
+                                
+                                for ($i = $start; $i <= $end; $i++) {
+                                    $active_style = ($i == $curr_page) 
+                                        ? 'background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important;' 
+                                        : 'background: #fff; color: #475569; border-color: #e2e8f0;';
+                                    echo '<a href="' . $get_page_url($i) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; ' . $active_style . '">' . toBengaliNumberLocal($i) . '</a>';
+                                }
+                                
+                                if ($end < $tot_pages) {
+                                    if ($end < $tot_pages - 1) {
+                                        echo '<span style="color: #94a3b8; padding: 0 4px;">...</span>';
+                                    }
+                                    echo '<a href="' . $get_page_url($tot_pages) . '" class="blog-page-link" style="padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">' . toBengaliNumberLocal($tot_pages) . '</a>';
+                                }
+                                ?>
+                                
+                                <?php if ($curr_page < $tot_pages): ?>
+                                    <a href="<?= $get_page_url($curr_page + 1) ?>" class="blog-page-link" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #475569; font-weight: 600; font-size: 0.9rem; background: #fff; transition: all 0.2s;">পরবর্তী <i class="fas fa-chevron-right"></i></a>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php elseif (empty($data['search'])): ?>
+                        <div style="text-align: center; padding: 50px; background: #fff; border: 1px solid var(--newspaper-border); border-radius: 4px; color: var(--newspaper-text-muted); font-style: italic;">
+                            কোনো নিবন্ধ পাওয়া যায়নি।
+                        </div>
                     <?php endif; ?>
-                <?php else: ?>
-                    <div style="text-align: center; padding: 50px; background: #fff; border: 1px solid var(--newspaper-border); border-radius: 4px; color: var(--newspaper-text-muted); font-style: italic;">
-                        কোনো নিবন্ধ পাওয়া যায়নি।
+                </div>
+
+                <!-- Questions & Answers Section for Search -->
+                <?php if (!empty($data['search'])): ?>
+                    <div id="blog-search-qa-section" style="margin-top: 35px; margin-bottom: 30px;">
+                        <?php if (!empty($data['search_questions'])): ?>
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
+                                <h3 style="font-family: 'Noto Serif Bengali', serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-question-circle" style="color: #d97706;"></i> সম্পর্কিত প্রশ্নোত্তর (<?= count($data['search_questions']) ?>)
+                                </h3>
+                                <a href="<?= URLROOT ?>/q&a?search=<?= urlencode($data['search']) ?>" style="font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none;">সকল প্রশ্নোত্তর দেখুন &rarr;</a>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 14px;">
+                                <?php foreach ($data['search_questions'] as $q): ?>
+                                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03);" onmouseover="this.style.borderColor='#cbd5e1'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.06)'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.03)'">
+                                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                                            <div style="flex: 1; min-width: 260px;">
+                                                <h4 style="font-size: 1.12rem; font-weight: 700; margin: 0 0 8px 0; line-height: 1.45;">
+                                                    <a href="<?= URLROOT ?>/q&a?search=<?= urlencode($data['search']) ?>" style="color: #0f172a; text-decoration: none;">
+                                                        <i class="fas fa-question" style="font-size: 11px; color: #d97706; margin-right: 4px;"></i>
+                                                        <?= !empty($q['highlighted_question']) ? $q['highlighted_question'] : htmlspecialchars($q['question']) ?>
+                                                    </a>
+                                                </h4>
+                                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                                    <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #ecfdf5; color: #059669;">
+                                                        <i class="fas fa-check-circle" style="font-size: 10px;"></i> উত্তর দেওয়া হয়েছে
+                                                    </span>
+                                                    <span style="font-size: 11px; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px;">
+                                                        <?= htmlspecialchars($q['category_name'] ?? 'সাধারণ') ?>
+                                                    </span>
+                                                    <span style="font-size: 11px; color: #94a3b8;">
+                                                        <i class="far fa-clock"></i> <?= date('d M, Y', strtotime($q['created_at'])) ?>
+                                                    </span>
+                                                </div>
+                                                <div style="font-size: 13.5px; color: #334155; line-height: 1.6; background: #f8fafc; border-left: 3px solid #2563eb; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+                                                    <strong style="color: #059669; margin-right: 4px;">উত্তর সারাংশ:</strong>
+                                                    <?= !empty($q['highlighted_answer']) ? $q['highlighted_answer'] : htmlspecialchars(strip_tags($q['answer'] ?? '')) ?>
+                                                </div>
+                                            </div>
+                                            <div style="flex-shrink: 0; align-self: center;">
+                                                <a href="<?= URLROOT ?>/q&a?search=<?= urlencode($data['search']) ?>" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; background: #eff6ff; color: #2563eb; font-weight: 600; font-size: 13px; text-decoration: none; border: 1px solid #bfdbfe; transition: all 0.2s;" onmouseover="this.style.background='#2563eb'; this.style.color='#fff'" onmouseout="this.style.background='#eff6ff'; this.style.color='#2563eb'">
+                                                    সম্পূর্ণ উত্তর <i class="fas fa-arrow-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
+
+                    <?php if (empty($all_posts) && empty($data['search_questions'])): ?>
+                        <div style="text-align: center; padding: 60px 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; color: #64748b; margin-top: 15px;">
+                            <i class="fas fa-search" style="font-size: 38px; color: #94a3b8; margin-bottom: 12px; opacity: 0.5;"></i>
+                            <h3 style="font-size: 1.25rem; font-weight: 700; color: #334155; margin: 0 0 8px 0;">কোনো ফলাফল পাওয়া যায়নি</h3>
+                            <p style="margin: 0; font-size: 14px;">"<strong><?= htmlspecialchars($data['search']) ?></strong>" দিয়ে কোনো নিবন্ধ বা প্রশ্নোত্তর পাওয়া যায়নি।</p>
+                            <p style="margin: 6px 0 0 0; font-size: 13px; color: #94a3b8;">বানান ঠিক আছে কিনা পরীক্ষা করুন, অথবা অন্য শব্দ বা বাংলিশে চেষ্টা করুন।</p>
+                        </div>
+                    <?php endif; ?>
+
+                    <script>
+                        function filterBlogSearchTab(tab) {
+                            const postsSec = document.getElementById('blog-search-posts-section');
+                            const qaSec = document.getElementById('blog-search-qa-section');
+                            const tabPillPosts = document.getElementById('tab-pill-posts');
+                            const tabPillQa = document.getElementById('tab-pill-qa');
+                            const tabPillAll = document.getElementById('tab-pill-all');
+
+                            const pills = [tabPillPosts, tabPillQa, tabPillAll];
+                            pills.forEach(p => {
+                                if (p) {
+                                    p.style.background = '#fff';
+                                    p.style.color = '#475569';
+                                    p.style.borderColor = '#cbd5e1';
+                                }
+                            });
+
+                            if (tab === 'posts') {
+                                if (tabPillPosts) { tabPillPosts.style.background = '#2563eb'; tabPillPosts.style.color = '#fff'; tabPillPosts.style.borderColor = '#2563eb'; }
+                                if (postsSec) postsSec.style.display = 'block';
+                                if (qaSec) qaSec.style.display = 'none';
+                            } else if (tab === 'qa') {
+                                if (tabPillQa) { tabPillQa.style.background = '#2563eb'; tabPillQa.style.color = '#fff'; tabPillQa.style.borderColor = '#2563eb'; }
+                                if (postsSec) postsSec.style.display = 'none';
+                                if (qaSec) qaSec.style.display = 'block';
+                            } else {
+                                if (tabPillAll) { tabPillAll.style.background = '#2563eb'; tabPillAll.style.color = '#fff'; tabPillAll.style.borderColor = '#2563eb'; }
+                                if (postsSec) postsSec.style.display = 'block';
+                                if (qaSec) qaSec.style.display = 'block';
+                            }
+                        }
+                    </script>
                 <?php endif; ?>
             <?php else: ?>
                 <!-- Default Newspaper Layout -->

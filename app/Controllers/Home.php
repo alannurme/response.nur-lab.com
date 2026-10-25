@@ -187,9 +187,11 @@ class Home extends Controller {
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         if ($page < 1) $page = 1;
-        $cache_key = 'blog_page_' . ($category_slug ?? 'all') . '_' . md5($search) . '_page_' . $page;
         
-        $data = \App\Helpers\Cache::get($cache_key);
+        // Never serve stale cached page when searching
+        $cache_key = empty($search) ? ('blog_page_' . ($category_slug ?? 'all') . '_page_' . $page) : null;
+        
+        $data = $cache_key ? \App\Helpers\Cache::get($cache_key) : null;
         
         if ($data === null) {
             $postModel = $this->model('PostModel');
@@ -197,6 +199,7 @@ class Home extends Controller {
             
             $category_id = null;
             $category_name = 'সবগুলো নিবন্ধ';
+            $questions = [];
             
             if ($category_slug !== null) {
                 $db = \Config\Database::pdoConnect();
@@ -210,11 +213,12 @@ class Home extends Controller {
             }
             
             if (!empty($search)) {
-                $category_name = 'সার্চ ফলাফল: ' . htmlspecialchars($search);
-                $posts = \App\Helpers\SearchHelper::searchPosts($search, ['limit' => 150]);
+                $category_name = 'সার্চ ফলাফল: "' . htmlspecialchars($search) . '"';
+                $posts = \App\Helpers\SearchHelper::searchPosts($search, ['limit' => 200]);
                 foreach ($posts as &$post) {
                     $post['category_name'] = $post['main_category'] ?? ($post['secondary_categories'] ?? 'সাধারণ');
                 }
+                $questions = \App\Helpers\SearchHelper::searchQuestions($search, ['limit' => 50, 'status' => 'answered']);
             } elseif ($category_id !== null) {
                 $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
@@ -278,6 +282,10 @@ class Home extends Controller {
                 'posts' => $paginated_posts,
                 'current_page' => $page,
                 'total_pages' => $total_pages,
+                'total_posts' => $total_posts,
+                'search_questions' => $questions,
+                'search_questions_count' => count($questions),
+                'search_posts_count' => $total_posts,
                 'dont_miss_posts' => $dont_miss_posts,
                 'categories' => $postModel->getCategories(),
                 'popular_posts' => $postModel->getPopularPosts(5),
@@ -293,7 +301,9 @@ class Home extends Controller {
                 'recent_posts' => $postModel->getAllPosts(5)
             ];
             
-            \App\Helpers\Cache::set($cache_key, $data, 300);
+            if ($cache_key) {
+                \App\Helpers\Cache::set($cache_key, $data, 300);
+            }
         }
 
         $this->view('home/blog', $data);
@@ -1030,14 +1040,33 @@ class Home extends Controller {
         }
 
         $limit = 10;
-        $total_questions = $adminModel->getFilteredUserQuestionsCount('answered', $category_slug, $search, $user_id, $show_bookmarks);
-        $total_pages = ceil($total_questions / $limit);
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         if ($page < 1) $page = 1;
-        if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
         $offset = max(0, ($page - 1) * $limit);
 
-        $paginated_questions = $adminModel->getFilteredUserQuestions($limit, $offset, 'answered', $category_slug, $search, $user_id, $show_bookmarks);
+        if ($search) {
+            $all_searched = \App\Helpers\SearchHelper::searchQuestions($search, ['limit' => 200, 'status' => 'answered']);
+            if ($category_slug) {
+                $all_searched = array_values(array_filter($all_searched, function($q) use ($category_slug) {
+                    return ($q['category_slug'] ?? '') === $category_slug;
+                }));
+            }
+            if ($show_bookmarks && $user_id) {
+                $b_ids = $adminModel->getBookmarkedQuestionIds($user_id);
+                $all_searched = array_values(array_filter($all_searched, function($q) use ($b_ids) {
+                    return in_array($q['id'], $b_ids);
+                }));
+            }
+            $total_questions = count($all_searched);
+            $total_pages = ceil($total_questions / $limit);
+            if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
+            $paginated_questions = array_slice($all_searched, $offset, $limit);
+        } else {
+            $total_questions = $adminModel->getFilteredUserQuestionsCount('answered', $category_slug, $search, $user_id, $show_bookmarks);
+            $total_pages = ceil($total_questions / $limit);
+            if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
+            $paginated_questions = $adminModel->getFilteredUserQuestions($limit, $offset, 'answered', $category_slug, $search, $user_id, $show_bookmarks);
+        }
 
         $bookmarked_ids = [];
         if ($user_id) {
