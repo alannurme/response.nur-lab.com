@@ -2333,56 +2333,620 @@ document.addEventListener('DOMContentLoaded', function() {
                     <li><a href="<?= URLROOT ?>">হোম</a></li>
                 <?php endif; ?>
                 
-                <!-- Header Expandable Search Bar -->
-                <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px;">
+                <!-- Header Expandable Search Bar with Live AJAX Dropdown -->
+                <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px; position: relative;">
                     <form action="<?= URLROOT ?>/blog" method="GET" id="header-search-form" style="position: relative; display: flex; align-items: center; height: 38px;">
-                        <input type="text" name="search" id="header-search-input" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." required style="padding: 7px 40px 7px 14px; border-radius: 20px; font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 0px; opacity: 0; border: none; background: transparent; transition: all 0.35s ease; box-sizing: border-box;" onblur="if(!this.value.trim()){ this.style.width='0px'; this.style.opacity='0'; this.style.border='none'; this.style.background='transparent'; }">
-                        <button type="button" id="header-search-btn" style="background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); border: none; color: #ffffff; cursor: pointer; font-size: 0.95rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.3);" title="সার্চ করুন" onclick="const input = document.getElementById('header-search-input'); if(input.style.width === '0px' || !input.style.width || input.style.width === '0'){ input.style.width='220px'; input.style.opacity='1'; input.style.border='1px solid var(--primary)'; input.style.background='#ffffff'; input.focus(); } else { if(input.value.trim()){ document.getElementById('header-search-form').submit(); } }">
+                        <input type="text" name="search" id="header-search-input" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." autocomplete="off" style="padding: 7px 40px 7px 14px; border-radius: 20px; font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 0px; opacity: 0; border: none; background: transparent; transition: all 0.35s ease; box-sizing: border-box;">
+                        <button type="button" id="header-search-clear-btn" style="display: none; position: absolute; right: 44px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 50%;" title="মুছুন">&times;</button>
+                        <button type="button" id="header-search-btn" style="background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); border: none; color: #ffffff; cursor: pointer; font-size: 0.95rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.3);" title="সার্চ করুন">
                             <i class="fas fa-search"></i>
                         </button>
+
+                        <!-- Header Live Search Dropdown -->
+                        <div id="header-search-dropdown" class="live-search-dropdown">
+                            <div class="search-dropdown-header">
+                                <div class="search-dropdown-tabs">
+                                    <button type="button" class="search-tab-pill active" data-tab="all">সব (<span class="tab-count-all">0</span>)</button>
+                                    <button type="button" class="search-tab-pill" data-tab="posts">পোস্ট (<span class="tab-count-posts">0</span>)</button>
+                                    <button type="button" class="search-tab-pill" data-tab="questions">প্রশ্নোত্তর (<span class="tab-count-questions">0</span>)</button>
+                                </div>
+                                <div class="search-status-indicator" style="font-size: 11px; color: #64748b;"></div>
+                            </div>
+                            <div class="search-dropdown-body custom-scroll">
+                                <!-- Results populated via AJAX -->
+                            </div>
+                            <div class="search-dropdown-footer">
+                                <a href="#" class="search-view-all-link">
+                                    <span>সকল ফলাফল দেখুন</span>
+                                    <i class="fas fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                            </div>
+                        </div>
                     </form>
                 </li>
 
             </ul>
-
 
         </nav>
     </div>
 </div>
 
 <!-- Search Popup Overlay Modal -->
-<div id="search-popup-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 99999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s ease;">
+<div id="search-popup-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); z-index: 99999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s ease;">
     <div style="position: absolute; top: 30px; right: 30px; color: white; font-size: 2rem; cursor: pointer; transition: 0.2s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.08);" id="search-popup-close" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(90deg)';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.transform='rotate(0)';">
         <i class="fas fa-times"></i>
     </div>
     
-    <div style="width: 100%; max-width: 650px; padding: 20px; text-align: center; transform: scale(0.9); transition: 0.3s ease;" id="search-popup-content">
+    <div style="width: 100%; max-width: 720px; padding: 20px; text-align: center; transform: scale(0.9); transition: 0.3s ease;" id="search-popup-content">
         <h2 style="color: white; font-size: 2.2rem; font-weight: 800; margin-bottom: 25px; font-family: 'Hind Siliguri', sans-serif;">আপনি কি খুঁজছেন?</h2>
-        <form action="<?= URLROOT ?>/blog" method="GET" style="position: relative; background: white; border-radius: 50px; padding: 8px 10px; display: flex; align-items: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); border: 2px solid transparent; transition: 0.3s;" onfocusin="this.style.borderColor='var(--primary)';">
-            <input type="text" name="search" id="search-popup-input" placeholder="এখানে লিখুন (যেমন: রমজান, জাকাত, সালাত)..." required style="width: 100%; padding: 15px 25px; border: none; outline: none; font-size: 1.25rem; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; color: var(--text-main); border-radius: 50px;">
-            <button type="submit" style="background: var(--primary); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 10px 20px var(--primary-glow);" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+        <form action="<?= URLROOT ?>/blog" method="GET" id="search-popup-form" style="position: relative; background: white; border-radius: 50px; padding: 8px 10px; display: flex; align-items: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); border: 2px solid transparent; transition: 0.3s;" onfocusin="this.style.borderColor='var(--primary)';">
+            <input type="text" name="search" id="search-popup-input" autocomplete="off" placeholder="এখানে লিখুন (যেমন: রমজান, জাকাত, সালাত)..." required style="width: 100%; padding: 15px 25px; border: none; outline: none; font-size: 1.25rem; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; color: var(--text-main); border-radius: 50px;">
+            <button type="button" id="modal-search-clear-btn" style="display: none; background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 5px 12px;" title="মুছুন">&times;</button>
+            <button type="submit" style="background: var(--primary); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 10px 20px var(--primary-glow); flex-shrink: 0;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
                 <i class="fas fa-search" style="font-size: 1.3rem;"></i>
             </button>
         </form>
+
+        <!-- Modal Live Search Results Dropdown -->
+        <div id="modal-search-results" class="modal-search-results-box" style="display: none;">
+            <div class="search-dropdown-header" style="border-radius: 18px 18px 0 0; background: #ffffff; padding: 12px 18px;">
+                <div class="search-dropdown-tabs">
+                    <button type="button" class="search-tab-pill active" data-tab="all">সব (<span class="tab-count-all">0</span>)</button>
+                    <button type="button" class="search-tab-pill" data-tab="posts">পোস্ট (<span class="tab-count-posts">0</span>)</button>
+                    <button type="button" class="search-tab-pill" data-tab="questions">প্রশ্নোত্তর (<span class="tab-count-questions">0</span>)</button>
+                </div>
+                <div class="search-status-indicator" style="font-size: 12px; color: #64748b; font-weight: 600;"></div>
+            </div>
+            <div class="search-dropdown-body custom-scroll" style="max-height: 420px; background: #ffffff;">
+                <!-- Populated via AJAX -->
+            </div>
+            <div class="search-dropdown-footer" style="border-radius: 0 0 18px 18px; background: #f8fafc; padding: 12px 18px;">
+                <a href="#" class="search-view-all-link">
+                    <span>সকল ফলাফল বিস্তারিত দেখুন</span>
+                    <i class="fas fa-arrow-right" style="font-size: 11px;"></i>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
+<style>
+/* Live AJAX Search Styles */
+mark.search-highlight {
+    background-color: #fef08a !important;
+    color: #854d0e !important;
+    padding: 1px 4px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+}
+
+.live-search-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 440px;
+    max-width: calc(100vw - 30px);
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    z-index: 999999;
+    overflow: hidden;
+    display: none;
+    text-align: left;
+    font-family: 'Hind Siliguri', sans-serif;
+    animation: searchDropdownFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes searchDropdownFadeIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.search-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.search-dropdown-tabs {
+    display: flex;
+    gap: 6px;
+}
+
+.search-tab-pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: inherit;
+}
+
+.search-tab-pill:hover {
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.search-tab-pill.active {
+    background: #0b7c4d;
+    color: #ffffff;
+    border-color: #0b7c4d;
+    box-shadow: 0 2px 6px rgba(11, 124, 77, 0.25);
+}
+
+.search-dropdown-body {
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 6px 0;
+}
+
+.search-dropdown-body::-webkit-scrollbar {
+    width: 6px;
+}
+.search-dropdown-body::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+.search-dropdown-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.search-dropdown-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.search-result-item {
+    padding: 11px 16px;
+    display: block;
+    text-decoration: none;
+    color: #1e293b;
+    border-bottom: 1px solid #f8fafc;
+    transition: all 0.18s ease;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover, .search-result-item.selected {
+    background: #f0fdf4;
+}
+
+.search-result-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+}
+
+.search-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-badge-post {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.search-badge-qa {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.search-badge-category {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-result-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.42;
+    margin-bottom: 4px;
+}
+
+.search-result-snippet {
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.48;
+}
+
+.search-qa-box {
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    padding: 6px 10px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #334155;
+}
+
+.search-qa-box .qa-label {
+    font-weight: 700;
+    color: #2563eb;
+    margin-right: 4px;
+}
+
+.search-dropdown-footer {
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-top: 1px solid #edf2f7;
+    text-align: center;
+}
+
+.search-dropdown-footer a {
+    color: #0b7c4d;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.search-dropdown-footer a:hover {
+    color: #059669;
+    transform: translateX(2px);
+}
+
+.search-loading-state, .search-empty-state {
+    padding: 30px 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 13.5px;
+}
+
+/* Modal Search Results Box */
+.modal-search-results-box {
+    margin-top: 18px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.3);
+    text-align: left;
+    overflow: hidden;
+    animation: searchDropdownFadeIn 0.22s ease-out;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // -------------------------------------------------------------
+    // Live Search Engine Core (Bangla, Banglish, English Support)
+    // -------------------------------------------------------------
+    const AJAX_SEARCH_URL = '<?= URLROOT ?>/ajax_search';
+    const BLOG_URL = '<?= URLROOT ?>/blog';
+
+    function initLiveSearch(options) {
+        const input = options.input;
+        const container = options.container;
+        const form = options.form;
+        const clearBtn = options.clearBtn;
+        const isHeader = options.isHeader;
+
+        if (!input || !container) return;
+
+        let activeTab = 'all';
+        let debounceTimer = null;
+        let cachedData = null;
+        let selectedIndex = -1;
+
+        const body = container.querySelector('.search-dropdown-body');
+        const countAll = container.querySelector('.tab-count-all');
+        const countPosts = container.querySelector('.tab-count-posts');
+        const countQuestions = container.querySelector('.tab-count-questions');
+        const statusEl = container.querySelector('.search-status-indicator');
+        const viewAllLink = container.querySelector('.search-view-all-link');
+        const tabBtns = container.querySelectorAll('.search-tab-pill');
+
+        function showLoading() {
+            container.style.display = 'block';
+            if (body) {
+                body.innerHTML = `
+                    <div class="search-loading-state">
+                        <i class="fas fa-circle-notch fa-spin" style="font-size: 20px; color: #0b7c4d; margin-bottom: 8px; display: block;"></i>
+                        <span>খোঁজা হচ্ছে...</span>
+                    </div>`;
+            }
+            if (statusEl) statusEl.textContent = 'লোড হচ্ছে...';
+        }
+
+        function renderResults(data, query) {
+            cachedData = data;
+            const posts = data.posts || [];
+            const questions = data.questions || [];
+            const total = (posts.length + questions.length);
+
+            if (countAll) countAll.textContent = total;
+            if (countPosts) countPosts.textContent = posts.length;
+            if (countQuestions) countQuestions.textContent = questions.length;
+            if (statusEl) statusEl.textContent = `${total}টি ফলাফল`;
+
+            if (viewAllLink) {
+                viewAllLink.href = `${BLOG_URL}?search=${encodeURIComponent(query)}`;
+                const span = viewAllLink.querySelector('span');
+                if (span) span.textContent = `"${query}" এর সকল ফলাফল দেখুন (${total})`;
+            }
+
+            if (total === 0) {
+                body.innerHTML = `
+                    <div class="search-empty-state">
+                        <i class="fas fa-search" style="font-size: 24px; color: #94a3b8; display: block; margin-bottom: 8px;"></i>
+                        <p style="margin: 0 0 4px 0; font-weight: 700; color: #1e293b;">কোনো তথ্য পাওয়া যায়নি</p>
+                        <p style="margin: 0; font-size: 12px; color: #64748b;">বাংলা বা ইংরেজিতে অন্য কোনো শব্দ দিয়ে চেষ্টা করুন।</p>
+                    </div>`;
+                container.style.display = 'block';
+                return;
+            }
+
+            // Build list based on activeTab
+            let itemsHTML = '';
+
+            // Filter items based on activeTab
+            let displayPosts = (activeTab === 'all' || activeTab === 'posts') ? posts : [];
+            let displayQuestions = (activeTab === 'all' || activeTab === 'questions') ? questions : [];
+
+            // Combine and sort by score DESC
+            let combined = [];
+            displayPosts.forEach(p => combined.push({ ...p, item_type: 'post' }));
+            displayQuestions.forEach(q => combined.push({ ...q, item_type: 'question' }));
+            combined.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+            combined.forEach((item, index) => {
+                if (item.item_type === 'post') {
+                    const title = item.highlighted_title || item.title;
+                    const snippet = item.highlighted_snippet || item.snippet || '';
+                    const catName = item.main_category || 'সাধারণ';
+                    const date = item.created_at ? item.created_at.substring(0, 10) : '';
+
+                    itemsHTML += `
+                        <a href="${item.url}" class="search-result-item" data-index="${index}">
+                            <div class="search-result-badge-row">
+                                <span class="search-badge search-badge-post">
+                                    <i class="far fa-file-alt"></i> পোস্ট
+                                </span>
+                                <span class="search-badge-category">
+                                    <i class="fas fa-folder" style="font-size: 10px; color: #f59e0b;"></i> ${catName}
+                                </span>
+                                ${item.match_badge === 'Title Match' ? '<span style="font-size: 9.5px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-star" style="font-size: 8px;"></i> শিরোনাম মিল</span>' : ''}
+                            </div>
+                            <div class="search-result-title">${title}</div>
+                            ${snippet ? `<div class="search-result-snippet">${snippet}</div>` : ''}
+                        </a>`;
+                } else if (item.item_type === 'question') {
+                    const questionText = item.highlighted_question || item.question;
+                    const answerSnippet = item.highlighted_answer || item.answer_snippet || '';
+                    const catName = item.category_name || 'প্রশ্নোত্তর';
+
+                    itemsHTML += `
+                        <a href="${item.url}" class="search-result-item" data-index="${index}">
+                            <div class="search-result-badge-row">
+                                <span class="search-badge search-badge-qa">
+                                    <i class="fas fa-question-circle"></i> প্রশ্নোত্তর
+                                </span>
+                                <span class="search-badge-category">
+                                    <i class="fas fa-tag" style="font-size: 10px; color: #3b82f6;"></i> ${catName}
+                                </span>
+                                ${item.match_badge === 'Question Match' ? '<span style="font-size: 9.5px; background: #eff6ff; color: #1e40af; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-check" style="font-size: 8px;"></i> প্রশ্ন মিল</span>' : ''}
+                            </div>
+                            <div class="search-result-title">
+                                <span style="color: #2563eb; font-weight: 800; margin-right: 4px;">প্রশ্ন:</span> ${questionText}
+                            </div>
+                            ${answerSnippet ? `
+                                <div class="search-qa-box">
+                                    <span class="qa-label"><i class="fas fa-reply"></i> উত্তর:</span> ${answerSnippet}
+                                </div>` : ''}
+                        </a>`;
+                }
+            });
+
+            body.innerHTML = itemsHTML || `
+                <div class="search-empty-state">
+                    <p style="margin: 0; color: #64748b;">এই ট্যাবে কোনো ফলাফল পাওয়া যায়নি।</p>
+                </div>`;
+            container.style.display = 'block';
+            selectedIndex = -1;
+        }
+
+        // Tab click handling
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeTab = this.getAttribute('data-tab');
+                if (cachedData) {
+                    renderResults(cachedData, input.value.trim());
+                }
+            });
+        });
+
+        // Trigger Search
+        function performSearch(val) {
+            const query = val.trim();
+            if (clearBtn) {
+                clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+            }
+
+            if (query.length === 0) {
+                container.style.display = 'none';
+                cachedData = null;
+                return;
+            }
+
+            showLoading();
+
+            fetch(`${AJAX_SEARCH_URL}?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Check if current input still matches query
+                    if (input.value.trim() === query) {
+                        renderResults(data, query);
+                    }
+                })
+                .catch(err => {
+                    console.error('AJAX Live Search Error:', err);
+                    if (body) {
+                        body.innerHTML = `
+                            <div class="search-empty-state">
+                                <p style="margin: 0; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> অনুসন্ধানে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।</p>
+                            </div>`;
+                    }
+                });
+        }
+
+        // Input listener with debounce
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                performSearch(this.value);
+            }, 220);
+        });
+
+        // Focus listener to reopen if text exists
+        input.addEventListener('focus', function() {
+            if (this.value.trim().length > 0 && cachedData) {
+                renderResults(cachedData, this.value.trim());
+            }
+        });
+
+        // Clear button
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = '';
+                this.style.display = 'none';
+                container.style.display = 'none';
+                input.focus();
+            });
+        }
+
+        // Keyboard navigation (Arrow keys + Enter + Escape)
+        input.addEventListener('keydown', function(e) {
+            const items = body ? body.querySelectorAll('.search-result-item') : [];
+            if (!items.length || container.style.display === 'none') return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % items.length;
+                updateSelection(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                updateSelection(items);
+            } else if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                container.style.display = 'none';
+            }
+        });
+
+        function updateSelection(items) {
+            items.forEach((item, idx) => {
+                if (idx === selectedIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        // Document click to close on outside click
+        document.addEventListener('click', function(e) {
+            if (!form.contains(e.target) && !container.contains(e.target)) {
+                container.style.display = 'none';
+                if (isHeader && !input.value.trim()) {
+                    input.style.width = '0px';
+                    input.style.opacity = '0';
+                    input.style.border = 'none';
+                    input.style.background = 'transparent';
+                }
+            }
+        });
+    }
+
+    // 1. Initialize Header Expandable Search Bar
+    const headerInput = document.getElementById('header-search-input');
+    const headerBtn = document.getElementById('header-search-btn');
+    const headerForm = document.getElementById('header-search-form');
+    const headerDropdown = document.getElementById('header-search-dropdown');
+    const headerClearBtn = document.getElementById('header-search-clear-btn');
+
+    if (headerInput && headerBtn) {
+        headerBtn.addEventListener('click', function(e) {
+            if (headerInput.style.width === '0px' || !headerInput.style.width || headerInput.style.width === '0') {
+                headerInput.style.width = '240px';
+                headerInput.style.opacity = '1';
+                headerInput.style.border = '1px solid var(--primary)';
+                headerInput.style.background = '#ffffff';
+                headerInput.focus();
+            } else {
+                if (headerInput.value.trim()) {
+                    headerForm.submit();
+                } else {
+                    headerInput.focus();
+                }
+            }
+        });
+
+        initLiveSearch({
+            input: headerInput,
+            container: headerDropdown,
+            form: headerForm,
+            clearBtn: headerClearBtn,
+            isHeader: true
+        });
+    }
+
+    // 2. Initialize Search Popup Overlay Modal
     const searchTrigger = document.getElementById('search-popup-trigger');
     const mobileSearchTrigger = document.getElementById('mobile-search-popup-trigger');
     const searchModal = document.getElementById('search-popup-modal');
     const searchClose = document.getElementById('search-popup-close');
     const searchContent = document.getElementById('search-popup-content');
-    const searchInput = document.getElementById('search-popup-input');
+    const modalInput = document.getElementById('search-popup-input');
+    const modalForm = document.getElementById('search-popup-form');
+    const modalResults = document.getElementById('modal-search-results');
+    const modalClearBtn = document.getElementById('modal-search-clear-btn');
 
-    if (searchModal) {
+    if (searchModal && modalInput) {
         const openModal = function() {
             searchModal.style.opacity = '1';
             searchModal.style.visibility = 'visible';
             searchContent.style.transform = 'scale(1)';
             setTimeout(() => {
-                searchInput.focus();
+                modalInput.focus();
             }, 100);
         };
 
@@ -2393,9 +2957,10 @@ document.addEventListener('DOMContentLoaded', function() {
             searchModal.style.opacity = '0';
             searchModal.style.visibility = 'hidden';
             searchContent.style.transform = 'scale(0.9)';
+            if (modalResults) modalResults.style.display = 'none';
         };
 
-        searchClose.addEventListener('click', closeModal);
+        if (searchClose) searchClose.addEventListener('click', closeModal);
         
         searchModal.addEventListener('click', function(e) {
             if (e.target === searchModal) {
@@ -2407,6 +2972,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Escape' && searchModal.style.visibility === 'visible') {
                 closeModal();
             }
+        });
+
+        initLiveSearch({
+            input: modalInput,
+            container: modalResults,
+            form: modalForm,
+            clearBtn: modalClearBtn,
+            isHeader: false
         });
     }
 });

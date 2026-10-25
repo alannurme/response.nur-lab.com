@@ -42,7 +42,12 @@ $routes->get('admin/login', 'Admin::login');
 $routes->post('admin/login', 'Admin::login');
 $routes->get('admin/logout', 'Admin::logout');
 $routes->get('admin/posts', 'Admin::posts');
-$routes->get('admin/pages', 'Admin::pages');
+// AJAX Live Search Routes
+$routes->get('ajax_search', 'Home::ajax_search');
+$routes->post('ajax_search', 'Home::ajax_search');
+$routes->get('admin/ajax_search_posts', 'Admin::ajax_search_posts');
+$routes->post('admin/ajax_search_posts', 'Admin::ajax_search_posts');
+
 $routes->add('admin/(:any)', 'Admin::$1');
 $routes->add('(:any)', 'Home::$1');
 

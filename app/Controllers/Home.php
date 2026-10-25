@@ -156,6 +156,33 @@ class Home extends Controller {
         $this->view('home/videos', $data);
     }
 
+    public function ajax_search() {
+        header('Content-Type: application/json; charset=utf-8');
+        $query = isset($_GET['q']) ? trim($_GET['q']) : (isset($_POST['q']) ? trim($_POST['q']) : '');
+        if (empty($query)) {
+            $query = isset($_GET['search']) ? trim($_GET['search']) : '';
+        }
+
+        if (mb_strlen($query, 'UTF-8') < 1) {
+            echo json_encode([
+                'status' => 'success',
+                'query' => '',
+                'total' => 0,
+                'posts' => [],
+                'questions' => []
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $results = \App\Helpers\SearchHelper::searchUnified($query, [
+            'posts_limit' => 8,
+            'questions_limit' => 6
+        ]);
+
+        echo json_encode($results, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     public function blog($category_slug = null) {
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
@@ -184,23 +211,9 @@ class Home extends Controller {
             
             if (!empty($search)) {
                 $category_name = 'সার্চ ফলাফল: ' . htmlspecialchars($search);
-                $db = \Config\Database::pdoConnect();
-                $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
-                                      FROM posts p 
-                                      LEFT JOIN post_categories pc ON p.id = pc.post_id
-                                      LEFT JOIN categories c ON pc.category_id = c.id 
-                                      WHERE p.status = 'published' AND (p.title LIKE :search OR p.content LIKE :search) 
-                                      GROUP BY p.id
-                                      ORDER BY p.created_at DESC");
-                $stmt->execute(['search' => '%' . $search . '%']);
-                $posts = $stmt->fetchAll();
-                
+                $posts = \App\Helpers\SearchHelper::searchPosts($search, ['limit' => 150]);
                 foreach ($posts as &$post) {
-                    if (empty($post['category_name']) && !empty($post['category_id'])) {
-                        $stmt2 = $db->prepare("SELECT name FROM categories WHERE id = :cat_id");
-                        $stmt2->execute(['cat_id' => $post['category_id']]);
-                        $post['category_name'] = $stmt2->fetchColumn();
-                    }
+                    $post['category_name'] = $post['main_category'] ?? ($post['secondary_categories'] ?? 'সাধারণ');
                 }
             } elseif ($category_id !== null) {
                 $db = \Config\Database::pdoConnect();

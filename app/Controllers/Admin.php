@@ -249,6 +249,52 @@ class Admin extends Controller {
     }
         
 
+    public function ajax_search_posts() {
+        header('Content-Type: application/json; charset=utf-8');
+        
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $query = isset($_GET['q']) ? trim($_GET['q']) : (isset($_POST['q']) ? trim($_POST['q']) : '');
+        if (empty($query)) {
+            $query = isset($_GET['search']) ? trim($_GET['search']) : '';
+        }
+
+        if (mb_strlen($query, 'UTF-8') < 1) {
+            echo json_encode([
+                'success' => true,
+                'total' => 0,
+                'posts' => [],
+                'questions_count' => 0
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $categoryId = isset($_GET['category_id']) && $_GET['category_id'] !== '' ? (int)$_GET['category_id'] : null;
+
+        $posts = \App\Helpers\SearchHelper::searchPosts($query, [
+            'limit' => 60,
+            'include_drafts' => true,
+            'category_id' => $categoryId
+        ]);
+
+        $questions = \App\Helpers\SearchHelper::searchQuestions($query, [
+            'limit' => 5
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'query' => $query,
+            'total' => count($posts),
+            'posts' => $posts,
+            'questions_count' => count($questions),
+            'questions' => $questions
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     public function get_folder_posts_ajax($category_id) {
         header('Content-Type: application/json; charset=utf-8');
         $db = \Config\Database::pdoConnect();
