@@ -333,7 +333,7 @@ if (!function_exists('resolve_blog_image')) {
         margin-top: 45px;
         margin-bottom: 25px;
         color: #1e293b;
-        font-size: 1.8rem;
+        font-size: 1.8em;
         font-weight: 800;
     }
     .post-body h2::after {
@@ -364,7 +364,7 @@ if (!function_exists('resolve_blog_image')) {
         margin-top: 35px;
         margin-bottom: 20px;
         color: #334155;
-        font-size: 1.45rem;
+        font-size: 1.45em;
         font-weight: 700;
     }
     .post-body h3::after {
@@ -383,7 +383,7 @@ if (!function_exists('resolve_blog_image')) {
         margin-top: 30px;
         margin-bottom: 15px;
         color: #475569;
-        font-size: 1.2rem;
+        font-size: 1.2em;
         font-weight: 700;
         border-left: 3px solid #cbd5e1;
     }
@@ -405,7 +405,7 @@ if (!function_exists('resolve_blog_image')) {
         margin: 30px 0;
         font-style: normal;
         line-height: 1.8;
-        font-size: 1rem;
+        font-size: 1em;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
     }
@@ -444,7 +444,7 @@ if (!function_exists('resolve_blog_image')) {
     .post-body blockquote p {
         margin-bottom: 12px;
         line-height: 1.7;
-        font-size: 0.98rem;
+        font-size: 1em;
     }
 
     .post-body blockquote p:last-child {
@@ -1449,8 +1449,8 @@ document.addEventListener('DOMContentLoaded', function() {
             footnoteContainer.style.borderRadius = '16px';
             footnoteContainer.style.fontFamily = "'Hind Siliguri', sans-serif";
             
-            let footnoteHtml = `<h4 style="margin: 0 0 16px 0; font-size: 1.15rem; font-weight: 800; color: #1e293b; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px;"><i class="fas fa-bookmark" style="color: #2563eb; margin-right: 8px;"></i>তথ্যসূত্র ও নোট (References)</h4>`;
-            footnoteHtml += `<ol style="margin: 0; padding-left: 20px; font-size: 0.95rem; line-height: 1.8; color: #475569;">`;
+            let footnoteHtml = `<h4 style="margin: 0 0 16px 0; font-size: 1.15em; font-weight: 800; color: #1e293b; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px;"><i class="fas fa-bookmark" style="color: #2563eb; margin-right: 8px;"></i>তথ্যসূত্র ও নোট (References)</h4>`;
+            footnoteHtml += `<ol style="margin: 0; padding-left: 20px; font-size: 0.95em; line-height: 1.8; color: #475569;">`;
             
             footnotes.forEach(fn => {
                 let text = fn.displayText;
