@@ -35,11 +35,22 @@ if (!function_exists('getBengaliDate')) {
     $og_title = $site_name;
     $og_description = $meta_description;
     $og_image = !empty($data['settings']['site_logo']) ? resolve_setting_image($data['settings']['site_logo']) : '';
-    $og_url = URLROOT . '/' . ($_GET['url'] ?? '');
+    // Determine current request URL
+    $request_path = ltrim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '', '/');
+    $script_base = trim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
+    if (!empty($script_base) && strpos($request_path, $script_base) === 0) {
+        $request_path = ltrim(substr($request_path, strlen($script_base)), '/');
+    }
+    $og_url = URLROOT . (!empty($request_path) ? '/' . $request_path : '');
     
     // Check if we are viewing a single post
     if (isset($data['post']) && !empty($data['post'])) {
         $post = $data['post'];
+        
+        // Accurate post canonical & OG URL
+        if (!empty($post['slug'])) {
+            $og_url = URLROOT . '/' . rawurlencode($post['slug']);
+        }
         
         // Post Title SEO
         if (!empty($post['seo_title'])) {
@@ -84,6 +95,7 @@ if (!function_exists('getBengaliDate')) {
     }
     ?>
     <title><?= htmlspecialchars($seo_title) ?></title>
+    <link rel="canonical" href="<?= htmlspecialchars($og_url) ?>">
     <meta name="description" content="<?= htmlspecialchars(strip_tags($meta_description)) ?>">
     <meta name="keywords" content="<?= htmlspecialchars(strip_tags($meta_keywords)) ?>">
     <meta name="author" content="<?= htmlspecialchars($meta_author) ?>">
@@ -99,8 +111,11 @@ if (!function_exists('getBengaliDate')) {
     <meta property="og:url" content="<?= htmlspecialchars($og_url) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($og_title) ?>">
     <meta property="og:description" content="<?= htmlspecialchars(strip_tags($og_description)) ?>">
+    <meta property="og:site_name" content="<?= htmlspecialchars($site_name) ?>">
     <?php if (!empty($og_image)): ?>
         <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
+        <meta property="og:image:secure_url" content="<?= htmlspecialchars($og_image) ?>">
+        <link rel="image_src" href="<?= htmlspecialchars($og_image) ?>">
     <?php endif; ?>
     
     <!-- Twitter -->

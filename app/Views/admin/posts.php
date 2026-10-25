@@ -5,9 +5,13 @@
 
     /* Front-end Match Styles for Post Detail View */
     .post-content-title {
+        display: block !important;
+        width: 100% !important;
+        clear: both !important;
         font-size: 2.5rem;
         font-weight: 800;
-        line-height: 1.2;
+        line-height: 1.25;
+        margin-top: 10px;
         margin-bottom: 25px;
         color: #000000;
         text-align: left !important;
@@ -1892,7 +1896,8 @@ if (!empty($data['breadcrumbs'])) {
 
             <!-- Main Content Area Post Detail View -->
             <div id="explorerPostDetailView" style="display: none; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;">
+                <!-- Action Buttons Toolbar (Back to Folder, Share, Font) -->
+                <div class="post-detail-header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; width: 100%;">
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                         <button type="button" onclick="closePostDetailView()" class="btn-explorer btn-explorer-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; text-decoration: none; padding: 8px 16px;">
                             <i class="fas fa-arrow-left"></i> Back to Folder
@@ -1914,6 +1919,18 @@ if (!empty($data['breadcrumbs'])) {
                                 <i class="fab fa-twitter"></i>
                             </a>
                         </div>
+
+                        <!-- Copy Full Post (Facebook Ready) -->
+                        <button type="button" id="btnCopyFullPost" onclick="copyFullPostForFacebook(this)" title="ফেসবুকে পোস্ট করার জন্য সম্পূর্ণ পোস্ট সুন্দর ফরম্যাটে কপি করুন" class="btn-explorer" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'; this.style.borderColor='#4ade80';" onmouseout="this.style.background='#f0fdf4'; this.style.borderColor='#86efac';">
+                            <i class="fas fa-clipboard-list" style="color: #16a34a; font-size: 13px;"></i> <span id="copyFullPostText">ফুল পোস্ট কপি</span>
+                        </button>
+
+                        <!-- Copy Feature Image -->
+                        <button type="button" id="btnCopyFeatureImage" onclick="copyPostFeatureImage(this)" title="ফিচার ইমেজ ক্লিপবোর্ডে কপি করুন (সরাসরি ফেসবুকে পেস্ট করা যাবে)" class="btn-explorer" style="display: none; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.borderColor='#60a5fa';" onmouseout="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd';">
+                            <i class="fas fa-image" style="color: #2563eb; font-size: 13px;"></i> <span id="copyFeatureImageText">ছবি কপি</span>
+                        </button>
+                    </div>
+                    
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                         <!-- Font Controls -->
                         <div class="font-controls" style="display: flex; gap: 6px; align-items: center;">
@@ -1922,10 +1939,20 @@ if (!empty($data['breadcrumbs'])) {
                             <span id="fontSizeDisplay" style="font-size: 13px; font-weight: 600; color: #334155; min-width: 38px; text-align: center;">18px</span>
                             <button type="button" onclick="changeFontSize(1)" title="Increase font size" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; cursor: pointer; color: #334155; font-size: 12px; display: flex; align-items: center; justify-content: center; height: 26px; width: 30px;"><i class="fas fa-plus"></i></button>
                         </div>
+
+                        <!-- Small Feature Image Thumbnail on the right -->
+                        <div id="detailHeaderThumbContainer" style="display: none; align-items: center; gap: 6px;" title="ফিচার ইমেজ প্রিভিউ (ক্লিক করে বড় দেখুন)">
+                            <a id="detailHeaderThumbLink" href="#" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; text-decoration: none;">
+                                <img id="detailHeaderThumbImg" src="" alt="Feature Image" style="width: 48px; height: 32px; object-fit: cover; border-radius: 6px; border: 1.5px solid #94a3b8; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: transform 0.2s, border-color 0.2s; vertical-align: middle;" onmouseover="this.style.transform='scale(1.2)'; this.style.borderColor='#2563eb';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#94a3b8';">
+                            </a>
+                        </div>
                     </div>
                 </div>
                 
-                <h1 id="detailViewTitle" class="post-content-title">Loading...</h1>
+                <!-- Title is strictly on its own row below all buttons -->
+                <div style="width: 100%; display: block; clear: both; margin-bottom: 20px;">
+                    <h1 id="detailViewTitle" class="post-content-title" style="display: block; width: 100%; clear: both; margin: 0 0 16px 0;">Loading...</h1>
+                </div>
                 
                 <div id="detailViewMetadata" style="font-size: 13px; color: #64748b; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
                     <span><i class="far fa-calendar"></i> <span id="detailViewDate"></span></span>
@@ -3215,6 +3242,24 @@ if (!function_exists('renderManageCategoryTree')) {
         document.getElementById('shareTwitter').href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(publicLink) + '&text=' + encodeURIComponent(data.title);
         
         document.getElementById('detailShareGroup').style.display = 'flex';
+        
+        window.currentPostDetailData = data;
+
+        // Update small feature image thumbnail on the right and copy image button
+        const headerThumbContainer = document.getElementById('detailHeaderThumbContainer');
+        const headerThumbImg = document.getElementById('detailHeaderThumbImg');
+        const headerThumbLink = document.getElementById('detailHeaderThumbLink');
+        const btnCopyFeatureImg = document.getElementById('btnCopyFeatureImage');
+
+        if (data.image) {
+            if (headerThumbImg) headerThumbImg.src = data.image;
+            if (headerThumbLink) headerThumbLink.href = data.image;
+            if (headerThumbContainer) headerThumbContainer.style.display = 'inline-flex';
+            if (btnCopyFeatureImg) btnCopyFeatureImg.style.display = 'inline-flex';
+        } else {
+            if (headerThumbContainer) headerThumbContainer.style.display = 'none';
+            if (btnCopyFeatureImg) btnCopyFeatureImg.style.display = 'none';
+        }
 
         // Generate TOC for the sidebar
         if (tocContainer && tocContent) {
@@ -3418,6 +3463,13 @@ if (!function_exists('renderManageCategoryTree')) {
                 sidebarEl.classList.remove('has-toc');
                 adjustSidebarFixedPosition();
             }
+
+            // Reset header thumbnail and copy image button
+            window.currentPostDetailData = null;
+            const headerThumbContainer = document.getElementById('detailHeaderThumbContainer');
+            if (headerThumbContainer) headerThumbContainer.style.display = 'none';
+            const btnCopyFeatureImg = document.getElementById('btnCopyFeatureImage');
+            if (btnCopyFeatureImg) btnCopyFeatureImg.style.display = 'none';
         }
     }
 
@@ -3453,6 +3505,215 @@ if (!function_exists('renderManageCategoryTree')) {
             .catch(err => {
                 console.error('Failed to copy text: ', err);
             });
+    }
+
+    // Copy full post formatted cleanly for Facebook
+    function copyFullPostForFacebook(btn) {
+        if (!window.currentPostDetailData) {
+            alert('পোস্ট লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন...');
+            return;
+        }
+        const data = window.currentPostDetailData;
+        const title = (data.title || '').trim();
+        
+        let formattedText = '';
+        if (title) {
+            formattedText += '📌 ' + title + '\n\n';
+        }
+        
+        const tempDiv = document.createElement('div');
+        let rawContent = data.content || '';
+        
+        // Merge split blockquotes into unified content
+        rawContent = rawContent.replace(/<\/blockquote>\s*<blockquote[^>]*>/gi, '<br>');
+        
+        // Process double bracket footnotes (( ref | link )) or (( ref ))
+        const footnotes = [];
+        const fnRegex = /\(\(\s*([^)]+?)\s*\)\)/g;
+        let match;
+        let fnIdx = 1;
+        while ((match = fnRegex.exec(rawContent)) !== null) {
+            const rawRef = match[1];
+            let refText = rawRef;
+            let linkText = '';
+            if (rawRef.includes('|')) {
+                const parts = rawRef.split('|');
+                refText = parts[0].trim();
+                linkText = parts[1].trim();
+            }
+            footnotes.push({
+                index: fnIdx,
+                displayText: refText,
+                linkText: linkText
+            });
+            const rep = ` [${fnIdx}]`;
+            rawContent = rawContent.replace(match[0], rep);
+            fnRegex.lastIndex -= (match[0].length - rep.length);
+            fnIdx++;
+        }
+        
+        tempDiv.innerHTML = rawContent;
+        
+        function parseNodeToFacebookText(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                return node.textContent;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) {
+                return '';
+            }
+            const tag = node.tagName.toLowerCase();
+            
+            // Skip media and scripts
+            if (tag === 'img' || tag === 'audio' || tag === 'video' || tag === 'style' || tag === 'script') {
+                return '';
+            }
+            if (tag === 'br') {
+                return '\n';
+            }
+            if (tag === 'hr') {
+                return '\n──────────────────\n';
+            }
+            if (tag === 'blockquote') {
+                const inner = Array.from(node.childNodes).map(parseNodeToFacebookText).join('').trim();
+                if (!inner) return '';
+                return '\n❝ ' + inner.replace(/\n+/g, '\n  ') + ' ❞\n\n';
+            }
+            if (/^h[1-6]$/.test(tag)) {
+                const inner = Array.from(node.childNodes).map(parseNodeToFacebookText).join('').trim();
+                if (!inner) return '';
+                return '\n\n❖ ' + inner + '\n';
+            }
+            if (tag === 'li') {
+                const inner = Array.from(node.childNodes).map(parseNodeToFacebookText).join('').trim();
+                return '• ' + inner + '\n';
+            }
+            if (tag === 'ul' || tag === 'ol') {
+                const inner = Array.from(node.childNodes).map(parseNodeToFacebookText).join('');
+                return '\n' + inner + '\n';
+            }
+            if (tag === 'p' || tag === 'div') {
+                const inner = Array.from(node.childNodes).map(parseNodeToFacebookText).join('').trim();
+                if (!inner) return '';
+                return inner + '\n\n';
+            }
+            return Array.from(node.childNodes).map(parseNodeToFacebookText).join('');
+        }
+        
+        let bodyText = Array.from(tempDiv.childNodes).map(parseNodeToFacebookText).join('');
+        bodyText = bodyText.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+        formattedText += bodyText;
+        
+        // Append footnotes if any
+        if (footnotes.length > 0) {
+            formattedText += '\n\n──────────────────\n📌 তথ্যসূত্র ও নোট:\n';
+            footnotes.forEach(fn => {
+                formattedText += `[${fn.index}] ${fn.displayText}` + (fn.linkText ? ` (${fn.linkText})` : '') + '\n';
+            });
+        }
+        
+        // Append public post link
+        if (data.slug) {
+            const postLink = '<?= URLROOT ?>/' + encodeURI(data.slug);
+            formattedText += '\n\n🔗 সম্পূর্ণ পড়তে ভিজিট করুন: ' + postLink;
+        }
+        
+        formattedText = formattedText.trim();
+        
+        const origHtml = btn.innerHTML;
+        
+        navigator.clipboard.writeText(formattedText)
+            .then(() => {
+                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>পোস্ট কপি হয়েছে!</span>';
+                setTimeout(() => {
+                    btn.innerHTML = origHtml;
+                }, 2500);
+            })
+            .catch(err => {
+                console.error('Clipboard write error:', err);
+                const ta = document.createElement('textarea');
+                ta.value = formattedText;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                
+                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>পোস্ট কপি হয়েছে!</span>';
+                setTimeout(() => {
+                    btn.innerHTML = origHtml;
+                }, 2500);
+            });
+    }
+
+    // Copy feature image directly into clipboard as image blob (or image url fallback)
+    async function copyPostFeatureImage(btn) {
+        if (!window.currentPostDetailData || !window.currentPostDetailData.image) {
+            alert('এই পোস্টে কোনো ফিচার ইমেজ পাওয়া যায়নি!');
+            return;
+        }
+        const imgUrl = window.currentPostDetailData.image;
+        const origHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>কপি হচ্ছে...</span>';
+        btn.disabled = true;
+
+        const fallbackCopyUrl = () => {
+            navigator.clipboard.writeText(imgUrl).then(() => {
+                btn.innerHTML = '<i class="fas fa-check" style="color: #2563eb;"></i> <span>ইমেজ লিংক কপি হয়েছে!</span>';
+            }).catch(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> <span>কপি সম্পন্ন</span>';
+            }).finally(() => {
+                setTimeout(() => {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }, 2500);
+            });
+        };
+
+        try {
+            const response = await fetch(imgUrl, { mode: 'cors' });
+            if (!response.ok) throw new Error('Fetch status ' + response.status);
+            const blob = await response.blob();
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = URL.createObjectURL(blob);
+
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = () => reject(new Error('Image decode error'));
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            canvas.toBlob(async (pngBlob) => {
+                if (!pngBlob) {
+                    fallbackCopyUrl();
+                    return;
+                }
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': pngBlob })
+                    ]);
+                    btn.innerHTML = '<i class="fas fa-check" style="color: #2563eb;"></i> <span>ছবি কপি হয়েছে!</span>';
+                    setTimeout(() => {
+                        btn.innerHTML = origHtml;
+                        btn.disabled = false;
+                    }, 2500);
+                } catch (clipErr) {
+                    console.warn('ClipboardItem write blocked, falling back to URL copy:', clipErr);
+                    fallbackCopyUrl();
+                }
+            }, 'image/png');
+
+        } catch (err) {
+            console.warn('Image fetch failed (possibly CORS on local), falling back to URL copy:', err);
+            fallbackCopyUrl();
+        }
     }
 
     let ttsQueue = [];

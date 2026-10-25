@@ -728,21 +728,29 @@ if (!function_exists('resolve_blog_image')) {
 
                         <span><i class="fas fa-eye"></i> <?= number_format($data['post']['views']) ?> বার পঠিত</span>
                     </div>
+                    <?php
+                    $postSlugEncoded = rawurlencode($data['post']['slug']);
+                    $shareFullUrl = URLROOT . '/' . $postSlugEncoded;
+                    $shareTitle = $data['post']['title'];
+                    $shareEncodedUrl = urlencode($shareFullUrl);
+                    $shareEncodedTitle = urlencode($shareTitle);
+                    $waShareText = urlencode($shareTitle . ' ' . $shareFullUrl);
+                    ?>
                     <div class="post-meta-share">
                         <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; font-family: 'Hind Siliguri', sans-serif;"><i class="fas fa-share-alt"></i> শেয়ার:</span>
-                        <button onclick="copyPostLink('<?= URLROOT ?>/p/<?= $data['post']['id'] ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
+                        <button onclick="copyPostLink('<?= $shareFullUrl ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
                             <i class="fas fa-link"></i>
                         </button>
-                        <a href="https://api.whatsapp.com/send?text=<?= $data['post']['title'] ?>%20<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
+                        <a href="https://api.whatsapp.com/send?text=<?= $waShareText ?>" target="_blank" rel="noopener" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
                             <i class="fab fa-whatsapp"></i>
                         </a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn fb" title="ফেসবুকে শেয়ার">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareEncodedUrl ?>" target="_blank" rel="noopener" class="share-btn fb" title="ফেসবুকে শেয়ার">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="https://t.me/share/url?url=<?= URLROOT ?>/<?= $data['post']['slug'] ?>&text=<?= $data['post']['title'] ?>" target="_blank" class="share-btn tg" title="টেলিগ্রামে শেয়ার">
+                        <a href="https://t.me/share/url?url=<?= $shareEncodedUrl ?>&text=<?= $shareEncodedTitle ?>" target="_blank" rel="noopener" class="share-btn tg" title="টেলিগ্রামে শেয়ার">
                             <i class="fab fa-telegram-plane"></i>
                         </a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn li" title="লিংকডইনে শেয়ার">
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareEncodedUrl ?>" target="_blank" rel="noopener" class="share-btn li" title="লিংকডইনে শেয়ার">
                             <i class="fab fa-linkedin-in"></i>
                         </a>
                         <button onclick="window.print();" class="share-btn print" style="background: #64748b; color: #ffffff !important;" title="প্রিন্ট করুন">
@@ -761,19 +769,19 @@ if (!function_exists('resolve_blog_image')) {
                     <span style="font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-share-alt"></i> শেয়ার করুন:
                     </span>
-                    <button onclick="copyPostLink('<?= URLROOT ?>/p/<?= $data['post']['id'] ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
+                    <button onclick="copyPostLink('<?= $shareFullUrl ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
                         <i class="fas fa-link"></i> <span class="share-btn-text">লিংক কপি</span>
                     </button>
-                    <a href="https://api.whatsapp.com/send?text=<?= $data['post']['title'] ?>%20<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
+                    <a href="https://api.whatsapp.com/send?text=<?= $waShareText ?>" target="_blank" rel="noopener" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
                         <i class="fab fa-whatsapp"></i> <span class="share-btn-text">WhatsApp</span>
                     </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn fb" title="ফেসবুকে শেয়ার">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareEncodedUrl ?>" target="_blank" rel="noopener" class="share-btn fb" title="ফেসবুকে শেয়ার">
                         <i class="fab fa-facebook-f"></i> <span class="share-btn-text">Facebook</span>
                     </a>
-                    <a href="https://t.me/share/url?url=<?= URLROOT ?>/<?= $data['post']['slug'] ?>&text=<?= $data['post']['title'] ?>" target="_blank" class="share-btn tg" title="টেলিগ্রামে শেয়ার">
+                    <a href="https://t.me/share/url?url=<?= $shareEncodedUrl ?>&text=<?= $shareEncodedTitle ?>" target="_blank" rel="noopener" class="share-btn tg" title="টেলিগ্রামে শেয়ার">
                         <i class="fab fa-telegram-plane"></i> <span class="share-btn-text">Telegram</span>
                     </a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= URLROOT ?>/<?= $data['post']['slug'] ?>" target="_blank" class="share-btn li" title="লিংকডইনে শেয়ার">
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareEncodedUrl ?>" target="_blank" rel="noopener" class="share-btn li" title="লিংকডইনে শেয়ার">
                         <i class="fab fa-linkedin-in"></i> <span class="share-btn-text">LinkedIn</span>
                     </a>
                 </div>
