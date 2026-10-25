@@ -1029,9 +1029,11 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
                                 $matchBadgeHtml = '';
                                 if (!empty($post['match_badge'])) {
                                     if ($post['match_badge'] === 'Title Match') {
-                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> Title Match</span>';
+                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> শিরোনাম মিল</span>';
                                     } elseif ($post['match_badge'] === 'Keyword Match') {
-                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> Tag Match</span>';
+                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> ট্যাগ মিল</span>';
+                                    } elseif ($post['match_badge'] === 'Content Match') {
+                                        $matchBadgeHtml = '<span style="font-size: 10px; font-weight: 700; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-file-alt" style="font-size: 8px;"></i> মূল লেখায় মিল</span>';
                                     }
                                 }
                             ?>

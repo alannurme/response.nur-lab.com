@@ -2733,7 +2733,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span class="search-badge-category">
                                     <i class="fas fa-folder" style="font-size: 10px; color: #f59e0b;"></i> ${catName}
                                 </span>
-                                ${item.match_badge === 'Title Match' ? '<span style="font-size: 9.5px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-star" style="font-size: 8px;"></i> শিরোনাম মিল</span>' : ''}
+                                ${item.match_badge === 'Title Match' ? '<span style="font-size: 9.5px; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-star" style="font-size: 8px;"></i> শিরোনাম মিল</span>' : (item.match_badge === 'Keyword Match' ? '<span style="font-size: 9.5px; background: #f3e8ff; color: #6b21a8; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-tag" style="font-size: 8px;"></i> ট্যাগ মিল</span>' : '<span style="font-size: 9.5px; background: #e0f2fe; color: #0369a1; padding: 1px 5px; border-radius: 4px; font-weight: 700;"><i class="fas fa-file-alt" style="font-size: 8px;"></i> মূল লেখায় মিল</span>')}
                             </div>
                             <div class="search-result-title">${title}</div>
                             ${snippet ? `<div class="search-result-snippet">${snippet}</div>` : ''}

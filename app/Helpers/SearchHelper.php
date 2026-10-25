@@ -282,10 +282,15 @@ class SearchHelper {
         ];
 
         $consonants = [
-            'kkh' => 'ক্ষ', 'cch' => 'চ্ছ', 'chh' => 'ছ', 'ch' => 'চ',
+            'shth' => 'ষ্ঠ', 'chch' => 'চ্ছ', 'kkh' => 'ক্ষ', 'cch' => 'চ্ছ', 'chh' => 'ছ', 'ch' => 'চ',
             'kh'  => 'খ', 'gh'  => 'ঘ', 'ng'  => 'ং', 'jh'  => 'ঝ',
             'th'  => 'থ', 'dh'  => 'ধ', 'ph'  => 'ফ', 'bh'  => 'ভ',
-            'sh'  => 'শ', 'k'   => 'ক', 'g'   => 'গ', 'j'   => 'জ',
+            'sh'  => 'শ',
+            'nn'  => 'ন্ন', 'tt'  => 'ত্ত', 'dd'  => 'দ্দ', 'mm'  => 'ম্ম',
+            'll'  => 'ল্ল', 'bb'  => 'ব্ব', 'kk'  => 'ক্ক', 'jj'  => 'জ্জ',
+            'ss'  => 'স্স', 'pp'  => 'প্প', 'gg'  => 'গ্গ',
+            'nt'  => 'ন্ত', 'nd'  => 'ন্দ', 'st'  => 'স্ত',
+            'k'   => 'ক', 'g'   => 'গ', 'j'   => 'জ',
             'z'   => 'জ', 't'   => 'ত', 'd'   => 'দ', 'n'   => 'ন',
             'p'   => 'প', 'f'   => 'ফ', 'b'   => 'ব', 'v'   => 'ভ',
             'm'   => 'ম', 'r'   => 'র', 'l'   => 'ল', 's'   => 'স',
@@ -304,6 +309,14 @@ class SearchHelper {
         $prevWasConsonant = false;
 
         while ($i < $len) {
+            $sub4 = substr($w, $i, 4);
+            if (isset($consonants[$sub4])) {
+                $out .= $consonants[$sub4];
+                $i += 4;
+                $prevWasConsonant = true;
+                continue;
+            }
+
             $sub3 = substr($w, $i, 3);
             if (isset($consonants[$sub3])) {
                 $out .= $consonants[$sub3];
@@ -361,6 +374,81 @@ class SearchHelper {
     }
 
     /**
+     * Strip common Banglish case suffixes (e.g. jannate -> jannat, hadisgulo -> hadis).
+     */
+    public static function stripBanglishSuffixes($w) {
+        $suffixes = [
+            'shomuho', 'somuho', 'gulo', 'gula', 'guli', 'derke', 'der',
+            'theke', 'hote', 'tay', 'tey', 'teu', 'te', 'er', 'ke', 'ta', 'ti', 'to',
+            'e', 'r', 'y'
+        ];
+        $stems = [];
+        $wLen = strlen($w);
+        foreach ($suffixes as $suf) {
+            $len = strlen($suf);
+            if ($wLen > $len + 2 && substr($w, -$len) === $suf) {
+                $stems[] = substr($w, 0, -$len);
+            }
+        }
+        return array_unique($stems);
+    }
+
+    /**
+     * Strip common Bengali grammatical suffixes (বিভক্তি ও প্রত্যয়).
+     * e.g. জান্নাতে -> জান্নাত, হাদিসগুলো -> হাদিস, রোজার -> রোজা
+     */
+    public static function stripBanglaSuffixes($w) {
+        $suffixes = [
+            'সমূহ', 'গুলো', 'গুলি', 'দেরকে', 'দের',
+            'থেকে', 'হতে', 'দ্বারা', 'তেই', 'তায়', 'তে',
+            'ের', 'কে', 'টি', 'টা',
+            'ে', 'র', 'য়'
+        ];
+        $stems = [];
+        $wLen = mb_strlen($w, 'UTF-8');
+        foreach ($suffixes as $suf) {
+            $len = mb_strlen($suf, 'UTF-8');
+            if ($wLen >= $len + 2) {
+                if (mb_substr($w, -$len, null, 'UTF-8') === $suf) {
+                    $stems[] = mb_substr($w, 0, -$len, 'UTF-8');
+                }
+            }
+        }
+        return array_unique($stems);
+    }
+
+    /**
+     * Generate common Bengali grammatical inflections (বিভক্তি রূপান্তর).
+     * e.g. জান্নাত -> জান্নাতে, জান্নাতের, জান্নাতকে
+     *      রোজা -> রোজার, রোজায়, রোজাটি
+     */
+    public static function generateBanglaInflections($root) {
+        $root = trim($root);
+        $len = mb_strlen($root, 'UTF-8');
+        if ($len < 2 || $len > 15) return [];
+
+        if ($root === 'আল্লাহ') {
+            return ['আল্লাহর', 'আল্লাহকে', 'আল্লাহ তায়ালা', 'আল্লাহ তাআলা'];
+        }
+
+        $inflections = [];
+        $lastChar = mb_substr($root, -1, 1, 'UTF-8');
+        $vowelKars = ['া', 'ি', 'ী', 'ু', 'ূ', 'ে', 'ো'];
+
+        if (in_array($lastChar, $vowelKars, true)) {
+            $inflections[] = $root . 'র';
+            $inflections[] = $root . 'য়';
+            $inflections[] = $root . 'তে';
+        } else {
+            $inflections[] = $root . 'ে';
+            $inflections[] = $root . 'ের';
+            $inflections[] = $root . 'কে';
+        }
+
+        return $inflections;
+    }
+
+    /**
      * Normalize Bengali text to handle homophones and spelling variations.
      */
     public static function normalizeBangla($text) {
@@ -393,33 +481,50 @@ class SearchHelper {
             
             $expanded[] = $token;
 
-            // Direct dictionary lookup
+            // 1. Direct dictionary lookup
             if (isset(self::$dictionary[$token])) {
                 foreach (self::$dictionary[$token] as $var) {
                     $expanded[] = $var;
                 }
             }
 
-            // Reverse dictionary lookup (if Bangla matches values)
-            foreach (self::$dictionary as $eng => $bngList) {
-                if (in_array($token, $bngList, true)) {
-                    $expanded[] = $eng;
-                    foreach ($bngList as $b) {
-                        $expanded[] = $b;
+            // 2. Banglish tokens: strip suffixes & phonetics
+            if (preg_match('/^[a-z]+$/i', $token)) {
+                $bgStems = self::stripBanglishSuffixes($token);
+                foreach ($bgStems as $bgStem) {
+                    $expanded[] = $bgStem;
+                    if (isset(self::$dictionary[$bgStem])) {
+                        foreach (self::$dictionary[$bgStem] as $var) {
+                            $expanded[] = $var;
+                        }
+                    }
+                    $stemPhonetic = self::banglishToBanglaPhonetic($bgStem);
+                    if (!empty($stemPhonetic) && mb_strlen($stemPhonetic, 'UTF-8') >= 2) {
+                        $expanded[] = $stemPhonetic;
                     }
                 }
-            }
 
-            // If token is latin letters, add phonetic conversion
-            if (preg_match('/^[a-z]+$/i', $token)) {
+                // Phonetic of the full token
                 $phonetic = self::banglishToBanglaPhonetic($token);
                 if (!empty($phonetic) && mb_strlen($phonetic, 'UTF-8') >= 2) {
                     $expanded[] = $phonetic;
                 }
             }
 
-            // If token is Bangla, generate variant with interchangeable characters
+            // 3. Bangla tokens: strip suffixes & add inflections
             if (preg_match('/[\x{0980}-\x{09FF}]/u', $token)) {
+                $bStems = self::stripBanglaSuffixes($token);
+                foreach ($bStems as $bStem) {
+                    $expanded[] = $bStem;
+                    foreach (self::generateBanglaInflections($bStem) as $inf) {
+                        $expanded[] = $inf;
+                    }
+                }
+
+                foreach (self::generateBanglaInflections($token) as $inf) {
+                    $expanded[] = $inf;
+                }
+
                 // e.g. রমযান <-> রমজান, যাকাত <-> জাকাত
                 if (mb_strpos($token, 'য') !== false) {
                     $expanded[] = str_replace('য', 'জ', $token);
@@ -439,6 +544,33 @@ class SearchHelper {
                 if (mb_strpos($token, 'কুরআন') !== false) {
                     $expanded[] = str_replace('কুরআন', 'কোরআন', $token);
                 }
+            }
+
+            // Reverse dictionary lookup (if Bangla matches values)
+            foreach (self::$dictionary as $eng => $bngList) {
+                if (in_array($token, $bngList, true)) {
+                    $expanded[] = $eng;
+                    foreach ($bngList as $b) {
+                        $expanded[] = $b;
+                    }
+                }
+            }
+        }
+
+        // For all root Bangla candidates collected, also generate inflections
+        $rootsToInflect = [];
+        foreach ($expanded as $item) {
+            if (preg_match('/^[\x{0980}-\x{09FF}]+$/u', $item)) {
+                $rootsToInflect[] = $item;
+                $st = self::stripBanglaSuffixes($item);
+                foreach ($st as $s) {
+                    $rootsToInflect[] = $s;
+                }
+            }
+        }
+        foreach (array_unique($rootsToInflect) as $r) {
+            foreach (self::generateBanglaInflections($r) as $inf) {
+                $expanded[] = $inf;
             }
         }
 
@@ -496,7 +628,8 @@ class SearchHelper {
                 LEFT JOIN categories c2 ON p.category_id = c2.id
                 WHERE $statusClause $categoryClause AND (" . implode(" OR ", $likes) . ")
                 GROUP BY p.id
-                LIMIT 100";
+                ORDER BY p.id DESC
+                LIMIT 300";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -515,12 +648,18 @@ class SearchHelper {
             $kwLower = mb_strtolower($post['seo_keywords'] ?? '', 'UTF-8');
             $catLower = mb_strtolower($post['main_category'] ?? '', 'UTF-8');
             $excerptLower = mb_strtolower($post['excerpt'] ?? '', 'UTF-8');
-            $cleanContent = strip_tags($post['content'] ?? '');
+
+            // Deep clean and normalize HTML content so all text inside body is searchable
+            $rawContent = $post['content'] ?? '';
+            $decodedContent = html_entity_decode(strip_tags($rawContent), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $cleanContent = str_replace(["\xc2\xa0", "&nbsp;"], ' ', $decodedContent);
+            $cleanContent = trim(preg_replace('/\s+/u', ' ', $cleanContent));
             $contentLower = mb_strtolower($cleanContent, 'UTF-8');
 
             $matchedInTitle = false;
             $matchedInKeywords = false;
             $matchedInContent = false;
+            $contentTokensMatched = 0;
 
             // 1. Exact full query matching
             if (mb_strpos($titleLower, $qLower) !== false) {
@@ -541,7 +680,13 @@ class SearchHelper {
             }
 
             if (!empty($excerptLower) && mb_strpos($excerptLower, $qLower) !== false) {
-                $score += 80;
+                $score += 120;
+                $matchedInContent = true;
+            }
+
+            // Exact full query match inside post content body
+            if (!empty($contentLower) && mb_strpos($contentLower, $qLower) !== false) {
+                $score += 250;
                 $matchedInContent = true;
             }
 
@@ -573,12 +718,20 @@ class SearchHelper {
                     $matchedInContent = true;
                 }
 
-                // Content score (+10 per word occurrence, max +50)
-                $occurrences = mb_substr_count($contentLower, $vLower);
-                if ($occurrences > 0) {
-                    $score += min(50, $occurrences * 10);
-                    $matchedInContent = true;
+                // Content score (+15 per word occurrence, max +100)
+                if (!empty($contentLower)) {
+                    $occurrences = mb_substr_count($contentLower, $vLower);
+                    if ($occurrences > 0) {
+                        $score += min(100, $occurrences * 15);
+                        $matchedInContent = true;
+                        $contentTokensMatched++;
+                    }
                 }
+            }
+
+            // Bonus if multiple query words match anywhere inside the post content
+            if ($contentTokensMatched >= 2) {
+                $score += $contentTokensMatched * 50;
             }
 
             // Match type badge for display
@@ -589,15 +742,27 @@ class SearchHelper {
                 $matchBadge = 'Keyword Match';
             }
 
-            // Generate highlight snippets
-            $highlightedTitle = self::highlightText($post['title'], $variants);
-            $snippetSource = !empty($post['excerpt']) ? $post['excerpt'] : $cleanContent;
-            $snippet = self::extractSnippet($snippetSource, $variants, 180);
+            // Determine best source for snippet: if match is in content, extract snippet around the matched content!
+            $foundInExcerpt = false;
+            if (!empty($post['excerpt'])) {
+                $exLower = mb_strtolower($post['excerpt'], 'UTF-8');
+                foreach ($variants as $v) {
+                    $vLower = mb_strtolower($v, 'UTF-8');
+                    if (mb_strlen($vLower, 'UTF-8') >= 2 && mb_strpos($exLower, $vLower) !== false) {
+                        $foundInExcerpt = true;
+                        break;
+                    }
+                }
+            }
+
+            // If the search term matched in content body, extract snippet from content!
+            $snippetSource = ($foundInExcerpt || empty($cleanContent)) ? (!empty($post['excerpt']) ? $post['excerpt'] : $cleanContent) : $cleanContent;
+            $snippet = self::extractSnippet($snippetSource, $variants, 220);
             $highlightedSnippet = self::highlightText($snippet, $variants);
 
             $post['score'] = $score;
             $post['match_badge'] = $matchBadge;
-            $post['highlighted_title'] = $highlightedTitle;
+            $post['highlighted_title'] = self::highlightText($post['title'], $variants);
             $post['snippet'] = $snippet;
             $post['highlighted_snippet'] = $highlightedSnippet;
             $post['type'] = 'post';
@@ -786,24 +951,30 @@ class SearchHelper {
     /**
      * Extract a snippet of text surrounding matched keywords.
      */
-    public static function extractSnippet($text, $terms, $maxLength = 180) {
+    public static function extractSnippet($text, $terms, $maxLength = 220) {
         $decoded = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $clean = trim(preg_replace('/\s+/u', ' ', $decoded));
+        $clean = str_replace(["\xc2\xa0", "&nbsp;"], ' ', $decoded);
+        $clean = trim(preg_replace('/\s+/u', ' ', $clean));
         if (mb_strlen($clean, 'UTF-8') <= $maxLength) {
             return $clean;
         }
 
-        $bestPos = -1;
         $cleanLower = mb_strtolower($clean, 'UTF-8');
+        $bestPos = -1;
 
-        foreach ($terms as $term) {
+        // Sort terms by length DESCENDING so longer/specific words take priority for focal point
+        $sortedTerms = $terms;
+        usort($sortedTerms, function($a, $b) {
+            return mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
+        });
+
+        foreach ($sortedTerms as $term) {
             $t = trim(mb_strtolower($term, 'UTF-8'));
             if (mb_strlen($t, 'UTF-8') < 2) continue;
             $pos = mb_strpos($cleanLower, $t);
             if ($pos !== false) {
-                if ($bestPos === -1 || $pos < $bestPos) {
-                    $bestPos = $pos;
-                }
+                $bestPos = $pos;
+                break; // Found best focal point!
             }
         }
 
@@ -817,7 +988,7 @@ class SearchHelper {
         // Clean boundary to avoid cutting words
         if ($start > 0) {
             $firstSpace = mb_strpos($snippet, ' ');
-            if ($firstSpace !== false && $firstSpace < 20) {
+            if ($firstSpace !== false && $firstSpace < 30) {
                 $snippet = mb_substr($snippet, $firstSpace + 1);
             }
             $snippet = '...' . $snippet;
@@ -825,7 +996,7 @@ class SearchHelper {
 
         if ($start + $maxLength < mb_strlen($clean, 'UTF-8')) {
             $lastSpace = mb_strrpos($snippet, ' ');
-            if ($lastSpace !== false && $lastSpace > ($maxLength - 30)) {
+            if ($lastSpace !== false && $lastSpace > ($maxLength - 40)) {
                 $snippet = mb_substr($snippet, 0, $lastSpace);
             }
             $snippet .= '...';

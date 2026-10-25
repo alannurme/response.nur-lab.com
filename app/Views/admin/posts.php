@@ -2839,6 +2839,8 @@ if (!function_exists('renderManageCategoryTree')) {
                     badge = `<span style="font-size: 9px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i> Title</span>`;
                 } else if (post.match_badge === 'Keyword Match') {
                     badge = `<span style="font-size: 9px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-tag" style="font-size: 8px;"></i> Tag</span>`;
+                } else if (post.match_badge === 'Content Match') {
+                    badge = `<span style="font-size: 9px; font-weight: 700; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-file-alt" style="font-size: 8px;"></i> Body</span>`;
                 }
                 const title = post.highlighted_title || escapeHtmlAttr(post.title);
                 const snippet = post.highlighted_snippet || (post.snippet ? escapeHtmlAttr(post.snippet) : '');
