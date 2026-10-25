@@ -1920,10 +1920,15 @@ if (!empty($data['breadcrumbs'])) {
                             </a>
                         </div>
 
-                        <!-- Copy Full Post (Facebook Ready) -->
-                        <button type="button" id="btnCopyFullPost" onclick="copyFullPostForFacebook(this)" title="ফেসবুকে পোস্ট করার জন্য সম্পূর্ণ পোস্ট সুন্দর ফরম্যাটে কপি করুন" class="btn-explorer" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'; this.style.borderColor='#4ade80';" onmouseout="this.style.background='#f0fdf4'; this.style.borderColor='#86efac';">
-                            <i class="fas fa-clipboard-list" style="color: #16a34a; font-size: 13px;"></i> <span id="copyFullPostText">ফুল পোস্ট কপি</span>
-                        </button>
+                        <!-- Copy Post (Facebook Ready: Smart Summary + Full Text) -->
+                        <div style="display: inline-flex; align-items: center; border-radius: 8px; border: 1px solid #86efac; background: #f0fdf4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;">
+                            <button type="button" id="btnCopyFullPost" onclick="copyFullPostForFacebook(this, 'smart')" title="ফেসবুকের জন্য স্মার্ট পোস্ট কপি করুন (টাইটেল + আকর্ষণীয় মূল অংশ + লিঙ্ক)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 11px; background: transparent; border: none; color: #166534; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
+                                <i class="fas fa-clipboard-list" style="color: #16a34a; font-size: 13px;"></i> <span id="copyFullPostText">ফেসবুক পোস্ট কপি</span>
+                            </button>
+                            <button type="button" onclick="copyFullPostForFacebook(this, 'full')" title="সম্পূর্ণ পোস্ট (ফুল টেক্সট) কপি করুন" style="display: inline-flex; align-items: center; padding: 6px 8px; background: transparent; border: none; border-left: 1px solid #86efac; color: #166534; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
+                                <span>ফুল</span>
+                            </button>
+                        </div>
 
                         <!-- Copy Feature Image -->
                         <button type="button" id="btnCopyFeatureImage" onclick="copyPostFeatureImage(this)" title="ফিচার ইমেজ ক্লিপবোর্ডে কপি করুন (সরাসরি ফেসবুকে পেস্ট করা যাবে)" class="btn-explorer" style="display: none; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.borderColor='#60a5fa';" onmouseout="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd';">
@@ -1943,7 +1948,7 @@ if (!empty($data['breadcrumbs'])) {
                         <!-- Small Feature Image Thumbnail on the right -->
                         <div id="detailHeaderThumbContainer" style="display: none; align-items: center; gap: 6px;" title="ফিচার ইমেজ প্রিভিউ (ক্লিক করে বড় দেখুন)">
                             <a id="detailHeaderThumbLink" href="#" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; text-decoration: none;">
-                                <img id="detailHeaderThumbImg" src="" alt="Feature Image" style="width: 48px; height: 32px; object-fit: cover; border-radius: 6px; border: 1.5px solid #94a3b8; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: transform 0.2s, border-color 0.2s; vertical-align: middle;" onmouseover="this.style.transform='scale(1.2)'; this.style.borderColor='#2563eb';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#94a3b8';">
+                                <img id="detailHeaderThumbImg" src="" alt="Feature Image" style="width: 48px; height: 32px; object-fit: cover; border-radius: 6px; border: 1.5px solid #94a3b8; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: transform 0.2s, border-color 0.2s; vertical-align: middle;" onmouseover="this.style.transform='scale(1.2)'; this.style.borderColor='#2563eb';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#94a3b8';" onerror="const c = document.getElementById('detailHeaderThumbContainer'); if (c) c.style.display='none';">
                             </a>
                         </div>
                     </div>
@@ -2950,7 +2955,11 @@ if (!function_exists('renderManageCategoryTree')) {
     }
 
     function copyPostLink(url, btn) {
-        navigator.clipboard.writeText(url).then(() => {
+        let cleanUrl = url;
+        try {
+            cleanUrl = encodeURI(url);
+        } catch (e) {}
+        navigator.clipboard.writeText(cleanUrl).then(() => {
             showToast('📋 পোস্টের লিঙ্ক কপি করা হয়েছে!');
             if (btn) {
                 const icon = btn.querySelector('i');
@@ -3224,21 +3233,38 @@ if (!function_exists('renderManageCategoryTree')) {
             bodyEl.appendChild(footnoteContainer);
         }
         
-        if (data.image) {
-            imgEl.src = data.image;
+        // Clean and resolve image URL (fixes any accidental double URL or relative paths)
+        let cleanImgUrl = (data.image || '').trim();
+        if (cleanImgUrl) {
+            const lastHttpIdx = cleanImgUrl.lastIndexOf('http://');
+            const lastHttpsIdx = cleanImgUrl.lastIndexOf('https://');
+            const maxIdx = Math.max(lastHttpIdx, lastHttpsIdx);
+            if (maxIdx > 0) {
+                cleanImgUrl = cleanImgUrl.substring(maxIdx);
+            } else if (!cleanImgUrl.startsWith('http://') && !cleanImgUrl.startsWith('https://')) {
+                cleanImgUrl = '<?= URLROOT ?>/' + cleanImgUrl.replace(/^\/+/, '');
+            }
+        }
+        data.image = cleanImgUrl;
+
+        if (cleanImgUrl) {
+            imgEl.src = cleanImgUrl;
             imgContainer.style.display = 'block';
         } else {
             imgContainer.style.display = 'none';
         }
 
-        // Generate short public frontend link (e.g. /p/[id])
-        const shortLink = '<?= URLROOT ?>/p/' + data.id;
-        const publicLink = '<?= URLROOT ?>/' + data.slug;
-        window.currentPostPublicLink = shortLink;
+        // Generate canonical public frontend link and short link (always live domain for public sharing)
+        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const publicBase = isLocalHost ? 'https://response.nur-lab.com' : '<?= URLROOT ?>';
+        const canonicalSlug = encodeURI(data.slug || '');
+        const publicLink = publicBase + '/' + canonicalSlug;
+        const shortLink = publicBase + '/p/' + data.id;
+        window.currentPostPublicLink = publicLink;
         
         // Set social media links
         document.getElementById('shareFB').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(publicLink);
-        document.getElementById('shareWA').href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + ' ' + publicLink);
+        document.getElementById('shareWA').href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + '\n' + publicLink);
         document.getElementById('shareTwitter').href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(publicLink) + '&text=' + encodeURIComponent(data.title);
         
         document.getElementById('detailShareGroup').style.display = 'flex';
@@ -3251,9 +3277,9 @@ if (!function_exists('renderManageCategoryTree')) {
         const headerThumbLink = document.getElementById('detailHeaderThumbLink');
         const btnCopyFeatureImg = document.getElementById('btnCopyFeatureImage');
 
-        if (data.image) {
-            if (headerThumbImg) headerThumbImg.src = data.image;
-            if (headerThumbLink) headerThumbLink.href = data.image;
+        if (cleanImgUrl) {
+            if (headerThumbImg) headerThumbImg.src = cleanImgUrl;
+            if (headerThumbLink) headerThumbLink.href = cleanImgUrl;
             if (headerThumbContainer) headerThumbContainer.style.display = 'inline-flex';
             if (btnCopyFeatureImg) btnCopyFeatureImg.style.display = 'inline-flex';
         } else {
@@ -3507,8 +3533,8 @@ if (!function_exists('renderManageCategoryTree')) {
             });
     }
 
-    // Copy full post formatted cleanly for Facebook
-    function copyFullPostForFacebook(btn) {
+    // Copy formatted post for Facebook (Smart Summary or Full Text)
+    function copyFullPostForFacebook(btn, mode = 'smart') {
         if (!window.currentPostDetailData) {
             alert('পোস্ট লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন...');
             return;
@@ -3601,32 +3627,88 @@ if (!function_exists('renderManageCategoryTree')) {
         
         let bodyText = Array.from(tempDiv.childNodes).map(parseNodeToFacebookText).join('');
         bodyText = bodyText.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-        formattedText += bodyText;
         
-        // Append footnotes if any
-        if (footnotes.length > 0) {
+        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const publicBase = isLocalHost ? 'https://response.nur-lab.com' : '<?= URLROOT ?>';
+        const postLink = data.slug ? (publicBase + '/' + encodeURI(data.slug)) : (data.id ? (publicBase + '/p/' + data.id) : '');
+        const isSmart = (mode === 'smart');
+        const MAX_SMART_CHARS = 1350; // Facebook optimal character threshold
+
+        let isTruncated = false;
+
+        if (isSmart && bodyText.length > MAX_SMART_CHARS) {
+            // Smart paragraph extraction up to target limit
+            const paragraphs = bodyText.split(/\n\n+/);
+            let summaryParts = [];
+            let currentLen = 0;
+
+            for (let p of paragraphs) {
+                p = p.trim();
+                if (!p) continue;
+                if (currentLen + p.length <= MAX_SMART_CHARS || currentLen < 500) {
+                    summaryParts.push(p);
+                    currentLen += p.length;
+                } else {
+                    isTruncated = true;
+                    break;
+                }
+            }
+
+            // Fallback if first paragraph was excessively long
+            if (summaryParts.length === 1 && summaryParts[0].length > MAX_SMART_CHARS) {
+                let firstP = summaryParts[0];
+                const sentenceEnders = ['।', '?', '!', '\n', '.'];
+                let cutIdx = -1;
+                for (let ender of sentenceEnders) {
+                    const idx = firstP.lastIndexOf(ender, MAX_SMART_CHARS);
+                    if (idx > cutIdx) cutIdx = idx;
+                }
+                if (cutIdx > 350) {
+                    summaryParts[0] = firstP.substring(0, cutIdx + 1).trim();
+                } else {
+                    summaryParts[0] = firstP.substring(0, MAX_SMART_CHARS).trim() + '...';
+                }
+                isTruncated = true;
+            }
+
+            formattedText += summaryParts.join('\n\n');
+        } else {
+            formattedText += bodyText;
+        }
+
+        // Append footnotes if full mode or if post was short and not truncated
+        if ((!isTruncated || !isSmart) && footnotes.length > 0) {
             formattedText += '\n\n──────────────────\n📌 তথ্যসূত্র ও নোট:\n';
             footnotes.forEach(fn => {
                 formattedText += `[${fn.index}] ${fn.displayText}` + (fn.linkText ? ` (${fn.linkText})` : '') + '\n';
             });
         }
-        
-        // Append public post link
-        if (data.slug) {
-            const postLink = '<?= URLROOT ?>/' + encodeURI(data.slug);
-            formattedText += '\n\n🔗 সম্পূর্ণ পড়তে ভিজিট করুন: ' + postLink;
+
+        // Append attractive Read More CTA & Link
+        if (postLink) {
+            if (isTruncated) {
+                formattedText += '\n\n...\n──────────────────\n📖 সম্পূর্ণ আলোচনাটি বিস্তারিত ও তথ্যসূত্রসহ পড়তে ভিজিট করুন:\n🔗 ' + postLink;
+            } else {
+                formattedText += '\n\n🔗 সম্পূর্ণ পড়তে ভিজিট করুন: ' + postLink;
+            }
         }
-        
+
         formattedText = formattedText.trim();
         
         const origHtml = btn.innerHTML;
+        const successMsg = isSmart ? (isTruncated ? 'স্মার্ট পোস্ট কপি হয়েছে!' : 'পোস্ট কপি হয়েছে!') : 'ফুল টেক্সট কপি হয়েছে!';
         
+        function onCopySuccess() {
+            btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>কপি হয়েছে!</span>';
+            showToast(isTruncated ? '📋 ফেসবুকে পোস্ট করার জন্য স্মার্ট সামারি কপি হয়েছে (লিংক সহ)!' : '📋 পোস্ট সফলভাবে কপি হয়েছে!');
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+            }, 2500);
+        }
+
         navigator.clipboard.writeText(formattedText)
             .then(() => {
-                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>পোস্ট কপি হয়েছে!</span>';
-                setTimeout(() => {
-                    btn.innerHTML = origHtml;
-                }, 2500);
+                onCopySuccess();
             })
             .catch(err => {
                 console.error('Clipboard write error:', err);
@@ -3638,11 +3720,7 @@ if (!function_exists('renderManageCategoryTree')) {
                 ta.select();
                 document.execCommand('copy');
                 document.body.removeChild(ta);
-                
-                btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>পোস্ট কপি হয়েছে!</span>';
-                setTimeout(() => {
-                    btn.innerHTML = origHtml;
-                }, 2500);
+                onCopySuccess();
             });
     }
 

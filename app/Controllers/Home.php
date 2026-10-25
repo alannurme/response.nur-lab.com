@@ -1163,10 +1163,80 @@ class Home extends Controller {
         $postModel = $this->model('PostModel');
         $post = $postModel->getPostById($id);
         if ($post && !empty($post['slug'])) {
-            header('Location: ' . base_url($post['slug']));
+            $adminModel = $this->model('AdminModel');
+            $settings = $adminModel->getSettings();
+            $site_name = $settings['site_title'] ?? 'Response with Nur-Lab';
+            
+            $canonical_url = URLROOT . '/' . rawurlencode($post['slug']);
+            
+            // Resolve post featured image
+            $og_image = '';
+            if (!empty($post['featured_image'])) {
+                $og_image = resolve_blog_image($post['featured_image']);
+            } elseif (!empty($post['content']) && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $post['content'], $m)) {
+                $og_image = resolve_dynamic_url($m[1], '/public/img/');
+            } else {
+                $og_image = resolve_blog_image('');
+            }
+            
+            $og_title = !empty($post['seo_title']) ? $post['seo_title'] : $post['title'];
+            $og_desc = !empty($post['seo_description']) ? $post['seo_description'] : (!empty($post['excerpt']) ? $post['excerpt'] : mb_substr(strip_tags($post['content']), 0, 160, 'UTF-8'));
+            $og_desc = trim(preg_replace('/\s+/u', ' ', strip_tags($og_desc)));
+            
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            $isBot = (bool) preg_match('/(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Discordbot|SkypeUriPreview|Slackbot|Pinterest|Googlebot|bingbot)/i', $userAgent);
+            
+            if (!$isBot) {
+                // For regular browsers, perform 301 permanent redirect
+                header('HTTP/1.1 301 Moved Permanently');
+                header('Location: ' . $canonical_url);
+            }
+            
+            // Output complete Open Graph and Twitter Card tags for scrapers
+            ?>
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title><?= htmlspecialchars($og_title . ' - ' . $site_name) ?></title>
+    <link rel="canonical" href="<?= htmlspecialchars($canonical_url) ?>">
+    <meta name="description" content="<?= htmlspecialchars($og_desc) ?>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="<?= htmlspecialchars($site_name) ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($canonical_url) ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($og_title) ?>">
+    <?php if (!empty($og_image)): ?>
+    <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
+    <meta property="og:image:secure_url" content="<?= htmlspecialchars($og_image) ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <link rel="image_src" href="<?= htmlspecialchars($og_image) ?>">
+    <?php endif; ?>
+    <meta property="og:description" content="<?= htmlspecialchars($og_desc) ?>">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?= htmlspecialchars($canonical_url) ?>">
+    <meta name="twitter:title" content="<?= htmlspecialchars($og_title) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars(strip_tags($og_desc)) ?>">
+    <?php if (!empty($og_image)): ?>
+    <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
+    <?php endif; ?>
+    
+    <meta http-equiv="refresh" content="0;url=<?= htmlspecialchars($canonical_url) ?>">
+    <script>window.location.replace("<?= addslashes($canonical_url) ?>");</script>
+</head>
+<body>
+    <p>Redirecting to <a href="<?= htmlspecialchars($canonical_url) ?>"><?= htmlspecialchars($post['title']) ?></a>...</p>
+</body>
+</html>
+            <?php
             exit;
         }
-        header('Location: ' . base_url());
+        header('Location: ' . URLROOT);
         exit;
     }
 

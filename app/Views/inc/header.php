@@ -65,6 +65,7 @@ if (!function_exists('getBengaliDate')) {
         } else {
             $meta_description = !empty($post['excerpt']) ? $post['excerpt'] : mb_substr(strip_tags($post['content']), 0, 160, 'UTF-8');
         }
+        $meta_description = trim(preg_replace('/\s+/u', ' ', strip_tags($meta_description)));
         
         // Post Keywords SEO
         if (!empty($post['seo_keywords'])) {
@@ -84,9 +85,18 @@ if (!function_exists('getBengaliDate')) {
         
         if (!empty($post['featured_image'])) {
             $og_image = resolve_blog_image($post['featured_image']);
+        } else {
+            // If post has no featured image, check if content has an image
+            if (!empty($post['content']) && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $post['content'], $img_match)) {
+                $og_image = resolve_dynamic_url($img_match[1], '/public/img/');
+            } else {
+                // Use default post banner / placeholder image instead of site logo
+                $og_image = resolve_blog_image('');
+            }
         }
     } else {
         // We are on general pages (Home, Category, list pages)
+        $meta_description = trim(preg_replace('/\s+/u', ' ', strip_tags($meta_description)));
         if (isset($data['title']) && strtolower($data['title']) === 'home') {
             $seo_title = $site_name . (!empty($data['settings']['site_tagline']) ? ' - ' . $data['settings']['site_tagline'] : '');
         } else {
@@ -96,7 +106,7 @@ if (!function_exists('getBengaliDate')) {
     ?>
     <title><?= htmlspecialchars($seo_title) ?></title>
     <link rel="canonical" href="<?= htmlspecialchars($og_url) ?>">
-    <meta name="description" content="<?= htmlspecialchars(strip_tags($meta_description)) ?>">
+    <meta name="description" content="<?= htmlspecialchars($meta_description) ?>">
     <meta name="keywords" content="<?= htmlspecialchars(strip_tags($meta_keywords)) ?>">
     <meta name="author" content="<?= htmlspecialchars($meta_author) ?>">
     <?php 
@@ -108,14 +118,21 @@ if (!function_exists('getBengaliDate')) {
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="<?= isset($data['post']) ? 'article' : 'website' ?>">
+    <meta property="og:site_name" content="<?= htmlspecialchars($site_name) ?>">
     <meta property="og:url" content="<?= htmlspecialchars($og_url) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($og_title) ?>">
-    <meta property="og:description" content="<?= htmlspecialchars(strip_tags($og_description)) ?>">
-    <meta property="og:site_name" content="<?= htmlspecialchars($site_name) ?>">
     <?php if (!empty($og_image)): ?>
         <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
         <meta property="og:image:secure_url" content="<?= htmlspecialchars($og_image) ?>">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:type" content="image/jpeg">
         <link rel="image_src" href="<?= htmlspecialchars($og_image) ?>">
+    <?php endif; ?>
+    <meta property="og:description" content="<?= htmlspecialchars($og_description) ?>">
+    <?php if (isset($data['post']) && !empty($data['post'])): ?>
+    <meta property="article:published_time" content="<?= !empty($post['created_at']) ? date('c', strtotime($post['created_at'])) : date('c') ?>">
+    <meta property="article:section" content="<?= htmlspecialchars($data['category_name'] ?? 'Islam') ?>">
     <?php endif; ?>
     
     <!-- Twitter -->

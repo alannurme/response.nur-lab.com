@@ -1481,6 +1481,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 function copyPostLink(url, btn) {
+    try { url = encodeURI(decodeURI(url)); } catch (e) {}
     navigator.clipboard.writeText(url).then(function() {
         const originalHtml = btn.innerHTML;
         const isMetaShare = btn.closest('.post-meta-share') !== null;

@@ -227,7 +227,7 @@ class Admin extends Controller {
                 'id' => $post['id'],
                 'title' => $post['title'] ?? '',
                 'content' => !empty($post['content']) ? preg_replace('/<\/blockquote>\s*<blockquote[^>]*>/i', '<br>', $post['content']) : '',
-                'image' => !empty($post['featured_image']) ? URLROOT . '/' . $post['featured_image'] : '',
+                'image' => !empty($post['featured_image']) ? ((strpos($post['featured_image'], 'http://') === 0 || strpos($post['featured_image'], 'https://') === 0) ? $post['featured_image'] : resolve_dynamic_url($post['featured_image'], '/public/img/')) : '',
                 'created_at' => !empty($post['created_at']) ? date('Y/m/d', strtotime($post['created_at'])) : '',
                 'status' => $post['status'] ?? 'published',
                 'slug' => $post['slug'] ?? ''
