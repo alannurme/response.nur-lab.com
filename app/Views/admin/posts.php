@@ -1959,16 +1959,10 @@ if (!empty($data['breadcrumbs'])) {
                     <h1 id="detailViewTitle" class="post-content-title" style="display: block; width: 100%; clear: both; margin: 0 0 16px 0;">Loading...</h1>
                 </div>
                 
-                <div id="detailViewMetadata" style="font-size: 13px; color: #64748b; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div id="detailViewMetadata" style="font-size: 13px; color: #64748b; margin-bottom: 20px; display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
                     <span><i class="far fa-calendar"></i> <span id="detailViewDate"></span></span>
                     <span id="detailViewStatus" class=""></span>
                 </div>
-                
-                <div id="detailViewImageContainer" style="display: none; margin-bottom: 24px; text-align: center; background: #f8fafc; border-radius: 8px; padding: 12px;">
-                    <img id="detailViewImage" class="post-featured-img" src="" alt="Post Image" onerror="this.parentNode.style.display='none'">
-                </div>
-                
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 24px;">
                 
                 <div id="detailViewContent" class="post-body">
                     <!-- Content will load dynamically -->
@@ -3247,10 +3241,7 @@ if (!function_exists('renderManageCategoryTree')) {
         }
         data.image = cleanImgUrl;
 
-        if (cleanImgUrl) {
-            imgEl.src = cleanImgUrl;
-            imgContainer.style.display = 'block';
-        } else {
+        if (imgContainer) {
             imgContainer.style.display = 'none';
         }
 
