@@ -530,7 +530,7 @@ class Home extends Controller {
             }
             echo '
             <div class="np-post-card">
-                <div class="np-post-image" style="height: 180px;">
+                <div class="np-post-image">
                     <img src="' . $img . '" alt="' . htmlspecialchars($p['title']) . '">
                 </div>
                 <h3 class="np-post-title"><a href="' . URLROOT . '/' . $p['slug'] . '">' . htmlspecialchars($p['title']) . '</a></h3>
@@ -571,7 +571,7 @@ class Home extends Controller {
             }
             echo '
             <div class="np-post-card">
-                <div class="np-post-image" style="height: 180px;">
+                <div class="np-post-image">
                     <img src="' . $img . '" alt="' . htmlspecialchars($p['title']) . '">
                 </div>
                 <h3 class="np-post-title"><a href="' . URLROOT . '/' . $p['slug'] . '">' . htmlspecialchars($p['title']) . '</a></h3>

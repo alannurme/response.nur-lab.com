@@ -650,12 +650,14 @@ document.addEventListener("click", function(e) {
                 <?php foreach (array_slice($data['posts'], 0, 12) as $post): ?>
                 <div class="premium-post-card post-card-animate" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
                     <!-- Image Wrapper -->
-                    <div style="height: 180px; overflow: hidden; position: relative; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    <div style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
                         <?php if (!empty($post['featured_image'])): ?>
                             <?php 
                             $index_img = resolve_blog_image($post['featured_image']);
                             ?>
-                            <img src="<?= $index_img ?>" alt="<?= $post['title'] ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; transition: 0.8s transform;">
+                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="display: block; width: 100%; height: 100%;">
+                                <img src="<?= $index_img ?>" alt="<?= $post['title'] ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: 0.8s transform;">
+                            </a>
                         <?php else: ?>
                             <i class="fa-regular fa-image" style="font-size: 2.5rem; opacity: 0.4;"></i>
                         <?php endif; ?>
@@ -1022,7 +1024,8 @@ document.addEventListener("click", function(e) {
         /* Target first child (image wrapper) */
         .premium-post-card > div:first-child {
             width: 100% !important;
-            height: 110px !important;
+            height: auto !important;
+            aspect-ratio: 16 / 9 !important;
             margin: 0 !important;
             overflow: hidden !important;
         }

@@ -296,8 +296,10 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
     }
     .np-post-image {
         position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
         overflow: hidden;
-        border-radius: 2px;
+        border-radius: 4px;
         background: #f1f5f9;
         margin-bottom: 12px;
     }
@@ -305,6 +307,8 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
+        display: block;
         transition: transform 0.6s ease;
     }
     .np-post-card:hover .np-post-image img {
@@ -655,7 +659,8 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
 
     .clean-card-image {
         position: relative;
-        height: 180px;
+        width: 100%;
+        aspect-ratio: 16 / 9;
         overflow: hidden;
         background: #f1f5f9;
     }
@@ -664,6 +669,8 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
+        display: block;
         transition: transform 0.6s ease;
     }
 
@@ -1279,7 +1286,7 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
                                 $img = resolve_blog_image($p['featured_image']);
                             ?>
                                 <div class="np-post-card">
-                                    <div class="np-post-image" style="height: 180px;">
+                                    <div class="np-post-image">
                                         <img src="<?=$img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($p['title']) ?>">
                                     </div>
                                     <h3 class="np-post-title"><a href="<?= URLROOT ?>/<?= $p['slug'] ?>"><?= htmlspecialchars($p['title']) ?></a></h3>
@@ -1316,7 +1323,7 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
                                 $img = resolve_blog_image($p['featured_image']);
                             ?>
                                 <div class="np-post-card">
-                                    <div class="np-post-image" style="height: 180px;">
+                                    <div class="np-post-image">
                                         <img src="<?=$img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($p['title']) ?>">
                                     </div>
                                     <h3 class="np-post-title"><a href="<?= URLROOT ?>/<?= $p['slug'] ?>"><?= htmlspecialchars($p['title']) ?></a></h3>
