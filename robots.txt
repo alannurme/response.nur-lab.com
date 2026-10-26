@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow admin & sensitive areas
+Disallow: /admin/
+Disallow: /app/
+Disallow: /writable/
+Disallow: /vendor/
+Disallow: /api/sync/
+
+# Sitemap location for automated search engine crawling
+Sitemap: https://response.nur-lab.com/sitemap.xml

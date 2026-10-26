@@ -3,6 +3,8 @@
     RewriteRule ^sw\.js$ public/sw.js [L]
     RewriteRule ^manifest\.json$ public/manifest.php [L]
     RewriteRule ^manifest\.php$ public/manifest.php [L]
+    RewriteRule ^robots\.txt$ robots.txt [L]
+    RewriteRule ^sitemap\.xml$ index.php?url=sitemap.xml [L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^$ index.php [L]

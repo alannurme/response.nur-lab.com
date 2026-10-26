@@ -26,12 +26,12 @@ if (!function_exists('getBengaliDate')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
     // Determine SEO values
-    $site_name = $data['settings']['site_title'] ?? 'Response with Nur-Lab';
+    $site_name = $data['settings']['site_title'] ?? 'RESPONSE WITH NUR-LAB';
     
     // Default fallback from global settings
     $meta_description = $data['settings']['meta_description'] ?? '';
     $meta_keywords = $data['settings']['meta_keywords'] ?? '';
-    $meta_author = $data['settings']['site_title'] ?? 'Response with Nur-Lab';
+    $meta_author = $data['settings']['site_title'] ?? 'RESPONSE WITH NUR-LAB';
     $og_title = $site_name;
     $og_description = $meta_description;
     $og_image = !empty($data['settings']['site_logo']) ? resolve_setting_image($data['settings']['site_logo']) : '';
@@ -94,14 +94,28 @@ if (!function_exists('getBengaliDate')) {
                 $og_image = resolve_blog_image('');
             }
         }
+    } elseif (isset($data['question']) && !empty($data['question'])) {
+        // Question detail view SEO
+        $q = $data['question'];
+        $clean_q = trim(preg_replace('/\s+/u', ' ', strip_tags($q['question'])));
+        $seo_title = $clean_q . ' - ' . $site_name;
+        $meta_description = !empty($q['details']) ? mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags($q['details']))), 0, 160, 'UTF-8') : mb_substr($clean_q, 0, 160, 'UTF-8');
+        $og_title = $clean_q;
+        $og_description = $meta_description;
+        $meta_author = $q['name'] ?? $site_name;
     } else {
         // We are on general pages (Home, Category, list pages)
         $meta_description = trim(preg_replace('/\s+/u', ' ', strip_tags($meta_description)));
-        if (isset($data['title']) && strtolower($data['title']) === 'home') {
-            $seo_title = $site_name . (!empty($data['settings']['site_tagline']) ? ' - ' . $data['settings']['site_tagline'] : '');
+        if (empty($meta_description)) {
+            $meta_description = 'RESPONSE WITH NUR-LAB - একটি নির্ভরযোগ্য ইসলামিক রিসার্চ, প্রশ্ন-উত্তর, কুরআন ও হাদিস প্ল্যাটফর্ম।';
+        }
+        if (isset($data['title']) && (strtolower($data['title']) === 'home' || empty($data['title']))) {
+            $seo_title = $site_name . (!empty($data['settings']['site_tagline']) ? ' - ' . $data['settings']['site_tagline'] : ' - Islamic Research, Quran, Hadith & Q&A Hub');
         } else {
             $seo_title = (!empty($data['title']) ? $data['title'] . ' - ' : '') . $site_name;
         }
+        $og_title = $seo_title;
+        $og_description = $meta_description;
     }
     ?>
     <title><?= htmlspecialchars($seo_title) ?></title>
@@ -114,6 +128,8 @@ if (!function_exists('getBengaliDate')) {
     if (!empty($data['post']) && $pStatus !== 'published'): 
     ?>
     <meta name="robots" content="noindex, nofollow, noarchive">
+    <?php else: ?>
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <?php endif; ?>
     
     <!-- Open Graph / Facebook -->
@@ -643,24 +659,87 @@ if (!function_exists('getBengaliDate')) {
             if (!empty($post['featured_image'])) {
                 $fallback["image"] = (strpos($post['featured_image'], 'http') === 0) ? $post['featured_image'] : URLROOT . '/public/img/' . basename($post['featured_image']);
             }
-            $schema_json = json_encode($fallback, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            $schema_json = json_encode($fallback, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }
+    } elseif (isset($data['question']) && !empty($data['question'])) {
+        // QAPage Schema for Google Rich Results
+        $q = $data['question'];
+        $clean_question = trim(preg_replace('/\s+/u', ' ', strip_tags($q['question'])));
+        $clean_details = !empty($q['details']) ? trim(preg_replace('/\s+/u', ' ', strip_tags($q['details']))) : $clean_question;
+        
+        $answers_schema = [];
+        if (!empty($data['answers'])) {
+            foreach ($data['answers'] as $idx => $ans) {
+                $answerEntity = [
+                    "@type" => "Answer",
+                    "text" => trim(preg_replace('/\s+/u', ' ', strip_tags($ans['answer'] ?? ''))),
+                    "dateCreated" => !empty($ans['created_at']) ? date('c', strtotime($ans['created_at'])) : date('c'),
+                    "author" => [
+                        "@type" => "Person",
+                        "name" => !empty($ans['name']) ? $ans['name'] : $site_name
+                    ]
+                ];
+                if ($idx === 0) {
+                    $answerEntity["upvoteCount"] = 1;
+                }
+                $answers_schema[] = $answerEntity;
+            }
+        }
+        
+        $qaSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "QAPage",
+            "mainEntity" => [
+                "@type" => "Question",
+                "name" => $clean_question,
+                "text" => $clean_details,
+                "answerCount" => count($answers_schema),
+                "dateCreated" => !empty($q['created_at']) ? date('c', strtotime($q['created_at'])) : date('c'),
+                "author" => [
+                    "@type" => "Person",
+                    "name" => !empty($q['name']) ? $q['name'] : "Anonymous"
+                ]
+            ]
+        ];
+        if (!empty($answers_schema)) {
+            $qaSchema["mainEntity"]["suggestedAnswer"] = $answers_schema;
+        }
+        $schema_json = json_encode($qaSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     } else {
-        // Global Website Schema for non-post pages
+        // Global Website Schema with Organization for non-post pages
         $schema_json = json_encode([
             "@context" => "https://schema.org",
-            "@type" => "WebSite",
-            "name" => $site_name,
-            "url" => URLROOT . "/",
-            "potentialAction" => [
-                "@type" => "SearchAction",
-                "target" => [
-                    "@type" => "EntryPoint",
-                    "urlTemplate" => URLROOT . "/search?q={search_term_string}"
+            "@graph" => [
+                [
+                    "@type" => "WebSite",
+                    "@id" => URLROOT . "/#website",
+                    "name" => $site_name,
+                    "url" => URLROOT . "/",
+                    "description" => $meta_description,
+                    "publisher" => [
+                        "@id" => URLROOT . "/#organization"
+                    ],
+                    "potentialAction" => [
+                        "@type" => "SearchAction",
+                        "target" => [
+                            "@type" => "EntryPoint",
+                            "urlTemplate" => URLROOT . "/blog?search={search_term_string}"
+                        ],
+                        "query-input" => "required name=search_term_string"
+                    ]
                 ],
-                "query-input" => "required name=search_term_string"
+                [
+                    "@type" => "Organization",
+                    "@id" => URLROOT . "/#organization",
+                    "name" => $site_name,
+                    "url" => URLROOT . "/",
+                    "logo" => [
+                        "@type" => "ImageObject",
+                        "url" => !empty($data['settings']['site_logo']) ? resolve_setting_image($data['settings']['site_logo']) : URLROOT . '/public/img/logo.png'
+                    ]
+                ]
             ]
-        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
     ?>
 

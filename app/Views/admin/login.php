@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in | <?= $data['settings']['site_title'] ?? 'Response with Nur-Lab' ?></title>
+    <title>Sign in | <?= $data['settings']['site_title'] ?? 'RESPONSE WITH NUR-LAB' ?></title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

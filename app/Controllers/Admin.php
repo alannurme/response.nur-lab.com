@@ -3781,6 +3781,9 @@ class Admin extends Controller {
                     'join',
                     'ask',
                     'qa',
+                    'quran',
+                    'hadith',
+                    'prophets-tree',
                     'videos',
                     'blog'
                 ];

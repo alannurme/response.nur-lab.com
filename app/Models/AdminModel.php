@@ -481,6 +481,7 @@ class AdminModel extends Model {
                 }
             }
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
             return $post_id;
         }
         return false;
@@ -491,6 +492,7 @@ class AdminModel extends Model {
         $res = $stmt->execute(['id' => $id]);
         if ($res) {
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
         }
         return $res;
     }
@@ -576,6 +578,7 @@ class AdminModel extends Model {
                 }
             }
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
             return true;
         }
         return false;
@@ -589,6 +592,7 @@ class AdminModel extends Model {
         $res = $this->db->query("DELETE FROM posts WHERE id IN ($in)");
         if ($res) {
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
         }
         return $res;
     }
@@ -605,6 +609,7 @@ class AdminModel extends Model {
         ]);
         if ($success) {
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
         }
         return $success;
     }
@@ -621,6 +626,7 @@ class AdminModel extends Model {
         $success = $stmt->execute(['status' => $status]);
         if ($success) {
             \App\Helpers\Cache::clear();
+            $this->regenerateSitemapFile();
         }
         return $success;
     }
@@ -2774,4 +2780,86 @@ class AdminModel extends Model {
         $moduleModel = new \App\Models\ModuleModel();
         return $moduleModel->deleteModule($id);
     }
+
+    public function regenerateSitemapFile() {
+        try {
+            $urlroot = defined('URLROOT') ? URLROOT : 'https://response.nur-lab.com';
+            if (strpos($urlroot, 'localhost') !== false) {
+                $urlroot = 'https://response.nur-lab.com';
+            }
+            
+            $posts = $this->db->query("SELECT slug, created_at FROM posts WHERE status = 'published' ORDER BY created_at DESC")->fetchAll();
+            $categories = $this->db->query("SELECT slug FROM categories ORDER BY name ASC")->fetchAll();
+            $questions = $this->db->query("SELECT id, question, created_at FROM user_questions WHERE status = 'answered' ORDER BY created_at DESC")->fetchAll();
+
+            $staticUrls = [
+                '',
+                'about',
+                'contact',
+                'donate',
+                'join',
+                'ask',
+                'qa',
+                'quran',
+                'hadith',
+                'prophets-tree',
+                'videos',
+                'blog'
+            ];
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+            foreach ($staticUrls as $u) {
+                $loc = $urlroot . ($u !== '' ? '/' . $u : '');
+                $xml .= "  <url>\n";
+                $xml .= "    <loc>{$loc}</loc>\n";
+                $xml .= "    <changefreq>daily</changefreq>\n";
+                $xml .= "    <priority>1.00</priority>\n";
+                $xml .= "  </url>\n";
+            }
+
+            foreach ($posts as $p) {
+                $loc = $urlroot . '/' . htmlspecialchars($p['slug']);
+                $lastmod = date('Y-m-d', strtotime($p['created_at']));
+                $xml .= "  <url>\n";
+                $xml .= "    <loc>{$loc}</loc>\n";
+                $xml .= "    <lastmod>{$lastmod}</lastmod>\n";
+                $xml .= "    <changefreq>weekly</changefreq>\n";
+                $xml .= "    <priority>0.80</priority>\n";
+                $xml .= "  </url>\n";
+            }
+
+            foreach ($categories as $c) {
+                $loc = $urlroot . '/' . htmlspecialchars($c['slug']);
+                $xml .= "  <url>\n";
+                $xml .= "    <loc>{$loc}</loc>\n";
+                $xml .= "    <changefreq>weekly</changefreq>\n";
+                $xml .= "    <priority>0.70</priority>\n";
+                $xml .= "  </url>\n";
+            }
+
+            foreach ($questions as $q) {
+                $trimmed = mb_strimwidth($q['question'], 0, 100);
+                $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($trimmed, 'UTF-8')), '-');
+                $loc = $urlroot . '/question/' . $q['id'] . '/' . urlencode($slug);
+                $lastmod = date('Y-m-d', strtotime($q['created_at']));
+                $xml .= "  <url>\n";
+                $xml .= "    <loc>{$loc}</loc>\n";
+                $xml .= "    <lastmod>{$lastmod}</lastmod>\n";
+                $xml .= "    <changefreq>weekly</changefreq>\n";
+                $xml .= "    <priority>0.64</priority>\n";
+                $xml .= "  </url>\n";
+            }
+
+            $xml .= '</urlset>';
+            
+            $targetPath = defined('ROOTPATH') ? ROOTPATH . 'sitemap.xml' : dirname(dirname(__DIR__)) . '/sitemap.xml';
+            @file_put_contents($targetPath, $xml);
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
 }
+
