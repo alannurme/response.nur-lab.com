@@ -2701,8 +2701,8 @@ if (!function_exists('renderManageCategoryTree')) {
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-bottom: 8px; padding: 0 4px;">
-                <span><i class="fas fa-check-square" style="color: #2563eb;"></i> টিক দিয়ে যোগ/বাদ দিন</span>
-                <span><i class="fas fa-star" style="color: #ea580c;"></i> প্রধান ফোল্ডারের জন্য <strong>Main</strong> সিলেক্ট করুন</span>
+                <span><i class="fas fa-check-circle" style="color: #2563eb;"></i> একটি ক্যাটাগরি নির্বাচন করুন (Single Selection)</span>
+                <span><i class="fas fa-sitemap" style="color: #ea580c;"></i> সাব-ক্যাটাগরির প্যারেন্ট স্বয়ংক্রিয় যুক্ত হবে</span>
             </div>
 
             <!-- Categories Tree Container -->
@@ -2809,29 +2809,23 @@ if (!function_exists('renderManageCategoryTree')) {
                     const assignedIds = data.category_ids || [];
                     const mainId = data.main_category_id;
 
-                    assignedIds.forEach(cid => {
-                        const cb = document.querySelector(`.mpc-checkbox[value="${cid}"]`);
+                    // Strictly select only the post's target main/leaf category
+                    const targetId = mainId || (assignedIds.length > 0 ? assignedIds[0] : null);
+
+                    if (targetId) {
+                        const cb = document.querySelector(`.mpc-checkbox[value="${targetId}"]`);
                         if (cb) {
                             cb.checked = true;
                             const item = cb.closest('.mpc-cat-item');
                             if (item) {
                                 const badgeWrap = item.querySelector('.mpc-main-badge-wrap');
                                 if (badgeWrap) badgeWrap.style.display = 'inline-flex';
+                                const radio = item.querySelector('.mpc-main-radio');
+                                if (radio) {
+                                    radio.checked = true;
+                                    updateMpcMainLabelStyle(radio);
+                                }
                             }
-                        }
-                    });
-
-                    if (mainId) {
-                        const mainRadio = document.querySelector(`.mpc-main-radio[value="${mainId}"]`);
-                        if (mainRadio) {
-                            mainRadio.checked = true;
-                            updateMpcMainLabelStyle(mainRadio);
-                        }
-                    } else if (assignedIds.length > 0) {
-                        const firstRadio = document.querySelector(`.mpc-main-radio[value="${assignedIds[0]}"]`);
-                        if (firstRadio) {
-                            firstRadio.checked = true;
-                            updateMpcMainLabelStyle(firstRadio);
                         }
                     }
                 } else {
@@ -2856,27 +2850,29 @@ if (!function_exists('renderManageCategoryTree')) {
         const radio = item.querySelector('.mpc-main-radio');
 
         if (checkbox.checked) {
+            // Strictly enforce single category: uncheck all other checkboxes immediately
+            document.querySelectorAll('.mpc-checkbox').forEach(cb => {
+                if (cb !== checkbox) {
+                    cb.checked = false;
+                    const otherItem = cb.closest('.mpc-cat-item');
+                    if (otherItem) {
+                        const otherBadge = otherItem.querySelector('.mpc-main-badge-wrap');
+                        if (otherBadge) otherBadge.style.display = 'none';
+                        const otherRadio = otherItem.querySelector('.mpc-main-radio');
+                        if (otherRadio) otherRadio.checked = false;
+                    }
+                }
+            });
+
             if (badgeWrap) badgeWrap.style.display = 'inline-flex';
-            const checkedMain = document.querySelector('.mpc-main-radio:checked');
-            if (!checkedMain && radio) {
+            if (radio) {
                 radio.checked = true;
                 updateMpcMainLabelStyle(radio);
             }
         } else {
             if (badgeWrap) badgeWrap.style.display = 'none';
-            if (radio && radio.checked) {
-                radio.checked = false;
-                updateMpcMainLabelStyle(null);
-                const firstCheckedCb = document.querySelector('.mpc-checkbox:checked');
-                if (firstCheckedCb) {
-                    const nextItem = firstCheckedCb.closest('.mpc-cat-item');
-                    const nextRadio = nextItem.querySelector('.mpc-main-radio');
-                    if (nextRadio) {
-                        nextRadio.checked = true;
-                        updateMpcMainLabelStyle(nextRadio);
-                    }
-                }
-            }
+            if (radio) radio.checked = false;
+            updateMpcMainLabelStyle(null);
         }
     }
 
@@ -2919,13 +2915,8 @@ if (!function_exists('renderManageCategoryTree')) {
         const postId = document.getElementById('mpc_post_id').value;
         if (!postId) return;
 
-        const checkedBoxes = Array.from(document.querySelectorAll('.mpc-checkbox:checked'));
-        const categoryIds = checkedBoxes.map(cb => parseInt(cb.value));
-
-        const mainRadio = document.querySelector('.mpc-main-radio:checked');
-        const mainCategoryId = (mainRadio && mainRadio.closest('.mpc-cat-item').querySelector('.mpc-checkbox').checked)
-            ? parseInt(mainRadio.value)
-            : (categoryIds.length > 0 ? categoryIds[0] : null);
+        const checkedBox = document.querySelector('.mpc-checkbox:checked');
+        const selectedCategoryId = checkedBox ? parseInt(checkedBox.value) : null;
 
         const saveBtn = document.getElementById('mpc_save_btn');
         const originalText = saveBtn.innerHTML;
@@ -2937,8 +2928,8 @@ if (!function_exists('renderManageCategoryTree')) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 post_id: postId,
-                category_ids: categoryIds,
-                main_category_id: mainCategoryId
+                category_ids: selectedCategoryId ? [selectedCategoryId] : [],
+                main_category_id: selectedCategoryId
             })
         })
         .then(res => res.json())

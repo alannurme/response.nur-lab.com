@@ -376,15 +376,32 @@ class Admin extends Controller {
             exit;
         }
 
-        if (!empty($category_ids)) {
-            if (!$main_category_id || !in_array($main_category_id, $category_ids)) {
-                $main_category_id = $category_ids[0];
-            }
-        } else {
-            $main_category_id = null;
+        if (!empty($category_ids) && empty($main_category_id)) {
+            $main_category_id = $category_ids[0];
         }
 
         $db = \Config\Database::pdoConnect();
+
+        // Auto-calculate full parent ancestor chain so the sub-category's parent is automatically linked
+        if ($main_category_id) {
+            $curr = $main_category_id;
+            $all_chain = [$curr];
+            while ($curr) {
+                $p_stmt = $db->prepare("SELECT parent_id FROM categories WHERE id = :cid");
+                $p_stmt->execute(['cid' => $curr]);
+                $pid = $p_stmt->fetchColumn();
+                if ($pid && !in_array((int)$pid, $all_chain)) {
+                    $all_chain[] = (int)$pid;
+                    $curr = (int)$pid;
+                } else {
+                    $curr = null;
+                }
+            }
+            $category_ids = $all_chain;
+        } else {
+            $category_ids = [];
+            $main_category_id = null;
+        }
 
         // 1. Update main category on posts table
         $stmt_post = $db->prepare("UPDATE posts SET category_id = :cat_id WHERE id = :post_id");
@@ -397,7 +414,7 @@ class Admin extends Controller {
         $stmt_del = $db->prepare("DELETE FROM post_categories WHERE post_id = :post_id");
         $stmt_del->execute(['post_id' => $post_id]);
 
-        // 3. Insert new relations
+        // 3. Insert new relations (leaf sub-category + parents)
         if (!empty($category_ids)) {
             $stmt_ins = $db->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (:post_id, :cat_id)");
             foreach ($category_ids as $cid) {
