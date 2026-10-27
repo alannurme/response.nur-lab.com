@@ -351,8 +351,14 @@
 
             <div class="admin-card">
                 <div class="form-group">
-                    <label class="form-label-premium"><i class="fas fa-folder-open"></i> Publication Categories</label>
-                    <div class="categories-checklist" style="max-height: 250px; overflow-y: auto;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <label class="form-label-premium" style="margin-bottom: 0;"><i class="fas fa-folder-open"></i> Publication Categories</label>
+                        <span style="font-size: 11px; color: #10b981; font-weight: 600;"><i class="fas fa-magic"></i> Auto-Match Enabled</span>
+                    </div>
+                    <div style="position: relative; margin-bottom: 8px;">
+                        <input type="text" id="category-search-filter" class="form-control" placeholder="🔍 ক্যাটাগরি খুঁজুন (যেমন: তাকদীর, জিহাদ)..." style="font-size: 12px; padding: 5px 10px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;" oninput="filterCategoryTree(this.value)">
+                    </div>
+                    <div class="categories-checklist" style="max-height: 380px; overflow-y: auto;">
                         <?php 
                         if (!function_exists('renderCheckboxTree')) {
                             function renderCheckboxTree($categories, $parentId = null, $selectedIds = [], $mainCatId = null, $level = 0) {
@@ -1058,16 +1064,26 @@
         };
 
         // 1. Parse YAML Frontmatter if present
-        const yamlMatch = raw.match(/^---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---\s*[\r\n]+([\s\S]*)$/);
+        let yamlMatch = raw.match(/---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---/);
         if (yamlMatch) {
             const yaml = yamlMatch[1];
-            raw = yamlMatch[2];
+            raw = raw.replace(/---\s*[\r\n]+[\s\S]*?\s*[\r\n]+---\s*[\r\n]*/, '').trim();
             yaml.split('\n').forEach(line => {
                 const idx = line.indexOf(':');
                 if (idx > -1) {
                     const key = line.substring(0, idx).trim().toLowerCase();
                     const val = line.substring(idx + 1).trim().replace(/^['"]|['"]$/g, '');
                     if (key in metadata) metadata[key] = val;
+                }
+            });
+        } else {
+            // Fallback: Check if metadata lines exist directly in raw text
+            raw.split('\n').forEach(line => {
+                const m = line.match(/^\s*(title|slug|category|categories|seo_title|seo_description|seo_keywords)\s*:\s*(.*)$/i);
+                if (m) {
+                    const key = m[1].toLowerCase();
+                    const val = m[2].trim().replace(/^['"]|['"]$/g, '');
+                    if (key in metadata && !metadata[key]) metadata[key] = val;
                 }
             });
         }
@@ -1226,8 +1242,12 @@
         });
 
         // 8. Auto Category Selection & Creation from Frontmatter
-        if (metadata.category || metadata.categories) {
-            handleAutoCategorySelection(metadata.category || metadata.categories);
+        const allCatInputs = [];
+        if (metadata.category) allCatInputs.push(metadata.category);
+        if (metadata.categories) allCatInputs.push(metadata.categories);
+        
+        if (allCatInputs.length > 0) {
+            handleAutoCategorySelection(allCatInputs.join(', '));
         }
 
         // 9. Update UI feedback
@@ -1239,56 +1259,94 @@
     }
 
     async function handleAutoCategorySelection(categoryInput) {
-        let catNames = [];
-        if (typeof categoryInput === 'string') {
-            catNames = categoryInput.split(/[,\/\|\n]+/).map(s => s.trim()).filter(s => s.length > 0);
-        } else if (Array.isArray(categoryInput)) {
-            catNames = categoryInput.map(s => String(s).trim()).filter(s => s.length > 0);
-        }
+        if (!categoryInput) return;
 
-        if (catNames.length === 0) return;
+        // 1. Collect all DOM categories with their wrapper, label, and checkbox
+        const domCategories = [];
+        document.querySelectorAll('.category-tree-item-wrapper').forEach(wrapper => {
+            const label = wrapper.querySelector('label:not([for^="main_cat_"])');
+            const checkbox = wrapper.querySelector('input[name="category_ids[]"]');
+            if (label && checkbox) {
+                const cleanName = label.textContent.replace(/\s*\([^)]*\)\s*$/, '').trim();
+                domCategories.push({
+                    name: cleanName,
+                    nameLower: cleanName.toLowerCase(),
+                    wrapper: wrapper,
+                    checkbox: checkbox
+                });
+            }
+        });
 
-        for (let i = 0; i < catNames.length; i++) {
-            const catName = catNames[i];
-            const isFirst = (i === 0);
+        // 2. Smart matching that preserves category names with commas (e.g. "ঈমান,তাকদীর ও ইলম", "বিবাহ, তালাক ও যিনা")
+        let matchedItems = [];
+        let inputLower = categoryInput.toLowerCase();
+
+        // Sort by length descending so longer category names are matched first
+        const sortedDom = [...domCategories].sort((a, b) => b.name.length - a.name.length);
+        sortedDom.forEach(item => {
+            if (inputLower.includes(item.nameLower)) {
+                if (!matchedItems.some(m => m.checkbox.value === item.checkbox.value)) {
+                    matchedItems.push(item);
+                }
+            }
+        });
+
+        // 3. Check and activate all matched categories
+        let firstScrolled = false;
+        matchedItems.forEach((item, idx) => {
+            if (!item.checkbox.checked) {
+                item.checkbox.checked = true;
+                handleCategoryCheckboxChange(item.checkbox);
+            }
+
+            // Highlight the matched item
+            item.wrapper.style.transition = 'all 0.4s ease';
+            item.wrapper.style.backgroundColor = '#ecfdf5';
+            item.wrapper.style.boxShadow = '0 0 0 2px #10b981';
+            setTimeout(() => {
+                item.wrapper.style.boxShadow = 'none';
+            }, 3000);
+
+            // Set main category radio button for the first matched category
+            if (idx === 0) {
+                const radio = item.wrapper.querySelector('input[name="main_category_id"]');
+                if (radio) {
+                    radio.checked = true;
+                }
+            }
+
+            // Auto check all parent categories up the tree
+            let currentLi = item.checkbox.closest('li');
+            if (currentLi) {
+                let parentLi = currentLi.parentElement.closest('li');
+                while (parentLi) {
+                    const parentCheckbox = parentLi.querySelector(':scope > .category-tree-item-wrapper input[type="checkbox"]');
+                    if (parentCheckbox && !parentCheckbox.checked) {
+                        parentCheckbox.checked = true;
+                        handleCategoryCheckboxChange(parentCheckbox);
+                    }
+                    parentLi = parentLi.parentElement.closest('li');
+                }
+            }
+
+            // Smooth scroll the category into view inside the checklist container
+            if (!firstScrolled) {
+                item.wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstScrolled = true;
+            }
+        });
+
+        // 4. If any comma-separated tokens did not match any DOM category, auto-create them via AJAX
+        const tokens = categoryInput.split(/[,\/\|\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            const tokenLower = token.toLowerCase();
+            const exists = domCategories.some(c => c.nameLower === tokenLower || tokenLower.includes(c.nameLower) || c.nameLower.includes(tokenLower));
             
-            // Check if checkbox exists in current DOM
-            let matchedCheckbox = null;
-            document.querySelectorAll('.category-tree-item-wrapper').forEach(wrapper => {
-                const label = wrapper.querySelector('label:not([for^="main_cat_"])');
-                if (label && label.textContent.trim().toLowerCase() === catName.toLowerCase()) {
-                    matchedCheckbox = wrapper.querySelector('input[name="category_ids[]"]');
-                }
-            });
-
-            if (matchedCheckbox) {
-                matchedCheckbox.checked = true;
-                handleCategoryCheckboxChange(matchedCheckbox);
-                if (isFirst) {
-                    const wrapper = matchedCheckbox.closest('.category-tree-item-wrapper');
-                    const radio = wrapper.querySelector('input[name="main_category_id"]');
-                    if (radio) {
-                        radio.checked = true;
-                    }
-                }
-                // Also trigger parent selection
-                let currentLi = matchedCheckbox.closest('li');
-                if (currentLi) {
-                    let parentLi = currentLi.parentElement.closest('li');
-                    while (parentLi) {
-                        const parentCheckbox = parentLi.querySelector(':scope > .category-tree-item-wrapper input[type="checkbox"]');
-                        if (parentCheckbox && !parentCheckbox.checked) {
-                            parentCheckbox.checked = true;
-                            handleCategoryCheckboxChange(parentCheckbox);
-                        }
-                        parentLi = parentLi.parentElement.closest('li');
-                    }
-                }
-            } else {
-                // Category does not exist -> Auto create category via AJAX!
+            if (!exists) {
                 try {
                     const formData = new FormData();
-                    formData.append('name', catName);
+                    formData.append('name', token);
 
                     const res = await fetch('<?= URLROOT ?>/admin/create_category_ajax', {
                         method: 'POST',
@@ -1298,7 +1356,6 @@
 
                     if (resData.success && resData.category) {
                         const newCat = resData.category;
-                        // Dynamically append new category item to the categories checklist UI
                         const checklist = document.querySelector('.categories-checklist');
                         if (checklist) {
                             let rootUl = checklist.querySelector(':scope > ul');
@@ -1309,17 +1366,18 @@
 
                             const li = document.createElement('li');
                             li.innerHTML = `
-                                <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5;">
+                                <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5; box-shadow: 0 0 0 2px #10b981;">
                                     <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
                                     <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
                                     <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
                                     <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
-                                        <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" style="margin: 0 !important; width: 13px !important; height: 13px !important;" ${isFirst ? 'checked' : ''}>
+                                        <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" style="margin: 0 !important; width: 13px !important; height: 13px !important;" ${matchedItems.length === 0 && i === 0 ? 'checked' : ''}>
                                         <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
                                     </span>
                                 </div>
                             `;
                             rootUl.insertBefore(li, rootUl.firstChild);
+                            li.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
                         }
                     }
@@ -1328,6 +1386,30 @@
                 }
             }
         }
+    }
+
+    function filterCategoryTree(query) {
+        query = (query || '').trim().toLowerCase();
+        const allLis = document.querySelectorAll('.categories-checklist li');
+        if (!query) {
+            allLis.forEach(li => li.style.display = '');
+            return;
+        }
+        allLis.forEach(li => {
+            const label = li.querySelector(':scope > .category-tree-item-wrapper label:not([for^="main_cat_"])');
+            const matchSelf = label && label.textContent.toLowerCase().includes(query);
+            const matchChild = Array.from(li.querySelectorAll('label:not([for^="main_cat_"])')).some(l => l.textContent.toLowerCase().includes(query));
+            if (matchSelf || matchChild) {
+                li.style.display = '';
+                let parentLi = li.parentElement.closest('li');
+                while (parentLi) {
+                    parentLi.style.display = '';
+                    parentLi = parentLi.parentElement.closest('li');
+                }
+            } else {
+                li.style.display = 'none';
+            }
+        });
     }
 
     function convertMarkdownToQuillHtml(mdText) {
