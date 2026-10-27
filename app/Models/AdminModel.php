@@ -1094,8 +1094,9 @@ class AdminModel extends Model {
         ]);
         if ($res) {
             \App\Helpers\Cache::clear();
+            return (int)$this->db->lastInsertId();
         }
-        return $res;
+        return false;
     }
 
     public function getCategoryById($id) {

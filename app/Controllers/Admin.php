@@ -470,6 +470,31 @@ class Admin extends Controller {
             }
             return (int)$cat['parent_id'] === $categoryId;
         });
+
+        // Compute post and subfolder counts for subfolders
+        if (!empty($subFolders)) {
+            $db = \Config\Database::pdoConnect();
+            $stmt_counts = $db->query("
+                SELECT category_id, COUNT(DISTINCT post_id) as cnt
+                FROM post_categories
+                GROUP BY category_id
+            ");
+            $postCountMap = $stmt_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+            $stmt_sub_counts = $db->query("
+                SELECT parent_id, COUNT(*) as cnt
+                FROM categories
+                WHERE parent_id IS NOT NULL
+                GROUP BY parent_id
+            ");
+            $subCountMap = $stmt_sub_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+            foreach ($subFolders as &$f) {
+                $f['post_count'] = (int)($postCountMap[$f['id']] ?? 0);
+                $f['sub_count'] = (int)($subCountMap[$f['id']] ?? 0);
+            }
+            unset($f);
+        }
         
         // Build breadcrumbs
         $breadcrumbs = [];
@@ -616,6 +641,61 @@ class Admin extends Controller {
             'success' => true,
             'posts' => $posts
         ]);
+        exit;
+    }
+
+    public function create_category_ajax() {
+        header('Content-Type: application/json; charset=utf-8');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
+
+        if ($name === '') {
+            echo json_encode(['success' => false, 'error' => 'Category name is required']);
+            exit;
+        }
+
+        $db = \Config\Database::pdoConnect();
+
+        // Check if category with this name already exists
+        $stmt_check = $db->prepare("SELECT id, name, parent_id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:name) LIMIT 1");
+        $stmt_check->execute(['name' => $name]);
+        $existing = $stmt_check->fetch(\PDO::FETCH_ASSOC);
+
+        if ($existing) {
+            echo json_encode([
+                'success' => true,
+                'is_new' => false,
+                'category' => [
+                    'id' => (int)$existing['id'],
+                    'name' => $existing['name'],
+                    'parent_id' => $existing['parent_id'] !== null ? (int)$existing['parent_id'] : null
+                ]
+            ]);
+            exit;
+        }
+
+        $adminModel = $this->model('AdminModel');
+        $newId = $adminModel->addCategory($name, $parent_id);
+
+        if ($newId) {
+            echo json_encode([
+                'success' => true,
+                'is_new' => true,
+                'category' => [
+                    'id' => (int)$newId,
+                    'name' => $name,
+                    'parent_id' => $parent_id
+                ]
+            ]);
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'error' => 'Failed to create category in database']);
         exit;
     }
 
@@ -1249,7 +1329,9 @@ class Admin extends Controller {
             }
             
             // Send headers for download
-            $filename = 'backup_' . \Config\Database::$default['database'] . '_' . date('Y-m-d_H-i-s') . '.sql';
+            $dbConfig = config('Database')->default;
+            $dbName = !empty($dbConfig['database']) ? $dbConfig['database'] : 'response';
+            $filename = 'backup_' . $dbName . '_' . date('Y-m-d_H-i-s') . '.sql';
 
             header('Content-Type: application/octet-stream');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -3892,42 +3974,71 @@ class Admin extends Controller {
             }
             
             try {
-                $db = \Config\Database::pdoConnect();
+                $dbConfig = config('Database')->default;
+                $dbUser = $dbConfig['username'] ?? 'root';
+                $dbPass = $dbConfig['password'] ?? '';
+                $dbName = $dbConfig['database'] ?? 'response';
+                $dbHost = $dbConfig['hostname'] ?? 'localhost';
                 
-                // Read SQL file content line by line to build queries
-                $queries = [];
-                $current_query = '';
-                
-                $handle = fopen($file['tmp_name'], "r");
-                if ($handle) {
-                    while (($line = fgets($handle)) !== false) {
-                        // Skip SQL comments
-                        if (substr(trim($line), 0, 2) === '--' || substr(trim($line), 0, 2) === '/*' || trim($line) === '') {
-                            continue;
-                        }
-                        $current_query .= $line;
-                        if (substr(trim($line), -1) === ';') {
-                            $queries[] = $current_query;
-                            $current_query = '';
-                        }
+                $mysqlBin = 'C:\\xampp\\mysql\\bin\\mysql.exe';
+                $restoredViaCli = false;
+
+                // Try ultra-fast and reliable CLI restore if mysql.exe exists
+                if (file_exists($mysqlBin)) {
+                    $passArg = ($dbPass !== '') ? (' -p' . escapeshellarg($dbPass)) : '';
+                    $cmd = sprintf(
+                        '"%s" -h %s -u %s%s --default-character-set=utf8mb4 %s < %s',
+                        $mysqlBin,
+                        escapeshellarg($dbHost),
+                        escapeshellarg($dbUser),
+                        $passArg,
+                        escapeshellarg($dbName),
+                        escapeshellarg($file['tmp_name'])
+                    );
+                    
+                    $output = [];
+                    $returnVar = 0;
+                    exec($cmd, $output, $returnVar);
+                    if ($returnVar === 0) {
+                        $restoredViaCli = true;
                     }
-                    fclose($handle);
                 }
-                
-                $db->exec("SET FOREIGN_KEY_CHECKS=0;");
-                foreach ($queries as $query) {
-                    if (trim($query) !== '') {
-                        $db->exec($query);
+
+                // Fallback to streaming PDO execution
+                if (!$restoredViaCli) {
+                    $db = \Config\Database::pdoConnect();
+                    $db->exec("SET FOREIGN_KEY_CHECKS=0;");
+                    
+                    $handle = fopen($file['tmp_name'], "r");
+                    if ($handle) {
+                        $current_query = '';
+                        while (($line = fgets($handle)) !== false) {
+                            $trimmed = trim($line);
+                            if (substr($trimmed, 0, 2) === '--' || substr($trimmed, 0, 2) === '/*' || $trimmed === '') {
+                                continue;
+                            }
+                            $current_query .= $line;
+                            if (substr($trimmed, -1) === ';') {
+                                if (trim($current_query) !== '') {
+                                    $db->exec($current_query);
+                                }
+                                $current_query = '';
+                            }
+                        }
+                        if (trim($current_query) !== '') {
+                            $db->exec($current_query);
+                        }
+                        fclose($handle);
                     }
+                    $db->exec("SET FOREIGN_KEY_CHECKS=1;");
                 }
-                $db->exec("SET FOREIGN_KEY_CHECKS=1;");
                 
                 $_SESSION['restore_success'] = 'Database restored successfully!';
                 header('Location: ' . URLROOT . '/admin/backup');
                 exit;
             } catch (\Exception $e) {
                 try {
-                    $db = \Config\Database::pdoConnect()->exec("SET FOREIGN_KEY_CHECKS=1;");
+                    \Config\Database::pdoConnect()->exec("SET FOREIGN_KEY_CHECKS=1;");
                 } catch (\Exception $ex) {}
                 
                 $_SESSION['restore_error'] = 'Database restore failed: ' . $e->getMessage();

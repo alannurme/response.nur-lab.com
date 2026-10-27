@@ -1050,6 +1050,8 @@
         let metadata = {
             title: '',
             slug: '',
+            category: '',
+            categories: '',
             seo_title: '',
             seo_description: '',
             seo_keywords: ''
@@ -1223,11 +1225,108 @@
             addNewPart(part.title, part.html);
         });
 
-        // 8. Update UI feedback
+        // 8. Auto Category Selection & Creation from Frontmatter
+        if (metadata.category || metadata.categories) {
+            handleAutoCategorySelection(metadata.category || metadata.categories);
+        }
+
+        // 9. Update UI feedback
         showToast('🎉 সফল! সম্পূর্ণ পোস্ট ' + parsedParts.length + 'টি অংশে বিভক্ত হয়ে অটো-ফিল হয়েছে।', 'success');
         
         if (titleInput) {
             titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    async function handleAutoCategorySelection(categoryInput) {
+        let catNames = [];
+        if (typeof categoryInput === 'string') {
+            catNames = categoryInput.split(/[,\/\|\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+        } else if (Array.isArray(categoryInput)) {
+            catNames = categoryInput.map(s => String(s).trim()).filter(s => s.length > 0);
+        }
+
+        if (catNames.length === 0) return;
+
+        for (let i = 0; i < catNames.length; i++) {
+            const catName = catNames[i];
+            const isFirst = (i === 0);
+            
+            // Check if checkbox exists in current DOM
+            let matchedCheckbox = null;
+            document.querySelectorAll('.category-tree-item-wrapper').forEach(wrapper => {
+                const label = wrapper.querySelector('label:not([for^="main_cat_"])');
+                if (label && label.textContent.trim().toLowerCase() === catName.toLowerCase()) {
+                    matchedCheckbox = wrapper.querySelector('input[name="category_ids[]"]');
+                }
+            });
+
+            if (matchedCheckbox) {
+                matchedCheckbox.checked = true;
+                handleCategoryCheckboxChange(matchedCheckbox);
+                if (isFirst) {
+                    const wrapper = matchedCheckbox.closest('.category-tree-item-wrapper');
+                    const radio = wrapper.querySelector('input[name="main_category_id"]');
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                }
+                // Also trigger parent selection
+                let currentLi = matchedCheckbox.closest('li');
+                if (currentLi) {
+                    let parentLi = currentLi.parentElement.closest('li');
+                    while (parentLi) {
+                        const parentCheckbox = parentLi.querySelector(':scope > .category-tree-item-wrapper input[type="checkbox"]');
+                        if (parentCheckbox && !parentCheckbox.checked) {
+                            parentCheckbox.checked = true;
+                            handleCategoryCheckboxChange(parentCheckbox);
+                        }
+                        parentLi = parentLi.parentElement.closest('li');
+                    }
+                }
+            } else {
+                // Category does not exist -> Auto create category via AJAX!
+                try {
+                    const formData = new FormData();
+                    formData.append('name', catName);
+
+                    const res = await fetch('<?= URLROOT ?>/admin/create_category_ajax', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const resData = await res.json();
+
+                    if (resData.success && resData.category) {
+                        const newCat = resData.category;
+                        // Dynamically append new category item to the categories checklist UI
+                        const checklist = document.querySelector('.categories-checklist');
+                        if (checklist) {
+                            let rootUl = checklist.querySelector(':scope > ul');
+                            if (!rootUl) {
+                                rootUl = document.createElement('ul');
+                                checklist.appendChild(rootUl);
+                            }
+
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5;">
+                                    <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
+                                    <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
+                                    <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
+                                    <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
+                                        <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" style="margin: 0 !important; width: 13px !important; height: 13px !important;" ${isFirst ? 'checked' : ''}>
+                                        <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
+                                    </span>
+                                </div>
+                            `;
+                            rootUl.insertBefore(li, rootUl.firstChild);
+                            showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error auto-creating category:', err);
+                }
+            }
         }
     }
 

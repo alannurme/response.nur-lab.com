@@ -701,51 +701,433 @@
         gap: 8px;
     }
 
-    .folder-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    .folder-card {
-        background: #fff;
+    /* Subfolders Header & Toolbar */
+    .subfolders-section {
+        margin-bottom: 24px;
+        background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 16px;
+        padding: 14px 16px;
+        transition: all 0.2s ease;
+    }
+
+    .subfolders-section.collapsed {
+        padding: 10px 16px;
+        background: #ffffff;
+    }
+
+    .subfolders-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 0;
+        flex-wrap: wrap;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .subfolders-section:not(.collapsed) .subfolders-header {
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .subfolders-title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .subfolders-title-group h2 {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .subfolder-count-badge {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #64748b;
+        background: #e2e8f0;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+
+    .btn-toggle-subfolders {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0284c7;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-toggle-subfolders:hover {
+        background: #0284c7;
+        color: #ffffff;
+    }
+
+    .btn-toggle-subfolders i {
+        transition: transform 0.2s ease;
+        font-size: 11px;
+    }
+
+    .subfolders-body {
+        transition: all 0.25s ease;
+    }
+
+    .subfolders-section.collapsed .subfolders-body {
+        display: none !important;
+    }
+
+    .subfolder-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .subfolder-filter-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .subfolder-filter-box .filter-icon {
+        position: absolute;
+        left: 10px;
+        font-size: 12px;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    .subfolder-filter-box input {
+        height: 32px;
+        padding: 0 26px 0 28px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font-size: 12.5px;
+        background: #ffffff;
+        color: #1e293b;
+        outline: none;
+        width: 150px;
+        transition: all 0.2s ease;
+    }
+
+    .subfolder-filter-box input:focus {
+        width: 190px;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+    }
+
+    .clear-filter-btn {
+        position: absolute;
+        right: 8px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 11px;
+        padding: 2px 4px;
+        line-height: 1;
+    }
+
+    .clear-filter-btn:hover {
+        color: #ef4444;
+    }
+
+    .view-mode-button-group {
+        display: inline-flex;
+        background: #ffffff;
+        padding: 3px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        gap: 2px;
+    }
+
+    .btn-view-mode {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        padding: 5px 9px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-view-mode:hover {
+        color: #1e293b;
+        background: #f1f5f9;
+    }
+
+    .btn-view-mode.active {
+        background: #f59e0b;
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Common Card Styles */
+    .folder-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        user-select: none;
+    }
+
+    .folder-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .folder-meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 2px 7px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .folder-meta-badge.sub {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .folder-card-main {
         display: flex;
         align-items: center;
         gap: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        position: relative;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .folder-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border-color: #cbd5e1;
-    }
-
-    .folder-icon {
-        font-size: 28px;
-        color: #f59e0b;
-        flex-shrink: 0;
-    }
-
-    .folder-info {
         flex-grow: 1;
         min-width: 0;
     }
 
-    .folder-name {
+    .folder-action-open {
+        display: none;
+    }
+
+    /* Mode 1: Grid View */
+    .folder-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+        gap: 12px;
+    }
+
+    .folder-grid.view-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+        gap: 12px;
+    }
+
+    .folder-grid.view-grid .folder-card {
+        border-radius: 10px;
+        padding: 13px 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .folder-grid.view-grid .folder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08);
+        border-color: #f59e0b;
+    }
+
+    .folder-grid.view-grid .folder-card-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        width: 100%;
+    }
+
+    .folder-grid.view-grid .folder-icon {
+        font-size: 26px;
+        color: #f59e0b;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .folder-grid.view-grid .folder-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .folder-grid.view-grid .folder-name {
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13.5px;
+        color: #1e293b;
+        margin: 0 0 6px 0;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    /* Mode 2: List View */
+    .folder-grid.view-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .folder-grid.view-list .folder-card {
+        border-radius: 8px;
+        padding: 10px 16px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.15s ease;
+    }
+
+    .folder-grid.view-list .folder-card:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateX(3px);
+    }
+
+    .folder-grid.view-list .folder-card-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-grow: 1;
+    }
+
+    .folder-grid.view-list .folder-icon {
+        font-size: 20px;
+        color: #f59e0b;
+        flex-shrink: 0;
+    }
+
+    .folder-grid.view-list .folder-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-grow: 1;
+        gap: 16px;
+    }
+
+    .folder-grid.view-list .folder-name {
+        font-size: 13.5px;
+        font-weight: 600;
         color: #1e293b;
         margin: 0;
-        word-break: break-word;
+    }
+
+    .folder-grid.view-list .folder-meta {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .folder-grid.view-list .folder-action-open {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        margin-left: 12px;
+        font-size: 11px;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+    }
+
+    .folder-grid.view-list .folder-card:hover .folder-action-open {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+
+    /* Mode 3: Compact Chips View */
+    .folder-grid.view-compact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .folder-grid.view-compact .folder-card {
+        border-radius: 20px;
+        padding: 6px 14px;
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: auto;
+        transition: all 0.15s ease;
+    }
+
+    .folder-grid.view-compact .folder-card:hover {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+    }
+
+    .folder-grid.view-compact .folder-card-main {
+        gap: 8px;
+    }
+
+    .folder-grid.view-compact .folder-icon {
+        font-size: 14px;
+        color: #f59e0b;
+    }
+
+    .folder-grid.view-compact .folder-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .folder-grid.view-compact .folder-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: #1e293b;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .folder-grid.view-compact .folder-meta {
+        margin: 0;
+    }
+
+    .folder-grid.view-compact .folder-meta-badge {
+        font-size: 11px;
+        padding: 1px 7px;
+        border-radius: 10px;
+        background: #e2e8f0;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .folder-grid.view-compact .folder-meta-badge.sub {
+        display: none;
     }
 
     .folder-card-actions {
@@ -1708,20 +2090,74 @@ if (!empty($data['breadcrumbs'])) {
 
 
             <?php if (!empty($data['subFolders'])): ?>
-                <!-- Subfolders Grid Section -->
-                <div style="margin-bottom: 24px;">
-                    <h2 class="explorer-section-title">
-                        <i class="fas fa-folder" style="color: #64748b;"></i> Subfolders
-                    </h2>
-                    <div class="folder-grid">
-                        <?php foreach ($data['subFolders'] as $folder): ?>
-                            <div class="folder-card" data-href="<?= URLROOT ?>/admin/posts?category_id=<?= $folder['id'] ?>">
-                                <i class="fas fa-folder folder-icon"></i>
-                                <div class="folder-info">
-                                    <h3 class="folder-name" title="<?= htmlspecialchars($folder['name']) ?>"><?= htmlspecialchars($folder['name']) ?></h3>
-                                </div>
+                <!-- Subfolders Multi-View Section (Collapsible) -->
+                <div class="subfolders-section collapsed" id="subfoldersSection">
+                    <div class="subfolders-header" onclick="toggleSubfolders()">
+                        <div class="subfolders-title-group">
+                            <h2>
+                                <i class="fas fa-folder-open" style="color: #f59e0b;"></i> সাব-ফোল্ডারসমূহ
+                            </h2>
+                            <span class="subfolder-count-badge" id="subfolderCountBadge"><?= count($data['subFolders']) ?>টি ফোল্ডার</span>
+                        </div>
+                        <button type="button" class="btn-toggle-subfolders" id="btnToggleSubfolders" title="ফোল্ডার তালিকা প্রদর্শন বা গোপন করুন">
+                            <i class="fas fa-chevron-down" id="subfolderToggleIcon"></i>
+                            <span id="subfolderToggleText">ফোল্ডারগুলো দেখুন</span>
+                        </button>
+                    </div>
+
+                    <div class="subfolders-body" id="subfoldersBody">
+                        <div class="subfolder-toolbar" style="margin-bottom: 14px; margin-top: 4px;">
+                            <!-- Instant Filter Input -->
+                            <div class="subfolder-filter-box">
+                                <i class="fas fa-search filter-icon"></i>
+                                <input type="text" id="subfolderSearchInput" placeholder="ফোল্ডার খুঁজুন..." oninput="filterSubfolders(this.value)" onclick="event.stopPropagation()">
+                                <button type="button" class="clear-filter-btn" id="clearSubfolderFilter" onclick="event.stopPropagation(); clearSubfolderSearch()" style="display: none;" title="মুছে ফেলুন">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        <?php endforeach; ?>
+                            <!-- View Mode Toggle Buttons -->
+                            <div class="view-mode-button-group" onclick="event.stopPropagation()">
+                                <button type="button" class="btn-view-mode active" data-mode="grid" onclick="setSubfolderViewMode('grid')" title="গ্রিড ভিউ (Grid View)">
+                                    <i class="fas fa-th-large"></i> <span>গ্রিড</span>
+                                </button>
+                                <button type="button" class="btn-view-mode" data-mode="list" onclick="setSubfolderViewMode('list')" title="তালিকা ভিউ (List View)">
+                                    <i class="fas fa-list-ul"></i> <span>লিস্ট</span>
+                                </button>
+                                <button type="button" class="btn-view-mode" data-mode="compact" onclick="setSubfolderViewMode('compact')" title="কমপ্যাক্ট বাটন/ট্যাগ ভিউ (Compact Chips)">
+                                    <i class="fas fa-tags"></i> <span>কমপ্যাক্ট</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="folder-grid view-grid" id="subfoldersContainer">
+                            <?php foreach ($data['subFolders'] as $folder): ?>
+                                <div class="folder-card" data-href="<?= URLROOT ?>/admin/posts?category_id=<?= $folder['id'] ?>" data-folder-name="<?= htmlspecialchars(mb_strtolower($folder['name'], 'UTF-8')) ?>">
+                                    <div class="folder-card-main">
+                                        <i class="fas fa-folder folder-icon"></i>
+                                        <div class="folder-info">
+                                            <h3 class="folder-name" title="<?= htmlspecialchars($folder['name']) ?>"><?= htmlspecialchars($folder['name']) ?></h3>
+                                            <div class="folder-meta">
+                                                <span class="folder-meta-badge" title="এই ফোল্ডারে মোট নিবন্ধ সংখ্যা">
+                                                    <i class="fas fa-file-alt"></i> <?= (int)($folder['post_count'] ?? 0) ?>টি নিবন্ধ
+                                                </span>
+                                                <?php if (!empty($folder['sub_count'])): ?>
+                                                    <span class="folder-meta-badge sub" title="এই ফোল্ডারের অন্তর্গত সাব-ফোল্ডার">
+                                                        <i class="fas fa-folder-tree"></i> <?= (int)$folder['sub_count'] ?>টি সাব-ফোল্ডার
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="folder-action-open" title="প্রবেশ করুন">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div id="noSubfoldersMatch" style="display: none; padding: 24px; text-align: center; color: #64748b; font-size: 13px;">
+                            <i class="fas fa-folder-open" style="font-size: 24px; color: #cbd5e1; margin-bottom: 6px; display: block;"></i>
+                            কোনো মিল পাওয়া যায়নি।
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -3246,6 +3682,124 @@ if (!function_exists('renderManageCategoryTree')) {
             
             document.body.appendChild(form);
             form.submit();
+        }
+    }
+
+    // Subfolder Multi-View & Collapse/Expand System
+    function toggleSubfolders() {
+        const section = document.getElementById('subfoldersSection');
+        if (!section) return;
+
+        const isCurrentlyCollapsed = section.classList.contains('collapsed');
+        const nextState = !isCurrentlyCollapsed; // true = collapse, false = expand
+
+        setSubfolderCollapseState(nextState);
+
+        try {
+            localStorage.setItem('admin_subfolder_collapsed', nextState ? '1' : '0');
+        } catch(e) {}
+    }
+
+    function setSubfolderCollapseState(isCollapsed) {
+        const section = document.getElementById('subfoldersSection');
+        const icon = document.getElementById('subfolderToggleIcon');
+        const text = document.getElementById('subfolderToggleText');
+
+        if (!section) return;
+
+        if (isCollapsed) {
+            section.classList.add('collapsed');
+            if (icon) {
+                icon.className = 'fas fa-chevron-down';
+            }
+            if (text) {
+                text.textContent = 'ফোল্ডারগুলো দেখুন';
+            }
+        } else {
+            section.classList.remove('collapsed');
+            if (icon) {
+                icon.className = 'fas fa-chevron-up';
+            }
+            if (text) {
+                text.textContent = 'লুকান';
+            }
+        }
+    }
+
+    function applySubfolderCollapsePreference() {
+        // Default to collapsed ('1')
+        let collapsed = '1';
+        try {
+            const saved = localStorage.getItem('admin_subfolder_collapsed');
+            if (saved !== null) {
+                collapsed = saved;
+            }
+        } catch(e) {}
+        setSubfolderCollapseState(collapsed === '1');
+    }
+
+    function setSubfolderViewMode(mode) {
+        const container = document.getElementById('subfoldersContainer') || document.querySelector('.folder-grid');
+        if (!container) return;
+
+        container.classList.remove('view-grid', 'view-list', 'view-compact');
+        container.classList.add('view-' + mode);
+
+        document.querySelectorAll('.btn-view-mode').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+        });
+
+        try {
+            localStorage.setItem('admin_subfolder_view_mode', mode);
+        } catch(e) {}
+    }
+
+    function applySubfolderViewPreference() {
+        let mode = 'grid';
+        try {
+            mode = localStorage.getItem('admin_subfolder_view_mode') || 'grid';
+        } catch(e) {}
+        setSubfolderViewMode(mode);
+        applySubfolderCollapsePreference();
+    }
+
+    function filterSubfolders(query) {
+        const q = (query || '').trim().toLowerCase();
+        const cards = document.querySelectorAll('#subfoldersContainer .folder-card, .folder-grid .folder-card');
+        const clearBtn = document.getElementById('clearSubfolderFilter');
+        const countBadge = document.getElementById('subfolderCountBadge');
+        const noResultsEl = document.getElementById('noSubfoldersMatch');
+
+        if (clearBtn) {
+            clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+        }
+
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const name = (card.getAttribute('data-folder-name') || card.textContent || '').toLowerCase();
+            if (!q || name.includes(q)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (countBadge) {
+            countBadge.textContent = q.length > 0 ? visibleCount + 'টি পাওয়া গেছে' : cards.length + 'টি ফোল্ডার';
+        }
+
+        if (noResultsEl) {
+            noResultsEl.style.display = (visibleCount === 0 && cards.length > 0) ? 'block' : 'none';
+        }
+    }
+
+    function clearSubfolderSearch() {
+        const input = document.getElementById('subfolderSearchInput');
+        if (input) {
+            input.value = '';
+            filterSubfolders('');
+            input.focus();
         }
     }
 
@@ -4927,6 +5481,7 @@ if (!function_exists('renderManageCategoryTree')) {
                 // Re-initialize sortables on the newly loaded lists
                 initAllSortables();
                 applySidebarPreferences();
+                applySubfolderViewPreference();
                 // prefetchAllPosts(); // Disabled to optimize CPU & RAM usage
                 // Recalculate fixed sidebar scroll offsets
                 adjustSidebarFixedPosition();
@@ -5021,6 +5576,7 @@ if (!function_exists('renderManageCategoryTree')) {
                 }
             }, 50);
         }
+        applySubfolderViewPreference();
     });
 })();
 </script>
