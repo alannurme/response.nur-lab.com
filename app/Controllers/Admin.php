@@ -458,8 +458,13 @@ class Admin extends Controller {
     }
 
     public function sync_all_post_categories() {
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . URLROOT . '/auth/login');
+        if (empty($_SESSION['admin_id'])) {
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+                exit;
+            }
+            header('Location: ' . base_url('admin/login'));
             exit;
         }
 
@@ -497,7 +502,19 @@ class Admin extends Controller {
             \App\Helpers\Cache::clear();
         }
 
-        $_SESSION['flash_message'] = "🎉 সফল! মোট {$count}টি পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করা হয়েছে।";
+        $msg = "🎉 সফল! মোট {$count}টি পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করা হয়েছে।";
+
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'count' => $count,
+                'message' => $msg
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $_SESSION['flash_message'] = $msg;
         header('Location: ' . URLROOT . '/admin/posts');
         exit;
     }

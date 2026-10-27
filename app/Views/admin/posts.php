@@ -2064,9 +2064,9 @@ if (!empty($data['breadcrumbs'])) {
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openNewFolderModal()">
                         <i class="fas fa-folder-plus"></i> New Folder
                     </button>
-                    <a href="<?= URLROOT ?>/admin/sync_all_post_categories" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;" onclick="return confirm('আপনি কি পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করতে চান?')" title="সকল পোস্টের ক্যাটাগরি ক্লিন ও সিঙ্ক করুন">
-                        <i class="fas fa-sync-alt"></i> Sync Categories
-                    </a>
+                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="syncAllPostCategories(this)" title="পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করুন">
+                        <i class="fas fa-sync-alt"></i> <span>Sync Categories</span>
+                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
@@ -2771,6 +2771,42 @@ if (!function_exists('renderManageCategoryTree')) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function syncAllPostCategories(btn) {
+        if (!confirm('আপনি কি পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করতে চান?')) {
+            return;
+        }
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>সিঙ্ক হচ্ছে...</span>';
+
+        fetch('<?= URLROOT ?>/admin/sync_all_post_categories', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            if (data.success) {
+                showAdminToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                alert(data.error || 'সিঙ্ক করতে সমস্যা হয়েছে');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            console.error('Sync AJAX error, redirecting directly:', err);
+            window.location.href = '<?= URLROOT ?>/admin/sync_all_post_categories';
+        });
     }
 
     // Modal: Manage Post Categories Functions
