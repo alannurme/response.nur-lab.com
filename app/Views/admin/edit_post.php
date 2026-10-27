@@ -364,7 +364,7 @@
                         echo renderCheckboxTree($data['categories'], null, $post_cat_ids, $mainCategoryId);
                         ?>
                     </div>
-                    <small style="color: var(--text-muted); margin-top: 5px; display: block; font-size: 12px;">Select one or more categories for this article.</small>
+                    <small style="color: var(--text-muted); margin-top: 5px; display: block; font-size: 12px;"><i class="fas fa-info-circle"></i> প্রতিটি পোস্টের জন্য শুধুমাত্র একটি নির্দিষ্ট মূল ক্যাটাগরি (Single Category) নির্বাচন করুন।</small>
                 </div>
 
                 <div class="admin-card">
@@ -498,25 +498,79 @@
                     });
 
                     function handleCategoryCheckboxChange(checkbox) {
-                        const wrapper = checkbox.closest('.category-tree-item-wrapper');
-                        const badgeContainer = wrapper.querySelector('.main-cat-badge-container');
-                        const radio = wrapper.querySelector('input[name="main_category_id"]');
-                        
                         if (checkbox.checked) {
-                            badgeContainer.style.display = 'inline-flex';
-                            const checkedRadio = document.querySelector('input[name="main_category_id"]:checked');
-                            if (!checkedRadio) {
-                                radio.checked = true;
+                            // Find all parent/ancestor checkboxes for this selection
+                            const allowedCheckboxes = new Set();
+                            allowedCheckboxes.add(checkbox);
+
+                            let currentLi = checkbox.closest('li');
+                            if (currentLi) {
+                                let parentLi = currentLi.parentElement ? currentLi.parentElement.closest('li') : null;
+                                while (parentLi) {
+                                    const parentCb = parentLi.querySelector(':scope > .category-tree-item-wrapper input[name="category_ids[]"]');
+                                    if (parentCb) {
+                                        allowedCheckboxes.add(parentCb);
+                                    }
+                                    parentLi = parentLi.parentElement ? parentLi.parentElement.closest('li') : null;
+                                }
                             }
+
+                            // Uncheck every other category checkbox outside this parent-child hierarchy
+                            document.querySelectorAll('input[name="category_ids[]"]').forEach(cb => {
+                                if (!allowedCheckboxes.has(cb) && cb.checked) {
+                                    cb.checked = false;
+                                    const w = cb.closest('.category-tree-item-wrapper');
+                                    if (w) {
+                                        const b = w.querySelector('.main-cat-badge-container');
+                                        if (b) b.style.display = 'none';
+                                        const r = w.querySelector('input[name="main_category_id"]');
+                                        if (r) r.checked = false;
+                                    }
+                                }
+                            });
+
+                            // Automatically check the parents/ancestors
+                            allowedCheckboxes.forEach(cb => {
+                                cb.checked = true;
+                                const w = cb.closest('.category-tree-item-wrapper');
+                                if (w) {
+                                    const b = w.querySelector('.main-cat-badge-container');
+                                    if (b) b.style.display = 'inline-flex';
+                                }
+                            });
+
+                            // The selected subcategory itself gets the MAIN radio button!
+                            const wrapper = checkbox.closest('.category-tree-item-wrapper');
+                            const radio = wrapper ? wrapper.querySelector('input[name="main_category_id"]') : null;
+                            if (radio) radio.checked = true;
                         } else {
-                            badgeContainer.style.display = 'none';
-                            if (radio.checked) {
-                                radio.checked = false;
-                                const firstCheckedCheckbox = document.querySelector('input[name="category_ids[]"]:checked');
-                                if (firstCheckedCheckbox) {
-                                    const firstCheckedWrapper = firstCheckedCheckbox.closest('.category-tree-item-wrapper');
-                                    const firstRadio = firstCheckedWrapper.querySelector('input[name="main_category_id"]');
-                                    if (firstRadio) firstRadio.checked = true;
+                            // If unchecked, uncheck this category and its radio
+                            const wrapper = checkbox.closest('.category-tree-item-wrapper');
+                            const badgeContainer = wrapper ? wrapper.querySelector('.main-cat-badge-container') : null;
+                            const radio = wrapper ? wrapper.querySelector('input[name="main_category_id"]') : null;
+                            if (badgeContainer) badgeContainer.style.display = 'none';
+                            if (radio) radio.checked = false;
+
+                            // Also check if all children of its parents are unchecked; if so, uncheck parents
+                            let currentLi = checkbox.closest('li');
+                            if (currentLi) {
+                                let parentLi = currentLi.parentElement ? currentLi.parentElement.closest('li') : null;
+                                while (parentLi) {
+                                    const hasCheckedDescendants = parentLi.querySelector('ul input[name="category_ids[]"]:checked');
+                                    if (!hasCheckedDescendants) {
+                                        const parentCb = parentLi.querySelector(':scope > .category-tree-item-wrapper input[name="category_ids[]"]');
+                                        if (parentCb) {
+                                            parentCb.checked = false;
+                                            const pw = parentCb.closest('.category-tree-item-wrapper');
+                                            if (pw) {
+                                                const pb = pw.querySelector('.main-cat-badge-container');
+                                                if (pb) pb.style.display = 'none';
+                                                const pr = pw.querySelector('input[name="main_category_id"]');
+                                                if (pr) pr.checked = false;
+                                            }
+                                        }
+                                    }
+                                    parentLi = parentLi.parentElement ? parentLi.parentElement.closest('li') : null;
                                 }
                             }
                         }

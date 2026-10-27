@@ -404,7 +404,7 @@
                         echo renderCheckboxTree($data['categories'], null, $selectedIds, $targetCategoryId);
                         ?>
                     </div>
-                    <small style="color: var(--text-muted); margin-top: 5px; display: block; font-size: 12px;">Select one or more categories for this article.</small>
+                    <small style="color: var(--text-muted); margin-top: 5px; display: block; font-size: 12px;"><i class="fas fa-info-circle"></i> প্রতিটি পোস্টের জন্য শুধুমাত্র একটি মূল ক্যাটাগরি (Single Category) নির্বাচন করুন।</small>
                 </div>
             </div>
 
@@ -523,25 +523,79 @@
     });
 
     function handleCategoryCheckboxChange(checkbox) {
-        const wrapper = checkbox.closest('.category-tree-item-wrapper');
-        const badgeContainer = wrapper.querySelector('.main-cat-badge-container');
-        const radio = wrapper.querySelector('input[name="main_category_id"]');
-        
         if (checkbox.checked) {
-            badgeContainer.style.display = 'inline-flex';
-            const checkedRadio = document.querySelector('input[name="main_category_id"]:checked');
-            if (!checkedRadio) {
-                radio.checked = true;
+            // Find all parent/ancestor checkboxes for this selection
+            const allowedCheckboxes = new Set();
+            allowedCheckboxes.add(checkbox);
+
+            let currentLi = checkbox.closest('li');
+            if (currentLi) {
+                let parentLi = currentLi.parentElement ? currentLi.parentElement.closest('li') : null;
+                while (parentLi) {
+                    const parentCb = parentLi.querySelector(':scope > .category-tree-item-wrapper input[name="category_ids[]"]');
+                    if (parentCb) {
+                        allowedCheckboxes.add(parentCb);
+                    }
+                    parentLi = parentLi.parentElement ? parentLi.parentElement.closest('li') : null;
+                }
             }
+
+            // Uncheck every other category checkbox outside this parent-child hierarchy
+            document.querySelectorAll('input[name="category_ids[]"]').forEach(cb => {
+                if (!allowedCheckboxes.has(cb) && cb.checked) {
+                    cb.checked = false;
+                    const w = cb.closest('.category-tree-item-wrapper');
+                    if (w) {
+                        const b = w.querySelector('.main-cat-badge-container');
+                        if (b) b.style.display = 'none';
+                        const r = w.querySelector('input[name="main_category_id"]');
+                        if (r) r.checked = false;
+                    }
+                }
+            });
+
+            // Automatically check the parents/ancestors
+            allowedCheckboxes.forEach(cb => {
+                cb.checked = true;
+                const w = cb.closest('.category-tree-item-wrapper');
+                if (w) {
+                    const b = w.querySelector('.main-cat-badge-container');
+                    if (b) b.style.display = 'inline-flex';
+                }
+            });
+
+            // The selected subcategory itself gets the MAIN radio button!
+            const wrapper = checkbox.closest('.category-tree-item-wrapper');
+            const radio = wrapper ? wrapper.querySelector('input[name="main_category_id"]') : null;
+            if (radio) radio.checked = true;
         } else {
-            badgeContainer.style.display = 'none';
-            if (radio.checked) {
-                radio.checked = false;
-                const firstCheckedCheckbox = document.querySelector('input[name="category_ids[]"]:checked');
-                if (firstCheckedCheckbox) {
-                    const firstCheckedWrapper = firstCheckedCheckbox.closest('.category-tree-item-wrapper');
-                    const firstRadio = firstCheckedWrapper.querySelector('input[name="main_category_id"]');
-                    if (firstRadio) firstRadio.checked = true;
+            // If unchecked, uncheck this category and its radio
+            const wrapper = checkbox.closest('.category-tree-item-wrapper');
+            const badgeContainer = wrapper ? wrapper.querySelector('.main-cat-badge-container') : null;
+            const radio = wrapper ? wrapper.querySelector('input[name="main_category_id"]') : null;
+            if (badgeContainer) badgeContainer.style.display = 'none';
+            if (radio) radio.checked = false;
+
+            // Also check if all children of its parents are unchecked; if so, uncheck parents
+            let currentLi = checkbox.closest('li');
+            if (currentLi) {
+                let parentLi = currentLi.parentElement ? currentLi.parentElement.closest('li') : null;
+                while (parentLi) {
+                    const hasCheckedDescendants = parentLi.querySelector('ul input[name="category_ids[]"]:checked');
+                    if (!hasCheckedDescendants) {
+                        const parentCb = parentLi.querySelector(':scope > .category-tree-item-wrapper input[name="category_ids[]"]');
+                        if (parentCb) {
+                            parentCb.checked = false;
+                            const pw = parentCb.closest('.category-tree-item-wrapper');
+                            if (pw) {
+                                const pb = pw.querySelector('.main-cat-badge-container');
+                                if (pb) pb.style.display = 'none';
+                                const pr = pw.querySelector('input[name="main_category_id"]');
+                                if (pr) pr.checked = false;
+                            }
+                        }
+                    }
+                    parentLi = parentLi.parentElement ? parentLi.parentElement.closest('li') : null;
                 }
             }
         }
@@ -1242,12 +1296,10 @@
         });
 
         // 8. Auto Category Selection & Creation from Frontmatter
-        const allCatInputs = [];
-        if (metadata.category) allCatInputs.push(metadata.category);
-        if (metadata.categories) allCatInputs.push(metadata.categories);
-        
-        if (allCatInputs.length > 0) {
-            handleAutoCategorySelection(allCatInputs.join(', '));
+        // 8. Auto Category Selection: STRICT SINGLE CATEGORY
+        const singleCategory = (metadata.category || metadata.categories || '').split(',')[0].trim();
+        if (singleCategory) {
+            handleAutoCategorySelection(singleCategory);
         }
 
         // 9. Update UI feedback
@@ -1258,10 +1310,28 @@
         }
     }
 
-    async function handleAutoCategorySelection(categoryInput) {
-        if (!categoryInput) return;
+    async function handleAutoCategorySelection(targetCategory) {
+        if (!targetCategory || !targetCategory.trim()) return;
 
-        // 1. Collect all DOM categories with their wrapper, label, and checkbox
+        const cleanTarget = targetCategory.trim();
+        const targetLower = cleanTarget.toLowerCase();
+
+        // 1. Reset all previously checked categories and radio buttons
+        document.querySelectorAll('input[name="category_ids[]"]').forEach(cb => {
+            cb.checked = false;
+            const w = cb.closest('.category-tree-item-wrapper');
+            if (w) {
+                const b = w.querySelector('.main-cat-badge-container');
+                if (b) b.style.display = 'none';
+                const r = w.querySelector('input[name="main_category_id"]');
+                if (r) r.checked = false;
+            }
+        });
+        document.querySelectorAll('input[name="main_category_id"]:checked').forEach(rb => {
+            rb.checked = false;
+        });
+
+        // 2. Collect all DOM categories
         const domCategories = [];
         document.querySelectorAll('.category-tree-item-wrapper').forEach(wrapper => {
             const label = wrapper.querySelector('label:not([for^="main_cat_"])');
@@ -1277,113 +1347,68 @@
             }
         });
 
-        // 2. Smart matching that preserves category names with commas (e.g. "ঈমান,তাকদীর ও ইলম", "বিবাহ, তালাক ও যিনা")
-        let matchedItems = [];
-        let inputLower = categoryInput.toLowerCase();
+        // 3. Find exact match first, then substring match if not found
+        let matched = domCategories.find(c => c.nameLower === targetLower);
+        if (!matched) {
+            matched = domCategories.find(c => targetLower.includes(c.nameLower) || c.nameLower.includes(targetLower));
+        }
 
-        // Sort by length descending so longer category names are matched first
-        const sortedDom = [...domCategories].sort((a, b) => b.name.length - a.name.length);
-        sortedDom.forEach(item => {
-            if (inputLower.includes(item.nameLower)) {
-                if (!matchedItems.some(m => m.checkbox.value === item.checkbox.value)) {
-                    matchedItems.push(item);
-                }
-            }
-        });
+        if (matched) {
+            // Select ONLY THIS SINGLE CATEGORY (No parents, no siblings, no secondary)
+            matched.checkbox.checked = true;
+            handleCategoryCheckboxChange(matched.checkbox);
 
-        // 3. Check and activate all matched categories
-        let firstScrolled = false;
-        matchedItems.forEach((item, idx) => {
-            if (!item.checkbox.checked) {
-                item.checkbox.checked = true;
-                handleCategoryCheckboxChange(item.checkbox);
-            }
-
-            // Highlight the matched item
-            item.wrapper.style.transition = 'all 0.4s ease';
-            item.wrapper.style.backgroundColor = '#ecfdf5';
-            item.wrapper.style.boxShadow = '0 0 0 2px #10b981';
+            // Highlight the single matched item
+            matched.wrapper.style.transition = 'all 0.4s ease';
+            matched.wrapper.style.backgroundColor = '#ecfdf5';
+            matched.wrapper.style.boxShadow = '0 0 0 2px #10b981';
             setTimeout(() => {
-                item.wrapper.style.boxShadow = 'none';
+                matched.wrapper.style.boxShadow = 'none';
             }, 3000);
 
-            // Set main category radio button for the first matched category
-            if (idx === 0) {
-                const radio = item.wrapper.querySelector('input[name="main_category_id"]');
-                if (radio) {
-                    radio.checked = true;
-                }
-            }
+            // Smooth scroll into view
+            matched.wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            // If doesn't exist in DB/DOM, auto-create via AJAX
+            try {
+                const formData = new FormData();
+                formData.append('name', cleanTarget);
 
-            // Auto check all parent categories up the tree
-            let currentLi = item.checkbox.closest('li');
-            if (currentLi) {
-                let parentLi = currentLi.parentElement.closest('li');
-                while (parentLi) {
-                    const parentCheckbox = parentLi.querySelector(':scope > .category-tree-item-wrapper input[type="checkbox"]');
-                    if (parentCheckbox && !parentCheckbox.checked) {
-                        parentCheckbox.checked = true;
-                        handleCategoryCheckboxChange(parentCheckbox);
-                    }
-                    parentLi = parentLi.parentElement.closest('li');
-                }
-            }
+                const res = await fetch('<?= URLROOT ?>/admin/create_category_ajax', {
+                    method: 'POST',
+                    body: formData
+                });
+                const resData = await res.json();
 
-            // Smooth scroll the category into view inside the checklist container
-            if (!firstScrolled) {
-                item.wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstScrolled = true;
-            }
-        });
-
-        // 4. If any comma-separated tokens did not match any DOM category, auto-create them via AJAX
-        const tokens = categoryInput.split(/[,\/\|\n]+/).map(s => s.trim()).filter(s => s.length > 0);
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            const tokenLower = token.toLowerCase();
-            const exists = domCategories.some(c => c.nameLower === tokenLower || tokenLower.includes(c.nameLower) || c.nameLower.includes(tokenLower));
-            
-            if (!exists) {
-                try {
-                    const formData = new FormData();
-                    formData.append('name', token);
-
-                    const res = await fetch('<?= URLROOT ?>/admin/create_category_ajax', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const resData = await res.json();
-
-                    if (resData.success && resData.category) {
-                        const newCat = resData.category;
-                        const checklist = document.querySelector('.categories-checklist');
-                        if (checklist) {
-                            let rootUl = checklist.querySelector(':scope > ul');
-                            if (!rootUl) {
-                                rootUl = document.createElement('ul');
-                                checklist.appendChild(rootUl);
-                            }
-
-                            const li = document.createElement('li');
-                            li.innerHTML = `
-                                <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5; box-shadow: 0 0 0 2px #10b981;">
-                                    <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
-                                    <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
-                                    <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
-                                    <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
-                                        <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" style="margin: 0 !important; width: 13px !important; height: 13px !important;" ${matchedItems.length === 0 && i === 0 ? 'checked' : ''}>
-                                        <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
-                                    </span>
-                                </div>
-                            `;
-                            rootUl.insertBefore(li, rootUl.firstChild);
-                            li.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
+                if (resData.success && resData.category) {
+                    const newCat = resData.category;
+                    const checklist = document.querySelector('.categories-checklist');
+                    if (checklist) {
+                        let rootUl = checklist.querySelector(':scope > ul');
+                        if (!rootUl) {
+                            rootUl = document.createElement('ul');
+                            checklist.appendChild(rootUl);
                         }
+
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5; box-shadow: 0 0 0 2px #10b981;">
+                                <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
+                                <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
+                                <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
+                                <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
+                                    <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" checked style="margin: 0 !important; width: 13px !important; height: 13px !important;">
+                                    <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
+                                </span>
+                            </div>
+                        `;
+                        rootUl.insertBefore(li, rootUl.firstChild);
+                        li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
                     }
-                } catch (err) {
-                    console.error('Error auto-creating category:', err);
                 }
+            } catch (err) {
+                console.error('Error auto-creating category:', err);
             }
         }
     }
