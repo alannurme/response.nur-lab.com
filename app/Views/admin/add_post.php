@@ -1403,6 +1403,17 @@
                             </div>
                         `;
                         rootUl.insertBefore(li, rootUl.firstChild);
+                        if (newCat.parent_id) {
+                            const parentCb = document.querySelector(`input[name="category_ids[]"][value="${newCat.parent_id}"]`);
+                            if (parentCb && !parentCb.checked) {
+                                parentCb.checked = true;
+                                const pw = parentCb.closest('.category-tree-item-wrapper');
+                                if (pw) {
+                                    const pb = pw.querySelector('.main-cat-badge-container');
+                                    if (pb) pb.style.display = 'inline-flex';
+                                }
+                            }
+                        }
                         li.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
                     }

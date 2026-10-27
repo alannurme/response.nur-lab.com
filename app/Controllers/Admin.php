@@ -724,6 +724,13 @@ class Admin extends Controller {
             exit;
         }
 
+        if (empty($parent_id)) {
+            $defaultParent = $db->query("SELECT id FROM categories WHERE name = 'ইসলাম' LIMIT 1")->fetchColumn();
+            if ($defaultParent) {
+                $parent_id = (int)$defaultParent;
+            }
+        }
+
         $adminModel = $this->model('AdminModel');
         $newId = $adminModel->addCategory($name, $parent_id);
 
