@@ -2064,6 +2064,9 @@ if (!empty($data['breadcrumbs'])) {
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openNewFolderModal()">
                         <i class="fas fa-folder-plus"></i> New Folder
                     </button>
+                    <a href="<?= URLROOT ?>/admin/sync_all_post_categories" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;" onclick="return confirm('আপনি কি পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করতে চান?')" title="সকল পোস্টের ক্যাটাগরি ক্লিন ও সিঙ্ক করুন">
+                        <i class="fas fa-sync-alt"></i> Sync Categories
+                    </a>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>

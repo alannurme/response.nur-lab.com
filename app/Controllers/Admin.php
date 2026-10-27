@@ -440,6 +440,51 @@ class Admin extends Controller {
         exit;
     }
 
+    public function sync_all_post_categories() {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . URLROOT . '/auth/login');
+            exit;
+        }
+
+        $db = \Config\Database::pdoConnect();
+        $cats = $db->query("SELECT id, parent_id FROM categories")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $posts = $db->query("SELECT id, category_id FROM posts WHERE category_id IS NOT NULL AND category_id > 0")->fetchAll(\PDO::FETCH_ASSOC);
+
+        $db->beginTransaction();
+        $stmtDel = $db->prepare("DELETE FROM post_categories WHERE post_id = :post_id");
+        $stmtIns = $db->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (:post_id, :category_id)");
+
+        $count = 0;
+        foreach ($posts as $p) {
+            $postId = (int)$p['id'];
+            $catId = (int)$p['category_id'];
+
+            $chain = [$catId];
+            $curr = $catId;
+            while (!empty($cats[$curr])) {
+                $parent = (int)$cats[$curr];
+                if (!in_array($parent, $chain)) {
+                    $chain[] = $parent;
+                }
+                $curr = $parent;
+            }
+
+            $stmtDel->execute(['post_id' => $postId]);
+            foreach ($chain as $cid) {
+                $stmtIns->execute(['post_id' => $postId, 'category_id' => $cid]);
+            }
+            $count++;
+        }
+        $db->commit();
+        if (class_exists('\App\Helpers\Cache')) {
+            \App\Helpers\Cache::clear();
+        }
+
+        $_SESSION['flash_message'] = "🎉 সফল! মোট {$count}টি পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করা হয়েছে।";
+        header('Location: ' . URLROOT . '/admin/posts');
+        exit;
+    }
+
     public function posts() {
         $postModel = $this->model('PostModel');
         $adminModel = $this->model('AdminModel');
