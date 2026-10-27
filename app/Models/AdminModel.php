@@ -1164,6 +1164,50 @@ class AdminModel extends Model {
         return true;
     }
 
+    public function syncPostCategoriesHierarchy() {
+        $cats = $this->db->query("SELECT id, parent_id FROM categories")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $posts = $this->db->query("SELECT id, category_id FROM posts WHERE category_id IS NOT NULL AND category_id > 0")->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->db->beginTransaction();
+        try {
+            $stmtDel = $this->db->prepare("DELETE FROM post_categories WHERE post_id = :post_id");
+            $stmtIns = $this->db->prepare("INSERT INTO post_categories (post_id, category_id) VALUES (:post_id, :category_id)");
+
+            $count = 0;
+            foreach ($posts as $p) {
+                $postId = (int)$p['id'];
+                $catId = (int)$p['category_id'];
+
+                $chain = [$catId];
+                $curr = $catId;
+                while (!empty($cats[$curr])) {
+                    $parent = (int)$cats[$curr];
+                    if (!in_array($parent, $chain)) {
+                        $chain[] = $parent;
+                        $curr = $parent;
+                    } else {
+                        break;
+                    }
+                }
+
+                $stmtDel->execute(['post_id' => $postId]);
+                foreach ($chain as $cid) {
+                    if ($cid > 0) {
+                        $stmtIns->execute(['post_id' => $postId, 'category_id' => $cid]);
+                    }
+                }
+                $count++;
+            }
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            error_log("syncPostCategoriesHierarchy error: " . $e->getMessage());
+        }
+
+        \App\Helpers\Cache::clear();
+        return $count;
+    }
+
     public function updateCategoryParent($id, $parent_id = null) {
         $stmt = $this->db->prepare("UPDATE categories SET parent_id = :parent_id WHERE id = :id");
         $res = $stmt->execute([
@@ -1171,6 +1215,7 @@ class AdminModel extends Model {
             'parent_id' => !empty($parent_id) ? $parent_id : null
         ]);
         if ($res) {
+            $this->syncPostCategoriesHierarchy();
             \App\Helpers\Cache::clear();
         }
         return $res;

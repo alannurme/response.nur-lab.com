@@ -2064,6 +2064,9 @@ if (!empty($data['breadcrumbs'])) {
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openNewFolderModal()">
                         <i class="fas fa-folder-plus"></i> New Folder
                     </button>
+                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="openFolderOrganizeModal()" title="ড্র্যাগ অ্যান্ড ড্রপ করে ফোল্ডার ও সাব-ফোল্ডার সাজান">
+                        <i class="fas fa-sitemap" style="color: #6366f1;"></i> <span>Organize Folders</span>
+                    </button>
                     <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="syncAllPostCategories(this)" title="পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করুন">
                         <i class="fas fa-sync-alt"></i> <span>Sync Categories</span>
                     </button>
@@ -2725,6 +2728,437 @@ if (!function_exists('renderManageCategoryTree')) {
     </div>
 </div>
 
+<!-- Modal: Organize Folder Hierarchy (Drag & Drop) -->
+<?php
+if (!function_exists('renderOrganizeCategoryTree')) {
+    function renderOrganizeCategoryTree($categories, $postCountMap = [], $parentId = null, $level = 0) {
+        $branch = [];
+        foreach ($categories as $cat) {
+            $catParent = $cat['parent_id'] ? (int)$cat['parent_id'] : null;
+            $filterParent = $parentId ? (int)$parentId : null;
+            if ($catParent === $filterParent) {
+                $branch[] = $cat;
+            }
+        }
+        
+        $html = '';
+        foreach ($branch as $cat) {
+            $catId = (int)$cat['id'];
+            $postCount = (int)($postCountMap[$catId] ?? 0);
+            
+            // Check if this category has subcategories
+            $hasChildren = false;
+            foreach ($categories as $sub) {
+                if ($sub['parent_id'] && (int)$sub['parent_id'] === $catId) {
+                    $hasChildren = true;
+                    break;
+                }
+            }
+            
+            $isRoot = empty($cat['parent_id']);
+            
+            $html .= '<li class="organize-item" data-cat-id="' . $catId . '" data-name="' . htmlspecialchars(mb_strtolower($cat['name'], 'UTF-8')) . '">';
+            $html .= '<div class="organize-item-card">';
+            
+            // Drag handle
+            $html .= '<span class="organize-drag-handle" title="টেনে অন্য ফোল্ডারে বা মূল স্তরে রাখুন"><i class="fas fa-grip-vertical"></i></span>';
+            
+            // Toggle chevron (if has subfolders)
+            if ($hasChildren) {
+                $html .= '<button type="button" class="organize-toggle-btn" onclick="toggleOrganizeBranch(this)" title="সাব-ফোল্ডার তালিকা"><i class="fas fa-chevron-down"></i></button>';
+            } else {
+                $html .= '<span class="organize-toggle-spacer"></span>';
+            }
+            
+            // Folder Icon + Name
+            $html .= '<div class="organize-cat-info">';
+            $html .= '<i class="fas fa-folder' . ($hasChildren ? '-open' : '') . ' organize-cat-icon ' . ($isRoot ? 'root-cat' : 'sub-cat') . '"></i>';
+            $html .= '<span class="organize-cat-title" title="' . htmlspecialchars($cat['name']) . '">' . htmlspecialchars($cat['name']) . '</span>';
+            $html .= '</div>';
+            
+            // Badge & Actions
+            $html .= '<div class="organize-item-meta">';
+            $html .= '<span class="organize-post-badge" title="মোট পোস্ট"><i class="far fa-file-alt"></i> ' . $postCount . '</span>';
+            
+            // If subfolder, show "Make Main Folder" quick button
+            if (!$isRoot) {
+                $html .= '<button type="button" class="organize-btn-make-root" onclick="makeFolderRoot(' . $catId . ', \'' . htmlspecialchars(addslashes($cat['name'])) . '\')" title="মূল স্তরে নিয়ে মেইন ফোল্ডার করুন">';
+                $html .= '<i class="fas fa-level-up-alt"></i> <span>মেইন ফোল্ডার করুন</span>';
+                $html .= '</button>';
+            }
+            $html .= '</div>'; // organize-item-meta
+            
+            $html .= '</div>'; // organize-item-card
+            
+            // Sub-list container
+            $html .= '<ul class="organize-tree-list sub-list" data-parent-id="' . $catId . '">';
+            if ($hasChildren) {
+                $html .= renderOrganizeCategoryTree($categories, $postCountMap, $catId, $level + 1);
+            }
+            $html .= '</ul>';
+            
+            $html .= '</li>';
+        }
+        return $html;
+    }
+}
+?>
+
+<div class="modal-overlay" id="folderOrganizeModal">
+    <div class="modal-content folder-organize-modal-content">
+        <div class="modal-header" style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div>
+                    <h3 class="modal-title" style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a;">
+                        ফোল্ডার ও সাব-ফোল্ডার অর্গানাইজার (Drag & Drop)
+                    </h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">
+                        ড্র্যাগ করে ফোল্ডারকে অন্য ফোল্ডারের ভেতরে রেখে সাব-ফোল্ডার বানান অথবা মূল স্তরে ড্রপ করে মেইন ফোল্ডার বানান।
+                    </p>
+                </div>
+            </div>
+            <button type="button" class="modal-close" onclick="closeFolderOrganizeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body" style="padding: 16px 20px; overflow-y: auto; max-height: 72vh;">
+            <!-- Control bar: Search + Expand/Collapse + Status -->
+            <div class="organize-control-bar">
+                <div class="organize-search-wrap">
+                    <i class="fas fa-search organize-search-icon"></i>
+                    <input type="text" id="organizeFolderSearch" placeholder="ফোল্ডার খুঁজুন (Search folder)..." class="organize-search-input" oninput="filterOrganizeFolders(this.value)">
+                </div>
+                <div class="organize-actions-wrap">
+                    <button type="button" class="btn-organize-tool" onclick="expandAllOrganizeFolders()" title="সব ফোল্ডার প্রসারিত করুন">
+                        <i class="fas fa-folder-open"></i> Expand All
+                    </button>
+                    <button type="button" class="btn-organize-tool" onclick="collapseAllOrganizeFolders()" title="সব ফোল্ডার গুটিয়ে নিন">
+                        <i class="fas fa-folder"></i> Collapse All
+                    </button>
+                    <span id="organizeSaveStatus" class="organize-status-pill" style="display: none;">
+                        <i class="fas fa-check-circle"></i> সংরক্ষিত
+                    </span>
+                </div>
+            </div>
+
+            <!-- Root Dropzone Notice & Canvas -->
+            <div class="organize-canvas-box">
+                <div class="organize-root-banner">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-home" style="color: #2563eb; font-size: 15px;"></i>
+                            <span style="font-weight: 700; font-size: 13px; color: #1e293b;">মূল স্তর (Root / Main Folders)</span>
+                        </div>
+                        <span class="organize-tip-tag"><i class="fas fa-arrow-down"></i> নিচে ড্রপ করলে ফোল্ডারটি সরাসরি মেইন ফোল্ডার হবে</span>
+                    </div>
+                </div>
+
+                <!-- Tree Root List -->
+                <ul class="organize-tree-list root-list" id="organize-root-list" data-parent-id="">
+                    <?= renderOrganizeCategoryTree($data['allCategories'] ?? [], $data['postCountMap'] ?? [], null, 0) ?>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+            <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-link" style="color: #10b981;"></i>
+                <span>সাব-ফোল্ডারের সমস্ত পোস্ট স্বয়ংক্রিয়ভাবে মেইন ফোল্ডারের সাথে লিংক হবে।</span>
+            </div>
+            <button type="button" class="btn-explorer btn-explorer-primary" onclick="closeFolderOrganizeModal()" style="padding: 7px 20px; font-size: 13px; background: #2563eb; border-color: #2563eb;">
+                <i class="fas fa-check"></i> <span>সম্পন্ন (Done)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Organize Folders Modal Styles */
+.folder-organize-modal-content {
+    max-width: 840px !important;
+    width: 95% !important;
+    border-radius: 14px !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+    overflow: hidden;
+}
+.organize-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.organize-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+}
+.organize-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+.organize-search-input {
+    width: 100%;
+    padding: 7px 12px 7px 34px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+.organize-search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.organize-actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-organize-tool {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-organize-tool:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+.organize-status-pill {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+.organize-canvas-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 280px;
+    box-sizing: border-box;
+}
+.organize-root-banner {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin-bottom: 10px;
+}
+.organize-tip-tag {
+    font-size: 11px;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.organize-tree-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-height: 12px;
+}
+.organize-tree-list.sub-list {
+    margin-left: 24px;
+    padding-left: 8px;
+    border-left: 2px dashed #e2e8f0;
+    transition: all 0.2s;
+}
+.organize-item {
+    list-style: none;
+    margin: 5px 0;
+    position: relative;
+}
+.organize-item-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+.organize-item-card:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+.organize-drag-handle {
+    cursor: grab;
+    color: #94a3b8;
+    padding: 3px 5px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-size: 13px;
+    user-select: none;
+}
+.organize-drag-handle:hover {
+    color: #2563eb;
+    background: #eff6ff;
+}
+.organize-toggle-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.2s;
+    padding: 0;
+}
+.organize-toggle-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.organize-toggle-btn.collapsed i {
+    transform: rotate(-90deg);
+}
+.organize-toggle-spacer {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+}
+.organize-cat-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+.organize-cat-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.organize-cat-icon.root-cat {
+    color: #2563eb;
+}
+.organize-cat-icon.sub-cat {
+    color: #f59e0b;
+}
+.organize-cat-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.organize-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.organize-post-badge {
+    font-size: 11px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 7px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+.organize-btn-make-root {
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #4338ca;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+}
+.organize-btn-make-root:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+    color: #3730a3;
+}
+.organize-ghost {
+    opacity: 0.45;
+    background: #e0e7ff !important;
+    border: 2px dashed #6366f1 !important;
+    border-radius: 8px;
+}
+.organize-chosen {
+    background: #f0fdf4 !important;
+    border-color: #22c55e !important;
+}
+.organize-dragging {
+    opacity: 0.95;
+    transform: scale(1.01);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* While dragging anywhere in the organizer */
+body.organize-drag-active .organize-tree-list.sub-list:empty {
+    min-height: 38px;
+    border: 2px dashed #93c5fd;
+    border-radius: 8px;
+    margin: 4px 0 6px 24px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+body.organize-drag-active .organize-tree-list.sub-list:empty::after {
+    content: "📁 এখানে ছেড়ে এই ফোল্ডারের সাব-ফোল্ডার বানান";
+    font-size: 11px;
+    font-weight: 600;
+    color: #2563eb;
+    pointer-events: none;
+}
+body.organize-drag-active #organize-root-list {
+    background: #f0fdf4;
+    border: 2px dashed #86efac;
+    border-radius: 8px;
+    padding: 6px;
+}
+</style>
+
 <script>
     let availablePosts = [];
     
@@ -2771,6 +3205,269 @@ if (!function_exists('renderManageCategoryTree')) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // ==========================================
+    // Modal: Organize Folder Hierarchy Functions
+    // ==========================================
+    let organizeSortableInstances = [];
+    window.organizeHierarchyChanged = false;
+
+    function openFolderOrganizeModal() {
+        const modal = document.getElementById('folderOrganizeModal');
+        if (!modal) return;
+        modal.classList.add('show');
+        window.organizeHierarchyChanged = false;
+        const searchInput = document.getElementById('organizeFolderSearch');
+        if (searchInput) searchInput.value = '';
+        filterOrganizeFolders('');
+        setTimeout(() => {
+            initOrganizeSortables();
+        }, 80);
+    }
+
+    function closeFolderOrganizeModal() {
+        const modal = document.getElementById('folderOrganizeModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        if (window.organizeHierarchyChanged) {
+            window.location.reload();
+        }
+    }
+
+    function initOrganizeSortables() {
+        organizeSortableInstances.forEach(inst => {
+            try { inst.destroy(); } catch (e) {}
+        });
+        organizeSortableInstances = [];
+
+        if (typeof Sortable === 'undefined') {
+            console.warn('SortableJS is not loaded.');
+            return;
+        }
+
+        const lists = document.querySelectorAll('#organize-root-list, .organize-tree-list.sub-list');
+        lists.forEach(ul => {
+            const inst = Sortable.create(ul, {
+                group: {
+                    name: 'organize-tree-group',
+                    pull: true,
+                    put: function(to, from, dragEl) {
+                        const dragId = parseInt(dragEl.dataset.catId);
+                        const toParentId = to.el.dataset.parentId ? parseInt(to.el.dataset.parentId) : null;
+                        if (!toParentId) return true; // Dropping to root is always allowed!
+                        if (toParentId === dragId) return false;
+                        if (isCategoryDescendant(toParentId, dragId)) return false;
+                        return true;
+                    }
+                },
+                animation: 160,
+                handle: '.organize-drag-handle',
+                draggable: '.organize-item',
+                ghostClass: 'organize-ghost',
+                chosenClass: 'organize-chosen',
+                dragClass: 'organize-dragging',
+                fallbackOnBody: true,
+                swapThreshold: 0.65,
+                emptyInsertThreshold: 15,
+                onStart: function() {
+                    document.body.classList.add('organize-drag-active');
+                },
+                onEnd: function(evt) {
+                    document.body.classList.remove('organize-drag-active');
+                    handleOrganizeDrop(evt);
+                }
+            });
+            organizeSortableInstances.push(inst);
+        });
+    }
+
+    function isCategoryDescendant(targetParentId, draggedId) {
+        if (!targetParentId || !draggedId) return false;
+        if (targetParentId === draggedId) return true;
+        const draggedItem = document.querySelector(`.organize-item[data-cat-id="${draggedId}"]`);
+        if (!draggedItem) return false;
+        const targetInside = draggedItem.querySelector(`.organize-tree-list[data-parent-id="${targetParentId}"], .organize-item[data-cat-id="${targetParentId}"]`);
+        return !!targetInside;
+    }
+
+    function handleOrganizeDrop(evt) {
+        const itemEl = evt.item;
+        const toList = evt.to;
+        const fromList = evt.from;
+        
+        const catId = parseInt(itemEl.dataset.catId);
+        const newParentId = toList.dataset.parentId ? parseInt(toList.dataset.parentId) : null;
+        const oldParentId = fromList.dataset.parentId ? parseInt(fromList.dataset.parentId) : null;
+        
+        const siblingItems = toList.querySelectorAll(':scope > .organize-item[data-cat-id]');
+        const siblingIds = Array.from(siblingItems).map(el => parseInt(el.dataset.catId)).filter(Boolean);
+        
+        if (newParentId === oldParentId && evt.oldIndex === evt.newIndex) {
+            return;
+        }
+        
+        executeCategoryMove(catId, newParentId, siblingIds, itemEl);
+    }
+
+    function executeCategoryMove(catId, newParentId, siblingIds, itemEl) {
+        const statusPill = document.getElementById('organizeSaveStatus');
+        if (statusPill) {
+            statusPill.style.display = 'inline-flex';
+            statusPill.style.background = '#fef3c7';
+            statusPill.style.color = '#92400e';
+            statusPill.style.borderColor = '#fde68a';
+            statusPill.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ ও সিঙ্ক হচ্ছে...';
+        }
+
+        fetch('<?= URLROOT ?>/admin/move_and_reorder_category', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                id: catId,
+                parent_id: newParentId,
+                sibling_ids: siblingIds
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success' || data.success) {
+                window.organizeHierarchyChanged = true;
+                if (statusPill) {
+                    statusPill.style.background = '#dcfce7';
+                    statusPill.style.color = '#15803d';
+                    statusPill.style.borderColor = '#bbf7d0';
+                    statusPill.innerHTML = '<i class="fas fa-check-circle"></i> সফলভাবে সংরক্ষিত ও সিঙ্ক হয়েছে';
+                    setTimeout(() => {
+                        statusPill.style.display = 'none';
+                    }, 3500);
+                }
+                showAdminToast(data.message || 'ফোল্ডার সাজানো এবং পোস্টগুলো সফলভাবে সিঙ্ক হয়েছে!', 'success');
+                
+                // Update UI of the moved item
+                if (itemEl) {
+                    const meta = itemEl.querySelector('.organize-item-meta');
+                    let makeRootBtn = meta ? meta.querySelector('.organize-btn-make-root') : null;
+                    const catName = itemEl.querySelector('.organize-cat-title')?.textContent || '';
+                    
+                    if (newParentId === null || newParentId === '') {
+                        if (makeRootBtn) makeRootBtn.remove();
+                        const icon = itemEl.querySelector('.organize-cat-icon');
+                        if (icon) {
+                            icon.classList.remove('sub-cat');
+                            icon.classList.add('root-cat');
+                        }
+                    } else {
+                        if (!makeRootBtn && meta) {
+                            const newBtn = document.createElement('button');
+                            newBtn.type = 'button';
+                            newBtn.className = 'organize-btn-make-root';
+                            newBtn.title = 'মূল স্তরে নিয়ে মেইন ফোল্ডার করুন';
+                            newBtn.onclick = function() { makeFolderRoot(catId, catName); };
+                            newBtn.innerHTML = '<i class="fas fa-level-up-alt"></i> <span>মেইন ফোল্ডার করুন</span>';
+                            meta.appendChild(newBtn);
+                        }
+                        const icon = itemEl.querySelector('.organize-cat-icon');
+                        if (icon) {
+                            icon.classList.remove('root-cat');
+                            icon.classList.add('sub-cat');
+                        }
+                    }
+                }
+                
+                setTimeout(initOrganizeSortables, 100);
+            } else {
+                alert(data.message || 'ফোল্ডার স্থানান্তরে সমস্যা হয়েছে');
+                if (statusPill) statusPill.style.display = 'none';
+                window.location.reload();
+            }
+        })
+        .catch(err => {
+            console.error('Move error:', err);
+            alert('কানেকশন সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+            if (statusPill) statusPill.style.display = 'none';
+        });
+    }
+
+    function makeFolderRoot(catId, catName) {
+        if (!confirm(`আপনি কি "${catName}" ফোল্ডারটিকে মূল স্তর (Main Folder) বানাতে চান?\n\nএর ফলে এর পোস্টসমূহ পূর্বের প্যারেন্ট ফোল্ডার থেকে পৃথক হয়ে এই ফোল্ডারের অধীনে থাকবে।`)) {
+            return;
+        }
+        
+        const itemEl = document.querySelector(`.organize-item[data-cat-id="${catId}"]`);
+        const rootList = document.getElementById('organize-root-list');
+        if (itemEl && rootList) {
+            rootList.appendChild(itemEl);
+        }
+        
+        const siblingItems = rootList.querySelectorAll(':scope > .organize-item[data-cat-id]');
+        const siblingIds = Array.from(siblingItems).map(el => parseInt(el.dataset.catId)).filter(Boolean);
+        
+        executeCategoryMove(catId, null, siblingIds, itemEl);
+    }
+
+    function toggleOrganizeBranch(btn) {
+        const item = btn.closest('.organize-item');
+        if (!item) return;
+        const subList = item.querySelector(':scope > .organize-tree-list.sub-list');
+        if (!subList) return;
+        
+        const isCollapsed = btn.classList.toggle('collapsed');
+        subList.style.display = isCollapsed ? 'none' : '';
+    }
+
+    function expandAllOrganizeFolders() {
+        document.querySelectorAll('.organize-toggle-btn').forEach(btn => {
+            btn.classList.remove('collapsed');
+        });
+        document.querySelectorAll('.organize-tree-list.sub-list').forEach(list => {
+            list.style.display = '';
+        });
+    }
+
+    function collapseAllOrganizeFolders() {
+        document.querySelectorAll('.organize-toggle-btn').forEach(btn => {
+            btn.classList.add('collapsed');
+        });
+        document.querySelectorAll('.organize-tree-list.sub-list').forEach(list => {
+            list.style.display = 'none';
+        });
+    }
+
+    function filterOrganizeFolders(keyword) {
+        keyword = (keyword || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.organize-item');
+        if (!keyword) {
+            items.forEach(it => it.style.display = '');
+            return;
+        }
+        items.forEach(it => {
+            const name = it.dataset.name || '';
+            if (name.includes(keyword)) {
+                it.style.display = '';
+                let parent = it.parentElement.closest('.organize-item');
+                while (parent) {
+                    parent.style.display = '';
+                    const toggle = parent.querySelector(':scope > .organize-item-card .organize-toggle-btn');
+                    if (toggle) toggle.classList.remove('collapsed');
+                    const subList = parent.querySelector(':scope > .organize-tree-list.sub-list');
+                    if (subList) subList.style.display = '';
+                    parent = parent.parentElement.closest('.organize-item');
+                }
+            } else {
+                const hasMatchingChild = it.querySelector(`.organize-item[data-name*="${keyword}"]`);
+                if (hasMatchingChild) {
+                    it.style.display = '';
+                } else {
+                    it.style.display = 'none';
+                }
+            }
+        });
     }
 
     function syncAllPostCategories(btn) {

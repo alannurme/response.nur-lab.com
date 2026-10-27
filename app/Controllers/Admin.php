@@ -550,24 +550,24 @@ class Admin extends Controller {
             return (int)$cat['parent_id'] === $categoryId;
         });
 
-        // Compute post and subfolder counts for subfolders
+        // Compute post and subfolder counts for all categories
+        $db = \Config\Database::pdoConnect();
+        $stmt_counts = $db->query("
+            SELECT category_id, COUNT(DISTINCT post_id) as cnt
+            FROM post_categories
+            GROUP BY category_id
+        ");
+        $postCountMap = $stmt_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        $stmt_sub_counts = $db->query("
+            SELECT parent_id, COUNT(*) as cnt
+            FROM categories
+            WHERE parent_id IS NOT NULL
+            GROUP BY parent_id
+        ");
+        $subCountMap = $stmt_sub_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
+
         if (!empty($subFolders)) {
-            $db = \Config\Database::pdoConnect();
-            $stmt_counts = $db->query("
-                SELECT category_id, COUNT(DISTINCT post_id) as cnt
-                FROM post_categories
-                GROUP BY category_id
-            ");
-            $postCountMap = $stmt_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
-
-            $stmt_sub_counts = $db->query("
-                SELECT parent_id, COUNT(*) as cnt
-                FROM categories
-                WHERE parent_id IS NOT NULL
-                GROUP BY parent_id
-            ");
-            $subCountMap = $stmt_sub_counts->fetchAll(\PDO::FETCH_KEY_PAIR);
-
             foreach ($subFolders as &$f) {
                 $f['post_count'] = (int)($postCountMap[$f['id']] ?? 0);
                 $f['sub_count'] = (int)($subCountMap[$f['id']] ?? 0);
@@ -648,6 +648,7 @@ class Admin extends Controller {
             'allCategories' => $allCategories,
             'allPosts' => $allPosts,
             'catsWithPosts' => $catsWithPosts,
+            'postCountMap' => $postCountMap,
             'current_page' => 'posts',
             'currentPageNum' => $page,
             'totalPages' => $totalPages,
@@ -3012,10 +3013,14 @@ class Admin extends Controller {
                 $adminModel->updateCategoriesOrder($sibling_ids);
             }
 
-            echo json_encode(['status' => 'success']);
+            echo json_encode([
+                'status' => 'success',
+                'success' => true,
+                'message' => 'ফোল্ডার স্থানান্তরিত এবং পোস্টসমূহ সফলভাবে সিঙ্ক হয়েছে!'
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        echo json_encode(['status' => 'error']);
+        echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Invalid request']);
         exit;
     }
 
