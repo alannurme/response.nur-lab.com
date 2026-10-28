@@ -2783,11 +2783,19 @@ if (!function_exists('renderOrganizeCategoryTree')) {
             // Badge & Actions
             $html .= '<div class="organize-item-meta">';
             $html .= '<span class="organize-post-badge" title="মোট পোস্ট"><i class="far fa-file-alt"></i> ' . $postCount . '</span>';
+
+            // Directional Action Buttons: Up, Down, Sub-folder (Indent Right), Outdent (Left / Make Root)
+            $html .= '<div class="organize-btn-group">';
+            $html .= '<button type="button" class="organize-nav-btn" onclick="moveOrganizeItem(this, \'up\')" title="উপরে নিন"><i class="fas fa-arrow-up"></i></button>';
+            $html .= '<button type="button" class="organize-nav-btn" onclick="moveOrganizeItem(this, \'down\')" title="নিচে নিন"><i class="fas fa-arrow-down"></i></button>';
+            $html .= '<button type="button" class="organize-nav-btn" onclick="moveOrganizeItem(this, \'in\')" title="উপরের ফোল্ডারের ভেতর (ডানে) সাব-ফোল্ডার করুন"><i class="fas fa-arrow-right"></i></button>';
+            $html .= '<button type="button" class="organize-nav-btn" onclick="moveOrganizeItem(this, \'out\')" title="এক স্তর বাহিরে (বামে) আনুন" ' . ($isRoot ? 'disabled' : '') . '><i class="fas fa-arrow-left"></i></button>';
+            $html .= '</div>';
             
             // If subfolder, show "Make Main Folder" quick button
             if (!$isRoot) {
-                $html .= '<button type="button" class="organize-btn-make-root" onclick="makeFolderRoot(' . $catId . ', \'' . htmlspecialchars(addslashes($cat['name'])) . '\')" title="মূল স্তরে নিয়ে মেইন ফোল্ডার করুন">';
-                $html .= '<i class="fas fa-level-up-alt"></i> <span>মেইন ফোল্ডার করুন</span>';
+                $html .= '<button type="button" class="organize-btn-make-root" onclick="makeFolderRoot(' . $catId . ', \'' . htmlspecialchars(addslashes($cat['name'])) . '\')" title="সরাসরি মূল স্তরে নিয়ে মেইন ফোল্ডার করুন">';
+                $html .= '<i class="fas fa-level-up-alt"></i> <span>মূল স্তর</span>';
                 $html .= '</button>';
             }
             $html .= '</div>'; // organize-item-meta
@@ -2817,10 +2825,10 @@ if (!function_exists('renderOrganizeCategoryTree')) {
                 </div>
                 <div>
                     <h3 class="modal-title" style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a;">
-                        ফোল্ডার ও সাব-ফোল্ডার অর্গানাইজার (Drag & Drop)
+                        ফোল্ডার ও সাব-ফোল্ডার অর্গানাইজার (বাটন ও ড্র্যাগ কন্ট্রোল)
                     </h3>
                     <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">
-                        ড্র্যাগ করে ফোল্ডারকে অন্য ফোল্ডারের ভেতরে রেখে সাব-ফোল্ডার বানান অথবা মূল স্তরে ড্রপ করে মেইন ফোল্ডার বানান।
+                        বাটন (<i class="fas fa-arrow-up"></i> উপরে, <i class="fas fa-arrow-down"></i> নিচে, <i class="fas fa-arrow-right"></i> সাব-ফোল্ডার, <i class="fas fa-arrow-left"></i> বাহিরে) ক্লিক করে সহজে ফোল্ডার সাজান অথবা ড্র্যাগ করুন।
                     </p>
                 </div>
             </div>
@@ -3090,6 +3098,38 @@ if (!function_exists('renderOrganizeCategoryTree')) {
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+}
+.organize-btn-group {
+    display: inline-flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+}
+.organize-nav-btn {
+    width: 26px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #475569;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+.organize-nav-btn:hover:not(:disabled) {
+    background: #2563eb;
+    color: #ffffff;
+}
+.organize-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 .organize-post-badge {
     font-size: 11px;
@@ -3363,22 +3403,25 @@ body.organize-drag-active #organize-root-list {
                     const meta = itemEl.querySelector('.organize-item-meta');
                     let makeRootBtn = meta ? meta.querySelector('.organize-btn-make-root') : null;
                     const catName = itemEl.querySelector('.organize-cat-title')?.textContent || '';
+                    const outBtn = meta ? meta.querySelector('.organize-nav-btn[onclick*="\'out\'"]') : null;
                     
                     if (newParentId === null || newParentId === '') {
                         if (makeRootBtn) makeRootBtn.remove();
+                        if (outBtn) outBtn.disabled = true;
                         const icon = itemEl.querySelector('.organize-cat-icon');
                         if (icon) {
                             icon.classList.remove('sub-cat');
                             icon.classList.add('root-cat');
                         }
                     } else {
+                        if (outBtn) outBtn.disabled = false;
                         if (!makeRootBtn && meta) {
                             const newBtn = document.createElement('button');
                             newBtn.type = 'button';
                             newBtn.className = 'organize-btn-make-root';
-                            newBtn.title = 'মূল স্তরে নিয়ে মেইন ফোল্ডার করুন';
+                            newBtn.title = 'সরাসরি মূল স্তরে নিয়ে মেইন ফোল্ডার করুন';
                             newBtn.onclick = function() { makeFolderRoot(catId, catName); };
-                            newBtn.innerHTML = '<i class="fas fa-level-up-alt"></i> <span>মেইন ফোল্ডার করুন</span>';
+                            newBtn.innerHTML = '<i class="fas fa-level-up-alt"></i> <span>মূল স্তর</span>';
                             meta.appendChild(newBtn);
                         }
                         const icon = itemEl.querySelector('.organize-cat-icon');
@@ -3401,6 +3444,90 @@ body.organize-drag-active #organize-root-list {
             alert('কানেকশন সমস্যা হয়েছে। আবার চেষ্টা করুন।');
             if (statusPill) statusPill.style.display = 'none';
         });
+    }
+
+    function moveOrganizeItem(btn, direction) {
+        const itemEl = btn.closest('.organize-item');
+        if (!itemEl) return;
+        const currentList = itemEl.parentElement; // UL
+        if (!currentList) return;
+        
+        const catId = parseInt(itemEl.dataset.catId);
+        let targetList = currentList;
+        let newParentId = currentList.dataset.parentId ? parseInt(currentList.dataset.parentId) : null;
+        
+        if (direction === 'up') {
+            const prevSibling = itemEl.previousElementSibling;
+            if (prevSibling && prevSibling.classList.contains('organize-item')) {
+                currentList.insertBefore(itemEl, prevSibling);
+            } else {
+                return; // Already at top of list
+            }
+        } else if (direction === 'down') {
+            const nextSibling = itemEl.nextElementSibling;
+            if (nextSibling && nextSibling.classList.contains('organize-item')) {
+                currentList.insertBefore(itemEl, nextSibling.nextElementSibling);
+            } else {
+                return; // Already at bottom of list
+            }
+        } else if (direction === 'in') {
+            // Indent into the previous sibling folder as its sub-folder
+            const prevSibling = itemEl.previousElementSibling;
+            if (!prevSibling || !prevSibling.classList.contains('organize-item')) {
+                showAdminToast('সাব-ফোল্ডার বানানোর জন্য উপরে কোনো ফোল্ডার পাওয়া যায়নি। প্রথমে ফোল্ডারটিকে কোনো ফোল্ডারের নিচে আনুন।', 'error');
+                return;
+            }
+            
+            let subList = prevSibling.querySelector(':scope > .organize-tree-list.sub-list');
+            if (!subList) {
+                subList = document.createElement('ul');
+                subList.className = 'organize-tree-list sub-list';
+                subList.dataset.parentId = prevSibling.dataset.catId;
+                prevSibling.appendChild(subList);
+            }
+            
+            // Expand the folder if collapsed
+            const toggleBtn = prevSibling.querySelector(':scope > .organize-item-card .organize-toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.classList.remove('collapsed');
+            } else {
+                // If it previously had a spacer, turn spacer into toggle button
+                const spacer = prevSibling.querySelector(':scope > .organize-item-card .organize-toggle-spacer');
+                if (spacer) {
+                    const newToggle = document.createElement('button');
+                    newToggle.type = 'button';
+                    newToggle.className = 'organize-toggle-btn';
+                    newToggle.onclick = function() { toggleOrganizeBranch(this); };
+                    newToggle.title = 'সাব-ফোল্ডার তালিকা';
+                    newToggle.innerHTML = '<i class="fas fa-chevron-down"></i>';
+                    spacer.replaceWith(newToggle);
+                }
+            }
+            subList.style.display = '';
+            
+            targetList = subList;
+            newParentId = parseInt(prevSibling.dataset.catId);
+            targetList.appendChild(itemEl);
+        } else if (direction === 'out') {
+            // Outdent: move out to parent list (left)
+            const parentItem = currentList.closest('.organize-item');
+            if (!parentItem) {
+                // Already at root
+                return;
+            }
+            const grandParentList = parentItem.parentElement; // UL of the parent
+            if (!grandParentList) return;
+            
+            targetList = grandParentList;
+            newParentId = grandParentList.dataset.parentId ? parseInt(grandParentList.dataset.parentId) : null;
+            // Place right after the parent item
+            grandParentList.insertBefore(itemEl, parentItem.nextElementSibling);
+        }
+        
+        const siblingItems = targetList.querySelectorAll(':scope > .organize-item[data-cat-id]');
+        const siblingIds = Array.from(siblingItems).map(el => parseInt(el.dataset.catId)).filter(Boolean);
+        
+        executeCategoryMove(catId, newParentId, siblingIds, itemEl);
     }
 
     function makeFolderRoot(catId, catName) {
