@@ -2728,6 +2728,10 @@ if (!function_exists('renderManageCategoryTree')) {
     </div>
 </div>
 
+<!-- SortableJS library for Drag & Drop in Organizer Modal and Sidebar -->
+<script src="<?= URLROOT ?>/public/js/Sortable.min.js"></script>
+<script>window.Sortable || document.write('<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"><\/script>')</script>
+
 <!-- Modal: Organize Folder Hierarchy (Drag & Drop) -->
 <?php
 if (!function_exists('renderOrganizeCategoryTree')) {
@@ -3134,11 +3138,14 @@ if (!function_exists('renderOrganizeCategoryTree')) {
 }
 
 /* While dragging anywhere in the organizer */
+body.organize-drag-active .organize-tree-list.sub-list {
+    min-height: 24px;
+}
 body.organize-drag-active .organize-tree-list.sub-list:empty {
-    min-height: 38px;
+    min-height: 42px;
     border: 2px dashed #93c5fd;
     border-radius: 8px;
-    margin: 4px 0 6px 24px;
+    margin: 6px 0 8px 24px;
     background: #eff6ff;
     display: flex;
     align-items: center;
@@ -3155,7 +3162,8 @@ body.organize-drag-active #organize-root-list {
     background: #f0fdf4;
     border: 2px dashed #86efac;
     border-radius: 8px;
-    padding: 6px;
+    padding: 8px;
+    min-height: 60px;
 }
 </style>
 
@@ -3270,7 +3278,8 @@ body.organize-drag-active #organize-root-list {
                 dragClass: 'organize-dragging',
                 fallbackOnBody: true,
                 swapThreshold: 0.65,
-                emptyInsertThreshold: 15,
+                emptyInsertThreshold: 25,
+                invertSwap: true,
                 onStart: function() {
                     document.body.classList.add('organize-drag-active');
                 },
