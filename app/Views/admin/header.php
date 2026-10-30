@@ -75,7 +75,7 @@ if (empty($current_page)) {
     <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="<?= URLROOT ?>/public/css/admin.css?v=<?= @filemtime(FCPATH . 'css/admin.css') ?: '2.0' ?>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -193,18 +193,18 @@ if (empty($current_page)) {
             overflow-x: hidden;
         }
         .sidebar {
-            width: 320px;
+            width: 300px;
             height: 100vh;
             background: #ffffff;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
-            border-right: 1px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
         }
         .main-content {
-            margin-left: 320px;
-            padding: 3rem;
+            margin-left: 300px;
+            padding: 2.5rem;
             min-height: 100vh;
             background: var(--bg-light);
             position: relative;
@@ -241,8 +241,8 @@ if (empty($current_page)) {
         #admin-3d-canvas {
             position: fixed;
             top: 0;
-            left: 320px;
-            width: calc(100% - 320px);
+            left: 300px;
+            width: calc(100% - 300px);
             height: 100%;
             z-index: 0;
             opacity: 0.1;
@@ -296,7 +296,7 @@ if (empty($current_page)) {
         
         @media (max-width: 992px) {
             .sidebar { 
-                width: 280px !important; 
+                width: 270px !important; 
                 transform: translateX(-100%) !important; 
                 transition: transform 0.3s !important; 
                 overflow-y: auto !important;
@@ -304,7 +304,7 @@ if (empty($current_page)) {
             }
             .sidebar.mobile-active { transform: translateX(0) !important; }
             body.sidebar-collapsed .sidebar {
-                width: 280px !important;
+                width: 270px !important;
                 transform: translateX(-100%) !important;
             }
             body.sidebar-collapsed .sidebar.mobile-active {
@@ -324,14 +324,14 @@ if (empty($current_page)) {
             }
             body.sidebar-collapsed .sidebar-logo {
                 justify-content: space-between !important;
-                padding: 24px 20px !important;
+                padding: 20px 16px !important;
             }
             body.sidebar-collapsed .nav-item {
                 justify-content: flex-start !important;
                 padding: 10px 14px !important;
             }
             body.sidebar-collapsed .nav-item i:first-child {
-                margin-right: 12px !important;
+                margin-right: 14px !important;
             }
             .main-content { margin-left: 0 !important; width: 100% !important; padding: 8px !important; }
             #admin-3d-canvas { left: 0 !important; width: 100% !important; }
@@ -346,7 +346,6 @@ if (empty($current_page)) {
                 gap: 1.5rem !important;
                 margin-bottom: 2rem !important;
             }
-            /* Target only non-editor header panels to stack */
             .admin-header-title-section {
                 flex-direction: column !important;
                 align-items: flex-start !important;
@@ -377,7 +376,6 @@ if (empty($current_page)) {
                 white-space: normal !important;
                 word-break: break-word !important;
             }
-            /* Hide secondary columns on mobile dashboards to prevent squishing */
             .data-table th:nth-child(2), .data-table td:nth-child(2),
             .data-table th:nth-child(3), .data-table td:nth-child(3),
             .data-table th:nth-child(4), .data-table td:nth-child(4) {
@@ -394,150 +392,214 @@ if (empty($current_page)) {
                 height: 220px !important;
             }
         }
-    <style>
-        /* Modernized Sidebar Scrollbar & Shell */
+
+        /* Crisp Light Modern Sidebar (Matching exact reference screenshot) */
         .sidebar {
-            width: 320px;
+            width: 300px;
             height: 100vh;
             background: #ffffff;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
-            border-right: 1px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+            scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            box-shadow: 1px 0 6px rgba(0, 0, 0, 0.02);
         }
         .sidebar::-webkit-scrollbar {
             width: 4px;
         }
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.08);
-            border-radius: 4px;
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.4);
         }
         .sidebar::-webkit-scrollbar-track {
             background: transparent;
         }
 
         .sidebar-logo {
-            padding: 24px 20px;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 15px;
+            padding: 12px 14px 10px 14px;
+            border-bottom: 1px solid #f8fafc;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-logo #sidebar-collapse-btn {
+            color: #94a3b8 !important;
+        }
+        .sidebar-logo #sidebar-collapse-btn:hover {
+            color: #475569 !important;
+            background: #f8fafc !important;
         }
 
         .sidebar-nav {
-            padding: 0 15px 30px;
+            padding: 0 8px 25px;
             display: flex;
             flex-direction: column;
+            gap: 0px !important;
         }
 
-        /* Improved Sidebar Navigation Design */
         .nav-group {
             display: flex;
             flex-direction: column;
-            margin-bottom: 1.25rem;
+            margin-bottom: 4px !important;
+            gap: 0px !important;
         }
 
         .nav-label {
-            font-size: 0.72rem;
+            font-size: 0.64rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: #94a3b8;
             font-weight: 700;
-            padding: 10px 12px 6px;
+            padding: 6px 10px 2px !important;
+            margin: 0 !important;
+            font-family: inherit;
         }
 
+        /* Ultra-compact, clean spacing between menus */
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 10px 14px;
-            color: #475569 !important;
+            padding: 4px 10px !important;
+            color: #1e293b !important;
             text-decoration: none;
-            border-radius: 10px;
-            font-size: 0.92rem;
-            font-weight: 500;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 2px;
-            border-right: 3px solid transparent;
+            border-radius: 6px;
+            font-size: 0.87rem !important;
+            font-weight: 600;
+            line-height: 1.2;
+            transition: all 0.12s ease;
+            margin: 0 0 1px 0 !important;
+            border-right: none !important;
+            background: transparent;
+            cursor: pointer;
+            user-select: none;
+            letter-spacing: -0.01em;
+            min-height: 30px !important;
+            height: 30px !important;
+            box-sizing: border-box;
         }
 
         .nav-item i:first-child {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 1.05rem;
+            width: 18px;
+            margin-right: 8px !important;
+            font-size: 0.94rem !important;
             color: #64748b;
-            transition: all 0.25s;
+            transition: all 0.12s ease;
+            text-align: center;
+            flex-shrink: 0;
         }
 
         .nav-item:hover {
             background: #f8fafc;
-            color: #2563eb !important;
-            transform: translateX(4px);
+            color: #0f172a !important;
+            transform: none !important;
         }
 
         .nav-item:hover i:first-child {
-            color: #2563eb;
+            color: #334155;
         }
 
+        /* Active / Selected Item */
         .nav-item.active {
-            background: #eff6ff !important;
-            color: #2563eb !important;
-            font-weight: 700;
-            border-right-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+            background: #f0f4f9 !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            box-shadow: none !important;
         }
 
         .nav-item.active i:first-child {
-            color: #2563eb !important;
+            color: #0f172a !important;
         }
 
-        /* Dropdown arrows and lists styling */
+        /* Dropdown Chevron arrow */
         .dropdown-arrow {
             margin-left: auto;
-            font-size: 0.75rem;
-            transition: transform 0.3s;
+            font-size: 0.68rem;
+            color: #64748b;
+            font-weight: 600;
+            transition: transform 0.2s ease, color 0.12s;
+        }
+
+        .nav-item:hover .dropdown-arrow {
+            color: #334155;
         }
 
         .dropdown-content {
             display: none;
-            padding-left: 15px;
-            border-left: 2px solid #eff6ff;
-            margin: 2px 0 8px 22px;
+            padding-left: 8px;
+            margin: 1px 0 2px 10px !important;
+            border-left: 1.5px solid #e2e8f0;
             flex-direction: column;
-            gap: 2px;
+            gap: 0px !important;
         }
 
         .dropdown-content a {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
-            color: #64748b !important;
+            padding: 4px 8px !important;
+            color: #475569 !important;
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 0.83rem !important;
             font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s;
+            border-radius: 5px;
+            transition: all 0.12s ease;
+            min-height: 26px !important;
+            height: 26px !important;
+            margin-bottom: 1px !important;
         }
 
         .dropdown-content a i {
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: #94a3b8;
-            transition: all 0.2s;
+            width: 14px;
+            text-align: center;
+            transition: all 0.15s ease;
         }
 
         .dropdown-content a:hover, 
         .dropdown-content a.active-sub {
-            background: #eff6ff;
-            color: #2563eb !important;
+            background: #f1f5f9;
+            color: #0f172a !important;
+            font-weight: 600;
         }
 
         .dropdown-content a:hover i, 
         .dropdown-content a.active-sub i {
-            color: #2563eb;
+            color: #0f172a;
+        }
+
+        /* Subcontent Folder Tree in Left Sidebar */
+        #sidebar-posts-subcontent .folder-tree-node {
+            color: #475569 !important;
+            border-radius: 6px;
+        }
+        #sidebar-posts-subcontent .folder-tree-node a {
+            color: #475569 !important;
+            font-size: 13px;
+        }
+        #sidebar-posts-subcontent .folder-tree-node:hover {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        #sidebar-posts-subcontent .folder-tree-node:hover a {
+            color: #0f172a !important;
+        }
+        #sidebar-posts-subcontent .folder-tree-node.active {
+            background: #eff6ff !important;
+            color: #1d4ed8 !important;
+            font-weight: 600 !important;
+        }
+        #sidebar-posts-subcontent .folder-tree-node.active a {
+            color: #1d4ed8 !important;
         }
 
         /* User Profile & Other elements */
@@ -687,7 +749,7 @@ if (empty($current_page)) {
                 <?php if (!empty($settings['site_logo'])): ?>
                     <img src="<?= resolve_setting_image($settings['site_logo']) ?>" alt="Logo" style="max-height: 40px; width: auto; object-fit: contain; flex-shrink: 0;">
                 <?php else: ?>
-                    <h2 style="color: var(--text-main); margin: 0; font-size: 1.5rem; flex-shrink: 0;">NUR<span style="color: var(--primary);">LAB</span></h2>
+                    <h2 style="color: #0f172a; margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; flex-shrink: 0;">NUR<span style="color: #2563eb;">LAB</span></h2>
                 <?php endif; ?>
             </a>
             <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;">
@@ -696,9 +758,9 @@ if (empty($current_page)) {
         </div>
         
         <nav class="sidebar-nav">
-            <div style="margin-bottom: 1.5rem;">
+            <div style="margin-bottom: 4px; display: flex; flex-direction: column; gap: 1px;">
                 <a href="<?= URLROOT ?>/admin" class="nav-item <?= $current_page == 'dashboard' || $current_page == '' ? 'active' : '' ?>">
-                    <i class="fas fa-gauge-high"></i><span>Dashboard</span>
+                    <i class="fas fa-border-all"></i><span>Dashboard</span>
                 </a>
                 <a href="<?= URLROOT ?>/" target="_blank" class="nav-item">
                     <i class="fas fa-globe"></i><span>Visit Website</span>

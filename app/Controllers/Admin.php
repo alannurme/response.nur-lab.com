@@ -283,16 +283,11 @@ class Admin extends Controller {
 
         $categoryId = isset($_GET['category_id']) && $_GET['category_id'] !== '' ? (int)$_GET['category_id'] : null;
 
-        $posts = \App\Helpers\SearchHelper::searchPosts($query, [
-            'limit' => 60,
-            'include_drafts' => true,
-            'category_id' => $categoryId
-        ]);
+        $postModel = $this->model('PostModel');
+        $posts = $postModel->searchPostsFast($query, 60, true, $categoryId);
 
-        $questions = \App\Helpers\SearchHelper::searchQuestions($query, [
-            'limit' => 20,
-            'status' => null // Admin sees both answered and pending questions
-        ]);
+        $adminModel = $this->model('AdminModel');
+        $questions = $adminModel->getFilteredUserQuestions(20, 0, null, null, $query, null, false);
 
         echo json_encode([
             'success' => true,

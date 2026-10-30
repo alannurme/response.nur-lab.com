@@ -174,10 +174,19 @@ class Home extends Controller {
             exit;
         }
 
-        $results = \App\Helpers\SearchHelper::searchUnified($query, [
-            'posts_limit' => 8,
-            'questions_limit' => 6
-        ]);
+        $postModel = $this->model('PostModel');
+        $adminModel = $this->model('AdminModel');
+
+        $posts = $postModel->searchPostsFast($query, 8, false, null);
+        $questions = $adminModel->getFilteredUserQuestions(6, 0, 'answered', null, $query, null, false);
+
+        $results = [
+            'status' => 'success',
+            'query' => $query,
+            'total' => count($posts) + count($questions),
+            'posts' => $posts,
+            'questions' => $questions
+        ];
 
         echo json_encode($results, JSON_UNESCAPED_UNICODE);
         exit;
@@ -214,11 +223,11 @@ class Home extends Controller {
             
             if (!empty($search)) {
                 $category_name = 'সার্চ ফলাফল: "' . htmlspecialchars($search) . '"';
-                $posts = \App\Helpers\SearchHelper::searchPosts($search, ['limit' => 200]);
+                $posts = $postModel->searchPostsFast($search, 200, false, null);
                 foreach ($posts as &$post) {
                     $post['category_name'] = $post['main_category'] ?? ($post['secondary_categories'] ?? 'সাধারণ');
                 }
-                $questions = \App\Helpers\SearchHelper::searchQuestions($search, ['limit' => 50, 'status' => 'answered']);
+                $questions = $adminModel->getFilteredUserQuestions(50, 0, 'answered', null, $search, null, false);
             } elseif ($category_id !== null) {
                 $db = \Config\Database::pdoConnect();
                 $stmt = $db->prepare("SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at, GROUP_CONCAT(c.name SEPARATOR ', ') as category_name 
@@ -1045,7 +1054,7 @@ class Home extends Controller {
         $offset = max(0, ($page - 1) * $limit);
 
         if ($search) {
-            $all_searched = \App\Helpers\SearchHelper::searchQuestions($search, ['limit' => 200, 'status' => 'answered']);
+            $all_searched = $adminModel->getFilteredUserQuestions(200, 0, 'answered', null, $search, null, false);
             if ($category_slug) {
                 $all_searched = array_values(array_filter($all_searched, function($q) use ($category_slug) {
                     return ($q['category_slug'] ?? '') === $category_slug;

@@ -199,4 +199,60 @@ class PostModel extends Model {
         ");
         return $stmt->fetchAll();
     }
+
+    /**
+     * Fast, lightweight direct SQL search across posts (title, seo_keywords, excerpt, category name).
+     * Bypasses slow fulltext content scans for instant responsive search.
+     */
+    public function searchPostsFast($query, $limit = 60, $include_drafts = false, $categoryId = null) {
+        $q = trim($query);
+        if (empty($q)) return [];
+
+        $statusClause = $include_drafts ? "1=1" : "p.status = 'published'";
+        $categoryClause = "";
+        $params = [
+            'q1' => '%' . $q . '%',
+            'q2' => '%' . $q . '%',
+            'q3' => '%' . $q . '%',
+            'q4' => '%' . $q . '%'
+        ];
+
+        if ($categoryId !== null) {
+            $categoryClause = "AND (p.category_id = :cat_id OR pc.category_id = :cat_id)";
+            $params['cat_id'] = (int)$categoryId;
+        }
+
+        $sql = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
+                       p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
+                       COALESCE(c2.name, c.name, 'ইসলাম') as main_category,
+                       GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') as secondary_categories
+                FROM posts p
+                LEFT JOIN post_categories pc ON p.id = pc.post_id
+                LEFT JOIN categories c ON pc.category_id = c.id
+                LEFT JOIN categories c2 ON p.category_id = c2.id
+                WHERE $statusClause $categoryClause 
+                  AND (p.title LIKE :q1 OR p.seo_keywords LIKE :q2 OR p.excerpt LIKE :q3 OR c2.name LIKE :q4)
+                GROUP BY p.id
+                ORDER BY 
+                    CASE 
+                        WHEN p.title = :q_exact THEN 1
+                        WHEN p.title LIKE :q_start THEN 2
+                        WHEN p.title LIKE :q_like THEN 3
+                        ELSE 4 
+                    END,
+                    p.id DESC
+                LIMIT :limit";
+
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue(':' . $k, $v);
+        }
+        $stmt->bindValue(':q_exact', $q);
+        $stmt->bindValue(':q_start', $q . '%');
+        $stmt->bindValue(':q_like', '%' . $q . '%');
+        $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }

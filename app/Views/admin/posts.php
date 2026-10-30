@@ -1834,10 +1834,16 @@
     }
     
     /* Toggle post visibility in sidebar tree */
-    .hide-posts-in-tree .post-tree-item {
+    .hide-posts-in-tree .post-tree-item,
+    #sidebar-tree-card.hide-posts-in-tree .post-tree-item,
+    #sidebar-posts-subcontent.hide-posts-in-tree .post-tree-item,
+    .sidebar.hide-posts-in-tree .post-tree-item {
         display: none !important;
     }
-    .hide-posts-in-tree .folder-tree-item:not(:has(.folder-tree-list .folder-tree-item)) > .folder-tree-node > .folder-tree-toggle {
+    .hide-posts-in-tree .folder-tree-item:not(:has(.folder-tree-list .folder-tree-item)) > .folder-tree-node > .folder-tree-toggle,
+    #sidebar-tree-card.hide-posts-in-tree .folder-tree-item:not(:has(.folder-tree-list .folder-tree-item)) > .folder-tree-node > .folder-tree-toggle,
+    #sidebar-posts-subcontent.hide-posts-in-tree .folder-tree-item:not(:has(.folder-tree-list .folder-tree-item)) > .folder-tree-node > .folder-tree-toggle,
+    .sidebar.hide-posts-in-tree .folder-tree-item:not(:has(.folder-tree-list .folder-tree-item)) > .folder-tree-node > .folder-tree-toggle {
         visibility: hidden !important;
         pointer-events: none !important;
     }
@@ -6157,14 +6163,18 @@ body.organize-drag-active #organize-root-list {
 
     function applySidebarPreferences() {
         const sidebar = document.querySelector('.explorer-sidebar');
+        const treeCard = document.getElementById('sidebar-tree-card');
+        const postsSubcontent = document.getElementById('sidebar-posts-subcontent');
+        const mainSidebar = document.querySelector('.sidebar');
         const btnTogglePosts = document.getElementById('btn-toggle-posts');
         const btnAdjust = document.getElementById('btn-adjust-folders');
-        if (!sidebar) return;
+
+        const targets = [sidebar, treeCard, postsSubcontent, mainSidebar].filter(Boolean);
 
         // 1. Posts preference
         const hidePostsPref = localStorage.getItem('hidePostsInTree') === 'true';
         if (hidePostsPref) {
-            sidebar.classList.add('hide-posts-in-tree');
+            targets.forEach(el => el.classList.add('hide-posts-in-tree'));
             if (btnTogglePosts) {
                 btnTogglePosts.innerHTML = '<i class="fas fa-eye-slash"></i> Posts';
                 btnTogglePosts.classList.remove('btn-explorer-secondary');
@@ -6173,7 +6183,7 @@ body.organize-drag-active #organize-root-list {
                 btnTogglePosts.style.borderColor = '#64748b';
             }
         } else {
-            sidebar.classList.remove('hide-posts-in-tree');
+            targets.forEach(el => el.classList.remove('hide-posts-in-tree'));
             if (btnTogglePosts) {
                 btnTogglePosts.innerHTML = '<i class="fas fa-eye"></i> Posts';
                 btnTogglePosts.classList.remove('btn-explorer-primary');
@@ -6185,14 +6195,14 @@ body.organize-drag-active #organize-root-list {
 
         // 2. Adjust/Drag Mode preference
         if (dragModeActive) {
-            sidebar.classList.add('drag-active');
+            targets.forEach(el => el.classList.add('drag-active'));
             if (btnAdjust) {
                 btnAdjust.innerHTML = '<i class="fas fa-check"></i> Done';
                 btnAdjust.classList.remove('btn-explorer-secondary');
                 btnAdjust.classList.add('btn-explorer-primary');
             }
         } else {
-            sidebar.classList.remove('drag-active');
+            targets.forEach(el => el.classList.remove('drag-active'));
             if (btnAdjust) {
                 btnAdjust.innerHTML = '<i class="fas fa-arrows-alt"></i> Adjust';
                 btnAdjust.classList.remove('btn-explorer-primary');
@@ -6205,25 +6215,20 @@ body.organize-drag-active #organize-root-list {
     document.addEventListener('click', function(e) {
         const btnTogglePosts = e.target.closest('#btn-toggle-posts');
         if (btnTogglePosts) {
-            const sidebar = document.querySelector('.explorer-sidebar');
-            if (sidebar) {
-                const isHidden = sidebar.classList.toggle('hide-posts-in-tree');
-                localStorage.setItem('hidePostsInTree', isHidden);
-                applySidebarPreferences();
-            }
+            const currentHidePref = localStorage.getItem('hidePostsInTree') === 'true';
+            const newHidePref = !currentHidePref;
+            localStorage.setItem('hidePostsInTree', newHidePref ? 'true' : 'false');
+            applySidebarPreferences();
             return;
         }
 
         const btnAdjust = e.target.closest('#btn-adjust-folders');
         if (btnAdjust) {
-            const sidebar = document.querySelector('.explorer-sidebar');
-            if (sidebar) {
-                dragModeActive = !dragModeActive;
-                applySidebarPreferences();
-                sortableInstances.forEach(inst => {
-                    inst.option('disabled', !dragModeActive);
-                });
-            }
+            dragModeActive = !dragModeActive;
+            applySidebarPreferences();
+            sortableInstances.forEach(inst => {
+                inst.option('disabled', !dragModeActive);
+            });
             return;
         }
 
