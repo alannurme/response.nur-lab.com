@@ -526,9 +526,37 @@ if (!function_exists('resolve_blog_image')) {
     /* Sidebar Styles */
     .post-sidebar {
         position: sticky;
-        top: 110px;
+        top: 100px;
         align-self: start;
-        height: fit-content;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 6px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .post-sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+    .post-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .post-sidebar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 10px;
+    }
+    .post-sidebar::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8;
+    }
+
+    @media (max-width: 1024px) {
+        .post-sidebar {
+            position: static;
+            max-height: none;
+            overflow-y: visible;
+            padding-right: 0;
+        }
     }
 
     /* Sidebar Widgets */
