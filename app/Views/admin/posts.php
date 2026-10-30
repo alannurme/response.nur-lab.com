@@ -2388,13 +2388,16 @@ if (!empty($data['breadcrumbs'])) {
                             </a>
                         </div>
 
-                        <!-- Copy Post (Facebook Ready: Smart Summary + Full Text) -->
+                        <!-- Copy Post (Facebook Ready: Smart Summary + Full Text + Comment Link) -->
                         <div style="display: inline-flex; align-items: center; border-radius: 8px; border: 1px solid #86efac; background: #f0fdf4; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;">
-                            <button type="button" id="btnCopyFullPost" onclick="copyFullPostForFacebook(this, 'smart')" title="ফেসবুকের জন্য স্মার্ট পোস্ট কপি করুন (টাইটেল + আকর্ষণীয় মূল অংশ + লিঙ্ক)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 11px; background: transparent; border: none; color: #166534; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
+                            <button type="button" id="btnCopyFullPost" onclick="copyFullPostForFacebook(this, 'smart')" title="ফেসবুকের জন্য স্মার্ট পোস্ট কপি করুন (টাইটেল + আকর্ষণীয় অংশ)" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; padding: 6px 11px; background: transparent; border: none; color: #166534; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
                                 <i class="fas fa-clipboard-list" style="color: #16a34a; font-size: 13px;"></i> <span id="copyFullPostText">ফেসবুক পোস্ট কপি</span>
                             </button>
                             <button type="button" onclick="copyFullPostForFacebook(this, 'full')" title="সম্পূর্ণ পোস্ট (ফুল টেক্সট) কপি করুন" style="display: inline-flex; align-items: center; padding: 6px 8px; background: transparent; border: none; border-left: 1px solid #86efac; color: #166534; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
                                 <span>ফুল</span>
+                            </button>
+                            <button type="button" onclick="copyCommentForFacebook(this)" title="ফেসবুক কমেন্টের জন্য লিংক ও টেক্সট কপি করুন" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 9px; background: transparent; border: none; border-left: 1px solid #86efac; color: #166534; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='transparent';">
+                                <i class="far fa-comment-dots" style="color: #16a34a; font-size: 12px;"></i> <span>কমেন্ট</span>
                             </button>
                         </div>
 
@@ -5651,9 +5654,9 @@ body.organize-drag-active #organize-root-list {
         // Append attractive Read More CTA & Link
         if (postLink) {
             if (isTruncated) {
-                formattedText += '\n\n...\n──────────────────\n📖 সম্পূর্ণ আলোচনাটি বিস্তারিত ও তথ্যসূত্রসহ পড়তে ভিজিট করুন:\n🔗 ' + postLink;
+                formattedText += '\n\n...\n──────────────────\n📖 সম্পূর্ণ আলোচনাটি বিস্তারিত ও তথ্যসূত্রসহ পড়তে প্রথম কমেন্ট দেখুন।';
             } else {
-                formattedText += '\n\n🔗 সম্পূর্ণ পড়তে ভিজিট করুন: ' + postLink;
+                formattedText += '\n\n📖 সম্পূর্ণ আলোচনাটি বিস্তারিত ও তথ্যসূত্রসহ পড়তে প্রথম কমেন্ট দেখুন।';
             }
         }
 
@@ -5678,6 +5681,51 @@ body.organize-drag-active #organize-root-list {
                 console.error('Clipboard write error:', err);
                 const ta = document.createElement('textarea');
                 ta.value = formattedText;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                onCopySuccess();
+            });
+    }
+
+    // Copy Facebook comment text with read more link
+    function copyCommentForFacebook(btn) {
+        if (!window.currentPostDetailData) {
+            alert('পোস্ট লোড হচ্ছে, দয়া করে একটু অপেক্ষা করুন...');
+            return;
+        }
+        const data = window.currentPostDetailData;
+        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const publicBase = isLocalHost ? 'https://response.nur-lab.com' : '<?= URLROOT ?>';
+        const postLink = data.slug ? (publicBase + '/' + encodeURI(data.slug)) : (data.id ? (publicBase + '/p/' + data.id) : '');
+
+        if (!postLink) {
+            alert('পোস্টের লিংক পাওয়া যায়নি!');
+            return;
+        }
+
+        const commentText = '📖 সম্পূর্ণ আলোচনাটি বিস্তারিত ও তথ্যসূত্রসহ পড়তে ভিজিট করুন:\n🔗 ' + postLink;
+        const origHtml = btn.innerHTML;
+
+        function onCopySuccess() {
+            btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>কপি হয়েছে!</span>';
+            showToast('💬 কমেন্টের টেক্সট ও লিংক সফলভাবে কপি হয়েছে!');
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+            }, 2500);
+        }
+
+        navigator.clipboard.writeText(commentText)
+            .then(() => {
+                onCopySuccess();
+            })
+            .catch(err => {
+                console.error('Clipboard write error:', err);
+                const ta = document.createElement('textarea');
+                ta.value = commentText;
                 ta.style.position = 'fixed';
                 ta.style.left = '-9999px';
                 document.body.appendChild(ta);
