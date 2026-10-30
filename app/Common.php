@@ -92,3 +92,77 @@ if (!function_exists('resolve_blog_image')) {
         return resolve_dynamic_url($path, '/public/img/');
     }
 }
+
+if (!function_exists('helper')) {
+    /**
+     * Safe override for helper() function to ensure missing vendor helper files
+     * (e.g. system/Helpers/kint_helper.php) don't trigger fatal include_once errors on live server.
+     *
+     * @param list<string>|string $filenames
+     */
+    function helper($filenames): void
+    {
+        static $loaded = [];
+
+        $loader = service('locator');
+
+        if (!is_array($filenames)) {
+            $filenames = [$filenames];
+        }
+
+        $includes = [];
+
+        foreach ($filenames as $filename) {
+            $systemHelper  = '';
+            $appHelper     = '';
+            $localIncludes = [];
+
+            if (!str_contains($filename, '_helper')) {
+                $filename .= '_helper';
+            }
+
+            if (in_array($filename, $loaded, true)) {
+                continue;
+            }
+
+            if (str_contains($filename, '\\')) {
+                $path = $loader->locateFile($filename, 'Helpers');
+                if ($path !== false && is_file($path)) {
+                    $includes[] = $path;
+                    $loaded[]   = $filename;
+                }
+            } else {
+                $paths = $loader->search('Helpers/' . $filename);
+
+                foreach ($paths as $path) {
+                    if (str_starts_with($path, APPPATH . 'Helpers' . DIRECTORY_SEPARATOR)) {
+                        $appHelper = $path;
+                    } elseif (str_starts_with($path, SYSTEMPATH . 'Helpers' . DIRECTORY_SEPARATOR)) {
+                        $systemHelper = $path;
+                    } else {
+                        $localIncludes[] = $path;
+                        $loaded[]        = $filename;
+                    }
+                }
+
+                if ($appHelper !== '' && is_file($appHelper)) {
+                    $includes[] = $appHelper;
+                    $loaded[]   = $filename;
+                }
+
+                $includes = [...$includes, ...$localIncludes];
+
+                if ($systemHelper !== '' && is_file($systemHelper)) {
+                    $includes[] = $systemHelper;
+                    $loaded[]   = $filename;
+                }
+            }
+        }
+
+        foreach ($includes as $path) {
+            if (is_file($path)) {
+                include_once $path;
+            }
+        }
+    }
+}
