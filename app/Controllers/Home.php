@@ -252,8 +252,8 @@ class Home extends Controller {
                 $posts = $postModel->getAllPosts(2000);
             }
             
-            // Pagination logic (15 posts per page)
-            $limit = 15;
+            // Pagination logic (40 posts per page)
+            $limit = 40;
             $total_posts = count($posts);
             $total_pages = ceil($total_posts / $limit);
             if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
