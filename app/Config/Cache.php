@@ -22,14 +22,28 @@ class Cache extends BaseConfig
      * The name of the preferred handler that should be used. If for some reason
      * it is not available, the $backupHandler will be used in its place.
      */
-    public string $handler = 'file';
-    public string $backupHandler = 'file';
+    public string $handler = 'dummy';
+    public string $backupHandler = 'dummy';
 
     public function __construct()
     {
         parent::__construct();
+
+        // Ensure writable/cache directory exists and is writable
+        $cacheDir = WRITEPATH . 'cache';
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0777, true);
+        }
+
         if (extension_loaded('redis')) {
             $this->handler = 'redis';
+            $this->backupHandler = 'dummy';
+        } elseif (function_exists('is_really_writable') && is_really_writable($cacheDir)) {
+            $this->handler = 'file';
+            $this->backupHandler = 'dummy';
+        } else {
+            $this->handler = 'dummy';
+            $this->backupHandler = 'dummy';
         }
     }
 
