@@ -2089,12 +2089,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </ul>
             <!-- Right Side: Social Icons & Donation & PWA App -->
             <div class="top-menu-right">
-                <!-- PWA App Install Button -->
-                <a href="javascript:void(0)" onclick="triggerPwaInstallation()" id="pwaTopbarInstallBtn" class="pwa-topbar-install-btn" title="অ্যাপ ইনস্টল করুন" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 4px 14px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35); transition: all 0.3s ease; font-family: 'Hind Siliguri', sans-serif; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 5px 15px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 3px 10px rgba(16, 185, 129, 0.35)';">
-                    <i class="fas fa-download" style="font-size: 0.82rem; color: #fef08a;"></i>
-                    <span>ইনস্টল অ্যাপ</span>
-                </a>
-
                 <!-- Donation Button -->
                 <a href="<?= URLROOT ?>/donate" style="background: #ffffff; color: var(--bg-dark); font-weight: 700; font-size: 0.85rem; padding: 4px 12px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
                     <i class="fas fa-hand-holding-heart" style="color: #16a34a; font-size: 0.85rem;"></i>

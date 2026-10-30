@@ -174,19 +174,24 @@
         </div>
 
         <!-- Actions & Apps -->
-        <?php 
-        $app_url = $data['settings']['app_download_url'] ?? '';
-        if (!empty($app_url)): 
-        ?>
         <div>
             <h4 style="color: #ffffff; margin-bottom: 22px; font-size: 1.15rem; font-family: 'Hind Siliguri', sans-serif; font-weight: 700; border-bottom: 2px solid #10b981; display: inline-block; padding-bottom: 4px;">মোবাইল অ্যাপস</h4>
-            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 250px;">
-                <a href="<?= htmlspecialchars($app_url) ?>" target="_blank" class="btn-footer btn-footer-success" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 22px; border-radius: 12px; font-weight: 800; font-size: 1rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.3s; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.45)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.3)';">
-                    <i class="fab fa-android" style="font-size: 1.3rem;"></i> আমাদের অ্যাপস ডাউনলোড করুন
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 260px;">
+                <!-- PWA Web App Direct Install Button -->
+                <a href="javascript:void(0)" onclick="triggerPwaInstallation()" id="pwaFooterInstallBtn" class="btn-footer btn-footer-success" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 13px 20px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.3s; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.45)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.3)';">
+                    <i class="fas fa-download" style="font-size: 1.1rem; color: #fef08a;"></i> ইনস্টল অ্যাপ (PWA)
                 </a>
+
+                <?php 
+                $app_url = $data['settings']['app_download_url'] ?? '';
+                if (!empty($app_url)): 
+                ?>
+                <a href="<?= htmlspecialchars($app_url) ?>" target="_blank" class="btn-footer" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 255, 255, 0.08); color: #ffffff; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.15);" onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.transform='none';">
+                    <i class="fab fa-android" style="font-size: 1.2rem; color: #10b981;"></i> APK ডাউনলোড করুন
+                </a>
+                <?php endif; ?>
             </div>
         </div>
-        <?php endif; ?>
 
     </div>
 
