@@ -195,8 +195,18 @@
         <div style="font-size: 0.92rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif;">
             <?= $data['settings']['footer_copyright'] ?? '&copy; ' . date('Y') . ' NUR-LAB. All Rights Reserved.' ?>
         </div>
-        <div style="font-size: 0.92rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif;">
-            Developed with ❤️ by <a href="https://nur-lab.com/" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: none;">NUR-LAB AGENCY</a>
+        <div style="font-size: 0.92rem; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <span>Developed with ❤️ by <a href="https://nur-lab.com/" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: none;">NUR-LAB AGENCY</a></span>
+            <span style="opacity: 0.3;">•</span>
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                <a href="<?= URLROOT ?>/admin" style="color: #94a3b8; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.85rem;" onmouseover="this.style.color='#10b981';" onmouseout="this.style.color='#94a3b8';">
+                    <i class="fas fa-gauge-high" style="font-size: 0.8rem;"></i> অ্যাডমিন ড্যাশবোর্ড
+                </a>
+            <?php else: ?>
+                <a href="<?= URLROOT ?>/admin/login" style="color: #94a3b8; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.85rem;" onmouseover="this.style.color='#10b981';" onmouseout="this.style.color='#94a3b8';">
+                    <i class="fas fa-lock" style="font-size: 0.8rem;"></i> অ্যাডমিন লগইন
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </footer>

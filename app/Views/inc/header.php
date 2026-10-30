@@ -2100,6 +2100,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="fas fa-hand-holding-heart" style="color: #16a34a; font-size: 0.85rem;"></i>
                     <span class="topbar-donation-label">ডোনেশন</span>
                 </a>
+
+                <!-- Admin Login / Dashboard Button -->
+                <?php if (isset($_SESSION['admin_id'])): ?>
+                    <a href="<?= URLROOT ?>/admin" title="অ্যাডমিন ড্যাশবোর্ড" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; font-weight: 700; font-size: 0.82rem; padding: 4px 12px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.35); transition: all 0.2s; font-family: 'Hind Siliguri', sans-serif;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='scale(1)';">
+                        <i class="fas fa-gauge-high" style="color: #fef08a; font-size: 0.82rem;"></i>
+                        <span>ড্যাশবোর্ড</span>
+                    </a>
+                <?php else: ?>
+                    <a href="<?= URLROOT ?>/admin/login" title="অ্যাডমিন লগইন" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; font-weight: 700; font-size: 0.82rem; padding: 4px 12px; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.35); transition: all 0.2s; font-family: 'Hind Siliguri', sans-serif;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='scale(1)';">
+                        <i class="fas fa-user-shield" style="color: #fef08a; font-size: 0.82rem;"></i>
+                        <span>লগইন</span>
+                    </a>
+                <?php endif; ?>
                 
                 <!-- Vertical Divider -->
                 <span class="topbar-divider" style="opacity: 0.2; color: white;">|</span>
