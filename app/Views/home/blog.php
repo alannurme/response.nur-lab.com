@@ -1391,6 +1391,30 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
                 </div>
                 <?php endif; ?>
 
+                <!-- Popular Posts Widget -->
+                <?php if (!empty($data['popular_posts'])): ?>
+                <div class="sidebar-widget">
+                    <h4 class="widget-title">জনপ্রিয় লেখাসমূহ</h4>
+                    <?php foreach ($data['popular_posts'] as $popular): ?>
+                    <a href="<?= URLROOT ?>/<?= $popular['slug'] ?>" class="related-post">
+                        <div class="related-img-container" style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; flex-shrink: 0;">
+                            <?php if (!empty($popular['featured_image'])): 
+                                $popular_img = resolve_blog_image($popular['featured_image']);
+                            ?>
+                                <img src="<?=$popular_img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($popular['title']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <?php else: ?>
+                                <i class="fa-regular fa-image" style="font-size: 1.2rem; opacity: 0.5;"></i>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <div class="related-title"><?= htmlspecialchars($popular['title']) ?></div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;"><?= date('M d, Y', strtotime($popular['created_at'])) ?></div>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+
                 <!-- Recent Posts Widget -->
                 <?php if (!empty($data['recent_posts'])): ?>
                 <div class="sidebar-widget">
@@ -1446,30 +1470,6 @@ $cat3 = $resolve_cat($settings['cat3_category'] ?? '', 3, 'ইতিহাস �
                             </div>
                         <?php endif; ?>
                     </div>
-                </div>
-                <?php endif; ?>
-
-                <!-- Popular Posts Widget -->
-                <?php if (!empty($data['popular_posts'])): ?>
-                <div class="sidebar-widget">
-                    <h4 class="widget-title">জনপ্রিয় লেখাসমূহ</h4>
-                    <?php foreach ($data['popular_posts'] as $popular): ?>
-                    <a href="<?= URLROOT ?>/<?= $popular['slug'] ?>" class="related-post">
-                        <div class="related-img-container" style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; flex-shrink: 0;">
-                            <?php if (!empty($popular['featured_image'])): 
-                                $popular_img = resolve_blog_image($popular['featured_image']);
-                            ?>
-                                <img src="<?=$popular_img?>" loading="lazy" decoding="async" alt="<?= htmlspecialchars($popular['title']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                            <?php else: ?>
-                                <i class="fa-regular fa-image" style="font-size: 1.2rem; opacity: 0.5;"></i>
-                            <?php endif; ?>
-                        </div>
-                        <div>
-                            <div class="related-title"><?= htmlspecialchars($popular['title']) ?></div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;"><?= date('M d, Y', strtotime($popular['created_at'])) ?></div>
-                        </div>
-                    </a>
-                    <?php endforeach; ?>
                 </div>
                 <?php endif; ?>
             </aside>
