@@ -707,7 +707,10 @@ class Home extends Controller {
                         : 'https://pay.nur-lab.com';
                 }
 
-                $apiUrl = rtrim($baseUrl, '/') . '/api/checkout/redirect';
+                // Strip /api/checkout/redirect or /api or trailing slash if entered by user
+                $baseUrl = preg_replace('#/api(/checkout(/redirect)?)?/?$#i', '', rtrim($baseUrl, '/'));
+
+                $apiUrl = $baseUrl . '/api/checkout/redirect';
 
                 if (empty($apiKey)) {
                     $_SESSION['donation_error'] = 'PipraPay Merchant API Key কনফিগার করা নেই। অনুগ্রহ করে অ্যাডমিন প্যানেল থেকে সেটিংস আপডেট করুন।';
@@ -847,7 +850,8 @@ class Home extends Controller {
                     ? 'http://localhost/pay.nur-lab.com'
                     : 'https://pay.nur-lab.com';
             }
-            $apiUrl = rtrim($baseUrl, '/') . '/api/verify-payment';
+            $baseUrl = preg_replace('#/api(/verify-payment)?/?$#i', '', rtrim($baseUrl, '/'));
+            $apiUrl = $baseUrl . '/api/verify-payment';
 
             if (!empty($payment_id) && !empty($apiKey)) {
                 $ch = curl_init($apiUrl);

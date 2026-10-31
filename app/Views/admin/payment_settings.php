@@ -84,7 +84,7 @@
                                 <i class="fas fa-desktop"></i> লোকাল টেস্ট: http://localhost/pay.nur-lab.com
                             </button>
                         </div>
-                        <small style="color: #64748b; display: block; margin-top: 6px; font-size: 0.82rem;">লাইভ সার্ভারে পেমেন্ট এপিআই এন্ডপয়েন্ট: <code>https://pay.nur-lab.com/api/checkout/redirect</code></small>
+                        <small style="color: #64748b; display: block; margin-top: 6px; font-size: 0.82rem;">আপনি <code>https://pay.nur-lab.com</code> অথবা <code>https://pay.nur-lab.com/api/</code> যা-ই লিখুন না কেন, সিস্টেম স্বয়ংক্রিয়ভাবে সঠিক এপিআই এন্ডপয়েন্ট <code>/api/checkout/redirect</code> ব্যবহার করবে।</small>
                     </div>
 
                     <!-- API Key -->

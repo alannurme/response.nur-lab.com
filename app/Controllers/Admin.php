@@ -2002,6 +2002,9 @@ class Admin extends Controller {
             if (empty($baseUrl)) {
                 $baseUrl = 'http://localhost/pay.nur-lab.com';
             }
+            // Strip any trailing /api/checkout/redirect or /api or trailing slashes
+            $baseUrl = preg_replace('#/api(/checkout(/redirect)?)?/?$#i', '', rtrim($baseUrl, '/'));
+
             if (empty($apiKey)) {
                 echo json_encode([
                     'status' => 'error',
@@ -2084,6 +2087,8 @@ class Admin extends Controller {
             if (empty($baseUrl)) {
                 $baseUrl = 'http://localhost/pay.nur-lab.com';
             }
+            $baseUrl = preg_replace('#/api(/verify-payment)?/?$#i', '', rtrim($baseUrl, '/'));
+
             if (empty($ppId)) {
                 echo json_encode(['status' => 'error', 'message' => 'Payment ID (pp_id) প্রদান করুন।']);
                 exit;
@@ -2124,8 +2129,10 @@ class Admin extends Controller {
 
             if (!empty($settings['piprapay_base_url'])) {
                 $baseUrl = rtrim(trim($settings['piprapay_base_url']), '/');
-                $settings['piprapay_base_url'] = $baseUrl;
-                $settings['piprapay_api_url'] = $baseUrl . '/api/checkout/redirect';
+                // Automatically strip trailing /api, /api/checkout/redirect, etc. so user can enter https://pay.nur-lab.com, https://pay.nur-lab.com/api/, or full URL
+                $cleanBaseUrl = preg_replace('#/api(/checkout(/redirect)?)?/?$#i', '', $baseUrl);
+                $settings['piprapay_base_url'] = $cleanBaseUrl;
+                $settings['piprapay_api_url'] = $cleanBaseUrl . '/api/checkout/redirect';
             }
 
             $adminModel->updateSettings($settings);
