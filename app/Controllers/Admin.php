@@ -3617,15 +3617,13 @@ class Admin extends Controller {
                 $mime = $mimeType ?: (mime_content_type($localTarget) ?: 'application/octet-stream');
                 $finalUrl = URLROOT . '/public/img/records/' . $cleanName;
 
-                // Upload to Google Drive
+                // Upload to Google Drive (Records files always strictly go to Google Drive, no local backup)
                 try {
                     $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($localTarget, $cleanName, $mime, $this->siteSettings);
                     if (!empty($driveRes['url'])) {
                         $finalUrl = $driveRes['url'];
-                        // Delete local file if sync local is not turned on
-                        if (($this->siteSettings['gdrive_sync_local'] ?? '0') != '1') {
-                            @unlink($localTarget);
-                        }
+                        // Always unlink local temporary file immediately
+                        @unlink($localTarget);
                     }
                 } catch (\Exception $e) {
                     error_log("Google drive upload for record media failed: " . $e->getMessage());
@@ -4075,9 +4073,7 @@ class Admin extends Controller {
                     $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($localTarget, $cleanName, $mime, $this->siteSettings);
                     if (!empty($driveRes['url'])) {
                         $finalUrl = $driveRes['url'];
-                        if (($this->siteSettings['gdrive_sync_local'] ?? '0') != '1') {
-                            @unlink($localTarget);
-                        }
+                        @unlink($localTarget);
                     }
                 } catch (\Exception $e) {
                     error_log("Google drive upload error: " . $e->getMessage());
