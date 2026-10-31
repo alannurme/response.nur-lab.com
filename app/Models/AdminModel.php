@@ -1578,6 +1578,42 @@ class AdminModel extends Model {
 
     // Menu Management
     public function getMenus() {
+        // Self-healing migration for Live Server: Ensure only 'সবগুলো নিবন্ধ' is the main mega menu, remove legacy separated category menus if present
+        try {
+            $checkLegacy = $this->db->query("SELECT id FROM menus WHERE title IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব') AND (parent_id IS NULL OR parent_id = 0)")->fetchAll();
+            if (!empty($checkLegacy)) {
+                $this->db->exec("DELETE FROM menus WHERE title IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব') AND (parent_id IS NULL OR parent_id = 0)");
+                if (class_exists('\\App\\Helpers\\Cache')) {
+                    \App\Helpers\Cache::clear();
+                }
+            }
+
+            // Ensure 'সবগুলো নিবন্ধ' has menu_type = 'post_mega' and proper category_source
+            $stmtMega = $this->db->query("SELECT id, menu_type, category_source FROM menus WHERE title = 'সবগুলো নিবন্ধ' LIMIT 1");
+            $megaMenu = $stmtMega ? $stmtMega->fetch() : null;
+            if ($megaMenu) {
+                if ($megaMenu['menu_type'] !== 'post_mega' || empty($megaMenu['category_source']) || $megaMenu['category_source'] === '[]') {
+                    $catStmt = $this->db->query("SELECT id FROM categories WHERE parent_id IS NULL OR parent_id = 0 ORDER BY order_index ASC, id ASC");
+                    $catIds = $catStmt ? $catStmt->fetchAll(\PDO::FETCH_COLUMN) : [];
+                    $sourceJson = json_encode(array_values(array_map('intval', $catIds)));
+                    $updateStmt = $this->db->prepare("UPDATE menus SET menu_type = 'post_mega', category_source = :source, url = '/blog' WHERE id = :id");
+                    $updateStmt->execute(['source' => $sourceJson, 'id' => $megaMenu['id']]);
+                    if (class_exists('\\App\\Helpers\\Cache')) {
+                        \App\Helpers\Cache::clear();
+                    }
+                }
+            } else {
+                $catStmt = $this->db->query("SELECT id FROM categories WHERE parent_id IS NULL OR parent_id = 0 ORDER BY order_index ASC, id ASC");
+                $catIds = $catStmt ? $catStmt->fetchAll(\PDO::FETCH_COLUMN) : [];
+                $sourceJson = json_encode(array_values(array_map('intval', $catIds)));
+                $stmtInsert = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type, category_source) VALUES ('সবগুলো নিবন্ধ', '/blog', 1, NULL, '', 'post_mega', :source)");
+                $stmtInsert->execute(['source' => $sourceJson]);
+                if (class_exists('\\App\\Helpers\\Cache')) {
+                    \App\Helpers\Cache::clear();
+                }
+            }
+        } catch (\Exception $e) {}
+
         $stmt = $this->db->query("SELECT * FROM menus ORDER BY order_index ASC");
         return $stmt->fetchAll();
     }

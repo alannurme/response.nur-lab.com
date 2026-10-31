@@ -2570,7 +2570,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-links">
                 <?php 
                 if(!empty($data['menus'])): 
-                    $all_menus = $data['menus'];
+                    $legacy_cat_names = ['ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব'];
+                    $all_menus = array_filter($data['menus'], function($m) use ($legacy_cat_names) {
+                        return !(empty($m['parent_id']) && in_array(trim($m['title'] ?? ''), $legacy_cat_names));
+                    });
                     $top_menus = array_filter($all_menus, function($m) { return empty($m['parent_id']); });
                     usort($top_menus, function($a, $b) { return $a['order_index'] <=> $b['order_index']; });
                     
