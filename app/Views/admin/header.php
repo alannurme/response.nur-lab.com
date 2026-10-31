@@ -823,9 +823,6 @@ if (empty($current_page)) {
                         <a href="<?= URLROOT ?>/admin/records" class="<?= in_array($current_page, ['records', 'records_add', 'open_database_records', 'open_database_add', 'open_database']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-list-ul"></i> Record List
                         </a>
-                        <a href="<?= URLROOT ?>/admin/records_persons" class="<?= in_array($current_page, ['records_persons', 'records_person_view']) ? 'active-sub' : '' ?>">
-                            <i class="fas fa-users"></i> Person List
-                        </a>
                         <a href="<?= URLROOT ?>/admin/records_categories" class="<?= in_array($current_page, ['records_categories', 'open_database_categories']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-tags"></i> Categories
                         </a>
