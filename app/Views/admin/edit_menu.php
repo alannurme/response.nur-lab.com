@@ -27,40 +27,40 @@ if (!function_exists('renderCategoryCheckboxTree')) {
 <div class="admin-card" style="max-width: 680px; margin: 0 auto; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; padding: 30px;">
     <div class="justify-content-between d-flex align-items-center mb-4">
         <div>
-            <h3 class="m-0" style="color: #064e3b; font-weight: 800; font-size: 1.4rem;">হেডার মেনু এডিট: <?= htmlspecialchars($data['menu']['title']) ?></h3>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">মূল নেভিগেশন বারের 'সবগুলো নিবন্ধ' মেগামেনুর তথ্য আপডেট করুন</p>
+            <h3 class="m-0" style="color: #064e3b; font-weight: 800; font-size: 1.4rem;">Edit Header Menu: <?= htmlspecialchars($data['menu']['title']) ?></h3>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">Update menu title, URL, icon class, and displayed category tabs</p>
         </div>
-        <a href="<?= URLROOT ?>/admin/menus" class="btn btn-visit-site" style="text-decoration: none;">মেনু তালিকায় ফিরুন</a>
+        <a href="<?= URLROOT ?>/admin/menus" class="btn btn-visit-site" style="text-decoration: none;">Back to Menus</a>
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_menu/<?= $data['menu']['id'] ?>" method="POST">
         <input type="hidden" name="menu_type" value="post_mega">
 
         <div class="form-group mb-4">
-            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">মেনু টাইটেল (Menu Title)</label>
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Menu Title</label>
             <input type="text" name="title" value="<?= htmlspecialchars($data['menu']['title']) ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
-            <small style="color: #64748b; font-size: 13px;">ন্যাভবারে বাটনে যে লেখাটি দেখাবে (যেমন: সবগুলো নিবন্ধ)।</small>
+            <small style="color: #64748b; font-size: 13px;">Label displayed on the navbar button.</small>
         </div>
 
         <div class="form-group mb-4">
-            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">ন্যাভিগেশন URL (Link)</label>
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Navigation URL</label>
             <input type="text" name="url" id="menu_url" value="<?= htmlspecialchars($data['menu']['url'] ?: '/blog') ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
-            <small style="color: #64748b; font-size: 13px;">বাটনে সরাসরি ক্লিক করলে যে লিংকে যাবে (ডিফল্ট: /blog)।</small>
+            <small style="color: #64748b; font-size: 13px;">Target URL when clicked directly (default: /blog).</small>
         </div>
 
         <div class="form-group mb-4">
-            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">আইকন ক্লাস (FontAwesome Icon Class)</label>
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">FontAwesome Icon Class</label>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <input type="text" name="icon" id="menu_icon_input" value="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>" class="form-control" placeholder="fa-solid fa-layer-group" style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
                 <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; border: 1.5px solid #a7f3d0; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #10b981; flex-shrink: 0;">
                     <i id="icon_preview" class="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>"></i>
                 </div>
             </div>
-            <small style="color: #64748b; font-size: 13px;">মেনু টাইটেলের বামে প্রদর্শিত আইকন (যেমন: <code>fa-solid fa-layer-group</code> বা <code>fas fa-book-open</code>)।</small>
+            <small style="color: #64748b; font-size: 13px;">Icon displayed before the menu title (e.g. <code>fa-solid fa-layer-group</code> or <code>fas fa-book-open</code>).</small>
         </div>
 
         <div class="form-group mb-4">
-            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">ডিসপ্লে অর্ডার (Order Index)</label>
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Display Order</label>
             <input type="number" name="order_index" value="<?= (int)$data['menu']['order_index'] ?>" class="form-control" style="border-radius: 12px; padding: 12px 16px; font-weight: 600; width: 120px;">
         </div>
 
@@ -70,27 +70,27 @@ if (!function_exists('renderCategoryCheckboxTree')) {
         ?>
         <div class="form-group mb-4">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: 700; color: #1e293b; margin: 0;">মেগামেনুতে প্রদর্শিত ক্যাটাগরিসমূহ</label>
+                <label style="font-weight: 700; color: #1e293b; margin: 0;">Displayed Categories in Mega Menu</label>
                 <div style="font-size: 13px; display: flex; gap: 10px;">
-                    <a href="javascript:void(0)" onclick="selectAllCats(true)" style="color: var(--primary); font-weight: 600; text-decoration: none;">সবগুলো নির্বাচন করুন</a>
+                    <a href="javascript:void(0)" onclick="selectAllCats(true)" style="color: var(--primary); font-weight: 600; text-decoration: none;">Select All</a>
                     <span style="color: #cbd5e1;">|</span>
-                    <a href="javascript:void(0)" onclick="selectAllCats(false)" style="color: #64748b; font-weight: 600; text-decoration: none;">সব মুছুন</a>
+                    <a href="javascript:void(0)" onclick="selectAllCats(false)" style="color: #64748b; font-weight: 600; text-decoration: none;">Deselect All</a>
                 </div>
             </div>
             <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 18px; max-height: 280px; overflow-y: auto;">
                 <?php if(!empty($data['post_categories'])): ?>
                     <?= renderCategoryCheckboxTree($data['post_categories'], $selected_cats) ?>
                 <?php else: ?>
-                    <p style="color: #64748b; font-style: italic; margin: 0;">কোনো ক্যাটাগরি পাওয়া যায়নি।</p>
+                    <p style="color: #64748b; font-style: italic; margin: 0;">No categories found.</p>
                 <?php endif; ?>
             </div>
             <small style="color: #64748b; font-size: 13px; margin-top: 6px; display: block;">
-                * কোনো ক্যাটাগরি সিলেক্ট না থাকলে স্বয়ংক্রিয়ভাবে সক্রিয় সকল প্রধান ক্যাটাগরি মেগামেনুতে প্রদর্শিত হবে।
+                * If no categories are selected, all active top-level categories will automatically be displayed in the mega menu.
             </small>
         </div>
 
         <button type="submit" class="btn btn-primary w-100" style="height: 52px; font-weight: 700; font-size: 1.05rem; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fas fa-save"></i> পরিবর্তন সংরক্ষণ করুন
+            <i class="fas fa-save"></i> Save Changes
         </button>
     </form>
 </div>

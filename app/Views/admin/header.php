@@ -846,7 +846,7 @@ if (empty($current_page)) {
                     </div>
                     <div class="dropdown-content" <?= $menu_manager_active ? 'style="display: block;"' : '' ?>>
                         <a href="<?= URLROOT ?>/admin/menus" class="<?= in_array($current_page, ['menus', 'add_menu', 'edit_menu']) ? 'active-sub' : '' ?>">
-                            <i class="fas fa-bars"></i> Main Menu (হেডার মেনু)
+                            <i class="fas fa-bars"></i> Main Menu
                         </a>
                         <a href="<?= URLROOT ?>/admin/sub_menus" class="<?= in_array($current_page, ['sub_menus', 'add_sub_menu', 'edit_sub_menu']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-link"></i> Top Menu Bar
