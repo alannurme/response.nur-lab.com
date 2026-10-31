@@ -3231,30 +3231,7 @@
             </div>
         `;
 
-        const count = endNum - startNum + 1;
-        const dbKey = bookDbKeyMap[pageCurrentHadithBook] || ('ben-' + pageCurrentHadithBook);
-
-        // Fetch strictly by Hadith number range (startNum to endNum)
-        const dbUrl = `<?= URLROOT ?>/api/hadith/list?book=${encodeURIComponent(dbKey)}&start_num=${startNum}&end_num=${endNum}&limit=${Math.max(count, 1000)}`;
-
-        fetch(dbUrl).then(async res => {
-            if (!res.ok) throw new Error('DB fetch failed');
-            const data = await res.json();
-            
-            if (data.success && data.hadiths && data.hadiths.length > 0) {
-                const results = data.hadiths.map(h => ({
-                    num: h.num,
-                    ben: h.text_bn,
-                    eng: null,
-                    ara: h.text_ar || null
-                }));
-                renderPageHadithChapterList(results, bookObj, 0, chapterName || (`হাদিস ${toBnNum(startNum)} - ${toBnNum(endNum)}`));
-                return;
-            }
-            renderPageFallbackHadithCard(bookObj.name, startNum);
-        }).catch(() => {
-            renderPageFallbackHadithCard(bookObj.name, startNum);
-        });
+        fetchChapterHadithsFromCDN(pageCurrentHadithBook, startNum, endNum, chapterName, bookObj);
     }
 
     function filterPageHadithSidebar() {
@@ -3371,43 +3348,16 @@
         pageCurrentHadithPage = 1;
         switchSidebarTab('chapter');
         
-        // Fetch hadiths for this DB chapter
-        const dbKey = bookDbKeyMap ? (bookDbKeyMap[bookId] || ('ben-' + bookId)) : ('ben-' + bookId);
-        const body = document.getElementById("pageHadithContentCard");
         const bookObj = pageHadithBookList.find(b => b.id === bookId) || { name: bookId, total: 100 };
-
-        if (!body) return;
-
-        body.innerHTML = `
-            <div style="text-align: center; padding: 60px 0; color: #a7f3d0;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; margin-bottom: 14px; display: block; color: #10b981;"></i>
-                <div style="font-size: 1.1rem; font-weight: 700;">অধ্যায়ের হাদিস লোড হচ্ছে...</div>
-            </div>
-        `;
-
-        fetch(`<?= URLROOT ?>/api/hadith/list?book=${encodeURIComponent(dbKey)}&chapter=${chapterNum}&limit=200`)
-            .then(r => r.ok ? r.json() : Promise.reject())
-            .then(data => {
-                if (data.success && data.hadiths && data.hadiths.length > 0) {
-                    const results = data.hadiths.map(h => ({
-                        num: h.num,
-                        ben: h.text_bn,
-                        eng: null,
-                        ara: h.text_ar || null
-                    }));
-                    // Map chapter name to Bangla if available
-                    const bookKnown = knownChapters[bookId] || [];
-                    const matchedKnown = bookKnown.find(k => k.id === parseInt(chapterNum, 10));
-                    let displayChapName = matchedKnown ? matchedKnown.name : (data.hadiths[0].chapter_name || '');
-                    if (!displayChapName || /^[A-Za-z0-9\s\-_'()]+$/.test(displayChapName)) {
-                        displayChapName = 'অধ্যায় ' + toBnNum(chapterNum);
-                    }
-                    renderPageHadithChapterList(results, bookObj, chapterNum, displayChapName);
-                } else {
-                    renderPageFallbackHadithCard(bookObj.name, 1);
-                }
-            })
-            .catch(() => renderPageFallbackHadithCard(bookObj.name, 1));
+        const bookKnown = knownChapters[bookId] || [];
+        const matchedKnown = bookKnown.find(k => k.id === parseInt(chapterNum, 10));
+        if (matchedKnown) {
+            fetchChapterHadithsFromCDN(bookId, matchedKnown.start, matchedKnown.end, matchedKnown.name, bookObj);
+        } else {
+            const start = (chapterNum - 1) * 50 + 1;
+            const end = chapterNum * 50;
+            fetchChapterHadithsFromCDN(bookId, start, end, `অধ্যায় ${toBnNum(chapterNum)}`, bookObj);
+        }
     }
 
     function renderPageHadithChapterList(hadithList, bookObj, chapterNum, chapterName) {
@@ -3467,7 +3417,7 @@
                         ${chapterName ? '<strong style="color: #34d399;">' + chapterName + '</strong> | ' : ''}মোট <strong style="color: #34d399;">${toBnNum(hadithList.length)}টি</strong> হাদিস
                     </div>
                 </div>
-                <span style="font-size: 0.8rem; background: rgba(16,185,129,0.2); color: #34d399; padding: 4px 12px; border-radius: 12px; font-weight: 700;"><i class="fas fa-database" style="margin-right: 4px;"></i> ডেটাবেজ ক্যাশ</span>
+                <span style="font-size: 0.8rem; background: rgba(16,185,129,0.2); color: #34d399; padding: 4px 12px; border-radius: 12px; font-weight: 700;"><i class="fas fa-bolt" style="margin-right: 4px;"></i> সরাসরি অনলাইন</span>
             </div>
             ${hadithsCardsHtml}
         `;
@@ -3594,25 +3544,26 @@
             return hadithCache[cacheKey];
         }
 
-        // Step 1: Try local DB API first
-        const dbResult = await fetchHadithFromLocalDB(book, num);
-        if (dbResult && dbResult.text_bn) {
-            const res = {
-                num: num,
-                ben: dbResult.text_bn,
-                eng: null,
-                ara: dbResult.text_ar || null
-            };
-            hadithCache[cacheKey] = res;
-            return res;
-        }
+        // Check sessionStorage
+        try {
+            const sCached = sessionStorage.getItem('hadith_' + cacheKey);
+            if (sCached) {
+                const p = JSON.parse(sCached);
+                hadithCache[cacheKey] = p;
+                return p;
+            }
+        } catch(e) {}
 
-        // Step 2: Fall back to CDN APIs
-        const [benText, engText, araText] = await Promise.all([
+        // Fetch directly from ultra-fast CDN APIs (100% database-free)
+        const [benText, araText] = await Promise.all([
             fetchHadithFromCDNs(`ben-${book}`, num),
-            fetchHadithFromCDNs(`eng-${book}`, num),
             fetchHadithFromCDNs(`ara-${book}`, num)
         ]);
+
+        let engText = null;
+        if (!benText) {
+            engText = await fetchHadithFromCDNs(`eng-${book}`, num);
+        }
 
         const res = {
             num: num,
@@ -3622,7 +3573,37 @@
         };
 
         hadithCache[cacheKey] = res;
+        try { sessionStorage.setItem('hadith_' + cacheKey, JSON.stringify(res)); } catch(e) {}
         return res;
+    }
+
+    async function fetchChapterHadithsFromCDN(book, startNum, endNum, chapterName, bookObj) {
+        const body = document.getElementById("pageHadithContentCard");
+        if (body) {
+            body.innerHTML = `
+                <div style="text-align: center; padding: 60px 0; color: #a7f3d0;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; margin-bottom: 14px; display: block; color: #10b981;"></i>
+                    <div style="font-size: 1.1rem; font-weight: 700;">${chapterName || 'অধ্যায়'} (হাদিস ${toBnNum(startNum)} - ${toBnNum(endNum)}) সিডিএন থেকে দ্রুত লোড হচ্ছে...</div>
+                </div>
+            `;
+        }
+        const promises = [];
+        // Limit max in a single chapter display to 50 hadiths for blazing speed
+        const maxEnd = Math.min(endNum, startNum + 49);
+        for (let i = startNum; i <= maxEnd; i++) {
+            promises.push(fetchSingleHadithFast(book, i));
+        }
+        try {
+            const results = await Promise.all(promises);
+            const validResults = results.filter(r => r !== null && (r.ben || r.eng || r.ara));
+            if (validResults.length > 0) {
+                renderPageHadithChapterList(validResults, bookObj, 0, chapterName || (`হাদিস ${toBnNum(startNum)} - ${toBnNum(endNum)}`));
+            } else {
+                renderPageFallbackHadithCard(bookObj.name, startNum);
+            }
+        } catch(e) {
+            renderPageFallbackHadithCard(bookObj.name, startNum);
+        }
     }
 
     function fetchPageHadithBatchData(book, pageNum, highlightNum = null) {
@@ -3644,29 +3625,8 @@
             </div>
         `;
 
-        // Fetch strictly from DB in bulk using offset-based pagination
-        const dbKey = bookDbKeyMap[book] || ('ben-' + book);
-        const dbUrl = `<?= URLROOT ?>/api/hadith/list?book=${encodeURIComponent(dbKey)}&limit=${itemsPerPage}&offset=${startHadith - 1}`;
-
-        fetch(dbUrl).then(async res => {
-            if (!res.ok) throw new Error('DB fetch failed');
-            const data = await res.json();
-            
-            if (data.success && data.hadiths && data.hadiths.length > 0) {
-                // Build results in the expected format
-                const results = data.hadiths.map(h => ({
-                    num: h.num,
-                    ben: h.text_bn,
-                    eng: null,
-                    ara: h.text_ar || null
-                }));
-                renderPageHadithBatchList(results, bookObj, pageNum, highlightNum);
-                return;
-            }
-            renderPageFallbackHadithCard(bookObj.name, startHadith);
-        }).catch(() => {
-            renderPageFallbackHadithCard(bookObj.name, startHadith);
-        });
+        // Directly load from CDN (100% database-free)
+        fetchPageHadithBatchFromCDN(book, pageNum, highlightNum, bookObj, startHadith, endHadith);
     }
 
     async function fetchPageHadithBatchFromCDN(book, pageNum, highlightNum, bookObj, startHadith, endHadith) {
@@ -3782,15 +3742,12 @@
 
         body.innerHTML = `
             <div style="background: rgba(2, 44, 34, 0.75); border: 1px solid rgba(16,185,129,0.25); padding: 40px; border-radius: 20px; text-align: center;">
-                <i class="fas fa-database" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 16px; display: block;"></i>
-                <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">${bookName} - লোকাল ডাটাবেজে হাদিস পাওয়া যায়নি</div>
-                <div style="font-size: 0.95rem; color: #a7f3d0; margin-bottom: 24px;">দয়া করে এডমিন প্যানেল থেকে এই হাদিস গ্রন্থের ডাটা সিঙ্ক করে নিন।</div>
+                <i class="fas fa-wifi" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 16px; display: block;"></i>
+                <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">${bookName} - হাদিস লোড হতে সমস্যা হয়েছে</div>
+                <div style="font-size: 0.95rem; color: #a7f3d0; margin-bottom: 24px;">আপনার ইন্টারনেট সংযোগ পরীক্ষা করে পুনরায় রিফ্রেশ বা চেষ্টা করুন।</div>
                 <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                    <a href="<?= URLROOT ?>/admin/sync_islamic" style="background: #10b981; border: none; color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 0.95rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-sync"></i> এডমিন ডাটা সিঙ্ক পেজ
-                    </a>
-                    <button onclick="location.reload()" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 0.95rem; font-weight: 700; cursor: pointer;">
-                        <i class="fas fa-rotate-right" style="margin-right: 6px;"></i> রিফ্রেশ করুন
+                    <button onclick="location.reload()" style="background: #10b981; border: none; color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-rotate-right"></i> পেজ রিফ্রেশ করুন
                     </button>
                 </div>
             </div>

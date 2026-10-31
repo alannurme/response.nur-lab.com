@@ -4361,43 +4361,6 @@ class Admin extends Controller {
         $action = $_GET['action'] ?? 'status';
         
         $db = \Config\Database::pdoConnect();
-        
-        // Auto-create tables on live server if not exist
-        try {
-            $db->exec("
-                CREATE TABLE IF NOT EXISTS `quran_cache` (
-                    `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    `surah_num`   TINYINT UNSIGNED NOT NULL,
-                    `ayah_num`    SMALLINT UNSIGNED NOT NULL,
-                    `arabic`      TEXT CHARACTER SET utf8mb4 NOT NULL,
-                    `bangla`      TEXT CHARACTER SET utf8mb4 NOT NULL,
-                    `surah_name_bn`    VARCHAR(100) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
-                    `surah_name_ar`    VARCHAR(100) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
-                    `total_ayahs`      SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-                    `cached_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    `updated_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    UNIQUE KEY `uq_surah_ayah` (`surah_num`, `ayah_num`),
-                    KEY `idx_surah` (`surah_num`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            ");
-
-            $db->exec("
-                CREATE TABLE IF NOT EXISTS `hadith_cache` (
-                    `id`           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    `book_key`     VARCHAR(60) NOT NULL,
-                    `chapter_num`  SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-                    `hadith_num`   INT UNSIGNED NOT NULL,
-                    `text_bn`      MEDIUMTEXT CHARACTER SET utf8mb4,
-                    `text_ar`      MEDIUMTEXT CHARACTER SET utf8mb4,
-                    `chapter_name` VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT '',
-                    `cached_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    `updated_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    UNIQUE KEY `uq_book_hadith` (`book_key`, `hadith_num`),
-                    KEY `idx_book` (`book_key`),
-                    KEY `idx_book_chapter` (`book_key`, `chapter_num`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            ");
-        } catch(\Exception $e) {}
 
         // Count quran
         $quranCount = 0;

@@ -6,6 +6,18 @@ class AdminModel extends Model {
     public function __construct() {
         parent::__construct();
         $this->initPagesTable();
+        $this->cleanupDeprecatedIslamicTables();
+    }
+
+    public function cleanupDeprecatedIslamicTables() {
+        $flagFile = WRITEPATH . 'cache/islamic_tables_dropped.flag';
+        if (!file_exists($flagFile)) {
+            try {
+                $this->db->exec("DROP TABLE IF EXISTS `quran_cache`");
+                $this->db->exec("DROP TABLE IF EXISTS `hadith_cache`");
+                @file_put_contents($flagFile, date('Y-m-d H:i:s'));
+            } catch (\Exception $e) {}
+        }
     }
 
     public function initPagesTable() {

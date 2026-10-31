@@ -1381,9 +1381,8 @@ class Home extends Controller {
     }
 
     // ============================================================
-    // LOCAL DB API: Quran Data
+    // FAST LIVE API: Quran - Get Ayahs for a Surah (100% Database-Free)
     // GET /api/quran/surah?num=1
-    // Returns all ayahs of a surah from local DB cache
     // ============================================================
     public function api_quran_surah() {
         header('Content-Type: application/json; charset=utf-8');
@@ -1396,71 +1395,74 @@ class Home extends Controller {
         }
 
         try {
-            $db = \Config\Database::pdoConnect();
-            
-            // Ensure tafsir_text and audio_url columns exist safely
-            try {
-                $db->exec("ALTER TABLE `quran_cache` ADD COLUMN `tafsir_text` MEDIUMTEXT CHARACTER SET utf8mb4 DEFAULT NULL");
-            } catch (\Exception $eEx) {}
-            try {
-                $db->exec("ALTER TABLE `quran_cache` ADD COLUMN `audio_url` VARCHAR(500) CHARACTER SET utf8mb4 DEFAULT NULL");
-            } catch (\Exception $eEx) {}
-            try {
-                $db->exec("ALTER TABLE `quran_cache` ADD COLUMN `transliteration` TEXT CHARACTER SET utf8mb4 DEFAULT NULL");
-            } catch (\Exception $eEx) {}
+            // Live fetch from Al-Quran Cloud (100% database-free)
+            $apiUrl = "https://api.alquran.cloud/v1/surah/{$surahNum}/editions/quran-uthmani,bn.bengali,en.transliteration";
+            $ch = curl_init($apiUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 6,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT      => 'Mozilla/5.0 NurLabApp/1.0',
+            ]);
+            $resp = curl_exec($ch);
+            curl_close($ch);
 
-            $stmt = $db->prepare("
-                SELECT ayah_num, arabic, bangla, transliteration, surah_name_bn, surah_name_ar, total_ayahs, tafsir_text, audio_url
-                FROM quran_cache
-                WHERE surah_num = ?
-                ORDER BY ayah_num ASC
-            ");
-            $stmt->execute([$surahNum]);
-            $rows = $stmt->fetchAll();
+            if ($resp) {
+                $cJson = json_decode($resp, true);
+                if (isset($cJson['data'][0]['ayahs']) && isset($cJson['data'][1]['ayahs'])) {
+                    $uth = $cJson['data'][0];
+                    $bn  = $cJson['data'][1];
+                    $tr  = $cJson['data'][2] ?? null;
 
-            if (empty($rows)) {
-                // No cached data
-                echo json_encode(['success' => false, 'error' => 'not_cached', 'surah' => $surahNum]);
-                exit;
+                    $surahNameBn = $uth['englishName'] ?? "Surah $surahNum";
+                    $surahNameAr = $uth['name'] ?? "سورة $surahNum";
+                    $totalAyahs  = (int)($uth['numberOfAyahs'] ?? count($uth['ayahs']));
+
+                    $ayahs = [];
+                    foreach ($uth['ayahs'] as $idx => $a) {
+                        $aNum   = (int)$a['numberInSurah'];
+                        $arText = $a['text'] ?? '';
+                        $bnText = $bn['ayahs'][$idx]['text'] ?? '';
+                        $trText = $tr['ayahs'][$idx]['text'] ?? '';
+                        $sPad   = str_pad($surahNum, 3, '0', STR_PAD_LEFT);
+                        $aPad   = str_pad($aNum, 3, '0', STR_PAD_LEFT);
+                        $aud    = "https://everyayah.com/data/Alafasy_128kbps/{$sPad}{$aPad}.mp3";
+
+                        $ayahs[] = [
+                            'num'             => $aNum,
+                            'arabic'          => $arText,
+                            'bangla'          => $bnText,
+                            'transliteration' => $trText,
+                            'tafsir'          => null,
+                            'audio'           => $aud
+                        ];
+                    }
+
+                    echo json_encode([
+                        'success'       => true,
+                        'source'        => 'live_api',
+                        'surah'         => $surahNum,
+                        'surah_name_bn' => $surahNameBn,
+                        'surah_name_ar' => $surahNameAr,
+                        'total_ayahs'   => $totalAyahs,
+                        'ayahs'         => $ayahs,
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
             }
 
-            $ayahs = [];
-            $surahNameBn = $rows[0]['surah_name_bn'];
-            $surahNameAr = $rows[0]['surah_name_ar'];
-            $totalAyahs  = $rows[0]['total_ayahs'];
-
-            foreach ($rows as $row) {
-                $sPad = str_pad($surahNum, 3, '0', STR_PAD_LEFT);
-                $aPad = str_pad($row['ayah_num'], 3, '0', STR_PAD_LEFT);
-                $rawAud = $row['audio_url'] ?? '';
-                $decodedAud = json_decode($rawAud, true);
-                $aud = is_array($decodedAud) ? $decodedAud : (!empty($rawAud) ? $rawAud : "https://everyayah.com/data/Alafasy_128kbps/{$sPad}{$aPad}.mp3");
-                
-                $ayahs[] = [
-                    'num'    => (int)$row['ayah_num'],
-                    'arabic' => $row['arabic'],
-                    'bangla' => $row['bangla'],
-                    'transliteration' => $row['transliteration'] ?? null,
-                    'tafsir' => $row['tafsir_text'] ?? null,
-                    'audio'  => $aud
-                ];
-            }
-
-            echo json_encode([
-                'success'       => true,
-                'source'        => 'db_cache',
-                'surah'         => $surahNum,
-                'surah_name_bn' => $surahNameBn,
-                'surah_name_ar' => $surahNameAr,
-                'total_ayahs'   => (int)$totalAyahs,
-                'ayahs'         => $ayahs,
-            ], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => 'not_found', 'surah' => $surahNum]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
         exit;
     }
 
+    // ============================================================
+    // FAST LIVE API: Quran - Get Ayah Tafsir (100% Database-Free)
+    // GET /api/quran/tafsir?surah=1&ayah=1&tafsir=165
+    // ============================================================
     public function api_quran_tafsir() {
         header('Content-Type: application/json; charset=utf-8');
         header('Access-Control-Allow-Origin: *');
@@ -1478,102 +1480,41 @@ class Home extends Controller {
             '168' => "Ma'arif al-Qur'an (English)"
         ];
 
-        try {
-            $db = \Config\Database::pdoConnect();
+        $tafsirTitle = $tafsirNames[$tafsirId] ?? 'তাফসীর';
 
-            // First check local DB if available
-            $stmt = $db->prepare("
-                SELECT tafsir_text, bangla, surah_name_bn
-                FROM quran_cache
-                WHERE surah_num = ? AND ayah_num = ?
-            ");
-            $stmt->execute([$surahNum, $ayahNum]);
-            $row = $stmt->fetch();
+        $apiUrl = "https://api.quran.com/api/v4/quran/tafsirs/{$tafsirId}?verse_key={$surahNum}:{$ayahNum}";
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 IslamicApp/1.0',
+        ]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
 
-            $tafsirTitle = $tafsirNames[$tafsirId] ?? 'তাফসীর';
-
-            if ($row && !empty($row['tafsir_text'])) {
-                $rawT = $row['tafsir_text'];
-                $decodedT = json_decode($rawT, true);
-                
-                $foundText = null;
-                if (is_array($decodedT)) {
-                    $foundText = $decodedT[$tafsirId] ?? ($decodedT['165'] ?? null);
-                } elseif ($tafsirId === '165' || empty($tafsirId)) {
-                    $foundText = $rawT;
-                }
-                
-                if (!empty($foundText)) {
-                    echo json_encode([
-                        'success' => true,
-                        'source'  => 'db_cache',
-                        'tafsir'  => [
-                            'resource_name' => $tafsirTitle . ' (লোকাল ডাটাবেজ)',
-                            'text'          => $foundText
-                        ]
-                    ], JSON_UNESCAPED_UNICODE);
-                    exit;
-                }
-            }
-
-            // Fetch selected Tafsir directly from Quran.com v4 API
-            $apiUrl = "https://api.quran.com/api/v4/quran/tafsirs/{$tafsirId}?verse_key={$surahNum}:{$ayahNum}";
-            $ch = curl_init($apiUrl);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 15,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_USERAGENT      => 'Mozilla/5.0 IslamicApp/1.0',
-            ]);
-            $resp = curl_exec($ch);
-            curl_close($ch);
-
-            if ($resp) {
-                $json = json_decode($resp, true);
-                if (isset($json['tafsirs'][0]['text']) && !empty($json['tafsirs'][0]['text'])) {
-                    echo json_encode([
-                        'success' => true,
-                        'source'  => 'live_api',
-                        'tafsir'  => [
-                            'resource_name' => $tafsirTitle,
-                            'text'          => $json['tafsirs'][0]['text']
-                        ]
-                    ], JSON_UNESCAPED_UNICODE);
-                    exit;
-                }
-            }
-
-            // Fallback to local DB text or default description
-            if ($row && !empty($row['tafsir_text'])) {
+        if ($resp) {
+            $json = json_decode($resp, true);
+            if (isset($json['tafsirs'][0]['text']) && !empty($json['tafsirs'][0]['text'])) {
                 echo json_encode([
                     'success' => true,
-                    'source'  => 'db_fallback',
+                    'source'  => 'live_api',
                     'tafsir'  => [
                         'resource_name' => $tafsirTitle,
-                        'text'          => $row['tafsir_text']
+                        'text'          => $json['tafsirs'][0]['text']
                     ]
                 ], JSON_UNESCAPED_UNICODE);
-            } else {
-                $bnText = $row['bangla'] ?? '';
-                $surahName = $row['surah_name_bn'] ?? '';
-                echo json_encode([
-                    'success' => true,
-                    'source'  => 'default_fallback',
-                    'tafsir'  => [
-                        'resource_name' => $tafsirTitle,
-                        'text'          => '<p><b>' . htmlspecialchars($surahName) . ' - আয়াত ' . $ayahNum . ':</b> ' . htmlspecialchars($bnText) . '</p><p>অনন্ত করুণাময় পরম দয়ালু আল্লাহর নামে শুরু করছি। প্রতিটি গুরুত্বপূর্ণ কাজ শুরু করার পূর্বে বিসমিল্লাহ পাঠ করার নির্দেশ দেওয়া হয়েছে।</p>'
-                    ]
-                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
+
+        echo json_encode(['success' => false, 'error' => 'not_found']);
         exit;
     }
 
     // ============================================================
-    // LOCAL DB API: Hadith - List Books
+    // FAST LIVE API: Hadith - List Books (100% Database-Free)
     // GET /api/hadith/books
     // ============================================================
     public function api_hadith_books() {
@@ -1581,37 +1522,22 @@ class Home extends Controller {
         header('Access-Control-Allow-Origin: *');
 
         $books = [
-            ['key' => 'ben-bukhari',       'name' => 'সহীহ বুখারী',       'name_en' => 'Sahih al-Bukhari'],
-            ['key' => 'ben-muslim',        'name' => 'সহীহ মুসলিম',        'name_en' => 'Sahih Muslim'],
-            ['key' => 'ben-abudawud',      'name' => 'আবু দাউদ',            'name_en' => 'Abu Dawud'],
-            ['key' => 'ben-tirmidhi',      'name' => 'তিরমিযী',             'name_en' => 'Jami at-Tirmidhi'],
-            ['key' => 'ben-nasai',         'name' => 'নাসাঈ',               'name_en' => 'Sunan an-Nasai'],
-            ['key' => 'ben-ibnmajah',      'name' => 'ইবনু মাজাহ',          'name_en' => 'Sunan Ibn Majah'],
-            ['key' => 'ben-malik',         'name' => 'মুয়াত্তা মালিক',      'name_en' => "Muwatta Malik"],
-            ['key' => 'ben-nawawi',        'name' => '৪০ হাদিস (ইমাম নববী)', 'name_en' => 'Forty Hadith Nawawi'],
+            ['key' => 'ben-bukhari',       'name' => 'সহীহ বুখারী',       'name_en' => 'Sahih al-Bukhari', 'total' => 7529],
+            ['key' => 'ben-muslim',        'name' => 'সহীহ মুসলিম',        'name_en' => 'Sahih Muslim', 'total' => 7360],
+            ['key' => 'ben-nasai',         'name' => 'নাসাঈ',               'name_en' => 'Sunan an-Nasai', 'total' => 5656],
+            ['key' => 'ben-abudawud',      'name' => 'আবু দাউদ',            'name_en' => 'Abu Dawud', 'total' => 5270],
+            ['key' => 'ben-tirmidhi',      'name' => 'তিরমিযী',             'name_en' => 'Jami at-Tirmidhi', 'total' => 3895],
+            ['key' => 'ben-ibnmajah',      'name' => 'ইবনু মাজাহ',          'name_en' => 'Sunan Ibn Majah', 'total' => 4336],
+            ['key' => 'ben-malik',         'name' => 'মুয়াত্তা মালিক',      'name_en' => "Muwatta Malik", 'total' => 1749],
+            ['key' => 'ben-nawawi',        'name' => '৪০ হাদিস (ইমাম নববী)', 'name_en' => 'Forty Hadith Nawawi', 'total' => 42],
         ];
-
-        // Enrich with DB counts
-        try {
-            $db = \Config\Database::pdoConnect();
-            $stmt = $db->query("SELECT book_key, COUNT(*) as total FROM hadith_cache GROUP BY book_key");
-            $counts = [];
-            foreach ($stmt->fetchAll() as $r) {
-                $counts[$r['book_key']] = (int)$r['total'];
-            }
-            foreach ($books as &$b) {
-                $b['cached_count'] = $counts[$b['key']] ?? 0;
-            }
-        } catch (\Exception $e) {
-            // Return without counts on error
-        }
 
         echo json_encode(['success' => true, 'books' => $books], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     // ============================================================
-    // LOCAL DB API: Hadith - List Chapters for a Book
+    // FAST LIVE API: Hadith - List Chapters for a Book (100% Database-Free)
     // GET /api/hadith/chapters?book=ben-bukhari
     // ============================================================
     public function api_hadith_chapters() {
@@ -1619,188 +1545,78 @@ class Home extends Controller {
         header('Access-Control-Allow-Origin: *');
 
         $bookKey = trim($_GET['book'] ?? 'ben-bukhari');
-
-        try {
-            $db = \Config\Database::pdoConnect();
-            $stmt = $db->prepare("
-                SELECT chapter_num, chapter_name, COUNT(*) as hadith_count
-                FROM hadith_cache
-                WHERE book_key = ?
-                GROUP BY chapter_num, chapter_name
-                ORDER BY chapter_num ASC
-            ");
-            $stmt->execute([$bookKey]);
-            $rows = $stmt->fetchAll();
-
-            if (empty($rows)) {
-                echo json_encode(['success' => false, 'error' => 'not_cached', 'book' => $bookKey]);
-                exit;
-            }
-
-            $chapters = [];
-            foreach ($rows as $row) {
-                $chapters[] = [
-                    'num'          => (int)$row['chapter_num'],
-                    'name'         => $row['chapter_name'] ?? 'অধ্যায় ' . $row['chapter_num'],
-                    'hadith_count' => (int)$row['hadith_count'],
-                ];
-            }
-
-            echo json_encode([
-                'success'  => true,
-                'source'   => 'db_cache',
-                'book'     => $bookKey,
-                'chapters' => $chapters,
-            ], JSON_UNESCAPED_UNICODE);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
+        echo json_encode(['success' => true, 'source' => 'client_defined', 'book' => $bookKey, 'chapters' => []], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     // ============================================================
-    // LOCAL DB API: Hadith - Get Hadiths for a Book/Chapter
-    // GET /api/hadith/list?book=ben-bukhari&chapter=1
-    // GET /api/hadith/list?book=ben-bukhari&num=1  (single hadith by number)
+    // FAST LIVE API: Hadith - Single Hadith Lookup (100% Database-Free)
+    // GET /api/hadith/list?book=ben-bukhari&num=1
     // ============================================================
     public function api_hadith_list() {
         header('Content-Type: application/json; charset=utf-8');
         header('Access-Control-Allow-Origin: *');
 
-        $bookKey    = trim($_GET['book'] ?? 'ben-bukhari');
-        $chapterNum = isset($_GET['chapter']) ? (int)$_GET['chapter'] : null;
-        $hadithNum  = isset($_GET['num']) ? (int)$_GET['num'] : null;
-        $limit      = min((int)($_GET['limit'] ?? 50), 1000);
-        $startNum   = isset($_GET['start_num']) ? (int)$_GET['start_num'] : null;
-        $endNum     = isset($_GET['end_num']) ? (int)$_GET['end_num'] : null;
-        $offset     = max((int)($_GET['offset'] ?? 0), 0);
+        $bookKey   = trim($_GET['book'] ?? 'ben-bukhari');
+        $hadithNum = isset($_GET['num']) ? (int)$_GET['num'] : null;
 
-        try {
-            $db = \Config\Database::pdoConnect();
+        if ($hadithNum !== null) {
+            $rawKey = preg_replace('/^(ben|ara|eng)-/', '', $bookKey);
+            $cdnBnUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/{$bookKey}/{$hadithNum}.json";
+            $cdnArUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-{$rawKey}/{$hadithNum}.json";
+            
+            $ch = curl_init($cdnBnUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 4,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT      => 'Mozilla/5.0 NurLabApp/1.0',
+            ]);
+            $bnResp = curl_exec($ch);
+            curl_close($ch);
 
-            if ($hadithNum !== null) {
-                // Single hadith lookup
-                $stmt = $db->prepare("
-                    SELECT hadith_num, text_bn, text_ar, chapter_num, chapter_name
-                    FROM hadith_cache
-                    WHERE book_key = ? AND hadith_num = ?
-                    LIMIT 1
-                ");
-                $stmt->execute([$bookKey, $hadithNum]);
-                $row = $stmt->fetch();
+            $bnJson = $bnResp ? json_decode($bnResp, true) : null;
+            $textBn = $bnJson['hadiths'][0]['text'] ?? null;
 
-                if (!$row) {
-                    echo json_encode(['success' => false, 'error' => 'not_found']);
-                    exit;
-                }
+            if ($textBn) {
+                $ch2 = curl_init($cdnArUrl);
+                curl_setopt_array($ch2, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT        => 4,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_USERAGENT      => 'Mozilla/5.0 NurLabApp/1.0',
+                ]);
+                $arResp = curl_exec($ch2);
+                curl_close($ch2);
+                $arJson = $arResp ? json_decode($arResp, true) : null;
+                $textAr = $arJson['hadiths'][0]['text'] ?? null;
 
                 echo json_encode([
                     'success' => true,
-                    'source'  => 'db_cache',
+                    'source'  => 'live_cdn',
                     'hadith'  => [
-                        'num'          => (int)$row['hadith_num'],
-                        'text_bn'      => $row['text_bn'],
-                        'text_ar'      => $row['text_ar'],
-                        'chapter_num'  => (int)$row['chapter_num'],
-                        'chapter_name' => $row['chapter_name'],
+                        'num'          => $hadithNum,
+                        'text_bn'      => $textBn,
+                        'text_ar'      => $textAr,
+                        'chapter_num'  => 0,
+                        'chapter_name' => '',
                     ],
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
-            if ($startNum !== null && $endNum !== null) {
-                // Hadiths strictly by Hadith Number range (e.g. 248 to 293)
-                $stmt = $db->prepare("
-                    SELECT hadith_num, text_bn, text_ar, chapter_num, chapter_name
-                    FROM hadith_cache
-                    WHERE book_key = ? AND hadith_num BETWEEN ? AND ?
-                    ORDER BY hadith_num ASC
-                    LIMIT ?
-                ");
-                $stmt->bindValue(1, $bookKey, \PDO::PARAM_STR);
-                $stmt->bindValue(2, $startNum, \PDO::PARAM_INT);
-                $stmt->bindValue(3, $endNum, \PDO::PARAM_INT);
-                $stmt->bindValue(4, $limit, \PDO::PARAM_INT);
-                $stmt->execute();
-            } elseif ($chapterNum !== null) {
-                // Hadiths for a chapter
-                $stmt = $db->prepare("
-                    SELECT hadith_num, text_bn, text_ar, chapter_num, chapter_name
-                    FROM hadith_cache
-                    WHERE book_key = ? AND chapter_num = ?
-                    ORDER BY hadith_num ASC
-                    LIMIT ? OFFSET ?
-                ");
-                $stmt->bindValue(1, $bookKey, \PDO::PARAM_STR);
-                $stmt->bindValue(2, $chapterNum, \PDO::PARAM_INT);
-                $stmt->bindValue(3, $limit, \PDO::PARAM_INT);
-                $stmt->bindValue(4, $offset, \PDO::PARAM_INT);
-                $stmt->execute();
-            } else {
-                // All hadiths for a book (paginated)
-                $stmt = $db->prepare("
-                    SELECT hadith_num, text_bn, text_ar, chapter_num, chapter_name
-                    FROM hadith_cache
-                    WHERE book_key = ?
-                    ORDER BY hadith_num ASC
-                    LIMIT ? OFFSET ?
-                ");
-                $stmt->bindValue(1, $bookKey, \PDO::PARAM_STR);
-                $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
-                $stmt->bindValue(3, $offset, \PDO::PARAM_INT);
-                $stmt->execute();
-            }
-
-            $rows = $stmt->fetchAll();
-
-            if (empty($rows)) {
-                echo json_encode(['success' => false, 'error' => 'not_cached', 'book' => $bookKey]);
-                exit;
-            }
-
-            // Get total count
-            if ($chapterNum !== null) {
-                $cntStmt = $db->prepare("SELECT COUNT(*) FROM hadith_cache WHERE book_key = ? AND chapter_num = ?");
-                $cntStmt->execute([$bookKey, $chapterNum]);
-            } else {
-                $cntStmt = $db->prepare("SELECT COUNT(*) FROM hadith_cache WHERE book_key = ?");
-                $cntStmt->execute([$bookKey]);
-            }
-            $totalCount = (int)$cntStmt->fetchColumn();
-
-            $hadiths = [];
-            foreach ($rows as $row) {
-                $hadiths[] = [
-                    'num'          => (int)$row['hadith_num'],
-                    'text_bn'      => $row['text_bn'],
-                    'text_ar'      => $row['text_ar'],
-                    'chapter_num'  => (int)$row['chapter_num'],
-                    'chapter_name' => $row['chapter_name'],
-                ];
-            }
-
-            echo json_encode([
-                'success'     => true,
-                'source'      => 'db_cache',
-                'book'        => $bookKey,
-                'chapter'     => $chapterNum,
-                'total'       => $totalCount,
-                'limit'       => $limit,
-                'offset'      => $offset,
-                'hadiths'     => $hadiths,
-            ], JSON_UNESCAPED_UNICODE);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'error' => 'not_found']);
+            exit;
         }
+
+        echo json_encode(['success' => false, 'error' => 'use_cdn_direct'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    // ============================================================
-    // LOCAL DB API: Trigger a background sync (admin-only)
-    // GET /api/sync/quran?secret=KEY&surah=1
-    // GET /api/sync/hadith?secret=KEY&book=ben-bukhari
-    // ============================================================
     public function prayer_times() {
+
         $adminModel = $this->model('AdminModel');
         $data = [
             'title' => 'নামাজের সময়সূচী',

@@ -831,9 +831,6 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/donations" class="nav-item <?= $current_page == 'donations' ? 'active' : '' ?>">
                     <i class="fas fa-hand-holding-heart"></i><span>Donation Logs</span>
                 </a>
-                <a href="<?= URLROOT ?>/admin/sync_islamic" class="nav-item <?= $current_page == 'sync_islamic' ? 'active' : '' ?>">
-                    <i class="fas fa-sync-alt" style="color: #10b981;"></i><span>Islamic Data Sync</span>
-                </a>
             </div>
 
             <div class="nav-group">

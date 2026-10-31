@@ -486,7 +486,7 @@
                     tafsirCache[cacheKey] = data.tafsir;
                     renderTafsirBox(box, data.tafsir, surahNum, ayahNum, tafsirId);
                 } else {
-                    renderTafsirBox(box, { resource_name: "তাফসীর", text: '<div style="color: #f87171; text-align: center; font-size: 0.9rem; padding: 10px;">এই আয়াতের তাফসীর লোকাল ডাটাবেজে পাওয়া যায়নি।</div>' }, surahNum, ayahNum, tafsirId);
+                    renderTafsirBox(box, { resource_name: "তাফসীর", text: '<div style="color: #f87171; text-align: center; font-size: 0.9rem; padding: 10px;">এই আয়াতের তাফসীর পাওয়া যায়নি।</div>' }, surahNum, ayahNum, tafsirId);
                 }
             })
             .catch(err => {
@@ -889,16 +889,35 @@ ${enText}`;
             body.innerHTML = `
                 <div style="text-align: center; padding: 70px 0; color: #a7f3d0;">
                     <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; margin-bottom: 14px; display: block; color: #34d399;"></i>
-                    <div style="font-size: 1.1rem; font-weight: 700;">সূরা ${toBnNum(surahNum)}-এর আয়াতসমূহ ডাটাবেজ থেকে লোড হচ্ছে...</div>
+                    <div style="font-size: 1.1rem; font-weight: 700;">সূরা ${toBnNum(surahNum)}-এর আয়াতসমূহ লোড হচ্ছে...</div>
                 </div>
             `;
         }
 
+        // 1. Instant Cache Check (sessionStorage)
+        const qCacheKey = "quran_surah_v2_" + surahNum;
+        try {
+            const cachedStr = sessionStorage.getItem(qCacheKey);
+            if (cachedStr) {
+                const parsed = JSON.parse(cachedStr);
+                if (parsed && parsed.uthmani && parsed.bengali && parsed.uthmani.ayahs && parsed.uthmani.ayahs.length > 0) {
+                    pageLoadedAyahsData = parsed;
+                    if (title) title.innerHTML = `${toBnNum(parsed.uthmani.number)}. ${parsed.bnName}`;
+                    if (sub) sub.innerText = `পবিত্র কুরআন • ${toBnNum(parsed.uthmani.numberOfAyahs)}টি আয়াত`;
+                    renderPageQuranAyahs(pageLoadedAyahsData);
+                    return;
+                }
+            }
+        } catch(e) {}
+
         let uthmani = null, bengali = null, english = null, audioRec = null;
 
-        // Fetch exclusively from Local Database API
+        // 2. Fetch from Local Database API (with fast 2.5s timeout)
         try {
-            const dbRes = await fetch(`<?= URLROOT ?>/api/quran/surah?num=${surahNum}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const dbRes = await fetch(`<?= URLROOT ?>/api/quran/surah?num=${surahNum}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (dbRes.ok) {
                 const dbJson = await dbRes.json();
                 if (dbJson && dbJson.success && dbJson.ayahs && dbJson.ayahs.length > 0) {
@@ -956,16 +975,121 @@ ${enText}`;
                 }
             }
         } catch (dbErr) {
-            console.error("Local DB API load error for Surah", dbErr);
+            console.log("Local DB API pass-through for Surah", surahNum);
+        }
+
+        // 3. Fallback to Ultra-Fast AlQuran Cloud Public API
+        if (!uthmani) {
+            try {
+                const apiRes = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/editions/quran-uthmani,bn.bengali,en.transliteration`);
+                if (apiRes.ok) {
+                    const apiJson = await apiRes.json();
+                    if (apiJson && apiJson.code === 200 && apiJson.data && apiJson.data.length >= 2) {
+                        const uthEdition = apiJson.data[0];
+                        const bnEdition = apiJson.data[1];
+                        const trEdition = apiJson.data[2] || null;
+
+                        const ayahsList = uthEdition.ayahs.map(a => ({
+                            numberInSurah: a.numberInSurah,
+                            text: a.text || ""
+                        }));
+                        const bnAyahsList = bnEdition.ayahs.map((a, idx) => ({
+                            numberInSurah: a.numberInSurah,
+                            text: a.text || "",
+                            transliteration: (trEdition && trEdition.ayahs && trEdition.ayahs[idx]) ? trEdition.ayahs[idx].text : ""
+                        }));
+
+                        const reciterSelect = document.getElementById("pageQuranReciterSelect");
+                        const selectedReciter = reciterSelect ? reciterSelect.value : "ar.alafasy";
+
+                        const audioAyahsList = uthEdition.ayahs.map(a => {
+                            const ayahNum = a.numberInSurah;
+                            const sPad = String(surahNum).padStart(3, '0');
+                            const aPad = String(ayahNum).padStart(3, '0');
+                            return {
+                                numberInSurah: ayahNum,
+                                audio: `https://everyayah.com/data/Alafasy_128kbps/${sPad}${aPad}.mp3`,
+                                secondaryAudio: `https://cdn.islamic.network/quran/audio/128/${selectedReciter}/${a.number}.mp3`
+                            };
+                        });
+
+                        uthmani = {
+                            number: surahNum,
+                            name: uthEdition.name || `سورة ${surahNum}`,
+                            englishName: bnSurahNames[surahNum] || uthEdition.englishName || `Surah ${surahNum}`,
+                            englishNameTranslation: uthEdition.englishNameTranslation || "",
+                            revelationType: uthEdition.revelationType || "Meccan",
+                            numberOfAyahs: uthEdition.numberOfAyahs || ayahsList.length,
+                            ayahs: ayahsList
+                        };
+                        bengali = { ayahs: bnAyahsList };
+                        english = { ayahs: [] };
+                        audioRec = { ayahs: audioAyahsList };
+                    }
+                }
+            } catch (cloudErr) {
+                console.warn("AlQuran Cloud API error:", cloudErr);
+            }
+        }
+
+        // 4. Fallback to Fawaz Ahmed Quran API on jsDelivr CDN
+        if (!uthmani) {
+            try {
+                const [arRes, bnRes] = await Promise.all([
+                    fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranindopak/${surahNum}.json`),
+                    fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ben-muhiuddinkhan/${surahNum}.json`)
+                ]);
+                if (arRes.ok && bnRes.ok) {
+                    const arJson = await arRes.json();
+                    const bnJson = await bnRes.json();
+                    const arAyahs = arJson.chapter || [];
+                    const bnAyahs = bnJson.chapter || [];
+
+                    const ayahsList = arAyahs.map(a => ({
+                        numberInSurah: a.verse,
+                        text: a.text
+                    }));
+                    const bnAyahsList = bnAyahs.map(a => ({
+                        numberInSurah: a.verse,
+                        text: a.text,
+                        transliteration: ""
+                    }));
+
+                    const audioAyahsList = arAyahs.map(a => {
+                        const sPad = String(surahNum).padStart(3, '0');
+                        const aPad = String(a.verse).padStart(3, '0');
+                        return {
+                            numberInSurah: a.verse,
+                            audio: `https://everyayah.com/data/Alafasy_128kbps/${sPad}${aPad}.mp3`,
+                            secondaryAudio: ""
+                        };
+                    });
+
+                    uthmani = {
+                        number: surahNum,
+                        name: `سورة ${surahNum}`,
+                        englishName: bnSurahNames[surahNum] || `Surah ${surahNum}`,
+                        englishNameTranslation: "",
+                        revelationType: "Meccan",
+                        numberOfAyahs: ayahsList.length,
+                        ayahs: ayahsList
+                    };
+                    bengali = { ayahs: bnAyahsList };
+                    english = { ayahs: [] };
+                    audioRec = { ayahs: audioAyahsList };
+                }
+            } catch(cdnErr) {
+                console.error("Quran CDN fallback error:", cdnErr);
+            }
         }
 
         if (!uthmani) {
             if (body) {
                 body.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px dashed rgba(239,68,68,0.4); color: #f87171;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 14px; display: block; color: #f59e0b;"></i>
-                        <div style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">সূরা ${toBnNum(surahNum)} ডাটাবেজে পাওয়া যায়নি</div>
-                        <div style="font-size: 0.88rem; color: #a7f3d0; margin-bottom: 20px;">দয়া করে এডমিন প্যানেল থেকে ডাটা সিঙ্ক করুন।</div>
+                        <i class="fas fa-wifi" style="font-size: 2.5rem; margin-bottom: 14px; display: block; color: #f59e0b;"></i>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">সূরা ${toBnNum(surahNum)} লোড হতে সমস্যা হয়েছে</div>
+                        <div style="font-size: 0.88rem; color: #a7f3d0; margin-bottom: 20px;">আপনার ইন্টারনেট সংযোগ পরীক্ষা করে পুনরায় চেষ্টা করুন।</div>
                         <button onclick="loadPageSurahDetail(${surahNum})" style="background: #10b981; border: none; color: #ffffff; padding: 10px 24px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
                             <i class="fas fa-rotate-right"></i> পুনরায় চেষ্টা করুন
                         </button>
@@ -978,8 +1102,13 @@ ${enText}`;
         const bnName = bnSurahNames[surahNum] ? `সূরা ${bnSurahNames[surahNum]}` : `সূরা ${uthmani.englishName}`;
         pageLoadedAyahsData = { uthmani, bengali, english, audioRec, surahNum, bnName };
 
+        // Save in sessionStorage for instant reuse
+        try {
+            sessionStorage.setItem(qCacheKey, JSON.stringify(pageLoadedAyahsData));
+        } catch(e) {}
+
         if (title) title.innerHTML = `${toBnNum(uthmani.number)}. ${bnName}`;
-        if (sub) sub.innerText = `ডাটাবেজ থেকে লোডকৃত • ${toBnNum(uthmani.numberOfAyahs)}টি আয়াত`;
+        if (sub) sub.innerText = `পবিত্র কুরআন • ${toBnNum(uthmani.numberOfAyahs)}টি আয়াত`;
 
         let surahHeaderHtml = `
             <div style="background: rgba(2, 44, 34, 0.85); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 24px; position: relative; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.3); box-sizing: border-box;">
