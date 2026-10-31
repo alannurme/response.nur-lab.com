@@ -1,6 +1,6 @@
 <?php require APPROOT . '/Views/admin/header.php'; ?>
 
-<div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+<div class="admin-header" style="margin-bottom: 25px;">
     <div>
         <h1 class="text-premium-glow" style="font-family: 'Hind Siliguri', sans-serif; font-size: 1.8rem; margin: 0 0 6px;">
             <i class="fab fa-google-drive" style="color: #0f9d58; font-size: 1.8rem; vertical-align: middle;"></i> Google Drive ক্লাউড স্টোরেজ
@@ -9,13 +9,6 @@
             ওয়েবসাইটের সকল ফাইল, ছবি ও মিডিয়া গুগল ড্রাইভে সংরক্ষণ করুন এবং ১-ক্লিকে অটো-কানেক্ট পরিচালনা করুন।
         </p>
     </div>
-    <?php if (!empty($data['settings']['gdrive_oauth_client_id']) && !empty($data['settings']['gdrive_oauth_client_secret'])): ?>
-    <div>
-        <a href="<?= URLROOT ?>/admin/gdrive_oauth_init" class="btn" style="background: #0f9d58; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 14px rgba(15, 157, 88, 0.25); text-decoration: none; transition: 0.2s;">
-            <i class="fab fa-google"></i> + Connect New Google Drive
-        </a>
-    </div>
-    <?php endif; ?>
 </div>
 
 <?php if (!empty($data['success'])): ?>
@@ -148,20 +141,13 @@
 
     <!-- Connected Google Drives List -->
     <div style="background: white; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-            <div>
-                <h3 style="margin: 0 0 5px; color: #0f172a; font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; font-family: 'Hind Siliguri', sans-serif;">
-                    <i class="fab fa-google-drive" style="color: #0f9d58;"></i> কানেক্টেড গুগল ড্রাইভসমূহ (Connected Accounts)
-                </h3>
-                <p style="margin: 0; color: #64748b; font-size: 0.88rem;">
-                    ১-ক্লিকে যুক্ত হওয়া সক্রিয় গুগল ড্রাইভ একাউন্টসমূহ।
-                </p>
-            </div>
-            <?php if (!empty($data['settings']['gdrive_oauth_client_id']) && !empty($data['settings']['gdrive_oauth_client_secret'])): ?>
-                <a href="<?= URLROOT ?>/admin/gdrive_oauth_init" class="btn" style="background: #0f9d58; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(15, 157, 88, 0.25);">
-                    <i class="fas fa-plus"></i> + নতুন ড্রাইভ যুক্ত করুন
-                </a>
-            <?php endif; ?>
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 5px; color: #0f172a; font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; font-family: 'Hind Siliguri', sans-serif;">
+                <i class="fab fa-google-drive" style="color: #0f9d58;"></i> কানেক্টেড গুগল ড্রাইভসমূহ (Connected Accounts)
+            </h3>
+            <p style="margin: 0; color: #64748b; font-size: 0.88rem;">
+                ১-ক্লিকে যুক্ত হওয়া সক্রিয় গুগল ড্রাইভ একাউন্টসমূহ।
+            </p>
         </div>
 
         <input type="hidden" name="settings[google_drives]" id="google_drives_json" value="<?= htmlspecialchars($data['settings']['google_drives'] ?? '[]', ENT_QUOTES, 'UTF-8') ?>">
