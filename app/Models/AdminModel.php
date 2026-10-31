@@ -1578,18 +1578,16 @@ class AdminModel extends Model {
 
     // Menu Management
     public function getMenus() {
-        // Self-healing migration for Live Server: Ensure only 'সবগুলো নিবন্ধ' is the main mega menu, remove legacy separated category menus if present
+        // Self-healing migration for Live Server: Ensure ONLY 'সবগুলো নিবন্ধ' is the main top-level menu
         try {
-            $checkLegacy = $this->db->query("SELECT id FROM menus WHERE title IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব') AND (parent_id IS NULL OR parent_id = 0)")->fetchAll();
-            if (!empty($checkLegacy)) {
-                $this->db->exec("DELETE FROM menus WHERE title IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব') AND (parent_id IS NULL OR parent_id = 0)");
-                if (class_exists('\\App\\Helpers\\Cache')) {
-                    \App\Helpers\Cache::clear();
-                }
+            // Delete ANY legacy top-level menus (like 'ধর্মতত্ব', 'ধর্মতত্ত্ব', 'ইসলাম', etc.)
+            $this->db->exec("DELETE FROM menus WHERE (parent_id IS NULL OR parent_id = 0) AND TRIM(title) != 'সবগুলো নিবন্ধ'");
+            if (class_exists('\\App\\Helpers\\Cache')) {
+                \App\Helpers\Cache::clear();
             }
 
             // Ensure 'সবগুলো নিবন্ধ' has menu_type = 'post_mega' and proper category_source
-            $stmtMega = $this->db->query("SELECT id, menu_type, category_source FROM menus WHERE title = 'সবগুলো নিবন্ধ' LIMIT 1");
+            $stmtMega = $this->db->query("SELECT id, menu_type, category_source FROM menus WHERE TRIM(title) = 'সবগুলো নিবন্ধ' LIMIT 1");
             $megaMenu = $stmtMega ? $stmtMega->fetch() : null;
             if ($megaMenu) {
                 if ($megaMenu['menu_type'] !== 'post_mega' || empty($megaMenu['category_source']) || $megaMenu['category_source'] === '[]') {

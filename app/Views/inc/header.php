@@ -2570,11 +2570,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-links">
                 <?php 
                 if(!empty($data['menus'])): 
-                    $legacy_cat_names = ['ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ত্ব'];
-                    $all_menus = array_filter($data['menus'], function($m) use ($legacy_cat_names) {
-                        return !(empty($m['parent_id']) && in_array(trim($m['title'] ?? ''), $legacy_cat_names));
+                    // ONLY keep 'সবগুলো নিবন্ধ' as the top-level main menu in navbar
+                    $top_menus = array_filter($data['menus'], function($m) { 
+                        return empty($m['parent_id']) && (trim($m['title'] ?? '') === 'সবগুলো নিবন্ধ'); 
                     });
-                    $top_menus = array_filter($all_menus, function($m) { return empty($m['parent_id']); });
                     usort($top_menus, function($a, $b) { return $a['order_index'] <=> $b['order_index']; });
                     
                     $db = \Config\Database::pdoConnect();
@@ -2583,12 +2582,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         $menu_type = $menu['menu_type'] ?? 'custom';
                         
                         if ($menu_type === 'post_mega'):
-                            $cat_ids = json_decode($menu['category_source'] ?? '[]', true);
-                            if (!empty($cat_ids)):
-                                $in_placeholder = implode(',', array_fill(0, count($cat_ids), '?'));
-                                $stmt = $db->prepare("SELECT * FROM categories WHERE id IN ($in_placeholder) ORDER BY order_index ASC, name ASC");
-                                $stmt->execute(array_values($cat_ids));
-                                $categories = $stmt->fetchAll();
+                            // Automatically fetch all active top-level categories dynamically so newly added categories appear instantly in সবগুলো নিবন্ধ
+                            $stmt = $db->query("SELECT * FROM categories WHERE (parent_id IS NULL OR parent_id = 0) ORDER BY order_index ASC, name ASC");
+                            $categories = $stmt->fetchAll();
+                            if (!empty($categories)):
                                 ?>
                                 <li class="nav-item-megamenu">
                                     <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger btn-nav-categories">
