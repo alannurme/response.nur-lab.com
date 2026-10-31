@@ -47,7 +47,7 @@ class Admin extends Controller {
         }
 
         $uri = service('request')->getUri()->getPath();
-        $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false));
+        $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false) || strpos($uri, 'gdrive_oauth_callback') !== false);
 
         $isAjaxRoute = (strpos($uri, 'ajax_') !== false);
 
@@ -5245,8 +5245,8 @@ class Admin extends Controller {
             exit;
         }
 
-        if (empty($code) || empty($state) || $state !== ($_SESSION['gdrive_oauth_state'] ?? '')) {
-            $_SESSION['flash_error'] = 'অথোরাইজেশন সেশন অকার্যকর বা মেয়াদোত্তীর্ণ। আবার চেষ্টা করুন।';
+        if (empty($code)) {
+            $_SESSION['flash_error'] = 'অথোরাইজেশন কোড পাওয়া যায়নি। আবার চেষ্টা করুন।';
             header('Location: ' . URLROOT . '/admin/storage_settings');
             exit;
         }
