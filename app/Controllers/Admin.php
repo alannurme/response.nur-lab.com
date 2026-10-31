@@ -1140,7 +1140,8 @@ class Admin extends Controller {
                                 if (!empty($driveResult['url'])) {
                                     $file_url = $driveResult['url'];
                                 }
-                                if (($currentSettings['gdrive_sync_local'] ?? '1') !== '1') {
+                                // If uploaded specifically to google_drive tab or sync is off, always delete the temporary local file
+                                if ($uploadDestination === 'google_drive' || ($currentSettings['gdrive_sync_local'] ?? '0') !== '1') {
                                     @unlink($upload_dir . $file_name);
                                 }
                             } catch (\Exception $e) {
