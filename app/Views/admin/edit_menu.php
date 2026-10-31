@@ -22,19 +22,21 @@ if (!function_exists('renderCategoryCheckboxTree')) {
         return $html;
     }
 }
+
+$is_post_mega = ($data['menu']['menu_type'] ?? '') === 'post_mega';
 ?>
 
 <div class="admin-card" style="max-width: 680px; margin: 0 auto; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; padding: 30px;">
     <div class="justify-content-between d-flex align-items-center mb-4">
         <div>
-            <h3 class="m-0" style="color: #064e3b; font-weight: 800; font-size: 1.4rem;">Edit Header Menu: <?= htmlspecialchars($data['menu']['title']) ?></h3>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">Update menu title, URL, icon class, and displayed category tabs</p>
+            <h3 class="m-0" style="color: #064e3b; font-weight: 800; font-size: 1.4rem;">Edit Menu: <?= htmlspecialchars($data['menu']['title']) ?></h3>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">Update navigation title, URL, icon class, and display order</p>
         </div>
         <a href="<?= URLROOT ?>/admin/menus" class="btn btn-visit-site" style="text-decoration: none;">Back to Menus</a>
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_menu/<?= $data['menu']['id'] ?>" method="POST">
-        <input type="hidden" name="menu_type" value="post_mega">
+        <input type="hidden" name="menu_type" value="<?= $is_post_mega ? 'post_mega' : 'custom' ?>">
 
         <div class="form-group mb-4">
             <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Menu Title</label>
@@ -44,26 +46,50 @@ if (!function_exists('renderCategoryCheckboxTree')) {
 
         <div class="form-group mb-4">
             <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Navigation URL</label>
-            <input type="text" name="url" id="menu_url" value="<?= htmlspecialchars($data['menu']['url'] ?: '/blog') ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
-            <small style="color: #64748b; font-size: 13px;">Target URL when clicked directly (default: /blog).</small>
+            <input type="text" name="url" id="menu_url" value="<?= htmlspecialchars($data['menu']['url'] ?: '#') ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+            <small style="color: #64748b; font-size: 13px;">Target URL when clicked directly (e.g. /blog or /admin/open_database_records).</small>
         </div>
 
         <div class="form-group mb-4">
             <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">FontAwesome Icon Class</label>
             <div style="display: flex; align-items: center; gap: 12px;">
-                <input type="text" name="icon" id="menu_icon_input" value="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>" class="form-control" placeholder="fa-solid fa-layer-group" style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+                <input type="text" name="icon" id="menu_icon_input" value="<?= htmlspecialchars($data['menu']['icon'] ?: 'fas fa-link') ?>" class="form-control" placeholder="fas fa-link" style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
                 <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; border: 1.5px solid #a7f3d0; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #10b981; flex-shrink: 0;">
-                    <i id="icon_preview" class="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>"></i>
+                    <i id="icon_preview" class="<?= htmlspecialchars($data['menu']['icon'] ?: 'fas fa-link') ?>"></i>
                 </div>
             </div>
-            <small style="color: #64748b; font-size: 13px;">Icon displayed before the menu title (e.g. <code>fa-solid fa-layer-group</code> or <code>fas fa-book-open</code>).</small>
+            <small style="color: #64748b; font-size: 13px;">Icon displayed before the menu title (e.g. <code>fas fa-database</code> or <code>fas fa-plus-circle</code>).</small>
         </div>
+
+        <?php if (!$is_post_mega): ?>
+        <div class="form-group mb-4">
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Parent Menu</label>
+            <select name="parent_id" class="form-control" style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+                <option value="">None (Top Level Menu)</option>
+                <?php if(!empty($data['menus'])): ?>
+                    <?php 
+                    $top_levels = array_filter($data['menus'], function($m) { return empty($m['parent_id']); });
+                    foreach($top_levels as $top):
+                        if ($top['id'] == $data['menu']['id']) continue; // Cannot be own parent
+                    ?>
+                        <option value="<?= $top['id'] ?>" <?= $data['menu']['parent_id'] == $top['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($top['title']) ?> (Top Level)
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </select>
+            <small style="color: #64748b; font-size: 13px;">Select parent menu if this is a dropdown sub-item (e.g. Open Database).</small>
+        </div>
+        <?php else: ?>
+        <input type="hidden" name="parent_id" value="">
+        <?php endif; ?>
 
         <div class="form-group mb-4">
             <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">Display Order</label>
             <input type="number" name="order_index" value="<?= (int)$data['menu']['order_index'] ?>" class="form-control" style="border-radius: 12px; padding: 12px 16px; font-weight: 600; width: 120px;">
         </div>
 
+        <?php if ($is_post_mega): ?>
         <?php 
         $selected_cats = json_decode($data['menu']['category_source'] ?? '[]', true);
         if (!is_array($selected_cats)) $selected_cats = [];
@@ -88,6 +114,7 @@ if (!function_exists('renderCategoryCheckboxTree')) {
                 * If no categories are selected, all active top-level categories will automatically be displayed in the mega menu.
             </small>
         </div>
+        <?php endif; ?>
 
         <button type="submit" class="btn btn-primary w-100" style="height: 52px; font-weight: 700; font-size: 1.05rem; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <i class="fas fa-save"></i> Save Changes
@@ -101,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconPreview = document.getElementById('icon_preview');
     if (iconInput && iconPreview) {
         iconInput.addEventListener('input', function() {
-            iconPreview.className = this.value.trim() || 'fa-solid fa-layer-group';
+            iconPreview.className = this.value.trim() || 'fas fa-link';
         });
     }
 });

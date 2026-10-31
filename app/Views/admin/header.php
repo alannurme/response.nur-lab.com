@@ -812,6 +812,25 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/comments" class="nav-item <?= $current_page == 'comments' ? 'active' : '' ?>">
                     <i class="fas fa-comments"></i><span>Comments</span>
                 </a>
+
+                <?php $open_db_active = in_array($current_page, ['open_database', 'open_database_add', 'open_database_records', 'open_database_verification']); ?>
+                <div class="dropdown-wrapper">
+                    <div class="nav-item has-dropdown <?= $open_db_active ? 'active' : '' ?>">
+                        <i class="fas fa-database"></i><span>Open Database</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
+                    <div class="dropdown-content" <?= $open_db_active ? 'style="display: block;"' : '' ?>>
+                        <a href="<?= URLROOT ?>/admin/open_database_add" class="<?= $current_page == 'open_database_add' ? 'active-sub' : '' ?>">
+                            <i class="fas fa-plus-circle"></i> Add Record
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/open_database_records" class="<?= $current_page == 'open_database_records' || $current_page == 'open_database' ? 'active-sub' : '' ?>">
+                            <i class="fas fa-list-ul"></i> Record List
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/open_database_verification" class="<?= $current_page == 'open_database_verification' ? 'active-sub' : '' ?>">
+                            <i class="fas fa-check-double"></i> Verification Section
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div class="nav-group">

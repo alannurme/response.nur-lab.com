@@ -1532,14 +1532,11 @@ class AdminModel extends Model {
         return $stmt->execute(['id' => $id]);
     }
 
-    // Menu Management: Manage ONLY 'সবগুলো নিবন্ধ' (Mega Menu)
+    // Menu Management: Manage 'সবগুলো নিবন্ধ' & 'Open Database'
     public function getMenus() {
         try {
-            // Delete legacy/dummy menus so ONLY 'সবগুলো নিবন্ধ' (post_mega) remains in the database
-            $this->db->exec("DELETE FROM menus WHERE menu_type != 'post_mega' AND TRIM(title) != 'সবগুলো নিবন্ধ'");
-            if (class_exists('\\App\\Helpers\\Cache')) {
-                \App\Helpers\Cache::clear();
-            }
+            // Delete old template dummy services if any
+            $this->db->exec("DELETE FROM menus WHERE TRIM(title) IN ('SOFTWARE SOLUTIONS (SAAS)', 'ISP MANAGMENT SYSTEM', 'EduNur School, College & Madrasha Management Software', 'POS SOFTWARE', 'ADVOCATE GO - Complete Legal Case Management Solution', 'Our Physical Product', 'SECURE CHAT', 'Use Your Android Phone as SMS/MMS Gateway', 'WEB DEVELOPMENT', 'INTERNET SERVICE', 'CYBER SECURITY SERVICES', 'GRAPHICS & BRANDING', 'Services')");
 
             // Ensure 'সবগুলো নিবন্ধ' exists, has menu_type = 'post_mega' and default icon
             $stmtMega = $this->db->query("SELECT id, menu_type, icon, category_source FROM menus WHERE TRIM(title) = 'সবগুলো নিবন্ধ' OR menu_type = 'post_mega' LIMIT 1");
@@ -1555,13 +1552,22 @@ class AdminModel extends Model {
                 $sourceJson = json_encode(array_values(array_map('intval', $catIds)));
                 $stmtInsert = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type, category_source) VALUES ('সবগুলো নিবন্ধ', '/blog', 1, NULL, 'fa-solid fa-layer-group', 'post_mega', :source)");
                 $stmtInsert->execute(['source' => $sourceJson]);
-                if (class_exists('\\App\\Helpers\\Cache')) {
-                    \App\Helpers\Cache::clear();
-                }
+            }
+
+            // Ensure 'Open Database' exists as a direct top-level menu
+            $stmtOpenDb = $this->db->query("SELECT id FROM menus WHERE TRIM(title) = 'Open Database' AND parent_id IS NULL LIMIT 1");
+            $openDb = $stmtOpenDb ? $stmtOpenDb->fetch() : null;
+            if (!$openDb) {
+                $ins = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type) VALUES ('Open Database', '/open_database', 2, NULL, 'fas fa-database', 'custom')");
+                $ins->execute();
+            }
+
+            if (class_exists('\\App\\Helpers\\Cache')) {
+                \App\Helpers\Cache::clear();
             }
         } catch (\Exception $e) {}
 
-        $stmt = $this->db->query("SELECT * FROM menus WHERE menu_type = 'post_mega' OR TRIM(title) = 'সবগুলো নিবন্ধ' ORDER BY order_index ASC LIMIT 1");
+        $stmt = $this->db->query("SELECT * FROM menus ORDER BY order_index ASC, id ASC");
         return $stmt->fetchAll();
     }
 

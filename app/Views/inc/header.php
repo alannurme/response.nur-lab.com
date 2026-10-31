@@ -1018,6 +1018,143 @@ if (!function_exists('getBengaliDate')) {
             transform: rotate(180deg);
         }
 
+        .nav-links a.nav-regular-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-links a.nav-regular-link i {
+            color: #0b7c4d;
+            font-size: 14px;
+            transition: transform 0.25s ease;
+        }
+        .nav-links a.nav-regular-link:hover {
+            color: #0b7c4d;
+            background: rgba(11, 124, 77, 0.05);
+        }
+        .nav-links a.nav-regular-link:hover i {
+            transform: scale(1.15);
+        }
+        .glass-nav .nav-item-dropdown {
+            display: flex;
+            align-items: stretch;
+            position: relative;
+        }
+        .glass-nav .dropdown-trigger {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+            padding: 0 20px !important;
+            border-radius: 0 !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            height: 100% !important;
+            min-height: 66px !important;
+            margin: 0 !important;
+            border-right: 1px solid #e2e8f0 !important;
+            border-left: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            transition: all 0.25s ease !important;
+            text-decoration: none !important;
+            box-sizing: border-box !important;
+            cursor: pointer;
+        }
+        .glass-nav .dropdown-trigger::after {
+            display: none !important;
+        }
+        .glass-nav .dropdown-trigger:hover,
+        .glass-nav .nav-item-dropdown.open .dropdown-trigger {
+            background: #e2e8f0 !important;
+            color: #0b7c4d !important;
+        }
+        .glass-nav .dropdown-trigger i {
+            color: #0b7c4d;
+            font-size: 14px;
+        }
+        .glass-nav .dropdown-trigger .megamenu-toggle-arrow i {
+            color: #64748b;
+            font-size: 11px;
+            transition: transform 0.25s ease;
+        }
+        .glass-nav .nav-item-dropdown.open .dropdown-trigger .megamenu-toggle-arrow i {
+            color: #0b7c4d;
+            transform: rotate(180deg);
+        }
+        .glass-nav .submenu-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            transform: translateY(8px);
+            background: #043e2f;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 16px;
+            width: 240px;
+            list-style: none;
+            padding: 10px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+            z-index: 9999;
+            margin: 0;
+        }
+        .glass-nav .nav-item-dropdown.open .submenu-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0s;
+        }
+        .glass-nav .submenu-dropdown li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border: none !important;
+        }
+        .glass-nav .submenu-dropdown li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            color: #ecfdf5 !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            background: transparent !important;
+            border: none !important;
+            height: auto !important;
+            min-height: auto !important;
+        }
+        .glass-nav .submenu-dropdown li a i {
+            color: #10b981 !important;
+            font-size: 13px;
+            width: 18px;
+            text-align: center;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .glass-nav .submenu-dropdown li a:hover {
+            background: rgba(16, 185, 129, 0.16) !important;
+            color: #34d399 !important;
+            padding-left: 20px;
+        }
+        .glass-nav .submenu-dropdown li a:hover i {
+            color: #34d399 !important;
+            transform: scale(1.15);
+        }
+
         .btn-premium {
             background: var(--primary);
             color: white;
@@ -2775,7 +2912,14 @@ if (!$is_islamic_dedicated_page):
                             
                             if (empty($tier2)):
                                 ?>
-                                <li><a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : URLROOT . $menu['url'] ?>"><?= htmlspecialchars($menu['title']) ?></a></li>
+                                <li>
+                                    <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="nav-regular-link">
+                                        <?php if (!empty($menu['icon'])): ?>
+                                            <i class="<?= htmlspecialchars($menu['icon']) ?>"></i>
+                                        <?php endif; ?>
+                                        <span><?= htmlspecialchars($menu['title']) ?></span>
+                                    </a>
+                                </li>
                                 <?php
                             else:
                                 $has_tier3 = false;
@@ -2852,8 +2996,15 @@ if (!$is_islamic_dedicated_page):
                                     ?>
                                     <li class="nav-item-dropdown">
                                         <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="dropdown-trigger">
-                                            <span><?= htmlspecialchars($menu['title']) ?></span>
-                                            <span class="megamenu-toggle-arrow"><i class="fas fa-chevron-down"></i></span>
+                                            <span class="btn-cat-main">
+                                                <?php if (!empty($menu['icon'])): ?>
+                                                    <i class="<?= htmlspecialchars($menu['icon']) ?> btn-cat-icon"></i>
+                                                <?php endif; ?>
+                                                <span><?= htmlspecialchars($menu['title']) ?></span>
+                                            </span>
+                                            <span class="megamenu-toggle-arrow" title="Toggle Dropdown">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
                                         </a>
                                         <ul class="submenu-dropdown">
                                             <?php foreach ($tier2 as $t2_menu): ?>

@@ -2955,36 +2955,61 @@ class Admin extends Controller {
     }
 
     public function add_menu() {
-        // Only 'সবগুলো নিবন্ধ' header menu is manageable; redirect back to menus
-        header('Location: ' . URLROOT . '/admin/menus');
-        exit;
+        $adminModel = $this->model('AdminModel');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $type = $_POST['menu_type'] ?? 'custom';
+            $cats = [];
+            if ($type === 'post_mega') {
+                $cats = $_POST['post_cats'] ?? [];
+            }
+            $data = [
+                'title' => trim($_POST['title']),
+                'url' => trim($_POST['url']),
+                'order_index' => (int)($_POST['order_index'] ?? 1),
+                'parent_id' => !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null,
+                'icon' => !empty($_POST['icon']) ? trim($_POST['icon']) : null,
+                'menu_type' => $type,
+                'category_source' => !empty($cats) ? json_encode(array_values(array_map('intval', $cats))) : null
+            ];
+            if ($adminModel->addMenu($data)) {
+                if (class_exists('\\App\\Helpers\\Cache')) {
+                    \App\Helpers\Cache::clear();
+                }
+                header('Location: ' . URLROOT . '/admin/menus?msg=created');
+                exit;
+            }
+        }
+        $menus = $adminModel->getMenus();
+        $post_categories = $adminModel->getCategories();
+        $this->view('admin/add_menu', [
+            'menus' => $menus,
+            'post_categories' => $post_categories,
+            'current_page' => 'menus',
+            'settings' => $this->siteSettings
+        ]);
     }
 
     public function edit_menu($id) {
         $adminModel = $this->model('AdminModel');
         $menu = $adminModel->getMenuById($id);
         if (!$menu) {
-            $menus = $adminModel->getMenus();
-            $menu = !empty($menus) ? $menus[0] : null;
-        }
-
-        if (!$menu) {
             header('Location: ' . URLROOT . '/admin/menus');
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $type = $_POST['menu_type'] ?? ($menu['menu_type'] ?? 'custom');
             $cats = $_POST['post_cats'] ?? [];
             $data = [
-                'title' => !empty(trim($_POST['title'] ?? '')) ? trim($_POST['title']) : 'সবগুলো নিবন্ধ',
-                'url' => !empty(trim($_POST['url'] ?? '')) ? trim($_POST['url']) : '/blog',
+                'title' => !empty(trim($_POST['title'] ?? '')) ? trim($_POST['title']) : $menu['title'],
+                'url' => !empty(trim($_POST['url'] ?? '')) ? trim($_POST['url']) : ($menu['url'] ?: '#'),
                 'order_index' => (int)($_POST['order_index'] ?? 1),
-                'parent_id' => null,
-                'icon' => !empty(trim($_POST['icon'] ?? '')) ? trim($_POST['icon']) : 'fa-solid fa-layer-group',
-                'menu_type' => 'post_mega',
-                'category_source' => !empty($cats) ? json_encode(array_values(array_map('intval', $cats))) : null
+                'parent_id' => !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null,
+                'icon' => !empty(trim($_POST['icon'] ?? '')) ? trim($_POST['icon']) : null,
+                'menu_type' => $type,
+                'category_source' => ($type === 'post_mega' && !empty($cats)) ? json_encode(array_values(array_map('intval', $cats))) : null
             ];
-            if ($adminModel->updateMenu($menu['id'], $data)) {
+            if ($adminModel->updateMenu($id, $data)) {
                 if (class_exists('\\App\\Helpers\\Cache')) {
                     \App\Helpers\Cache::clear();
                 }
@@ -3005,8 +3030,20 @@ class Admin extends Controller {
     }
 
     public function delete_menu($id) {
-        // Protect 'সবগুলো নিবন্ধ' from deletion
-        header('Location: ' . URLROOT . '/admin/menus?msg=protected');
+        $adminModel = $this->model('AdminModel');
+        $menu = $adminModel->getMenuById($id);
+        if ($menu && (trim($menu['title']) === 'সবগুলো নিবন্ধ' || ($menu['menu_type'] ?? '') === 'post_mega')) {
+            header('Location: ' . URLROOT . '/admin/menus?msg=protected');
+            exit;
+        }
+        if ($adminModel->deleteMenu($id)) {
+            if (class_exists('\\App\\Helpers\\Cache')) {
+                \App\Helpers\Cache::clear();
+            }
+            header('Location: ' . URLROOT . '/admin/menus?msg=deleted');
+            exit;
+        }
+        header('Location: ' . URLROOT . '/admin/menus');
         exit;
     }
 
@@ -3216,6 +3253,38 @@ class Admin extends Controller {
             header('Location: ' . URLROOT . '/admin/sub_menus');
             exit;
         }
+    }
+
+    // ==========================================
+    // Open Database Section (Blank / Ready)
+    // ==========================================
+    public function open_database() {
+        header('Location: ' . URLROOT . '/admin/open_database_records');
+        exit;
+    }
+
+    public function open_database_add() {
+        $this->view('admin/open_database_add', [
+            'current_page' => 'open_database_add',
+            'title'        => 'Add Record | Open Database',
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function open_database_records() {
+        $this->view('admin/open_database_records', [
+            'current_page' => 'open_database_records',
+            'title'        => 'Record List | Open Database',
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function open_database_verification() {
+        $this->view('admin/open_database_verification', [
+            'current_page' => 'open_database_verification',
+            'title'        => 'Verification Section | Open Database',
+            'settings'     => $this->siteSettings
+        ]);
     }
 
     // YouTube Video Management
