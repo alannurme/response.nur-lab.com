@@ -35,8 +35,6 @@ if (empty($current_page)) {
             'edit_team_member'       => 'team',
             'add_scope'              => 'scopes',
             'edit_scope'             => 'scopes',
-            'add_join_card'          => 'join_cards',
-            'edit_join_card'         => 'join_cards',
             'add_about_section'      => 'about_sections',
             'edit_about_section'     => 'about_sections',
             'add_review'             => 'reviews',
@@ -143,6 +141,38 @@ if (empty($current_page)) {
         }
         body.sidebar-collapsed #sidebar-collapse-btn i {
             transform: rotate(180deg);
+        }
+
+        /* Floating Circular Collapse Toggle on the Right Edge */
+        #sidebar-collapse-btn {
+            position: absolute;
+            top: 20px;
+            right: -13px;
+            width: 26px;
+            height: 26px;
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 50% !important;
+            color: #64748b !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            z-index: 105;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0 !important;
+        }
+        #sidebar-collapse-btn:hover {
+            background: #f8fafc !important;
+            color: #0b7c4d !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+            transform: scale(1.08);
+        }
+        #sidebar-collapse-btn i {
+            font-size: 11px !important;
+            transition: transform 0.25s ease;
         }
         
         /* Collapsed Sidebar Hover Submenu CSS */
@@ -406,6 +436,7 @@ if (empty($current_page)) {
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            overflow-x: visible !important;
             scrollbar-width: thin;
             scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
             font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
@@ -429,14 +460,7 @@ if (empty($current_page)) {
             padding: 12px 14px 10px 14px;
             border-bottom: 1px solid #f8fafc;
             margin-bottom: 4px;
-        }
-
-        .sidebar-logo #sidebar-collapse-btn {
-            color: #94a3b8 !important;
-        }
-        .sidebar-logo #sidebar-collapse-btn:hover {
-            color: #475569 !important;
-            background: #f8fafc !important;
+            position: relative;
         }
 
         .sidebar-nav {
@@ -752,8 +776,8 @@ if (empty($current_page)) {
                     <h2 style="color: #0f172a; margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; flex-shrink: 0;">NUR<span style="color: #2563eb;">LAB</span></h2>
                 <?php endif; ?>
             </a>
-            <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;">
-                <i class="fas fa-angle-double-left" style="font-size: 1.25rem;"></i>
+            <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" title="সাইডবার টগল করুন">
+                <i class="fas fa-angle-left"></i>
             </button>
         </div>
         
@@ -817,16 +841,13 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/pages" class="nav-item <?= $current_page == 'pages' ? 'active' : '' ?>">
                     <i class="fas fa-file-alt"></i><span>Static Pages</span>
                 </a>
-                <?php $menu_manager_active = in_array($current_page, ['menus', 'sub_menus', 'social_links', 'add_menu', 'edit_menu', 'add_sub_menu', 'edit_sub_menu']); ?>
+                <?php $menu_manager_active = in_array($current_page, ['sub_menus', 'social_links', 'add_sub_menu', 'edit_sub_menu']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $menu_manager_active ? 'active' : '' ?>">
                         <i class="fas fa-list"></i><span>Menu Manager</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </div>
                     <div class="dropdown-content" <?= $menu_manager_active ? 'style="display: block;"' : '' ?>>
-                        <a href="<?= URLROOT ?>/admin/menus" class="<?= in_array($current_page, ['menus', 'add_menu', 'edit_menu']) ? 'active-sub' : '' ?>">
-                            <i class="fas fa-bars"></i> Main Menu Bar
-                        </a>
                         <a href="<?= URLROOT ?>/admin/sub_menus" class="<?= in_array($current_page, ['sub_menus', 'add_sub_menu', 'edit_sub_menu']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-link"></i> Top Menu Bar
                         </a>
@@ -841,9 +862,6 @@ if (empty($current_page)) {
                 </a>
                 <a href="<?= URLROOT ?>/admin/scopes" class="nav-item <?= $current_page == 'scopes' ? 'active' : '' ?>">
                     <i class="fas fa-briefcase"></i><span>Scopes of Work</span>
-                </a>
-                <a href="<?= URLROOT ?>/admin/join_cards" class="nav-item <?= $current_page == 'join_cards' ? 'active' : '' ?>">
-                    <i class="fas fa-handshake"></i><span>Join Us Cards</span>
                 </a>
                 <a href="<?= URLROOT ?>/admin/about_sections" class="nav-item <?= $current_page == 'about_sections' ? 'active' : '' ?>">
                     <i class="fas fa-circle-info"></i><span>About Sections</span>
@@ -884,7 +902,7 @@ if (empty($current_page)) {
                     </div>
                 </div>
                 
-                <?php $settings_active = in_array($current_page, ['settings', 'permissions', 'users', 'backup', 'system_update', 'facebook_pixel', 'google_analytics', 'sitemap']); ?>
+                <?php $settings_active = in_array($current_page, ['settings', 'payment_settings', 'payment_methods', 'payment_gateway', 'permissions', 'users', 'backup', 'system_update', 'facebook_pixel', 'google_analytics', 'sitemap']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $settings_active ? 'active' : '' ?>">
                         <i class="fas fa-cog"></i><span>Settings</span>
@@ -893,6 +911,9 @@ if (empty($current_page)) {
                     <div class="dropdown-content" <?= $settings_active ? 'style="display: block;"' : '' ?>>
                         <a href="<?= URLROOT ?>/admin/settings" class="<?= $current_page == 'settings' ? 'active-sub' : '' ?>">
                             <i class="fas fa-sliders-h"></i> Site Settings
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/payment_settings" class="<?= in_array($current_page, ['payment_settings', 'payment_methods', 'payment_gateway']) ? 'active-sub' : '' ?>">
+                            <i class="fas fa-credit-card"></i> Payment Methods
                         </a>
                         <a href="<?= URLROOT ?>/admin/sitemap" class="<?= $current_page == 'sitemap' ? 'active-sub' : '' ?>">
                             <i class="fas fa-sitemap"></i> Site Map

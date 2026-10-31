@@ -2,7 +2,11 @@
 
 namespace Config;
 
+use CodeIgniter\Cache\CacheFactory;
+use CodeIgniter\Cache\CacheInterface;
+use CodeIgniter\Cache\Handlers\DummyHandler;
 use CodeIgniter\Config\BaseService;
+use Config\Cache;
 
 /**
  * Services Configuration file.
@@ -19,14 +23,26 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
+    /**
+     * Bulletproof Cache Service: Never throw unhandled CacheException
+     * if the cache directory is unwritable or corrupt. Automatically fallback to DummyHandler.
      */
+    public static function cache(?Cache $config = null, bool $getShared = true): CacheInterface
+    {
+        if ($getShared) {
+            return static::getSharedInstance('cache', $config);
+        }
+
+        $config ??= config(Cache::class);
+
+        // Always ensure writable/cache path matches the current running system root
+        $runtimeCachePath = rtrim(WRITEPATH . 'cache', '\\/') . '/';
+        $config->file['storePath'] = $runtimeCachePath;
+
+        try {
+            return CacheFactory::getHandler($config);
+        } catch (\Throwable $e) {
+            return new DummyHandler();
+        }
+    }
 }

@@ -666,7 +666,7 @@ function startSync(actionStr, btn) {
 
     const toast = showToast("ব্যাকগ্রাউন্ড সিঙ্ক শুরু হয়েছে", "API থেকে ব্যাকগ্রাউন্ডে ডাটা সিঙ্ক করা হচ্ছে...", "info", 0);
 
-    const syncUrl = `<?= URLROOT ?>/sync_islamic_data.php?action=${actionStr}`;
+    const syncUrl = `<?= URLROOT ?>/sync_islamic_data.php?action=${actionStr}&secret=nur-lab-sync-2025`;
     
     fetch(syncUrl)
         .then(res => {

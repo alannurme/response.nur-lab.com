@@ -926,6 +926,98 @@ if (!function_exists('getBengaliDate')) {
 
         .nav-links a:hover::after { width: 100%; }
 
+        /* Highlighted Button Style for All Categories (সবগুলো নিবন্ধ) */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: stretch;
+            min-height: 66px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(11, 124, 77, 0.12);
+            position: relative;
+        }
+
+        .nav-links {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 15px;
+            list-style: none;
+            margin-left: 30px;
+        }
+
+        .nav-links > li {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item-megamenu {
+            display: flex;
+            align-items: stretch;
+        }
+        .btn-nav-categories {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            padding: 0 24px !important;
+            border-radius: 0 !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            height: 100% !important;
+            min-height: 66px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            border-left: 1px solid #e2e8f0 !important;
+            border-right: 1px solid #e2e8f0 !important;
+            transition: all 0.25s ease !important;
+            text-decoration: none !important;
+            box-sizing: border-box !important;
+        }
+        .btn-nav-categories::after {
+            display: none !important;
+        }
+        .btn-nav-categories:hover,
+        .nav-item-megamenu.open .btn-nav-categories {
+            background: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+            color: #0b7c4d !important;
+        }
+        .btn-nav-categories i.btn-cat-icon {
+            font-size: 14px;
+            color: #0b7c4d;
+        }
+        .btn-nav-categories .megamenu-toggle-arrow,
+        .btn-nav-categories i.fa-chevron-down {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            margin-left: 4px;
+            color: #64748b;
+            transition: transform 0.25s ease;
+        }
+        .btn-nav-categories .megamenu-toggle-arrow i {
+            font-size: 11px;
+            color: inherit;
+            transition: transform 0.25s ease;
+        }
+        .nav-item-megamenu.open .btn-nav-categories i.fa-chevron-down,
+        .nav-item-megamenu.open .btn-nav-categories .megamenu-toggle-arrow i {
+            color: #0b7c4d;
+            transform: rotate(180deg);
+        }
+
         .btn-premium {
             background: var(--primary);
             color: white;
@@ -1084,7 +1176,8 @@ if (!function_exists('getBengaliDate')) {
             position: relative;
             display: flex;
             flex-direction: column;
-            width: 280px;
+            width: 330px;
+            min-width: 330px;
             border-right: 1px solid rgba(16, 185, 129, 0.15);
         }
 
@@ -1158,25 +1251,38 @@ if (!function_exists('getBengaliDate')) {
         .mega-tab-btn {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 20px;
-            border-radius: 10px;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 8px;
             color: #ffffff;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             letter-spacing: 0.2px;
-            line-height: 1.5;
+            line-height: 1.4;
             font-family: 'Hind Siliguri', sans-serif;
             border-left: 3px solid transparent;
         }
 
-        .mega-tab-btn i {
-            font-size: 16px;
-            width: 20px;
+        .mega-tab-btn-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mega-tab-btn i.mega-tab-icon {
+            font-size: 14px;
+            width: 18px;
             text-align: center;
             color: #34d399;
+            flex-shrink: 0;
         }
 
         .mega-tab-btn:hover {
@@ -1190,15 +1296,90 @@ if (!function_exists('getBengaliDate')) {
             background: rgba(16, 185, 129, 0.25);
         }
 
-        .mega-tab-btn span {
+        .mega-tab-btn span.tab-text {
             border-bottom: 2px solid transparent;
             transition: border-color 0.2s ease;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .mega-tab-btn:hover span,
-        .mega-tab-btn.active span {
+        .mega-tab-btn:hover span.tab-text,
+        .mega-tab-btn.active span.tab-text {
             border-bottom-color: #10b981;
+        }
+
+        .mega-cat-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .mega-cat-expander {
+            margin-left: 6px;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            color: #94a3b8;
+            background: transparent;
+            font-size: 11px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .mega-cat-expander:hover {
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .mega-cat-group.expanded .mega-cat-expander {
+            color: #34d399;
+        }
+        .mega-cat-group.expanded .mega-cat-expander i {
+            transform: rotate(180deg);
+        }
+        .mega-subcat-list {
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            padding: 4px 0 6px 36px;
+            border-left: 2px solid rgba(16, 185, 129, 0.2);
+            margin: 2px 0 6px 16px;
+            animation: fadeInSubcats 0.2s ease-in-out;
+        }
+        .mega-cat-group.expanded .mega-subcat-list {
+            display: flex;
+        }
+        @keyframes fadeInSubcats {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .mega-subcat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Hind Siliguri', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .mega-subcat-item:hover {
+            color: #ffffff !important;
+            background: rgba(16, 185, 129, 0.25);
+            transform: translateX(3px);
+        }
+        .mega-subcat-item i {
+            font-size: 11px;
+            color: #34d399;
         }
 
         /* Content pane styling */
@@ -1567,7 +1748,47 @@ if (!function_exists('getBengaliDate')) {
             }
 
             .mobile-search-trigger {
-                display: inline-flex !important;
+                display: none !important;
+            }
+
+            /* Move search bar to the top of mobile menu */
+            .nav-search-item {
+                order: -1 !important;
+                margin-left: 0 !important;
+                padding: 12px 16px !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                background: #f8fafc !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .nav-search-item form#header-search-form {
+                width: 100% !important;
+                height: 44px !important;
+            }
+
+            .nav-search-item #header-search-input {
+                width: 100% !important;
+                opacity: 1 !important;
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 50px !important;
+                padding: 10px 45px 10px 18px !important;
+                font-size: 15px !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+            }
+
+            .nav-search-item #header-search-btn {
+                position: absolute !important;
+                right: 4px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                width: 36px !important;
+                height: 36px !important;
+            }
+
+            .nav-search-item #header-search-clear-btn {
+                right: 44px !important;
             }
 
             /* Hide desktop search button inside nav-links on mobile */
@@ -1599,11 +1820,83 @@ if (!function_exists('getBengaliDate')) {
                 display: flex;
             }
 
-            /* Separators between main items */
+            .nav-item-megamenu {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            .nav-item-megamenu .btn-nav-categories {
+                width: 100% !important;
+                min-height: auto !important;
+                height: auto !important;
+                padding: 13px 20px !important;
+                margin: 0 !important;
+                border: none !important;
+                border-bottom: 1px solid #f1f5f9 !important;
+                border-radius: 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: #f8fafc !important;
+                color: #0f172a !important;
+                font-size: 16px !important;
+                font-weight: 700 !important;
+                box-shadow: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .nav-item-megamenu .btn-nav-categories .btn-cat-main {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            .nav-item-megamenu .btn-nav-categories i.btn-cat-icon {
+                color: #0b7c4d !important;
+                font-size: 16px !important;
+                margin-right: 4px !important;
+            }
+
+            .nav-item-megamenu .megamenu-toggle-arrow,
+            .nav-item-dropdown .megamenu-toggle-arrow {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 6px !important;
+                background: rgba(11, 124, 77, 0.08) !important;
+                color: #0b7c4d !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin-left: auto !important;
+                cursor: pointer !important;
+                flex-shrink: 0 !important;
+            }
+
+            .nav-item-megamenu .megamenu-toggle-arrow i,
+            .nav-item-dropdown .megamenu-toggle-arrow i {
+                margin: 0 !important;
+                color: #0b7c4d !important;
+                font-size: 12px !important;
+                transition: transform 0.25s ease !important;
+            }
+
+            .nav-item-megamenu.open .megamenu-toggle-arrow i,
+            .nav-item-dropdown.open .megamenu-toggle-arrow i {
+                transform: rotate(180deg) !important;
+            }
+
+            .nav-item-megamenu .btn-nav-categories i.fa-chevron-down {
+                margin-left: auto !important;
+                color: #64748b !important;
+            }
+
             .nav-links > li {
                 border-bottom: 1px solid #f1f5f9;
                 width: 100%;
                 list-style: none;
+                display: block !important;
             }
 
             .nav-links a, .nav-links .megamenu-trigger, .nav-links .dropdown-trigger {
@@ -1698,11 +1991,17 @@ if (!function_exists('getBengaliDate')) {
                 display: none !important;
             }
 
+            .mega-cat-group {
+                border-bottom: 1px solid #e2e8f0;
+                width: 100%;
+                background: #f8fafc;
+            }
+
             .mega-tab-btn {
-                border-bottom: 1px solid #f1f5f9 !important;
+                border-bottom: none !important;
                 border-left: none !important;
-                padding: 14px 24px 14px 40px !important;
-                color: #334155 !important;
+                padding: 13px 20px 13px 24px !important;
+                color: #1e293b !important;
                 font-weight: 600 !important;
                 background: #f8fafc !important;
                 justify-content: space-between !important;
@@ -1710,6 +2009,60 @@ if (!function_exists('getBengaliDate')) {
                 align-items: center !important;
                 border-radius: 0 !important;
                 flex-shrink: 0 !important;
+            }
+
+            .mega-tab-btn .mega-tab-btn-title {
+                color: #1e293b !important;
+            }
+
+            .mega-tab-btn .mega-tab-btn-title span {
+                color: #1e293b !important;
+                font-size: 15px !important;
+            }
+
+            .mega-tab-btn i.mega-tab-icon {
+                color: #0b7c4d !important;
+            }
+
+            .mega-cat-expander {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 6px !important;
+                background: rgba(11, 124, 77, 0.08) !important;
+                color: #0b7c4d !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin-left: auto !important;
+            }
+
+            .mega-subcat-list {
+                padding: 6px 16px 12px 28px !important;
+                margin: 0 !important;
+                border-left: 2px solid #0b7c4d !important;
+                margin-left: 24px !important;
+                margin-bottom: 8px !important;
+                background: #f1f5f9 !important;
+                border-radius: 0 8px 8px 0 !important;
+                gap: 4px !important;
+            }
+
+            .mega-subcat-item {
+                padding: 8px 12px !important;
+                color: #1e293b !important;
+                font-size: 14px !important;
+                border-radius: 6px !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .mega-subcat-item:hover, .mega-subcat-item:active {
+                background: rgba(11, 124, 77, 0.12) !important;
+                color: #0b7c4d !important;
+            }
+
+            .mega-subcat-item i {
+                color: #0b7c4d !important;
             }
 
             .mega-tab-btn::after {
@@ -1732,7 +2085,6 @@ if (!function_exists('getBengaliDate')) {
             .mega-tab-btn.active {
                 background: #f1f5f9 !important;
                 border-left: none !important;
-                border-bottom: 1px solid #e2e8f0 !important;
                 color: var(--primary) !important;
             }
 
@@ -2209,11 +2561,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <!-- Mobile Actions Wrapper -->
             <div style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
-                <!-- Mobile Search Button -->
-                <div class="mobile-search-trigger" id="mobile-search-popup-trigger" style="color: #ffffff; font-size: 1.05rem; cursor: pointer; transition: all 0.3s ease; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0b7c4d 0%, #10b981 100%); display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(11, 124, 77, 0.3);">
-                    <i class="fas fa-search"></i>
-                </div>
-                
                 <!-- Mobile Menu Toggle Button -->
                 <button class="mobile-nav-toggle" aria-label="Toggle Menu">
                     <i class="fas fa-bars"></i>
@@ -2241,7 +2588,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                 $categories = $stmt->fetchAll();
                                 ?>
                                 <li class="nav-item-megamenu">
-                                    <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger"><?= htmlspecialchars($menu['title']) ?> <i class="fas fa-chevron-down" style="font-size: 11px; margin-left: 4px;"></i></a>
+                                    <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger btn-nav-categories">
+                                        <span class="btn-cat-main">
+                                            <i class="fa-solid fa-layer-group btn-cat-icon"></i>
+                                            <span><?= htmlspecialchars($menu['title']) ?></span>
+                                        </span>
+                                        <span class="megamenu-toggle-arrow" title="খুলুন বা বন্ধ করুন">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                    </a>
                                     
                                     <div class="megamenu-dropdown">
                                         <div class="megamenu-inner">
@@ -2252,10 +2607,37 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     $is_first = true;
                                                     foreach($categories as $cat): 
                                                         $tab_slug = 'post-cat-' . $cat['id'];
+                                                        // Fetch subcategories for this category
+                                                        $stmt_sub = $db->prepare("SELECT id, name, slug FROM categories WHERE parent_id = ? ORDER BY order_index ASC, name ASC");
+                                                        $stmt_sub->execute([$cat['id']]);
+                                                        $subcats = $stmt_sub->fetchAll();
+                                                        $has_subcats = !empty($subcats);
                                                     ?>
-                                                        <div class="mega-tab-btn <?= $is_first ? 'active' : '' ?>" data-tab="<?= $tab_slug ?>" data-link="<?= URLROOT . '/' . $cat['slug'] ?>">
-                                                            <i class="fa-solid fa-layer-group"></i>
-                                                            <span><?= htmlspecialchars($cat['name']) ?></span>
+                                                        <div class="mega-cat-group" id="group-<?= $tab_slug ?>">
+                                                            <div class="mega-tab-btn <?= $is_first ? 'active' : '' ?>" data-tab="<?= $tab_slug ?>" data-link="<?= URLROOT . '/' . $cat['slug'] ?>">
+                                                                <div class="mega-tab-btn-title">
+                                                                    <i class="fa-solid fa-layer-group mega-tab-icon"></i>
+                                                                    <span class="tab-text"><?= htmlspecialchars($cat['name']) ?></span>
+                                                                </div>
+                                                                <?php if ($has_subcats): ?>
+                                                                    <span class="mega-cat-expander" onclick="event.preventDefault(); event.stopPropagation(); this.closest('.mega-cat-group').classList.toggle('expanded');" title="সাব-ক্যাটাগরি দেখুন">
+                                                                        <i class="fas fa-chevron-down"></i>
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </div>
+
+                                                            <?php if ($has_subcats): ?>
+                                                                <div class="mega-subcat-list">
+                                                                    <?php foreach ($subcats as $sub): 
+                                                                        $sub_tab_slug = 'post-cat-' . $sub['id'];
+                                                                    ?>
+                                                                        <div class="mega-subcat-item mega-tab-btn" data-tab="<?= $sub_tab_slug ?>" data-link="<?= URLROOT ?>/<?= $sub['slug'] ?>">
+                                                                            <i class="fas fa-turn-up fa-rotate-90"></i>
+                                                                            <span><?= htmlspecialchars($sub['name']) ?></span>
+                                                                        </div>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                            <?php endif; ?>
                                                         </div>
                                                     <?php 
                                                         $is_first = false;
@@ -2277,6 +2659,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                 ORDER BY p.created_at DESC LIMIT 6");
                                                     $stmt_posts->execute([$cat['id']]);
                                                     $posts = $stmt_posts->fetchAll();
+
+                                                    // Also fetch subcategory panes
+                                                    $stmt_sub_panes = $db->prepare("SELECT id, name, slug FROM categories WHERE parent_id = ? ORDER BY order_index ASC, name ASC");
+                                                    $stmt_sub_panes->execute([$cat['id']]);
+                                                    $subcats_for_panes = $stmt_sub_panes->fetchAll();
                                                 ?>
                                                     <div class="mega-tab-pane <?= $is_first ? 'active' : '' ?>" id="pane-<?= $tab_slug ?>">
                                                         <h3 class="pane-title"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars($cat['name']) ?></h3>
@@ -2297,6 +2684,42 @@ document.addEventListener('DOMContentLoaded', function() {
                                                             </a>
                                                         </div>
                                                     </div>
+
+                                                    <?php foreach ($subcats_for_panes as $sub): 
+                                                        $sub_tab_slug = 'post-cat-' . $sub['id'];
+                                                        $stmt_sub_posts = $db->prepare("SELECT p.* FROM posts p 
+                                                                                        JOIN post_categories pc ON p.id = pc.post_id 
+                                                                                        WHERE p.status = 'published' AND pc.category_id = ? 
+                                                                                        ORDER BY p.created_at DESC LIMIT 6");
+                                                        $stmt_sub_posts->execute([$sub['id']]);
+                                                        $sub_posts = $stmt_sub_posts->fetchAll();
+                                                    ?>
+                                                        <div class="mega-tab-pane" id="pane-<?= $sub_tab_slug ?>">
+                                                            <h3 class="pane-title"><i class="fas fa-turn-up fa-rotate-90" style="color: #34d399; font-size: 16px;"></i> <?= htmlspecialchars($sub['name']) ?></h3>
+                                                            <div class="services-grid">
+                                                                <?php if (!empty($sub_posts)): ?>
+                                                                    <?php foreach ($sub_posts as $post): ?>
+                                                                        <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="text-decoration: none;">
+                                                                            <div class="service-card">
+                                                                                <i class="fa-solid fa-file-invoice"></i>
+                                                                                <span><?= htmlspecialchars($post['title']) ?></span>
+                                                                            </div>
+                                                                        </a>
+                                                                    <?php endforeach; ?>
+                                                                <?php else: ?>
+                                                                    <div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #94a3b8; font-size: 15px;">
+                                                                        এই বিষয়ে কোনো নিবন্ধ পাওয়া যায়নি।
+                                                                    </div>
+                                                                <?php endif; ?>
+                                                                <a href="<?= URLROOT ?>/<?= $sub['slug'] ?>" style="text-decoration: none;">
+                                                                    <div class="service-card" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.06);">
+                                                                        <i class="fa-solid fa-arrow-right-to-bracket" style="color: var(--primary) !important;"></i>
+                                                                        <span style="color: #ffffff;"><?= htmlspecialchars($sub['name']) ?>-এর সকল নিবন্ধ</span>
+                                                                    </div>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
                                                 <?php 
                                                     $is_first = false;
                                                 endforeach; 
@@ -2337,7 +2760,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if ($has_tier3):
                                     ?>
                                     <li class="nav-item-megamenu">
-                                        <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger"><?= htmlspecialchars($menu['title']) ?> <i class="fas fa-chevron-down" style="font-size: 11px; margin-left: 4px;"></i></a>
+                                        <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger">
+                                            <span><?= htmlspecialchars($menu['title']) ?></span>
+                                            <span class="megamenu-toggle-arrow"><i class="fas fa-chevron-down"></i></span>
+                                        </a>
                                         
                                         <div class="megamenu-dropdown">
                                             <div class="megamenu-inner">
@@ -2395,7 +2821,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 else:
                                     ?>
                                     <li class="nav-item-dropdown">
-                                        <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="dropdown-trigger"><?= htmlspecialchars($menu['title']) ?> <i class="fas fa-chevron-down" style="font-size: 11px; margin-left: 4px;"></i></a>
+                                        <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="dropdown-trigger">
+                                            <span><?= htmlspecialchars($menu['title']) ?></span>
+                                            <span class="megamenu-toggle-arrow"><i class="fas fa-chevron-down"></i></span>
+                                        </a>
                                         <ul class="submenu-dropdown">
                                             <?php foreach ($tier2 as $t2_menu): ?>
                                                 <li>
@@ -2420,7 +2849,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <?php endif; ?>
                 
                 <!-- Header Expandable Search Bar with Live AJAX Dropdown -->
-                <li style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px; position: relative;">
+                <li class="nav-search-item" style="margin-left: auto; display: flex; align-items: center; list-style: none; padding-left: 15px; position: relative;">
                     <form action="<?= URLROOT ?>/blog" method="GET" id="header-search-form" style="position: relative; display: flex; align-items: center; height: 38px;">
                         <input type="text" name="search" id="header-search-input" placeholder="খুঁজুন (যেমন: রমজান, জাকাত)..." autocomplete="off" style="padding: 7px 40px 7px 14px; border-radius: 20px; font-size: 0.88rem; font-family: 'Hind Siliguri', sans-serif; outline: none; width: 0px; opacity: 0; border: none; background: transparent; transition: all 0.35s ease; box-sizing: border-box;">
                         <button type="button" id="header-search-clear-btn" style="display: none; position: absolute; right: 44px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 50%;" title="মুছুন">&times;</button>
@@ -3078,56 +3507,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tabs.forEach(tab => {
         const handleSwitch = (e) => {
+            // Ignore click if clicking directly on expander button
+            if (e.target.closest('.mega-cat-expander')) {
+                return;
+            }
+
             const isAlreadyActive = tab.classList.contains('active');
             const targetLink = tab.getAttribute('data-link');
             
-            // Prevent direct navigation on mobile viewports so user can expand/select tab
+            // On mobile, clicking category button should navigate directly into that category!
             if (window.innerWidth <= 1200) {
-                const tabId = tab.getAttribute('data-tab');
-                if (tabId && tabId.startsWith('post-cat-')) {
-                    if (targetLink) {
-                        window.location.href = targetLink;
-                    }
+                if (targetLink && targetLink !== '#' && targetLink !== '') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = targetLink;
                     return;
                 }
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (e.type === 'mouseenter') return; // Bypass hover on mobile
-                
-                const targetPane = document.getElementById('pane-' + tabId);
-                if (targetPane) {
-                    const parentMenu = tab.closest('.megamenu-inner');
-                    
-                    if (isAlreadyActive) {
-                        // Collapse it
-                        tab.classList.remove('active');
-                        targetPane.classList.remove('active');
-                        // Move pane back to content container
-                        const contentDiv = parentMenu.querySelector('.megamenu-content');
-                        if (contentDiv) {
-                            contentDiv.appendChild(targetPane);
-                        }
-                    } else {
-                        // Close other tabs first
-                        parentMenu.querySelectorAll('.mega-tab-btn').forEach(t => t.classList.remove('active'));
-                        parentMenu.querySelectorAll('.mega-tab-pane').forEach(p => {
-                            p.classList.remove('active');
-                            const contentDiv = parentMenu.querySelector('.megamenu-content');
-                            if (contentDiv && p.parentNode !== contentDiv) {
-                                contentDiv.appendChild(p);
-                            }
-                        });
-                        
-                        // Open this tab
-                        tab.classList.add('active');
-                        targetPane.classList.add('active');
-                        // Move pane to be directly after the tab button
-                        tab.parentNode.insertBefore(targetPane, tab.nextSibling);
-                    }
-                }
-                return;
             } else if (e.type === 'click' && isAlreadyActive && targetLink) {
                 window.location.href = targetLink;
                 return;
@@ -3149,7 +3544,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        tab.addEventListener('mouseenter', handleSwitch);
+        // Switch post panel only on click (no auto switch on hover)
         tab.addEventListener('click', handleSwitch);
     });
 
@@ -3332,44 +3727,61 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.megamenu-trigger, .dropdown-trigger').forEach(function(link) {
         link.addEventListener('click', function(e) {
             if (window.innerWidth <= 1200) {
+                const isToggleBtn = e.target.closest('.megamenu-toggle-arrow') || e.target.closest('.fa-chevron-down') || e.target.closest('.fa-chevron-up');
+                const targetUrl = link.getAttribute('href');
                 const parent = link.closest('.nav-item-megamenu, .nav-item-dropdown');
-                if (parent) {
-                    const isOpen = parent.classList.contains('open');
-                    
-                    if (isOpen) {
-                        // If already open, let it navigate to the link (if valid)
-                        const targetUrl = link.getAttribute('href');
-                        if (targetUrl && targetUrl !== '#') {
-                            window.location.href = targetUrl;
-                            return;
-                        }
-                        parent.classList.remove('open');
-                    } else {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Close other submenus first
-                        document.querySelectorAll('.nav-item-megamenu, .nav-item-dropdown').forEach(item => {
-                            if (item !== parent) item.classList.remove('open');
-                        });
+
+                // If clicking the dedicated expand/collapse button
+                if (isToggleBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (parent) {
+                        const isOpen = parent.classList.contains('open');
                         
-                        parent.classList.add('open');
-                        // Trigger scroll check on newly opened mega menu sidebar
-                        setTimeout(() => {
-                            const sidebar = parent.querySelector('.megamenu-sidebar');
-                            if (sidebar) {
-                                const wrapper = sidebar.closest('.megamenu-sidebar-wrapper');
-                                const indicator = wrapper ? wrapper.querySelector('.megamenu-scroll-indicator') : null;
-                                if (indicator) {
-                                    const isScrollable = sidebar.scrollHeight > sidebar.clientHeight;
-                                    const isAtBottom = sidebar.scrollTop + sidebar.clientHeight >= sidebar.scrollHeight - 10;
-                                    if (isScrollable && !isAtBottom) {
-                                        indicator.classList.add('visible');
-                                    } else {
-                                        indicator.classList.remove('visible');
+                        if (isOpen) {
+                            // Collapse on second click
+                            parent.classList.remove('open');
+                        } else {
+                            // Close other submenus first
+                            document.querySelectorAll('.nav-item-megamenu, .nav-item-dropdown').forEach(item => {
+                                if (item !== parent) item.classList.remove('open');
+                            });
+                            
+                            parent.classList.add('open');
+                            // Trigger scroll check on newly opened mega menu sidebar
+                            setTimeout(() => {
+                                const sidebar = parent.querySelector('.megamenu-sidebar');
+                                if (sidebar) {
+                                    const wrapper = sidebar.closest('.megamenu-sidebar-wrapper');
+                                    const indicator = wrapper ? wrapper.querySelector('.megamenu-scroll-indicator') : null;
+                                    if (indicator) {
+                                        const isScrollable = sidebar.scrollHeight > sidebar.clientHeight;
+                                        const isAtBottom = sidebar.scrollTop + sidebar.clientHeight >= sidebar.scrollHeight - 10;
+                                        if (isScrollable && !isAtBottom) {
+                                            indicator.classList.add('visible');
+                                        } else {
+                                            indicator.classList.remove('visible');
+                                        }
                                     }
                                 }
-                            }
-                        }, 100);
+                            }, 100);
+                        }
+                    }
+                    return;
+                }
+
+                // If clicking anywhere else on "সবগুলো নিবন্ধ" or the menu link:
+                // If it has a valid target link, navigate to that page/category!
+                if (targetUrl && targetUrl !== '#' && targetUrl !== '') {
+                    window.location.href = targetUrl;
+                    return;
+                } else {
+                    // Fallback if URL is '#': toggle open/close
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (parent) {
+                        parent.classList.toggle('open');
                     }
                 }
             } else {

@@ -20,6 +20,7 @@ class Admin extends Controller {
             $user = $this->adminModel->getUserByRememberToken($_COOKIE['admin_remember']);
             if ($user) {
                 $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 // Refresh cookie expiration for another year
                 setcookie('admin_remember', $_COOKIE['admin_remember'], [
@@ -1492,6 +1493,7 @@ class Admin extends Controller {
             $user = $adminModel->getUserByRememberToken($token);
             if ($user) {
                 $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 // Refresh cookie lifetime
                 setcookie('admin_remember', $token, [
@@ -1522,6 +1524,7 @@ class Admin extends Controller {
 
             if ($user) {
                 $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
 
                 // Always persist remember-me session (1 year) unless manual logout
@@ -1977,18 +1980,162 @@ class Admin extends Controller {
         $this->view('admin/google_analytics', $data);
     }
 
-    public function payment_gateway() {
-        $adminModel = $this->model('AdminModel');
+    public function payment_settings() {
+        $this->payment_methods();
+    }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    public function payment_gateway() {
+        $this->payment_methods();
+    }
+
+    public function payment_methods() {
+        $adminModel = $this->model('AdminModel');
+        $data = [];
+
+        // AJAX: Test PipraPay 10 BDT Payment Link Generation
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'test_piprapay') {
+            header('Content-Type: application/json');
+            $baseUrl = trim($_POST['base_url'] ?? '');
+            $apiKey = trim($_POST['api_key'] ?? '');
+            $amount = floatval($_POST['amount'] ?? 10);
+
+            if (empty($baseUrl)) {
+                $baseUrl = 'http://localhost/pay.nur-lab.com';
+            }
+            if (empty($apiKey)) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'API Key প্রদান করা হয়নি। দয়া করে API Key প্রদান করুন।'
+                ]);
+                exit;
+            }
+
+            $endpoint = rtrim($baseUrl, '/') . '/api/checkout/redirect';
+            $absoluteRoot = str_replace('://www.', '://', URLROOT);
+
+            $postData = [
+                'full_name'     => 'Admin Test Payment',
+                'email_address' => 'admin@nur-lab.com',
+                'mobile_number' => '01711111111',
+                'amount'        => number_format($amount > 0 ? $amount : 10, 2, '.', ''),
+                'currency'      => 'BDT',
+                'return_url'    => $absoluteRoot . '/admin/payment_settings?test=success',
+                'webhook_url'   => $absoluteRoot . '/admin/payment_settings?test=webhook',
+                'metadata'      => [
+                    'source' => 'admin_test',
+                    'initiated_at' => date('Y-m-d H:i:s')
+                ]
+            ];
+
+            $ch = curl_init($endpoint);
+            curl_setopt_array($ch, [
+                CURLOPT_POST           => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $apiKey,
+                    'MHS-PIPRAPAY-API-KEY: ' . $apiKey,
+                    'X-API-KEY: ' . $apiKey
+                ],
+                CURLOPT_POSTFIELDS     => json_encode($postData),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_TIMEOUT        => 15
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err = curl_error($ch);
+            curl_close($ch);
+
+            if ($err) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'কানেকশন এরর: ' . $err
+                ]);
+                exit;
+            }
+
+            $result = json_decode($response, true);
+            if ($httpCode === 200 && isset($result['pp_url'])) {
+                echo json_encode([
+                    'status' => 'success',
+                    'pp_id' => $result['pp_id'] ?? '',
+                    'pp_url' => $result['pp_url'],
+                    'message' => '১০ টাকার টেস্ট পেমেন্ট লিঙ্ক সফলভাবে তৈরি হয়েছে!'
+                ]);
+                exit;
+            } else {
+                $errMsg = $result['error']['message'] ?? $result['message'] ?? ('HTTP Status ' . $httpCode . ': ' . $response);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'PipraPay এরর: ' . $errMsg
+                ]);
+                exit;
+            }
+        }
+
+        // AJAX: Verify PipraPay Payment ID
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'verify_test_piprapay') {
+            header('Content-Type: application/json');
+            $baseUrl = trim($_POST['base_url'] ?? '');
+            $apiKey = trim($_POST['api_key'] ?? '');
+            $ppId = trim($_POST['pp_id'] ?? '');
+
+            if (empty($baseUrl)) {
+                $baseUrl = 'http://localhost/pay.nur-lab.com';
+            }
+            if (empty($ppId)) {
+                echo json_encode(['status' => 'error', 'message' => 'Payment ID (pp_id) প্রদান করুন।']);
+                exit;
+            }
+
+            $endpoint = rtrim($baseUrl, '/') . '/api/verify-payment';
+            $ch = curl_init($endpoint);
+            curl_setopt_array($ch, [
+                CURLOPT_POST           => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $apiKey,
+                    'MHS-PIPRAPAY-API-KEY: ' . $apiKey,
+                    'X-API-KEY: ' . $apiKey
+                ],
+                CURLOPT_POSTFIELDS     => json_encode(['pp_id' => $ppId]),
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_TIMEOUT        => 15
+            ]);
+            $response = curl_exec($ch);
+            $err = curl_error($ch);
+            curl_close($ch);
+
+            if ($err) {
+                echo json_encode(['status' => 'error', 'message' => 'কানেকশন এরর: ' . $err]);
+                exit;
+            }
+
+            $result = json_decode($response, true);
+            echo json_encode(['status' => 'success', 'data' => $result]);
+            exit;
+        }
+
+        // Save Settings
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['settings'])) {
             $settings = $_POST['settings'];
+
+            if (!empty($settings['piprapay_base_url'])) {
+                $baseUrl = rtrim(trim($settings['piprapay_base_url']), '/');
+                $settings['piprapay_base_url'] = $baseUrl;
+                $settings['piprapay_api_url'] = $baseUrl . '/api/checkout/redirect';
+            }
+
             $adminModel->updateSettings($settings);
-            $data['success'] = 'Payment gateway settings updated successfully';
+            \App\Helpers\Cache::clear();
+            $data['success'] = 'পেমেন্ট মেথড সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে!';
         }
 
         $data['settings'] = $adminModel->getSettings();
-        $data['current_page'] = 'payment_gateway';
-        $this->view('admin/payment_gateway', $data);
+        $data['current_page'] = 'payment_settings';
+        $this->view('admin/payment_settings', $data);
     }
 
     public function social_links() {
@@ -2642,63 +2789,23 @@ class Admin extends Controller {
     }
 
     public function join_cards() {
-        $adminModel = $this->model('AdminModel');
-        $cards = $adminModel->getJoinCards();
-        $this->view('admin/join_cards', [
-            'cards' => $cards,
-            'current_page' => 'join_cards',
-            'settings' => $this->siteSettings
-        ]);
+        header('Location: ' . URLROOT . '/admin');
+        exit;
     }
 
     public function add_join_card() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $adminModel = $this->model('AdminModel');
-            $data = [
-                'title' => $_POST['title'],
-                'icon' => $_POST['icon'],
-                'description' => $_POST['description'],
-                'button_text' => $_POST['button_text'] ?? null,
-                'button_url' => $_POST['button_url'] ?? null,
-                'order_index' => $_POST['order_index'] ?? 0
-            ];
-            if ($adminModel->addJoinCard($data)) {
-                header('Location: ' . URLROOT . '/admin/join_cards');
-                exit;
-            }
-        }
-        $this->view('admin/add_join_card', ['settings' => $this->siteSettings]);
+        header('Location: ' . URLROOT . '/admin');
+        exit;
     }
 
-    public function edit_join_card($id) {
-        $adminModel = $this->model('AdminModel');
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'title' => $_POST['title'],
-                'icon' => $_POST['icon'],
-                'description' => $_POST['description'],
-                'button_text' => $_POST['button_text'] ?? null,
-                'button_url' => $_POST['button_url'] ?? null,
-                'order_index' => $_POST['order_index'] ?? 0
-            ];
-            if ($adminModel->updateJoinCard($id, $data)) {
-                header('Location: ' . URLROOT . '/admin/join_cards');
-                exit;
-            }
-        }
-        $card = $adminModel->getJoinCardById($id);
-        $this->view('admin/edit_join_card', [
-            'card' => $card,
-            'settings' => $this->siteSettings
-        ]);
+    public function edit_join_card($id = null) {
+        header('Location: ' . URLROOT . '/admin');
+        exit;
     }
 
-    public function delete_join_card($id) {
-        $adminModel = $this->model('AdminModel');
-        if ($adminModel->deleteJoinCard($id)) {
-            header('Location: ' . URLROOT . '/admin/join_cards');
-            exit;
-        }
+    public function delete_join_card($id = null) {
+        header('Location: ' . URLROOT . '/admin');
+        exit;
     }
 
     public function about_sections() {
@@ -2822,14 +2929,8 @@ class Admin extends Controller {
     }
 
     public function menus() {
-        $adminModel = $this->model('AdminModel');
-        $menus = $adminModel->getMenus();
-        $this->view('admin/menus', [
-            'menus' => $menus,
-            'categories' => $adminModel->getCategories(),
-            'current_page' => 'menus',
-            'settings' => $adminModel->getSettings()
-        ]);
+        header('Location: ' . URLROOT . '/admin');
+        exit;
     }
 
     public function blog_manager() {
