@@ -3860,8 +3860,10 @@ class Admin extends Controller {
             exit;
         }
 
-        // Fetch records for listing
+        // Fetch records and grouped persons
         $records = [];
+        $persons = [];
+        $search = trim($_GET['q'] ?? '');
         try {
             $stmt = $db->query("
                 SELECT r.*, p.name AS person_master_name, p.photo AS person_master_photo 
@@ -3872,8 +3874,62 @@ class Admin extends Controller {
             if ($stmt) {
                 $records = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             }
+
+            // Fetch Persons with counts of records, gallery, videos, documents
+            $pQuery = "
+                SELECT 
+                    p.*,
+                    COUNT(r.id) AS total_records,
+                    GROUP_CONCAT(r.gallery SEPARATOR '||') AS all_galleries,
+                    GROUP_CONCAT(r.videos SEPARATOR '||') AS all_videos,
+                    GROUP_CONCAT(r.documents SEPARATOR '||') AS all_docs
+                FROM `records_persons` p
+                LEFT JOIN `records` r ON r.person_id = p.id
+            ";
+            $params = [];
+            if (!empty($search)) {
+                $pQuery .= " WHERE p.name LIKE ? OR p.alias LIKE ? OR p.nid_passport LIKE ? OR p.phone LIKE ? OR p.address LIKE ? ";
+                $params = ["%$search%", "%$search%", "%$search%", "%$search%", "%$search%"];
+            }
+            $pQuery .= " GROUP BY p.id ORDER BY p.id DESC";
+
+            $pStmt = $db->prepare($pQuery);
+            $pStmt->execute($params);
+            $rawPersons = $pStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            foreach ($rawPersons as $rp) {
+                // Count total files across all records of this person
+                $totalGallery = 0;
+                $totalVideos = 0;
+                $totalDocs = 0;
+
+                if (!empty($rp['all_galleries'])) {
+                    foreach (explode('||', $rp['all_galleries']) as $gJson) {
+                        $arr = json_decode($gJson, true);
+                        if (is_array($arr)) $totalGallery += count($arr);
+                    }
+                }
+                if (!empty($rp['all_videos'])) {
+                    foreach (explode('||', $rp['all_videos']) as $vJson) {
+                        $arr = json_decode($vJson, true);
+                        if (is_array($arr)) $totalVideos += count($arr);
+                    }
+                }
+                if (!empty($rp['all_docs'])) {
+                    foreach (explode('||', $rp['all_docs']) as $dJson) {
+                        $arr = json_decode($dJson, true);
+                        if (is_array($arr)) $totalDocs += count($arr);
+                    }
+                }
+
+                $rp['total_gallery'] = $totalGallery;
+                $rp['total_videos'] = $totalVideos;
+                $rp['total_docs'] = $totalDocs;
+                $persons[] = $rp;
+            }
         } catch (\Exception $e) {
             $records = [];
+            $persons = [];
         }
 
         $flashSuccess = $_SESSION['record_flash_success'] ?? null;
@@ -3884,6 +3940,8 @@ class Admin extends Controller {
             'current_page'  => 'records',
             'title'         => 'Record List | Records',
             'records'       => $records,
+            'persons'       => $persons,
+            'search'        => $search,
             'flash_success' => $flashSuccess,
             'flash_error'   => $flashError,
             'settings'      => $this->siteSettings
