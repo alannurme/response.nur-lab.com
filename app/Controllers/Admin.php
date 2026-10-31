@@ -4026,6 +4026,14 @@ class Admin extends Controller {
         $db = \Config\Database::pdoConnect();
         $this->ensureRecordsTableExists($db);
 
+        $preSelectedPersonId = intval($_GET['person_id'] ?? 0);
+        $selectedPerson = null;
+        if ($preSelectedPersonId > 0) {
+            $pStmt = $db->prepare("SELECT * FROM `records_persons` WHERE `id` = ?");
+            $pStmt->execute([$preSelectedPersonId]);
+            $selectedPerson = $pStmt->fetch(\PDO::FETCH_ASSOC);
+        }
+
         // Fetch categories dynamically from open_database_categories table
         $categories = [];
         try {
@@ -4049,12 +4057,13 @@ class Admin extends Controller {
         }
 
         $this->view('admin/records_add', [
-            'current_page' => 'records_add',
-            'title'        => 'নতুন ডাটা রেকর্ড যোগ করুন (Add Record)',
-            'categories'   => $categories,
-            'locations'    => $locations,
-            'persons'      => $persons,
-            'settings'     => $this->siteSettings
+            'current_page'    => 'records_add',
+            'title'           => 'নতুন ডাটা রেকর্ড যোগ করুন (Add Record)',
+            'categories'      => $categories,
+            'locations'       => $locations,
+            'persons'         => $persons,
+            'selected_person' => $selectedPerson,
+            'settings'        => $this->siteSettings
         ]);
     }
 
