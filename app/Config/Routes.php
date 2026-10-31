@@ -32,9 +32,6 @@ $routes->get('api/quran/tafsir', 'Home::api_quran_tafsir');
 $routes->get('api/hadith/books', 'Home::api_hadith_books');
 $routes->get('api/hadith/chapters', 'Home::api_hadith_chapters');
 $routes->get('api/hadith/list', 'Home::api_hadith_list');
-$routes->get('api/sync/trigger', 'Home::api_sync_trigger');
-$routes->get('sync_islamic_data.php', 'Home::run_sync_script');
-$routes->post('sync_islamic_data.php', 'Home::run_sync_script');
 
 // Admin Routes
 $routes->get('admin', 'Admin::index');

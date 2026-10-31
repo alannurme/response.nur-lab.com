@@ -1683,46 +1683,6 @@ class Home extends Controller {
     }
 
 
-    public function run_sync_script() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        $secret = $_GET['secret'] ?? '';
-        $hasAdminAuth = !empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember']) || ($secret === 'nur-lab-sync-2025');
-        if (!$hasAdminAuth) {
-            http_response_code(403);
-            echo "Access Denied: Admin session required to run data sync.";
-            exit;
-        }
-
-        $file = ROOTPATH . 'sync_islamic_data.php';
-        if (!file_exists($file)) {
-            $file = APPPATH . '../sync_islamic_data.php';
-        }
-        if (file_exists($file)) {
-            require $file;
-        } else {
-            echo "Sync script not found at " . htmlspecialchars($file);
-        }
-        exit;
-    }
-
-    public function api_sync_trigger() {
-        header('Content-Type: application/json; charset=utf-8');
-        $secret = $_GET['secret'] ?? '';
-        // Use a simple secret to protect this endpoint
-        if ($secret !== 'nur-lab-sync-2025') {
-            http_response_code(403);
-            echo json_encode(['error' => 'forbidden']);
-            exit;
-        }
-
-        $type   = $_GET['type'] ?? '';
-        $result = ['started' => true, 'type' => $type];
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
     public function _remap($method, ...$params) {
         if (method_exists($this, $method)) {
             return $this->$method(...$params);
