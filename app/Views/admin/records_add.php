@@ -499,102 +499,135 @@
                 </div>
             </div>
 
-            <!-- Section Card 2: Category, Status & Remarks -->
-            <div class="odb-section-card">
-                <div class="odb-section-card-title">
-                    <span><i class="fa-solid fa-folder-open"></i> ক্যাটাগরি, স্ট্যাটাস ও বিবরণ</span>
+            <!-- Section Card 2: Interactive Media & Details Bento Grid -->
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                    <i class="fa-solid fa-layer-group" style="color: #2563eb; font-size: 1.25rem;"></i>
+                    <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; font-family: 'Tiro Bangla', sans-serif;">ক্যাটাগরি, মিডিয়া ও রেকর্ডের বিবরণ</h3>
                 </div>
-                <div class="odb-form-grid-bottom">
-                    <div class="odb-form-group full-width">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label style="margin: 0;">ক্যাটাগরি নির্বাচন করুন (একাধিক বেছে নেওয়া যাবে)</label>
-                            <a href="<?= URLROOT ?>/admin/records_categories" target="_blank" style="font-size: 0.82rem; color: #2563eb; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
-                                <i class="fa-solid fa-tags"></i> ক্যাটাগরি ম্যানেজ করুন
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                    
+                    <!-- Card 1: Category Selector Card -->
+                    <div style="background: white; border-radius: 18px; border: 1.5px solid #e2e8f0; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                    <i class="fa-solid fa-tags"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">ক্যাটাগরি নির্বাচন</h4>
+                                    <span style="font-size: 0.78rem; color: #64748b;">একাধিক সিলেক্ট করা যাবে</span>
+                                </div>
+                            </div>
+                            <a href="<?= URLROOT ?>/admin/records_categories" target="_blank" style="font-size: 0.8rem; color: #2563eb; text-decoration: none; font-weight: 700; background: #f0fdf4; padding: 4px 10px; border-radius: 8px; border: 1px solid #bbf7d0;">
+                                <i class="fa-solid fa-cog"></i> ম্যানেজ
                             </a>
                         </div>
-                        <?php $categoriesList = $data['categories'] ?? []; ?>
-                        <?php if (!empty($categoriesList)): ?>
-                            <div class="odb-category-pills-container">
-                                <?php foreach ($categoriesList as $cat): 
-                                    $catName = htmlspecialchars($cat['name']);
-                                ?>
-                                    <label class="odb-category-pill">
-                                        <input type="checkbox" name="crime_type[]" value="<?= $catName ?>">
-                                        <span class="odb-pill-content">
-                                            <i class="fa-solid fa-check check-icon" style="display: none; color: #fff;"></i>
-                                            <span class="cat-name"><?= $catName ?></span>
-                                        </span>
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
-                            <small style="color: #64748b; font-size: 0.82rem; display: block; margin-top: 6px; font-weight: 600;">
-                                <i class="fa-solid fa-circle-info" style="color: #2563eb;"></i> প্রযোজ্য ক্যাটাগরিগুলোতে ক্লিক করে সিলেক্ট বা আনসিলেক্ট করুন।
-                            </small>
-                        <?php else: ?>
-                            <input type="text" name="crime_type" class="odb-form-control" placeholder="Financial, Cyber, Public (Comma separated)">
-                        <?php endif; ?>
+                        
+                        <div style="flex-grow: 1;">
+                            <?php $categoriesList = $data['categories'] ?? []; ?>
+                            <?php if (!empty($categoriesList)): ?>
+                                <div class="odb-category-pills-container" style="max-height: 140px; overflow-y: auto; padding: 4px;">
+                                    <?php foreach ($categoriesList as $cat): 
+                                        $catName = htmlspecialchars($cat['name']);
+                                    ?>
+                                        <label class="odb-category-pill">
+                                            <input type="checkbox" name="crime_type[]" value="<?= $catName ?>">
+                                            <span class="odb-pill-content">
+                                                <i class="fa-solid fa-check check-icon" style="display: none; color: #fff;"></i>
+                                                <span class="cat-name"><?= $catName ?></span>
+                                            </span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <input type="text" name="crime_type" class="odb-form-control" placeholder="যেমন: Financial, Cyber, Public..." style="border-radius: 10px; padding: 10px 14px; border: 1.5px solid #cbd5e1; width: 100%; box-sizing: border-box;">
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <input type="hidden" name="status" value="Active">
-
-                    <!-- Video Section (Local upload + Google Drive selection) -->
-                    <div class="odb-form-group full-width">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <label style="margin: 0;">ভিডিও ফাইল (কম্পিউটার থেকে আপলোড অথবা ড্রাইভ থেকে বেছে নিন)</label>
-                            <button type="button" class="picker-btn" onclick="openMediaModalForVideos()">
-                                <i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ থেকে ভিডিও সিলেক্ট করুন
-                            </button>
-                        </div>
-                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                    <!-- Card 2: Google Drive & Local Video Card -->
+                    <div style="background: white; border-radius: 18px; border: 1.5px solid #e2e8f0; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
                                     <i class="fa-solid fa-video"></i>
                                 </div>
-                                <div style="flex-grow: 1;">
-                                    <input type="file" name="video_files[]" class="odb-form-control" accept="video/*" multiple style="background: #fff; padding: 7px 12px;">
-                                    <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">MP4, MKV, WebM ভিডিও ফাইল (আপলোড করলে ড্রাইভে সেভ হবে)।</small>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">ভিডিও প্রমাণাদি</h4>
+                                    <span style="font-size: 0.78rem; color: #64748b;">ড্রাইভ ক্লাউডে সংরক্ষণ</span>
                                 </div>
                             </div>
-                            <div id="selectedDriveVideosContainer" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;"></div>
-                        </div>
-                        <input type="hidden" name="selected_drive_videos" id="selectedDriveVideosInput" value="[]">
-                    </div>
-
-                    <div class="odb-form-group full-width">
-                        <label>অথবা অনলাইন ভিডিও লিংক (YouTube / Vimeo / Direct Video URL)</label>
-                        <div style="position: relative;">
-                            <i class="fa-solid fa-link" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1rem;"></i>
-                            <input type="url" name="video_url" class="odb-form-control" style="padding-left: 42px;" placeholder="যেমন: https://www.youtube.com/watch?v=XXXXXX">
-                        </div>
-                    </div>
-
-                    <!-- Documents Section (Local + Google Drive) -->
-                    <div class="odb-form-group full-width">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <label style="margin: 0;">নথি ও অন্যান্য ফাইল (কম্পিউটার বা গুগল ড্রাইভ থেকে)</label>
-                            <button type="button" class="picker-btn" onclick="openMediaModalForDocs()">
-                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ থেকে ফাইল সিলেক্ট করুন
+                            <button type="button" class="picker-btn" onclick="openMediaModalForVideos()" style="padding: 5px 12px; font-size: 0.8rem; background: #f0fdf4; color: #166534; border: 1px solid #86efac; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ ভিডিও
                             </button>
                         </div>
-                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-                                    <i class="fa-solid fa-file-shield"></i>
-                                </div>
+
+                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+                            <label style="border: 2px dashed #fca5a5; border-radius: 12px; padding: 12px; background: #fff5f5; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s;">
+                                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: #ef4444;"></i>
                                 <div style="flex-grow: 1;">
-                                    <input type="file" name="document_files[]" class="odb-form-control" accept=".pdf,.doc,.docx,.zip,.rar,.tar,.mp3,.wav,.ogg,.txt,.csv" multiple style="background: #fff; padding: 7px 12px;">
-                                    <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">PDF, Word, Zip, অডিও এবং অন্যান্য প্রয়োজনীয় ডকুমেন্ট।</small>
+                                    <div style="font-weight: 700; font-size: 0.85rem; color: #991b1b;">কম্পিউটার থেকে ভিডিও আপলোড</div>
+                                    <span style="font-size: 0.75rem; color: #b91c1c;">MP4, MKV (সরাসরি ড্রাইভে আপলোড হবে)</span>
                                 </div>
+                                <input type="file" name="video_files[]" accept="video/*" multiple style="display: none;" onchange="this.parentElement.querySelector('span').textContent = this.files.length + ' টি ভিডিও সিলেক্ট হয়েছে'">
+                            </label>
+
+                            <div style="position: relative;">
+                                <i class="fa-solid fa-link" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem;"></i>
+                                <input type="url" name="video_url" class="odb-form-control" style="padding-left: 36px; font-size: 0.85rem; border-radius: 10px; border: 1.5px solid #cbd5e1; width: 100%; box-sizing: border-box;" placeholder="অথবা YouTube / অনলাইন ভিডিও লিংক...">
                             </div>
-                            <div id="selectedDriveDocsContainer" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;"></div>
+                            <div id="selectedDriveVideosContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                            <input type="hidden" name="selected_drive_videos" id="selectedDriveVideosInput" value="[]">
                         </div>
-                        <input type="hidden" name="selected_drive_documents" id="selectedDriveDocsInput" value="[]">
                     </div>
 
-                    <div class="odb-form-group full-width">
-                        <label>বিস্তারিত বিবরণী ও মন্তব্য</label>
-                        <textarea name="description" class="odb-form-control" rows="4" placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."></textarea>
+                    <!-- Card 3: Documents & Evidence Files Card -->
+                    <div style="background: white; border-radius: 18px; border: 1.5px solid #e2e8f0; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.05rem;">
+                                    <i class="fa-solid fa-file-shield"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">নথি ও অন্যান্য ফাইল</h4>
+                                    <span style="font-size: 0.78rem; color: #64748b;">PDF, Word, Zip, Audio</span>
+                                </div>
+                            </div>
+                            <button type="button" class="picker-btn" onclick="openMediaModalForDocs()" style="padding: 5px 12px; font-size: 0.8rem; background: #f0fdf4; color: #166534; border: 1px solid #86efac; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ ফাইল
+                            </button>
+                        </div>
+
+                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+                            <label style="border: 2px dashed #c7d2fe; border-radius: 12px; padding: 12px; background: #f5f7ff; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s;">
+                                <i class="fa-solid fa-file-arrow-up" style="font-size: 1.5rem; color: #4f46e5;"></i>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-weight: 700; font-size: 0.85rem; color: #3730a3;">ডকুমেন্ট ও ফাইল আপলোড</div>
+                                    <span style="font-size: 0.75rem; color: #4338ca;">PDF, Zip, Docx সিলেক্ট করুন</span>
+                                </div>
+                                <input type="file" name="document_files[]" accept=".pdf,.doc,.docx,.zip,.rar,.tar,.mp3,.wav,.ogg,.txt,.csv" multiple style="display: none;" onchange="this.parentElement.querySelector('span').textContent = this.files.length + ' টি ফাইল সিলেক্ট হয়েছে'">
+                            </label>
+
+                            <div id="selectedDriveDocsContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                            <input type="hidden" name="selected_drive_documents" id="selectedDriveDocsInput" value="[]">
+                        </div>
                     </div>
+                </div>
+
+                <!-- Card 4: Description & Remarks (Full Width Card below) -->
+                <div style="background: white; border-radius: 18px; border: 1.5px solid #e2e8f0; padding: 22px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9; color: #334155; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                            <i class="fa-solid fa-pen-nib"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">রেকর্ডের বিবরণ ও পর্যবেক্ষণ</h4>
+                            <span style="font-size: 0.78rem; color: #64748b;">ঘটনা, অপরাধের প্রেক্ষাপট বা প্রয়োজনীয় বিস্তারিত নোট</span>
+                        </div>
+                    </div>
+                    <textarea name="description" class="odb-form-control" rows="3" placeholder="রেকর্ডের বিস্তারিত বিবরণ, ঘটনা বা নোট এখানে লিখুন..." style="border-radius: 12px; border: 1.5px solid #cbd5e1; width: 100%; padding: 12px 16px; font-size: 0.92rem; box-sizing: border-box; line-height: 1.5;"></textarea>
                 </div>
             </div>
 
