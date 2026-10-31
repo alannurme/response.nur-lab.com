@@ -1377,6 +1377,13 @@ if (!function_exists('getBengaliDate')) {
             background: rgba(16, 185, 129, 0.25);
             transform: translateX(3px);
         }
+        .mega-subcat-item.active {
+            color: #ffffff !important;
+            background: rgba(16, 185, 129, 0.35) !important;
+            font-weight: 700;
+            border-left: 3px solid #34d399;
+            transform: translateX(3px);
+        }
         .mega-subcat-item i {
             font-size: 11px;
             color: #34d399;
@@ -2614,7 +2621,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         $subcats = $stmt_sub->fetchAll();
                                                         $has_subcats = !empty($subcats);
                                                     ?>
-                                                        <div class="mega-cat-group" id="group-<?= $tab_slug ?>">
+                                                        <div class="mega-cat-group <?= $is_first ? 'expanded' : '' ?>" id="group-<?= $tab_slug ?>">
                                                             <div class="mega-tab-btn <?= $is_first ? 'active' : '' ?>" data-tab="<?= $tab_slug ?>" data-link="<?= URLROOT . '/' . $cat['slug'] ?>">
                                                                 <div class="mega-tab-btn-title">
                                                                     <i class="fa-solid fa-layer-group mega-tab-icon"></i>
@@ -3508,32 +3515,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tabs.forEach(tab => {
         const handleSwitch = (e) => {
-            // Ignore click if clicking directly on expander button
+            // Ignore if clicking or hovering directly on expander button
             if (e.target.closest('.mega-cat-expander')) {
                 return;
             }
 
-            const isAlreadyActive = tab.classList.contains('active');
             const targetLink = tab.getAttribute('data-link');
             
             // On mobile, clicking category button should navigate directly into that category!
             if (window.innerWidth <= 1200) {
+                if (e.type === 'click') {
+                    if (targetLink && targetLink !== '#' && targetLink !== '') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = targetLink;
+                        return;
+                    }
+                }
+                return;
+            }
+
+            // On Desktop: Clicking category/subcategory navigates directly to that category page
+            if (e.type === 'click') {
                 if (targetLink && targetLink !== '#' && targetLink !== '') {
-                    e.preventDefault();
-                    e.stopPropagation();
                     window.location.href = targetLink;
                     return;
                 }
-            } else if (e.type === 'click' && isAlreadyActive && targetLink) {
-                window.location.href = targetLink;
-                return;
             }
 
-            // If mouseenter triggers on mobile, bypass it
-            if (e.type === 'mouseenter' && window.innerWidth <= 1200) {
-                return;
-            }
-
+            // On Desktop Hover (mouseenter): Switch active tab and active right-side post pane
             tabs.forEach(t => t.classList.remove('active'));
             panes.forEach(p => p.classList.remove('active'));
 
@@ -3543,9 +3553,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetPane) {
                 targetPane.classList.add('active');
             }
+
+            // If desktop hover on a parent category, auto-expand its subcategory list if present
+            const parentGroup = tab.closest('.mega-cat-group');
+            if (parentGroup && parentGroup.querySelector('.mega-subcat-list')) {
+                parentGroup.classList.add('expanded');
+            }
         };
 
-        // Switch post panel only on click (no auto switch on hover)
+        // Switch post panel on hover (mouseenter) on desktop and handle click navigation
+        tab.addEventListener('mouseenter', handleSwitch);
         tab.addEventListener('click', handleSwitch);
     });
 
