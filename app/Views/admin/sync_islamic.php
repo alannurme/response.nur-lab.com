@@ -109,6 +109,22 @@
     color: #fff !important;
     border-color: #10b981 !important;
 }
+.btn-remove {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-remove:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    border-color: #ef4444 !important;
+}
 @media (max-width: 768px) {
     .sync-cards-grid {
         grid-template-columns: 1fr !important;
@@ -175,9 +191,14 @@
             </div>
         </div>
 
-        <button onclick="startSync('quran_all&tafsir=all', this)" class="sync-btn" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%;">
-            <i class="fas fa-arrows-rotate"></i> <span>১. সম্পূর্ণ কুরআন ও বাংলা অনুবাদ সিঙ্ক করুন</span>
-        </button>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="startSync('quran_all&tafsir=all', this)" class="sync-btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-arrows-rotate"></i> <span>সম্পূর্ণ কুরআন সিঙ্ক</span>
+            </button>
+            <button onclick="removeData('quran_all', null, this)" class="sync-btn" style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 12px 14px;" title="সম্পূর্ণ কুরআন ডাটা মুছে ফেলুন">
+                <i class="fas fa-trash-can"></i>
+            </button>
+        </div>
     </div>
 
     <!-- 2. Quran Audio Reciter Card -->
@@ -278,12 +299,15 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button onclick="startSync('hadith&book=' + document.getElementById('adminHadithBookSelect').value, this)" class="sync-btn" style="flex: 1; background: linear-gradient(135deg, #eab308, #ca8a04); padding: 11px 8px; font-size: 0.85rem;">
-                <i class="fas fa-file-lines"></i> <span>সিলেক্টেড বই সিঙ্ক</span>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="startSync('hadith&book=' + document.getElementById('adminHadithBookSelect').value, this)" class="sync-btn" style="flex: 1; background: linear-gradient(135deg, #eab308, #ca8a04); padding: 11px 6px; font-size: 0.82rem;">
+                <i class="fas fa-file-lines"></i> <span>সিলেক্টেড সিঙ্ক</span>
             </button>
-            <button onclick="startSync('hadith_all', this)" class="sync-btn" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 11px 8px; font-size: 0.85rem;">
+            <button onclick="startSync('hadith_all', this)" class="sync-btn" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 11px 6px; font-size: 0.82rem;">
                 <i class="fas fa-arrows-rotate"></i> <span>সব বই সিঙ্ক</span>
+            </button>
+            <button onclick="removeData('hadith_all', null, this)" class="sync-btn" style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 11px 12px;" title="সকল হাদিস ডাটা মুছে ফেলুন">
+                <i class="fas fa-trash-can"></i>
             </button>
         </div>
     </div>
@@ -472,9 +496,14 @@
                             </td>
                             <!-- 10. অ্যাকশন -->
                             <td style="padding: 12px 14px; text-align: right;">
-                                <button onclick="startSync('quran&surah=<?= $s['surah_num'] ?>&tafsir=all', this)" class="btn-resync">
-                                    <i class="fas fa-rotate"></i> সিঙ্ক করুন
-                                </button>
+                                <div style="display: inline-flex; gap: 6px; align-items: center;">
+                                    <button onclick="startSync('quran&surah=<?= $s['surah_num'] ?>&tafsir=all', this)" class="btn-resync" title="পুনরায় সিঙ্ক করুন">
+                                        <i class="fas fa-rotate"></i> সিঙ্ক
+                                    </button>
+                                    <button onclick="removeData('quran_surah', <?= $s['surah_num'] ?>, this, '<?= htmlspecialchars(addslashes($s['surah_name_bn'] ?: ('সূরা ' . $s['surah_num']))) ?>')" class="btn-remove" title="ডাটাবেজ থেকে এই সূরার তথ্য মুছে ফেলুন">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -572,9 +601,16 @@
                             <?php endif; ?>
                         </td>
                         <td style="padding: 12px 14px; text-align: right;">
-                            <button onclick="startSync('hadith&book=<?= $b['book_key'] ?>', this)" class="btn-resync">
-                                <i class="fas fa-rotate"></i> সিঙ্ক করুন
-                            </button>
+                            <div style="display: inline-flex; gap: 6px; align-items: center;">
+                                <button onclick="startSync('hadith&book=<?= $b['book_key'] ?>', this)" class="btn-resync" title="পুনরায় সিঙ্ক করুন">
+                                    <i class="fas fa-rotate"></i> সিঙ্ক
+                                </button>
+                                <?php if ($hasData): ?>
+                                <button onclick="removeData('hadith_book', '<?= $b['book_key'] ?>', this, '<?= htmlspecialchars(addslashes($b['book_name'])) ?>')" class="btn-remove" title="এই গ্রন্থের সংরক্ষিত হাদিস ডাটা মুছে ফেলুন">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -708,6 +744,59 @@ function startSync(actionStr, btn) {
             if (btn) {
                 btn.disabled = false;
                 btn.style.opacity = "1";
+                btn.innerHTML = originalHtml;
+            }
+        });
+}
+
+function removeData(type, id, btn, name = "") {
+    let confirmMsg = "";
+    let actionParam = "";
+
+    if (type === "quran_surah") {
+        confirmMsg = `আপনি কি নিশ্চিতভাবে "${name}"-এর সংরক্ষিত সকল আয়াত, অনুবাদ ও অডিও ডাটাবেজ থেকে মুছে ফেলতে চান?`;
+        actionParam = `remove_quran_surah&surah=${id}`;
+    } else if (type === "quran_all") {
+        confirmMsg = "সতর্কতা: আপনি কি ডাটাবেজের সম্পূর্ণ কুরআন ডাটা (সকল ১১৪টি সূরার আয়াত, অনুবাদ ও অডিও) মুছে ফেলতে চান?";
+        actionParam = "remove_quran_all";
+    } else if (type === "hadith_book") {
+        confirmMsg = `আপনি কি "${name}" হাদিস গ্রন্থের সকল সংরক্ষিত ডাটা ডাটাবেজ থেকে মুছে ফেলতে চান?`;
+        actionParam = `remove_hadith_book&book=${id}`;
+    } else if (type === "hadith_all") {
+        confirmMsg = "সতর্কতা: আপনি কি ডাটাবেজের সম্পূর্ণ হাদিস ক্যাশ মুছে ফেলতে চান?";
+        actionParam = "remove_hadith_all";
+    }
+
+    if (!confirm(confirmMsg)) return;
+
+    let originalHtml = "";
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+    }
+
+    const toast = showToast("মুছে ফেলা হচ্ছে...", "ডাটাবেজ থেকে তথ্য রিমুভ করা হচ্ছে...", "info", 0);
+    const url = `<?= URLROOT ?>/sync_islamic_data.php?action=${actionParam}&secret=nur-lab-sync-2025`;
+
+    fetch(url)
+        .then(res => res.text())
+        .then(data => {
+            if (toast) toast.remove();
+            showToast("সফলভাবে মুছে ফেলা হয়েছে!", "ডাটাবেজ থেকে ক্যাশ ডাটা পরিষ্কার করা হয়েছে।", "success", 4000);
+            reloadSyncData(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            });
+        })
+        .catch(err => {
+            if (toast) toast.remove();
+            console.error("Remove error:", err);
+            showToast("ত্রুটি", "ডাটা মুছে ফেলার সময় সমস্যা হয়েছে।", "error", 4000);
+            if (btn) {
+                btn.disabled = false;
                 btn.innerHTML = originalHtml;
             }
         });

@@ -226,6 +226,34 @@ switch ($action) {
     case 'status':
         showStatus($pdo);
         break;
+    case 'remove_quran_surah':
+        $surah = (int)($isCLI ? ($argv[2] ?? 0) : ($_GET['surah'] ?? 0));
+        if ($surah > 0) {
+            $stmt = $pdo->prepare('DELETE FROM quran_cache WHERE surah_num = ?');
+            $stmt->execute([$surah]);
+            log_msg("SUCCESS: সূরা নম্বর {$surah}-এর ডাটাবেজ ক্যাশ সফলভাবে মুছে ফেলা হয়েছে।");
+        } else {
+            log_msg('ERROR: সূরা নম্বর প্রদান করা হয়নি।');
+        }
+        break;
+    case 'remove_quran_all':
+        $pdo->exec('TRUNCATE TABLE quran_cache');
+        log_msg('SUCCESS: সম্পূর্ণ কুরআন ক্যাশ ডাটাবেজ খালি করা হয়েছে।');
+        break;
+    case 'remove_hadith_book':
+        $book = trim($isCLI ? ($argv[2] ?? '') : ($_GET['book'] ?? ''));
+        if (!empty($book)) {
+            $stmt = $pdo->prepare('DELETE FROM hadith_cache WHERE book_key = ?');
+            $stmt->execute([$book]);
+            log_msg("SUCCESS: '{$book}' হাদিস গ্রন্থের ডাটাবেজ ক্যাশ সফলভাবে মুছে ফেলা হয়েছে।");
+        } else {
+            log_msg('ERROR: হাদিস বুকের কী (Book Key) প্রদান করা হয়নি।');
+        }
+        break;
+    case 'remove_hadith_all':
+        $pdo->exec('TRUNCATE TABLE hadith_cache');
+        log_msg('SUCCESS: সম্পূর্ণ হাদিস ক্যাশ ডাটাবেজ খালি করা হয়েছে।');
+        break;
     default:
         echo '<h3>Available actions:</h3>';
         echo '<ul>';
