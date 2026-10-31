@@ -5215,7 +5215,8 @@ class Admin extends Controller {
             exit;
         }
 
-        $redirectUri = URLROOT . '/admin/gdrive_oauth_callback';
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        $redirectUri = $protocol . ($_SERVER['HTTP_HOST'] ?? 'response.nur-lab.com') . '/admin/gdrive_oauth_callback';
         $state = bin2hex(random_bytes(16));
         $_SESSION['gdrive_oauth_state'] = $state;
 
@@ -5254,7 +5255,8 @@ class Admin extends Controller {
 
         $clientId = trim($this->siteSettings['gdrive_oauth_client_id'] ?? '');
         $clientSecret = trim($this->siteSettings['gdrive_oauth_client_secret'] ?? '');
-        $redirectUri = URLROOT . '/admin/gdrive_oauth_callback';
+        // Ensure redirectUri matches exact origin of current request (http vs https)
+        $redirectUri = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'response.nur-lab.com') . '/admin/gdrive_oauth_callback';
 
         // Exchange authorization code for tokens
         $ch = curl_init('https://oauth2.googleapis.com/token');
@@ -5275,7 +5277,7 @@ class Admin extends Controller {
 
         $tokens = json_decode($resp, true);
         if ($httpCode !== 200 || empty($tokens['refresh_token'])) {
-            $errMsg = $tokens['error_description'] ?? ($tokens['error'] ?? 'Refresh token পাওয়া যায়নি।');
+            $errMsg = $tokens['error_description'] ?? ($tokens['error'] ?? ('HTTP ' . $httpCode . ' ' . $resp));
             $_SESSION['flash_error'] = 'গুগল ড্রাইভ টোকেন এরর: ' . $errMsg;
             header('Location: ' . URLROOT . '/admin/storage_settings');
             exit;
