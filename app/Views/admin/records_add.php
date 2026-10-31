@@ -65,9 +65,15 @@
 
     .odb-form-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr) 200px;
-        grid-auto-flow: dense;
-        gap: 1.2rem 1.5rem;
+        grid-template-columns: 1fr 340px;
+        gap: 1.5rem 2rem;
+        align-items: stretch;
+    }
+
+    .odb-fields-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.1rem 1.4rem;
     }
 
     .odb-form-grid-bottom {
@@ -112,17 +118,16 @@
         background-color: #ffffff;
     }
 
-    /* Photo Upload Box */
+    /* Photo Upload Box - Tall & matched height */
     .odb-photo-upload-box {
-        grid-column: 3;
-        grid-row: span 3;
         display: flex;
         flex-direction: column;
+        height: 100%;
     }
 
     .odb-photo-dropzone {
         border: 2px dashed #94a3b8;
-        border-radius: 12px;
+        border-radius: 14px;
         background: #ffffff;
         flex-grow: 1;
         display: flex;
@@ -132,9 +137,10 @@
         cursor: pointer;
         position: relative;
         overflow: hidden;
-        min-height: 180px;
+        min-height: 380px;
+        height: 100%;
         transition: all 0.2s ease;
-        padding: 10px;
+        padding: 16px;
         text-align: center;
     }
 
@@ -144,13 +150,13 @@
     }
 
     .odb-photo-dropzone i.fa-cloud-arrow-up {
-        font-size: 2.2rem;
+        font-size: 3rem;
         color: #64748b;
-        margin-bottom: 6px;
+        margin-bottom: 10px;
     }
 
     .odb-photo-dropzone span.upload-label {
-        font-size: 0.8rem;
+        font-size: 0.88rem;
         font-weight: 700;
         color: #475569;
     }
@@ -173,6 +179,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: none;
         z-index: 2;
     }
@@ -182,10 +189,10 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(15, 23, 42, 0.75);
+        background: rgba(15, 23, 42, 0.82);
         color: white;
-        padding: 6px;
-        font-size: 0.75rem;
+        padding: 10px;
+        font-size: 0.85rem;
         font-weight: 700;
         text-align: center;
         z-index: 3;
@@ -311,17 +318,64 @@
                         </p>
                     </div>
 
-                    <div style="min-width: 300px; flex-grow: 1; max-width: 450px;">
-                        <select name="person_id" id="personSelector" class="odb-form-control" onchange="onPersonSelected(this)" style="border-color: #86efac; font-weight: 600; background: #fff;">
-                            <option value="">-- নতুন ব্যক্তি হিসেবে এন্ট্রি করুন --</option>
+                    <div style="min-width: 320px; flex-grow: 1; max-width: 480px; position: relative;" id="personDropdownWrapper">
+                        <!-- Hidden input storing selected person_id -->
+                        <input type="hidden" name="person_id" id="personIdInput" value="<?= $preSelectedPersonId ?: '' ?>">
+                        
+                        <!-- Searchable Custom Input -->
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #16a34a; font-size: 0.95rem;"></i>
+                            <input type="text" id="personSearchInput" class="odb-form-control" autocomplete="off" placeholder="নাম, উপনাম বা ফোন দিয়ে ব্যক্তি খুঁজুন বা সিলেক্ট করুন..." style="padding-left: 38px; padding-right: 36px; border-color: #86efac; font-weight: 600; background: #fff;" onclick="togglePersonDropdown(true)" oninput="filterPersonDropdown()">
+                            <button type="button" id="clearPersonBtn" onclick="clearSelectedPerson()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; display: none;">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                        </div>
+
+                        <!-- Dropdown Options Menu -->
+                        <div id="personDropdownList" style="display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; max-height: 280px; overflow-y: auto; background: #ffffff; border: 1.5px solid #86efac; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.12); z-index: 100;">
+                            <div class="person-dropdown-item" onclick="selectPersonItem('', 'নতুন ব্যক্তি হিসেবে এন্ট্রি করুন', null)" style="padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; transition: background 0.15s;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
+                                <div style="width: 34px; height: 34px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </div>
+                                <div>
+                                    <strong style="font-size: 0.88rem; color: #0f172a; display: block;">-- নতুন ব্যক্তি হিসেবে এন্ট্রি করুন --</strong>
+                                    <span style="font-size: 0.75rem; color: #64748b;">ফর্মটি নতুন এন্ট্রির জন্য খালি থাকবে</span>
+                                </div>
+                            </div>
+
                             <?php foreach ($personsList as $per): ?>
-                                <option value="<?= $per['id'] ?>" 
-                                    <?= ($preSelectedPersonId == $per['id']) ? 'selected' : '' ?>
-                                    data-person='<?= htmlspecialchars(json_encode($per), ENT_QUOTES, 'UTF-8') ?>'>
-                                    <?= htmlspecialchars($per['name']) ?> <?= !empty($per['alias']) ? '(' . htmlspecialchars($per['alias']) . ')' : '' ?> - <?= !empty($per['phone']) ? htmlspecialchars($per['phone']) : 'ID: #' . $per['id'] ?>
-                                </option>
+                                <div class="person-dropdown-item" 
+                                    data-id="<?= $per['id'] ?>"
+                                    data-name="<?= htmlspecialchars($per['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                    data-search="<?= htmlspecialchars(strtolower($per['name'] . ' ' . ($per['alias'] ?? '') . ' ' . ($per['phone'] ?? '') . ' ' . ($per['nid_passport'] ?? '')), ENT_QUOTES, 'UTF-8') ?>"
+                                    data-person='<?= htmlspecialchars(json_encode($per), ENT_QUOTES, 'UTF-8') ?>'
+                                    onclick="selectPersonItem(<?= $per['id'] ?>, '<?= htmlspecialchars(addslashes($per['name']), ENT_QUOTES, 'UTF-8') ?>', this)"
+                                    style="padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; transition: background 0.15s;" 
+                                    onmouseover="this.style.background='#f0fdf4'" 
+                                    onmouseout="this.style.background='white'">
+                                    
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                                        <?php if (!empty($per['photo'])): ?>
+                                            <img src="<?= htmlspecialchars($per['photo']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <?php else: ?>
+                                            <i class="fa-solid fa-user" style="color: #94a3b8; font-size: 0.85rem;"></i>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div style="flex-grow: 1;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <strong style="font-size: 0.9rem; color: #0f172a;"><?= htmlspecialchars($per['name']) ?></strong>
+                                            <?php if (!empty($per['alias'])): ?>
+                                                <span style="font-size: 0.78rem; color: #64748b;">(<?= htmlspecialchars($per['alias']) ?>)</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                            <?= !empty($per['phone']) ? htmlspecialchars($per['phone']) : 'NID: ' . htmlspecialchars($per['nid_passport'] ?? 'N/A') ?>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -340,103 +394,107 @@
                 </div>
 
                 <div class="odb-form-grid">
-                    <!-- Row 1: Full Name, Alias -->
-                    <div class="odb-form-group">
-                        <label>পূর্ণ নাম *</label>
-                        <input type="text" name="name" id="personName" class="odb-form-control" placeholder="যেমন: কায়সার আহমেদ" required>
+                    <!-- Left: Form inputs column -->
+                    <div class="odb-fields-column">
+                        <!-- Row 1: Full Name, Alias -->
+                        <div class="odb-form-group">
+                            <label>পূর্ণ নাম *</label>
+                            <input type="text" name="name" id="personName" class="odb-form-control" placeholder="যেমন: কায়সার আহমেদ" required>
+                        </div>
+
+                        <div class="odb-form-group">
+                            <label>উপনাম (Alias)</label>
+                            <input type="text" name="alias" id="personAlias" class="odb-form-control" placeholder="যেমন: কালা কায়সার">
+                        </div>
+
+                        <!-- Row 2: NID/Passport, Gender -->
+                        <div class="odb-form-group">
+                            <label>এনআইডি / পাসপোর্ট নম্বর</label>
+                            <input type="text" name="nid_passport" id="personNid" class="odb-form-control" placeholder="1992269123450001">
+                        </div>
+
+                        <div class="odb-form-group">
+                            <label>লিঙ্গ</label>
+                            <select name="gender" id="personGender" class="odb-form-control">
+                                <option value="Male">পুরুষ</option>
+                                <option value="Female">নারী</option>
+                                <option value="Other">অন্যান্য</option>
+                            </select>
+                        </div>
+
+                        <!-- Row 3: Age, Height -->
+                        <div class="odb-form-group">
+                            <label>বয়স</label>
+                            <input type="number" name="age" id="personAge" class="odb-form-control" placeholder="34">
+                        </div>
+
+                        <div class="odb-form-group">
+                            <label>উচ্চতা (সেমি)</label>
+                            <input type="number" name="height_cm" id="personHeight" class="odb-form-control" placeholder="175">
+                        </div>
+
+                        <!-- Row 4: Phone, Social Media Link -->
+                        <div class="odb-form-group">
+                            <label>ফোন / মোবাইল নম্বর</label>
+                            <input type="text" name="phone" id="personPhone" class="odb-form-control" placeholder="+880 1700-000000">
+                        </div>
+
+                        <div class="odb-form-group">
+                            <label>সোশ্যাল মিডিয়া প্রোফাইল লিংক</label>
+                            <input type="url" name="social_media" id="personSocial" class="odb-form-control" placeholder="https://facebook.com/username">
+                        </div>
+
+                        <!-- Row 5: Structured Location Selectors & Address -->
+                        <div class="odb-form-group full-width">
+                            <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা) *</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                                <select class="odb-form-control loc-division" onchange="filterDistricts(this)">
+                                    <option value="">-- বিভাগ সিলেক্ট করুন --</option>
+                                    <?php 
+                                        $locationsList = $data['locations'] ?? [];
+                                        $divisions = !empty($locationsList) ? array_unique(array_column($locationsList, 'division')) : ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'];
+                                        sort($divisions);
+                                        foreach ($divisions as $div): 
+                                    ?>
+                                        <option value="<?= htmlspecialchars($div) ?>"><?= htmlspecialchars($div) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+
+                                <select class="odb-form-control loc-district" onchange="filterUpazilas(this)" disabled>
+                                    <option value="">-- জেলা সিলেক্ট করুন --</option>
+                                </select>
+
+                                <select class="odb-form-control loc-upazila" onchange="updateFullAddress(this)" disabled>
+                                    <option value="">-- থানা / উপজেলা সিলেক্ট করুন --</option>
+                                </select>
+                            </div>
+
+                            <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা *</label>
+                            <input type="text" name="address" id="personAddress" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
+                        </div>
                     </div>
 
-                    <div class="odb-form-group">
-                        <label>উপনাম (Alias)</label>
-                        <input type="text" name="alias" id="personAlias" class="odb-form-control" placeholder="যেমন: কালা কায়সার">
-                    </div>
-
-                    <!-- Photo Upload Dropzone with Drive Picker -->
-                    <div class="odb-form-group odb-photo-upload-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <label style="margin: 0;">ছবি *</label>
-                            <button type="button" class="picker-btn" onclick="openMediaModalForPhoto()" style="padding: 2px 8px; font-size: 0.72rem;">
-                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ
+                    <!-- Right: Large Image Upload Box matching entire section height -->
+                    <div class="odb-photo-upload-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="margin: 0; font-size: 0.95rem; font-weight: 700;">প্রোফাইল ছবি *</label>
+                            <button type="button" class="picker-btn" onclick="openMediaModalForPhoto()" style="padding: 4px 10px; font-size: 0.78rem;">
+                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ থেকে নিন
                             </button>
                         </div>
                         <input type="hidden" name="selected_drive_photo" id="selectedDrivePhoto" value="">
                         
                         <div class="odb-photo-dropzone" id="photoDropzoneBox">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span class="upload-label">কম্পিউটার থেকে ড্রপ/ব্রাউজ</span>
+                            <span class="upload-label" style="font-size: 0.95rem;">কম্পিউটার থেকে ছবি ড্রপ বা ব্রাউজ করুন</span>
+                            <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 6px;">JPG, PNG, WEBP ইত্যাদি ফরম্যাট</small>
                             
                             <input type="file" name="photo" id="photoFileInput" class="odb-photo-file-input" accept="image/*" onchange="previewPhoto(this)">
                             <img class="odb-photo-preview" id="photoPreviewImg" src="" alt="Preview">
                             <div class="odb-photo-overlay" id="photoOverlayText">
-                                <i class="fa-solid fa-camera" style="margin-right: 5px;"></i> ছবি পরিবর্তন
+                                <i class="fa-solid fa-camera" style="margin-right: 5px;"></i> ছবি পরিবর্তন করুন
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Row 2: NID/Passport, Gender -->
-                    <div class="odb-form-group">
-                        <label>এনআইডি / পাসপোর্ট নম্বর</label>
-                        <input type="text" name="nid_passport" id="personNid" class="odb-form-control" placeholder="1992269123450001">
-                    </div>
-
-                    <div class="odb-form-group">
-                        <label>লিঙ্গ</label>
-                        <select name="gender" id="personGender" class="odb-form-control">
-                            <option value="Male">পুরুষ</option>
-                            <option value="Female">নারী</option>
-                            <option value="Other">অন্যান্য</option>
-                        </select>
-                    </div>
-
-                    <!-- Row 3: Age, Height -->
-                    <div class="odb-form-group">
-                        <label>বয়স</label>
-                        <input type="number" name="age" id="personAge" class="odb-form-control" placeholder="34">
-                    </div>
-
-                    <div class="odb-form-group">
-                        <label>উচ্চতা (সেমি)</label>
-                        <input type="number" name="height_cm" id="personHeight" class="odb-form-control" placeholder="175">
-                    </div>
-
-                    <!-- Row 4: Phone, Social Media Link -->
-                    <div class="odb-form-group">
-                        <label>ফোন / মোবাইল নম্বর</label>
-                        <input type="text" name="phone" id="personPhone" class="odb-form-control" placeholder="+880 1700-000000">
-                    </div>
-
-                    <div class="odb-form-group">
-                        <label>সোশ্যাল মিডিয়া প্রোফাইল লিংক</label>
-                        <input type="url" name="social_media" id="personSocial" class="odb-form-control" placeholder="https://facebook.com/username">
-                    </div>
-
-                    <!-- Row 5: Structured Location Selectors & Address -->
-                    <div class="odb-form-group" style="grid-column: 1 / span 2;">
-                        <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা) *</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px;">
-                            <select class="odb-form-control loc-division" onchange="filterDistricts(this)">
-                                <option value="">-- বিভাগ সিলেক্ট করুন --</option>
-                                <?php 
-                                    $locationsList = $data['locations'] ?? [];
-                                    $divisions = !empty($locationsList) ? array_unique(array_column($locationsList, 'division')) : ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'];
-                                    sort($divisions);
-                                    foreach ($divisions as $div): 
-                                ?>
-                                    <option value="<?= htmlspecialchars($div) ?>"><?= htmlspecialchars($div) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-
-                            <select class="odb-form-control loc-district" onchange="filterUpazilas(this)" disabled>
-                                <option value="">-- জেলা সিলেক্ট করুন --</option>
-                            </select>
-
-                            <select class="odb-form-control loc-upazila" onchange="updateFullAddress(this)" disabled>
-                                <option value="">-- থানা / উপজেলা সিলেক্ট করুন --</option>
-                            </select>
-                        </div>
-
-                        <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা *</label>
-                        <input type="text" name="address" id="personAddress" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
                     </div>
                 </div>
             </div>
@@ -613,12 +671,42 @@
 </div>
 
 <script>
-    // Existing Person Auto-population
-    function onPersonSelected(selectEl) {
-        const selectedOpt = selectEl.options[selectEl.selectedIndex];
-        const personData = selectedOpt.getAttribute('data-person');
+    // Searchable Person Dropdown Logic
+    function togglePersonDropdown(show) {
+        const list = document.getElementById('personDropdownList');
+        if (show) {
+            list.style.display = 'block';
+            filterPersonDropdown();
+        } else {
+            setTimeout(() => { list.style.display = 'none'; }, 200);
+        }
+    }
 
-        if (!personData) {
+    function filterPersonDropdown() {
+        const term = document.getElementById('personSearchInput').value.toLowerCase().trim();
+        const items = document.querySelectorAll('#personDropdownList .person-dropdown-item');
+        const clearBtn = document.getElementById('clearPersonBtn');
+        
+        clearBtn.style.display = term ? 'block' : 'none';
+
+        items.forEach(item => {
+            const searchData = item.getAttribute('data-search') || '';
+            if (!term || searchData.includes(term) || item.innerText.toLowerCase().includes(term)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        document.getElementById('personDropdownList').style.display = 'block';
+    }
+
+    function selectPersonItem(id, name, el) {
+        document.getElementById('personIdInput').value = id || '';
+        document.getElementById('personSearchInput').value = id ? name : '';
+        document.getElementById('personDropdownList').style.display = 'none';
+        document.getElementById('clearPersonBtn').style.display = id ? 'block' : 'none';
+
+        if (!id || !el) {
             // Reset to empty
             document.getElementById('personName').value = '';
             document.getElementById('personAlias').value = '';
@@ -637,36 +725,55 @@
             return;
         }
 
-        try {
-            const p = JSON.parse(personData);
-            document.getElementById('personName').value = p.name || '';
-            document.getElementById('personAlias').value = p.alias || '';
-            document.getElementById('personNid').value = p.nid_passport || '';
-            document.getElementById('personPhone').value = p.phone || '';
-            document.getElementById('personAge').value = p.age || '';
-            document.getElementById('personHeight').value = p.height_cm || '';
-            document.getElementById('personSocial').value = p.social_media || '';
-            document.getElementById('personAddress').value = p.address || '';
-            if (p.gender) document.getElementById('personGender').value = p.gender;
-            document.getElementById('isMostWantedCheckbox').checked = (p.is_most_wanted == 1);
+        const personData = el.getAttribute('data-person');
+        if (personData) {
+            try {
+                const p = JSON.parse(personData);
+                document.getElementById('personName').value = p.name || '';
+                document.getElementById('personAlias').value = p.alias || '';
+                document.getElementById('personNid').value = p.nid_passport || '';
+                document.getElementById('personPhone').value = p.phone || '';
+                document.getElementById('personAge').value = p.age || '';
+                document.getElementById('personHeight').value = p.height_cm || '';
+                document.getElementById('personSocial').value = p.social_media || '';
+                document.getElementById('personAddress').value = p.address || '';
+                if (p.gender) document.getElementById('personGender').value = p.gender;
+                document.getElementById('isMostWantedCheckbox').checked = (p.is_most_wanted == 1);
 
-            if (p.photo) {
-                document.getElementById('selectedDrivePhoto').value = p.photo;
-                const prev = document.getElementById('photoPreviewImg');
-                prev.src = p.photo;
-                prev.style.display = 'block';
-                document.getElementById('photoOverlayText').style.display = 'block';
+                if (p.photo) {
+                    document.getElementById('selectedDrivePhoto').value = p.photo;
+                    const prev = document.getElementById('photoPreviewImg');
+                    prev.src = p.photo;
+                    prev.style.display = 'block';
+                    document.getElementById('photoOverlayText').style.display = 'block';
+                }
+            } catch (e) {
+                console.error(e);
             }
-        } catch (e) {
-            console.error(e);
         }
     }
 
-    // Trigger on page load if preselected
+    function clearSelectedPerson() {
+        selectPersonItem('', '', null);
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('personDropdownWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            document.getElementById('personDropdownList').style.display = 'none';
+        }
+    });
+
+    // Auto-select on page load if preSelectedPersonId exists
     document.addEventListener('DOMContentLoaded', function() {
-        const sel = document.getElementById('personSelector');
-        if (sel && sel.value) {
-            onPersonSelected(sel);
+        const preId = document.getElementById('personIdInput').value;
+        if (preId) {
+            const targetItem = document.querySelector(`.person-dropdown-item[data-id="${preId}"]`);
+            if (targetItem) {
+                const name = targetItem.getAttribute('data-name');
+                selectPersonItem(preId, name, targetItem);
+            }
         }
     });
 

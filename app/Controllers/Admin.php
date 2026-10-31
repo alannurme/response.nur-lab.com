@@ -2053,6 +2053,12 @@ class Admin extends Controller {
             }
         }
 
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError   = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        $data['success'] = $data['success'] ?? $flashSuccess;
+        $data['error']   = $data['error'] ?? $flashError;
         $data['settings'] = $adminModel->getSettings();
         $data['current_page'] = 'storage_settings';
         $data['title'] = 'Google Drive & Storage Settings';
@@ -3623,6 +3629,7 @@ class Admin extends Controller {
                     }
                 } catch (\Exception $e) {
                     error_log("Google drive upload for record media failed: " . $e->getMessage());
+                    $_SESSION['gdrive_last_error'] = $e->getMessage();
                 }
                 return $finalUrl;
             };
@@ -3840,7 +3847,12 @@ class Admin extends Controller {
                     $now
                 ]);
 
-                $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে! সকল ছবি, ভিডিও ও ফাইল সংরক্ষিত হয়েছে।";
+                if (!empty($_SESSION['gdrive_last_error'])) {
+                    $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে (লোকাল স্টোরেজে সংরক্ষিত হয়েছে)। সতর্কতা: Google Drive আপলোড ব্যর্থ হয়েছে (" . htmlspecialchars($_SESSION['gdrive_last_error']) . ")। দয়া করে Storage Settings এ ফোল্ডার আইডি ও পারমিশন নিশ্চিত করুন।";
+                    unset($_SESSION['gdrive_last_error']);
+                } else {
+                    $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে! সকল ছবি, ভিডিও ও ফাইল Google Drive এ সংরক্ষিত হয়েছে।";
+                }
             } else {
                 $_SESSION['record_flash_error'] = "রেকর্ড সংরক্ষণ করা সম্ভব হয়নি। ব্যক্তির নাম বা তথ্য প্রদান করুন।";
             }
@@ -4017,6 +4029,219 @@ class Admin extends Controller {
         $this->view('admin/records_add', [
             'current_page' => 'records_add',
             'title'        => 'নতুন ডাটা রেকর্ড যোগ করুন (Add Record)',
+            'categories'   => $categories,
+            'locations'    => $locations,
+            'persons'      => $persons,
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function records_edit($id) {
+        $id = intval($id);
+        $db = \Config\Database::pdoConnect();
+        $this->ensureRecordsTableExists($db);
+
+        $stmt = $db->prepare("SELECT * FROM `records` WHERE `id` = ?");
+        $stmt->execute([$id]);
+        $record = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$record) {
+            $_SESSION['record_flash_error'] = 'রেকর্ডটি পাওয়া যায়নি।';
+            header('Location: ' . URLROOT . '/admin/records');
+            exit;
+        }
+
+        // Handle POST update
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once APPPATH . 'Helpers/GoogleDrive.php';
+            $now = date('Y-m-d H:i:s');
+            $upload_dir = FCPATH . 'public/img/records/';
+            if (!is_dir($upload_dir)) {
+                @mkdir($upload_dir, 0777, true);
+            }
+
+            $uploadSingleFile = function($tmpName, $origName, $mimeType = null) use ($upload_dir) {
+                if (empty($tmpName) || !file_exists($tmpName)) return null;
+                $ext = pathinfo($origName, PATHINFO_EXTENSION);
+                $cleanName = time() . '_' . bin2hex(random_bytes(4)) . '.' . ($ext ?: 'bin');
+                $localTarget = $upload_dir . $cleanName;
+                if (!@move_uploaded_file($tmpName, $localTarget)) {
+                    if (!@copy($tmpName, $localTarget)) return null;
+                }
+                $mime = $mimeType ?: (mime_content_type($localTarget) ?: 'application/octet-stream');
+                $finalUrl = URLROOT . '/public/img/records/' . $cleanName;
+
+                try {
+                    $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($localTarget, $cleanName, $mime, $this->siteSettings);
+                    if (!empty($driveRes['url'])) {
+                        $finalUrl = $driveRes['url'];
+                        if (($this->siteSettings['gdrive_sync_local'] ?? '0') != '1') {
+                            @unlink($localTarget);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    error_log("Google drive upload error: " . $e->getMessage());
+                    $_SESSION['gdrive_last_error'] = $e->getMessage();
+                }
+                return $finalUrl;
+            };
+
+            // Existing videos & new
+            $existingVideos = !empty($record['videos']) ? json_decode($record['videos'], true) : [];
+            if (!is_array($existingVideos)) $existingVideos = [];
+            if (isset($_POST['selected_drive_videos'])) {
+                $selVideos = is_array($_POST['selected_drive_videos']) ? $_POST['selected_drive_videos'] : json_decode($_POST['selected_drive_videos'], true);
+                if (is_array($selVideos)) {
+                    foreach ($selVideos as $sv) {
+                        $vUrl = is_array($sv) ? ($sv['url'] ?? '') : $sv;
+                        $vName = is_array($sv) ? ($sv['name'] ?? basename($vUrl)) : basename($vUrl);
+                        if ($vUrl) $existingVideos[] = ['name' => $vName, 'url' => $vUrl];
+                    }
+                }
+            }
+            if (!empty($_FILES['video_files']['name'][0])) {
+                $cnt = count($_FILES['video_files']['name']);
+                for ($v = 0; $v < $cnt; $v++) {
+                    if ($_FILES['video_files']['error'][$v] === UPLOAD_ERR_OK) {
+                        $vUrl = $uploadSingleFile($_FILES['video_files']['tmp_name'][$v], $_FILES['video_files']['name'][$v], $_FILES['video_files']['type'][$v] ?? null);
+                        if ($vUrl) $existingVideos[] = ['name' => $_FILES['video_files']['name'][$v], 'url' => $vUrl];
+                    }
+                }
+            }
+
+            // Existing docs & new
+            $existingDocs = !empty($record['documents']) ? json_decode($record['documents'], true) : [];
+            if (!is_array($existingDocs)) $existingDocs = [];
+            if (isset($_POST['selected_drive_documents'])) {
+                $selDocs = is_array($_POST['selected_drive_documents']) ? $_POST['selected_drive_documents'] : json_decode($_POST['selected_drive_documents'], true);
+                if (is_array($selDocs)) {
+                    foreach ($selDocs as $sd) {
+                        $dUrl = is_array($sd) ? ($sd['url'] ?? '') : $sd;
+                        $dName = is_array($sd) ? ($sd['name'] ?? basename($dUrl)) : basename($dUrl);
+                        if ($dUrl) $existingDocs[] = ['name' => $dName, 'url' => $dUrl];
+                    }
+                }
+            }
+            if (!empty($_FILES['document_files']['name'][0])) {
+                $cnt = count($_FILES['document_files']['name']);
+                for ($d = 0; $d < $cnt; $d++) {
+                    if ($_FILES['document_files']['error'][$d] === UPLOAD_ERR_OK) {
+                        $dUrl = $uploadSingleFile($_FILES['document_files']['tmp_name'][$d], $_FILES['document_files']['name'][$d], $_FILES['document_files']['type'][$d] ?? null);
+                        if ($dUrl) $existingDocs[] = ['name' => $_FILES['document_files']['name'][$d], 'url' => $dUrl];
+                    }
+                }
+            }
+
+            // Existing gallery & new
+            $existingGallery = !empty($record['gallery']) ? json_decode($record['gallery'], true) : [];
+            if (!is_array($existingGallery)) $existingGallery = [];
+            if (isset($_POST['selected_drive_gallery'])) {
+                $selGal = is_array($_POST['selected_drive_gallery']) ? $_POST['selected_drive_gallery'] : json_decode($_POST['selected_drive_gallery'], true);
+                if (is_array($selGal)) {
+                    foreach ($selGal as $sg) {
+                        $gUrl = is_array($sg) ? ($sg['url'] ?? '') : $sg;
+                        if ($gUrl && !in_array($gUrl, $existingGallery)) $existingGallery[] = $gUrl;
+                    }
+                }
+            }
+            if (!empty($_FILES['additional_photos']['name'][0])) {
+                $cnt = count($_FILES['additional_photos']['name']);
+                for ($g = 0; $g < $cnt; $g++) {
+                    if ($_FILES['additional_photos']['error'][$g] === UPLOAD_ERR_OK) {
+                        $gUrl = $uploadSingleFile($_FILES['additional_photos']['tmp_name'][$g], $_FILES['additional_photos']['name'][$g], $_FILES['additional_photos']['type'][$g] ?? null);
+                        if ($gUrl && !in_array($gUrl, $existingGallery)) $existingGallery[] = $gUrl;
+                    }
+                }
+            }
+
+            // Person info & Photo
+            $personId = !empty($_POST['person_id']) ? intval($_POST['person_id']) : $record['person_id'];
+            $personName = trim($_POST['name'] ?? $record['name']);
+            $alias = trim($_POST['alias'] ?? '');
+            $nid = trim($_POST['nid_passport'] ?? '');
+            $gender = trim($_POST['gender'] ?? 'Male');
+            $age = !empty($_POST['age']) ? intval($_POST['age']) : null;
+            $height = !empty($_POST['height_cm']) ? intval($_POST['height_cm']) : null;
+            $phone = trim($_POST['phone'] ?? '');
+            $social = trim($_POST['social_media'] ?? '');
+            $address = trim($_POST['address'] ?? '');
+            $isMostWanted = !empty($_POST['is_most_wanted']) ? 1 : 0;
+
+            $photoUrl = trim($_POST['selected_drive_photo'] ?? '') ?: $record['photo'];
+            if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                $newPhoto = $uploadSingleFile($_FILES['photo']['tmp_name'], $_FILES['photo']['name'], $_FILES['photo']['type'] ?? null);
+                if ($newPhoto) $photoUrl = $newPhoto;
+            }
+
+            $crimeTypeInput = $_POST['crime_type'] ?? [];
+            $crimeTypeStr = is_array($crimeTypeInput) ? implode(', ', array_filter($crimeTypeInput)) : trim($crimeTypeInput);
+            $videoUrlInput = trim($_POST['video_url'] ?? '');
+            $mainDesc = trim($_POST['description'] ?? '');
+
+            // Update records table
+            $upStmt = $db->prepare("
+                UPDATE `records` SET 
+                    `person_id` = ?, `name` = ?, `alias` = ?, `nid_passport` = ?, `gender` = ?, `age` = ?, 
+                    `height_cm` = ?, `phone` = ?, `social_media` = ?, `address` = ?, `crime_type` = ?, 
+                    `is_most_wanted` = ?, `photo` = ?, `gallery` = ?, `videos` = ?, `video_url` = ?, 
+                    `documents` = ?, `description` = ?, `updated_at` = ?
+                WHERE `id` = ?
+            ");
+            $upStmt->execute([
+                $personId, $personName, $alias, $nid, $gender, $age,
+                $height, $phone, $social, $address, $crimeTypeStr,
+                $isMostWanted, $photoUrl,
+                !empty($existingGallery) ? json_encode($existingGallery, JSON_UNESCAPED_SLASHES) : null,
+                !empty($existingVideos) ? json_encode($existingVideos, JSON_UNESCAPED_SLASHES) : null,
+                $videoUrlInput ?: null,
+                !empty($existingDocs) ? json_encode($existingDocs, JSON_UNESCAPED_SLASHES) : null,
+                $mainDesc, $now, $id
+            ]);
+
+            // Also update person profile if exists
+            if ($personId > 0) {
+                $db->prepare("
+                    UPDATE `records_persons` SET 
+                        `name` = ?, `alias` = ?, `nid_passport` = ?, `gender` = ?, `age` = ?, 
+                        `height_cm` = ?, `phone` = ?, `social_media` = ?, `address` = ?, 
+                        `is_most_wanted` = ?, `photo` = ?, `updated_at` = ?
+                    WHERE `id` = ?
+                ")->execute([
+                    $personName, $alias, $nid, $gender, $age,
+                    $height, $phone, $social, $address,
+                    $isMostWanted, $photoUrl, $now, $personId
+                ]);
+            }
+
+            if (!empty($_SESSION['gdrive_last_error'])) {
+                $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে আপডেট করা হয়েছে (ফাইল লোকাল স্টোরেজে সংরক্ষিত হয়েছে)। সতর্কতা: Google Drive আপলোড ব্যর্থ হয়েছে (" . htmlspecialchars($_SESSION['gdrive_last_error']) . ")।";
+                unset($_SESSION['gdrive_last_error']);
+            } else {
+                $_SESSION['record_flash_success'] = 'রেকর্ড সফলভাবে আপডেট করা হয়েছে!';
+            }
+            header('Location: ' . URLROOT . '/admin/records');
+            exit;
+        }
+
+        $locationsFile = APPPATH . 'cache/locations.json';
+        $locations = file_exists($locationsFile) ? json_decode(file_get_contents($locationsFile), true) : [];
+
+        $categories = [];
+        try {
+            $stmt = $db->query("SELECT * FROM `open_database_categories` ORDER BY `id` ASC");
+            if ($stmt) $categories = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {}
+
+        $persons = [];
+        try {
+            $pStmt = $db->query("SELECT * FROM `records_persons` ORDER BY `name` ASC");
+            if ($pStmt) $persons = $pStmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {}
+
+        $this->view('admin/records_edit', [
+            'current_page' => 'records',
+            'title'        => 'রেকর্ড সম্পাদনা (Edit Record) - #' . $record['id'],
+            'record'       => $record,
             'categories'   => $categories,
             'locations'    => $locations,
             'persons'      => $persons,
@@ -4977,6 +5202,159 @@ class Admin extends Controller {
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'SMTP সংযোগ ত্রুটি: ' . $e->getMessage()]);
         }
+        exit;
+    }
+
+    public function gdrive_oauth_init() {
+        $clientId = trim($this->siteSettings['gdrive_oauth_client_id'] ?? '');
+        $clientSecret = trim($this->siteSettings['gdrive_oauth_client_secret'] ?? '');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            $_SESSION['flash_error'] = 'দয়া করে প্রথমে Google OAuth Client ID এবং Client Secret কনফিগার করুন।';
+            header('Location: ' . URLROOT . '/admin/storage_settings');
+            exit;
+        }
+
+        $redirectUri = URLROOT . '/admin/gdrive_oauth_callback';
+        $state = bin2hex(random_bytes(16));
+        $_SESSION['gdrive_oauth_state'] = $state;
+
+        $params = [
+            'client_id'             => $clientId,
+            'redirect_uri'          => $redirectUri,
+            'response_type'         => 'code',
+            'scope'                 => 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+            'access_type'           => 'offline',
+            'prompt'                => 'consent select_account',
+            'state'                 => $state
+        ];
+
+        $authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
+        header('Location: ' . $authUrl);
+        exit;
+    }
+
+    public function gdrive_oauth_callback() {
+        $code = $_GET['code'] ?? '';
+        $state = $_GET['state'] ?? '';
+        $error = $_GET['error'] ?? '';
+
+        if (!empty($error)) {
+            $_SESSION['flash_error'] = 'গুগল ড্রাইভ অথোরাইজেশন বাতিল হয়েছে: ' . htmlspecialchars($error);
+            header('Location: ' . URLROOT . '/admin/storage_settings');
+            exit;
+        }
+
+        if (empty($code) || empty($state) || $state !== ($_SESSION['gdrive_oauth_state'] ?? '')) {
+            $_SESSION['flash_error'] = 'অথোরাইজেশন সেশন অকার্যকর বা মেয়াদোত্তীর্ণ। আবার চেষ্টা করুন।';
+            header('Location: ' . URLROOT . '/admin/storage_settings');
+            exit;
+        }
+        unset($_SESSION['gdrive_oauth_state']);
+
+        $clientId = trim($this->siteSettings['gdrive_oauth_client_id'] ?? '');
+        $clientSecret = trim($this->siteSettings['gdrive_oauth_client_secret'] ?? '');
+        $redirectUri = URLROOT . '/admin/gdrive_oauth_callback';
+
+        // Exchange authorization code for tokens
+        $ch = curl_init('https://oauth2.googleapis.com/token');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'code'          => $code,
+            'client_id'     => $clientId,
+            'client_secret' => $clientSecret,
+            'redirect_uri'  => $redirectUri,
+            'grant_type'    => 'authorization_code'
+        ]));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $tokens = json_decode($resp, true);
+        if ($httpCode !== 200 || empty($tokens['refresh_token'])) {
+            $errMsg = $tokens['error_description'] ?? ($tokens['error'] ?? 'Refresh token পাওয়া যায়নি।');
+            $_SESSION['flash_error'] = 'গুগল ড্রাইভ টোকেন এরর: ' . $errMsg;
+            header('Location: ' . URLROOT . '/admin/storage_settings');
+            exit;
+        }
+
+        $refreshToken = $tokens['refresh_token'];
+        $accessToken = $tokens['access_token'] ?? '';
+
+        // Get user profile email
+        $userEmail = 'Google Account';
+        $userName = 'Google User';
+        if ($accessToken) {
+            $ch = curl_init('https://www.googleapis.com/oauth2/v2/userinfo');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessToken]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $uResp = curl_exec($ch);
+            curl_close($ch);
+            $uData = json_decode($uResp, true);
+            if (!empty($uData['email'])) {
+                $userEmail = $uData['email'];
+                $userName = $uData['name'] ?? $userEmail;
+            }
+        }
+
+        // Auto-create / ensure root upload folder in user's Drive
+        require_once APPPATH . 'Helpers/GoogleDrive.php';
+        $tempDriveConfig = [
+            'id'            => 'temp_oauth',
+            'auth_type'     => 'oauth2',
+            'client_id'     => $clientId,
+            'client_secret' => $clientSecret,
+            'refresh_token' => $refreshToken
+        ];
+
+        $folderName = 'Response Records Storage';
+        $autoFolderId = '';
+        try {
+            $autoFolderId = \App\Helpers\GoogleDrive::createFolder($folderName, $tempDriveConfig);
+        } catch (\Exception $e) {
+            error_log("Failed to auto-create folder: " . $e->getMessage());
+        }
+
+        // Add this new drive to existing drives list
+        $drivesJson = $this->siteSettings['google_drives'] ?? '[]';
+        $drives = json_decode($drivesJson, true) ?: [];
+
+        // Set as default drive and make sure storage provider is set to google_drive
+        foreach ($drives as &$d) {
+            $d['is_default'] = 0;
+        }
+        unset($d);
+
+        $newDrive = [
+            'id'            => 'gdrive_oauth_' . time(),
+            'name'          => 'Google Drive (' . $userEmail . ')',
+            'auth_type'     => 'oauth2',
+            'client_id'     => $clientId,
+            'client_secret' => $clientSecret,
+            'refresh_token' => $refreshToken,
+            'folder_id'     => $autoFolderId,
+            'is_default'    => 1,
+            'status'        => 'active'
+        ];
+        $drives[] = $newDrive;
+
+        // Save updated settings to DB
+        $db = \Config\Database::pdoConnect();
+        $stmt = $db->prepare("
+            INSERT INTO `settings` (`setting_key`, `setting_value`, `created_at`, `updated_at`) 
+            VALUES (?, ?, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`), `updated_at` = NOW()
+        ");
+        $stmt->execute(['google_drives', json_encode($drives, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
+        $stmt->execute(['storage_provider', 'google_drive']);
+
+        $_SESSION['flash_success'] = "গুগল ড্রাইভ ({$userEmail}) সফলভাবে ১-ক্লিকে যুক্ত ও সক্রিয় হয়েছে! স্বয়ংক্রিয়ভাবে '{$folderName}' ফোল্ডার তৈরি ও কনফিগার করা হয়েছে।";
+        header('Location: ' . URLROOT . '/admin/storage_settings');
         exit;
     }
 

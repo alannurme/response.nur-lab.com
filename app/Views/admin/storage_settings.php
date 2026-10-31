@@ -29,6 +29,60 @@
 <?php endif; ?>
 
 <form action="<?= URLROOT ?>/admin/storage_settings" method="POST" id="storageSettingsForm">
+    <!-- One-Click Google Drive OAuth Card -->
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%); border: 2px solid #86efac; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(15, 157, 88, 0.08);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+            <div style="max-width: 650px;">
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: #0f9d58; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+                    <i class="fas fa-bolt"></i> ১-ক্লিক অটো কানেকশন
+                </div>
+                <h3 style="margin: 0 0 8px; color: #064e3b; font-size: 1.35rem; font-weight: 800; font-family: 'Hind Siliguri', sans-serif; display: flex; align-items: center; gap: 10px;">
+                    <i class="fab fa-google-drive" style="color: #0f9d58; font-size: 1.6rem;"></i> Google Drive 1-Click Auto Connect
+                </h3>
+                <p style="margin: 0; color: #166534; font-size: 0.95rem; line-height: 1.5;">
+                    কোনো JSON ফাইল বা ফোল্ডার খোঁজাখুঁজি ছাড়াই শুধু <strong>"Connect Google Drive"</strong> বাটনে ক্লিক করুন। আপনার গুগল অ্যাকাউন্টে স্বয়ংক্রিয়ভাবে <strong>"Response Records Storage"</strong> ফোল্ডার তৈরি হয়ে যাবে এবং সমস্ত ফাইল আপলোডের পারমিশন একটিভ হয়ে যাবে।
+                </p>
+            </div>
+            <div>
+                <?php if (!empty($data['settings']['gdrive_oauth_client_id']) && !empty($data['settings']['gdrive_oauth_client_secret'])): ?>
+                    <a href="<?= URLROOT ?>/admin/gdrive_oauth_init" class="btn" style="background: #0f9d58; color: white; padding: 14px 28px; border-radius: 14px; font-weight: 800; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 12px; text-decoration: none; box-shadow: 0 6px 20px rgba(15, 157, 88, 0.35); transition: 0.25s;">
+                        <i class="fab fa-google" style="font-size: 1.2rem;"></i> Connect Google Drive (১-ক্লিক)
+                    </a>
+                <?php else: ?>
+                    <button type="button" onclick="document.getElementById('oauth_credentials_setup').scrollIntoView({behavior: 'smooth'})" class="btn" style="background: #047857; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 10px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(4, 120, 87, 0.25);">
+                        <i class="fas fa-cog"></i> ১-ক্লিক সেটআপ সম্পন্ন করুন
+                    </button>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- OAuth Client ID & Secret toggle / config -->
+        <div id="oauth_credentials_setup" style="margin-top: 20px; padding-top: 18px; border-top: 1px dashed #86efac;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 0.9rem; font-weight: 700; color: #064e3b;">
+                    <i class="fas fa-key"></i> Google OAuth API Credentials (একবারের সেটআপ):
+                </span>
+                <span style="font-size: 0.82rem; color: #047857;">
+                    Redirect URI: <code style="background: white; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0; font-weight: 700;"><?= URLROOT ?>/admin/gdrive_oauth_callback</code>
+                </span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #166534; margin-bottom: 5px;">Google OAuth Client ID</label>
+                    <input type="text" name="settings[gdrive_oauth_client_id]" value="<?= htmlspecialchars($data['settings']['gdrive_oauth_client_id'] ?? '') ?>" placeholder="xxxx.apps.googleusercontent.com" style="width: 100%; padding: 10px 14px; border: 1.5px solid #a7f3d0; border-radius: 10px; font-size: 0.9rem; background: white; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #166534; margin-bottom: 5px;">Google OAuth Client Secret</label>
+                    <input type="password" name="settings[gdrive_oauth_client_secret]" value="<?= htmlspecialchars($data['settings']['gdrive_oauth_client_secret'] ?? '') ?>" placeholder="GOCSPX-xxxx" style="width: 100%; padding: 10px 14px; border: 1.5px solid #a7f3d0; border-radius: 10px; font-size: 0.9rem; background: white; box-sizing: border-box;">
+                </div>
+            </div>
+            <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn" style="background: #10b981; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                    <i class="fas fa-save"></i> ক্রেডেনশিয়াল সেভ করুন
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Storage Mode Selection -->
     <div style="background: white; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
         <h3 style="margin-top: 0; margin-bottom: 8px; color: #0f172a; font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 10px; font-family: 'Hind Siliguri', sans-serif;">

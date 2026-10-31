@@ -45,6 +45,7 @@ $routes->get('admin/posts', 'Admin::posts');
 // Records Routes
 $routes->match(['get', 'post'], 'admin/records', 'Admin::records');
 $routes->get('admin/records_add', 'Admin::records_add');
+$routes->match(['get', 'post'], 'admin/records_edit/(:num)', 'Admin::records_edit/$1');
 $routes->match(['get', 'post'], 'admin/records_delete/(:num)', 'Admin::records_delete/$1');
 $routes->match(['get', 'post'], 'admin/records_delete', 'Admin::records_delete');
 $routes->get('admin/records_persons', 'Admin::records_persons');
@@ -69,6 +70,8 @@ $routes->post('admin/open_database_categories_delete', 'Admin::open_database_cat
 $routes->get('admin/open_database_verification', 'Admin::open_database_verification');
 $routes->get('admin/storage_settings', 'Admin::storage_settings');
 $routes->post('admin/storage_settings', 'Admin::storage_settings');
+$routes->get('admin/gdrive_oauth_init', 'Admin::gdrive_oauth_init');
+$routes->get('admin/gdrive_oauth_callback', 'Admin::gdrive_oauth_callback');
 $routes->post('admin/test_gdrive_connection', 'Admin::test_gdrive_connection');
 // AJAX Live Search Routes
 $routes->get('ajax_search', 'Home::ajax_search');

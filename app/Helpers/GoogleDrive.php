@@ -226,7 +226,8 @@ class GoogleDrive {
             . $fileContent
             . $closeDelimiter;
 
-        $ch = curl_init('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink');
+        $url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink&supportsAllDrives=true';
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
@@ -269,8 +270,51 @@ class GoogleDrive {
     }
 
     /**
-     * Set file permission to anyone with link can view (reader)
+     * Create a folder in Google Drive (or return existing if already exists with same name)
      */
+    public static function createFolder($folderName, $drive) {
+        $token = self::getAccessToken($drive);
+        
+        // Check if folder already exists
+        $q = "name = '" . addslashes($folderName) . "' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        $ch = curl_init('https://www.googleapis.com/drive/v3/files?q=' . urlencode($q) . '&fields=files(id,name)&supportsAllDrives=true&includeItemsFromAllDrives=true');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        $data = json_decode($resp, true);
+        if (!empty($data['files'][0]['id'])) {
+            return $data['files'][0]['id'];
+        }
+
+        // Create new folder
+        $ch = curl_init('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+            'name' => $folderName,
+            'mimeType' => 'application/vnd.google-apps.folder'
+        ]));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $res = json_decode($resp, true);
+        if ($httpCode === 200 && !empty($res['id'])) {
+            self::makePublic($res['id'], $token);
+            return $res['id'];
+        }
+
+        return '';
+    }
     public static function makePublic($fileId, $token) {
         $ch = curl_init('https://www.googleapis.com/drive/v3/files/' . urlencode($fileId) . '/permissions');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -351,7 +395,9 @@ class GoogleDrive {
             'q' => $q,
             'pageSize' => $pageSize,
             'fields' => 'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink, webContentLink, thumbnailLink)',
-            'orderBy' => 'modifiedTime desc'
+            'orderBy' => 'modifiedTime desc',
+            'supportsAllDrives' => 'true',
+            'includeItemsFromAllDrives' => 'true'
         ];
         if (!empty($pageToken)) {
             $params['pageToken'] = $pageToken;
@@ -419,8 +465,10 @@ class GoogleDrive {
      */
     public static function deleteFile($fileId, $drive) {
         $token = self::getAccessToken($drive);
-        $url = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId);
+        $folderId = trim($drive['folder_id'] ?? '');
 
+        // 1. Try permanent DELETE first
+        $url = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId) . '?supportsAllDrives=true';
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -434,6 +482,49 @@ class GoogleDrive {
         curl_close($ch);
 
         if ($httpCode === 204 || $httpCode === 200 || $httpCode === 404) {
+            return true;
+        }
+
+        // 2. If DELETE failed (e.g. 403 insufficient permissions on shared files),
+        // try to remove the file from the shared folder (remove parents) or move to trash
+        if (!empty($folderId)) {
+            $removeUrl = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId) . '?removeParents=' . urlencode($folderId) . '&supportsAllDrives=true';
+            $ch = curl_init($removeUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, '{}');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $token,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $resp2 = curl_exec($ch);
+            $httpCode2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode2 === 200 || $httpCode2 === 204) {
+                return true;
+            }
+        }
+
+        // 3. Try trashing the file
+        $trashUrl = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId) . '?supportsAllDrives=true';
+        $ch = curl_init($trashUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['trashed' => true]));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp3 = curl_exec($ch);
+        $httpCode3 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode3 === 200 || $httpCode3 === 204) {
             return true;
         }
 

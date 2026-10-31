@@ -7,13 +7,7 @@
         </h1>
         <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">সংরক্ষিত সকল রেকর্ড দেখুন ও পরিচালনা করুন (ছবি, ভিডিও এবং ফাইলসমূহ গুগল ড্রাইভে সংরক্ষিত)</p>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="<?= URLROOT ?>/admin/records_persons" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
-            <i class="fa-solid fa-users"></i> ব্যক্তি তালিকা (Person List)
-        </a>
-        <a href="<?= URLROOT ?>/admin/records_categories" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
-            <i class="fa-solid fa-tags"></i> ক্যাটাগরি
-        </a>
+    <div>
         <a href="<?= URLROOT ?>/admin/records_add" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: #2563eb; border: none; color: #fff;">
             <i class="fa-solid fa-plus-circle"></i> নতুন রেকর্ড যোগ করুন
         </a>
@@ -165,9 +159,14 @@
                             </td>
 
                             <td style="padding: 16px 20px; vertical-align: middle; text-align: center;">
-                                <a href="<?= URLROOT ?>/admin/records_delete/<?= $r['id'] ?>" onclick="return confirm('আপনি কি নিশ্চিতভাবে এই রেকর্ডটি মুছে ফেলতে চান?')" style="color: #ef4444; background: #fee2e2; border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s;" title="মুছে ফেলুন">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
+                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                    <a href="<?= URLROOT ?>/admin/records_edit/<?= $r['id'] ?>" style="color: #2563eb; background: #eff6ff; border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s;" title="এডিট করুন">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <a href="<?= URLROOT ?>/admin/records_delete/<?= $r['id'] ?>" onclick="return confirm('আপনি কি নিশ্চিতভাবে এই রেকর্ডটি মুছে ফেলতে চান?')" style="color: #ef4444; background: #fee2e2; border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s;" title="মুছে ফেলুন">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

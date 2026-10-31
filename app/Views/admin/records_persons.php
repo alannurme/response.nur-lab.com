@@ -7,10 +7,7 @@
         </h1>
         <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">সকল ব্যক্তির প্রোফাইল ও তাদের অধীনে সংরক্ষিত একাধিক রেকর্ডসমূহ দেখুন</p>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="<?= URLROOT ?>/admin/records" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
-            <i class="fa-solid fa-list-ul"></i> রেকর্ড তালিকা
-        </a>
+    <div>
         <a href="<?= URLROOT ?>/admin/records_add" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: #2563eb; border: none; color: #fff;">
             <i class="fa-solid fa-plus-circle"></i> নতুন রেকর্ড যোগ করুন
         </a>
