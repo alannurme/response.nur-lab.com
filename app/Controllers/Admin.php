@@ -194,6 +194,39 @@ class Admin extends Controller {
             'upload_max'   => ini_get('upload_max_filesize'),
         ];
 
+        // Google Drive storage quotas
+        $googleDrivesQuota = [];
+        $drivesJson = $this->siteSettings['google_drives'] ?? '[]';
+        $googleDrives = json_decode($drivesJson, true) ?: [];
+        if (!empty($googleDrives)) {
+            require_once APPPATH . 'Helpers/GoogleDrive.php';
+            foreach ($googleDrives as $gd) {
+                if (($gd['status'] ?? 'active') === 'active') {
+                    $driveName = $gd['name'] ?? 'Google Drive';
+                    $driveId   = $gd['id'] ?? '';
+                    try {
+                        $quota = \App\Helpers\GoogleDrive::getStorageQuota($gd);
+                        $quota['id']   = $driveId;
+                        $quota['name'] = $driveName;
+                        $googleDrivesQuota[] = $quota;
+                    } catch (\Exception $e) {
+                        $googleDrivesQuota[] = [
+                            'id'         => $driveId,
+                            'name'       => $driveName,
+                            'total_gb'   => 0,
+                            'used_gb'    => 0,
+                            'free_gb'    => 0,
+                            'percent'    => 0,
+                            'unlimited'  => false,
+                            'user_name'  => '',
+                            'user_email' => '',
+                            'error'      => $e->getMessage()
+                        ];
+                    }
+                }
+            }
+        }
+
         $this->view('admin/dashboard', [
             'title' => 'Admin Dashboard',
             'posts' => $posts,
@@ -208,6 +241,7 @@ class Admin extends Controller {
             'recent_subscribers' => $recentSubscribers,
             'media_stats' => $mediaStats,
             'server_info' => $serverInfo,
+            'google_drives_quota' => $googleDrivesQuota,
             'pending_comments' => $pendingComments,
             'unread_messages' => $unreadMessages,
             'unanswered_questions' => $unansweredQuestions,

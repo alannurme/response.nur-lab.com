@@ -441,5 +441,72 @@ class GoogleDrive {
         $err = $data['error']['message'] ?? ('HTTP Error ' . $httpCode);
         throw new \Exception('Failed to delete Google Drive file: ' . $err);
     }
+
+    /**
+     * Get storage quota / space for a Google Drive
+     * Returns total bytes, used bytes, free bytes, and formatted strings
+     */
+    public static function getStorageQuota($drive) {
+        $token = self::getAccessToken($drive);
+        $url = 'https://www.googleapis.com/drive/v3/about?fields=storageQuota,user';
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $quota = [
+            'total_bytes' => 0,
+            'used_bytes'  => 0,
+            'free_bytes'  => 0,
+            'total_gb'    => 0,
+            'used_gb'     => 0,
+            'free_gb'     => 0,
+            'percent'     => 0,
+            'unlimited'   => false,
+            'user_name'   => '',
+            'user_email'  => '',
+            'error'       => null
+        ];
+
+        if ($httpCode === 200) {
+            $data = json_decode($resp, true);
+            $sq = $data['storageQuota'] ?? [];
+            $limit = isset($sq['limit']) ? (float)$sq['limit'] : 0;
+            $usage = isset($sq['usage']) ? (float)$sq['usage'] : 0;
+
+            $quota['user_name']  = $data['user']['displayName'] ?? '';
+            $quota['user_email'] = $data['user']['emailAddress'] ?? '';
+
+            if ($limit > 0) {
+                $quota['total_bytes'] = $limit;
+                $quota['used_bytes']  = $usage;
+                $quota['free_bytes']  = max(0, $limit - $usage);
+                $quota['total_gb']    = round($limit / (1024 * 1024 * 1024), 2);
+                $quota['used_gb']     = round($usage / (1024 * 1024 * 1024), 2);
+                $quota['free_gb']     = round($quota['free_bytes'] / (1024 * 1024 * 1024), 2);
+                $quota['percent']     = min(100, round(($usage / $limit) * 100, 1));
+            } else {
+                // Unlimited or shared/workspace pooled drive
+                $quota['unlimited']   = true;
+                $quota['used_bytes']  = $usage;
+                $quota['used_gb']     = round($usage / (1024 * 1024 * 1024), 2);
+                $quota['total_gb']    = 'Unlimited';
+                $quota['free_gb']     = 'Unlimited';
+                $quota['percent']     = 0;
+            }
+        } else {
+            $errData = json_decode($resp, true);
+            $quota['error'] = $errData['error']['message'] ?? ('HTTP ' . $httpCode);
+        }
+
+        return $quota;
+    }
 }
 

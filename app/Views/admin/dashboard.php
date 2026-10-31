@@ -452,13 +452,71 @@ $dc   = ['#2563eb','#8b5cf6','#ec4899','#f97316','#22c55e','#06b6d4','#f59e0b','
             </div>
             <div>
                 <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:6px">
-                    <span style="font-weight:600;color:var(--text-main)"><i class="fas fa-hdd" style="color:#22c55e;margin-right:5px"></i>Disk Usage</span>
+                    <span style="font-weight:600;color:var(--text-main)"><i class="fas fa-hdd" style="color:#22c55e;margin-right:5px"></i>Local Disk Usage</span>
                     <span style="font-weight:700;color:<?= $dP>80?'#ef4444':'var(--text-main)' ?>"><?= $dU ?> / <?= $dT ?> GB (<?= $dP ?>%)</span>
                 </div>
                 <div style="background:#e2e8f0;border-radius:20px;height:9px;overflow:hidden">
                     <div style="height:100%;width:<?= $dP ?>%;background:<?= $dP>80?'#ef4444':($dP>60?'#f59e0b':'#22c55e') ?>;border-radius:20px;transition:width .6s"></div>
                 </div>
             </div>
+
+            <!-- Google Drive Cloud Quota Section -->
+            <?php $gdQuotas = $data['google_drives_quota'] ?? []; ?>
+            <?php if (!empty($gdQuotas)): ?>
+                <div style="margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px dashed #e2e8f0;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-size: .84rem; font-weight: 700; color: #1e293b; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-brands fa-google-drive" style="color: #2563eb; font-size: 1rem;"></i> Google Drive Storage
+                        </span>
+                        <a href="<?= URLROOT ?>/admin/storage_settings" style="font-size: .75rem; color: #2563eb; text-decoration: none; font-weight: 600;">
+                            ম্যানেজ <i class="fas fa-arrow-right" style="font-size: .65rem;"></i>
+                        </a>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <?php foreach ($gdQuotas as $gq): ?>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <div>
+                                        <strong style="font-size: .86rem; color: #0f172a; display: block;"><?= htmlspecialchars($gq['name']) ?></strong>
+                                        <?php if (!empty($gq['user_email'])): ?>
+                                            <span style="font-size: .72rem; color: #64748b;"><?= htmlspecialchars($gq['user_email']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <?php if (empty($gq['error'])): ?>
+                                            <span style="font-size: .84rem; font-weight: 800; color: <?= ($gq['percent'] ?? 0) > 85 ? '#ef4444' : '#2563eb' ?>;">
+                                                <?= $gq['used_gb'] ?> GB
+                                            </span>
+                                            <span style="font-size: .75rem; color: #64748b;">
+                                                / <?= is_numeric($gq['total_gb']) ? $gq['total_gb'] . ' GB' : $gq['total_gb'] ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span style="font-size: .75rem; color: #ef4444; font-weight: 600;">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> এরর
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <?php if (empty($gq['error'])): ?>
+                                    <div style="background: #e2e8f0; border-radius: 10px; height: 7px; overflow: hidden; margin-top: 6px;">
+                                        <div style="height: 100%; width: <?= $gq['percent'] ?>%; background: <?= $gq['percent'] > 85 ? '#ef4444' : ($gq['percent'] > 65 ? '#f59e0b' : '#3b82f6') ?>; border-radius: 10px; transition: width .5s;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: .72rem; color: #64748b; margin-top: 4px;">
+                                        <span>ব্যবহার: <?= $gq['percent'] ?>%</span>
+                                        <span>ফ্রি স্পেস: <strong><?= is_numeric($gq['free_gb']) ? $gq['free_gb'] . ' GB' : $gq['free_gb'] ?></strong></span>
+                                    </div>
+                                <?php else: ?>
+                                    <div style="font-size: .73rem; color: #ef4444; margin-top: 4px; line-height: 1.3;">
+                                        <?= htmlspecialchars(mb_strimwidth($gq['error'], 0, 90, '...')) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
