@@ -72,6 +72,11 @@
 </div>
 
 <style>
+    /* Hide top global navbar on dedicated Hadith page */
+    .header-wrapper {
+        display: none !important;
+    }
+
     /* Dedicated Hadith Page Mobile Responsiveness */
     @media (max-width: 991px) {
         .hadith-workspace-container {

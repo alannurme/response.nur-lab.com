@@ -1358,6 +1358,7 @@ class Home extends Controller {
         $adminModel = $this->model('AdminModel');
         $data = [
             'title' => 'পবিত্র আল-কুরআন | Read & Listen Al-Quran Online',
+            'current_page' => 'quran',
             'settings' => $adminModel->getSettings(),
             'menus' => $adminModel->getMenus(),
             'sub_menus' => $adminModel->getSubMenus(),
@@ -1371,6 +1372,7 @@ class Home extends Controller {
         $adminModel = $this->model('AdminModel');
         $data = [
             'title' => 'আল হাদিস শরীফ | Hadith Collection',
+            'current_page' => 'hadith',
             'settings' => $adminModel->getSettings(),
             'menus' => $adminModel->getMenus(),
             'sub_menus' => $adminModel->getSubMenus(),

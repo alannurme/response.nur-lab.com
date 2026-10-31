@@ -108,6 +108,11 @@
 </div>
 
 <style>
+    /* Hide top global navbar on dedicated Quran page */
+    .header-wrapper {
+        display: none !important;
+    }
+
     @keyframes pulseGlow {
         0% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); }
         50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.65); }

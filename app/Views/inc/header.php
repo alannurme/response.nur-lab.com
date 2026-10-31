@@ -2554,6 +2554,15 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
+<?php
+$current_req_uri = strtolower($_SERVER['REQUEST_URI'] ?? '');
+$is_islamic_dedicated_page = (
+    strpos($current_req_uri, '/quran') !== false || 
+    strpos($current_req_uri, '/hadith') !== false ||
+    (isset($data['current_page']) && in_array($data['current_page'], ['quran', 'hadith']))
+);
+if (!$is_islamic_dedicated_page):
+?>
 <div class="header-wrapper">
     <div class="container container-header">
         <nav class="glass-nav">
@@ -2893,6 +2902,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </nav>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- Search Popup Overlay Modal -->
 <div id="search-popup-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); z-index: 99999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s ease;">
