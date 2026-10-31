@@ -1580,8 +1580,8 @@ class AdminModel extends Model {
     public function getMenus() {
         // Self-healing migration for Live Server: Ensure ONLY 'সবগুলো নিবন্ধ' is the main top-level menu
         try {
-            // Delete ANY legacy top-level menus (like 'ধর্মতত্ব', 'ধর্মতত্ত্ব', 'ইসলাম', etc.)
-            $this->db->exec("DELETE FROM menus WHERE (parent_id IS NULL OR parent_id = 0) AND TRIM(title) != 'সবগুলো নিবন্ধ'");
+            // Delete legacy hardcoded category menus if present, leaving custom menus intact
+            $this->db->exec("DELETE FROM menus WHERE (parent_id IS NULL OR parent_id = 0) AND TRIM(title) IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ব', 'ধর্মতত্ত্ব')");
             if (class_exists('\\App\\Helpers\\Cache')) {
                 \App\Helpers\Cache::clear();
             }

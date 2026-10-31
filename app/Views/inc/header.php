@@ -2570,9 +2570,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-links">
                 <?php 
                 if(!empty($data['menus'])): 
-                    // ONLY keep 'সবগুলো নিবন্ধ' as the top-level main menu in navbar
-                    $top_menus = array_filter($data['menus'], function($m) { 
-                        return empty($m['parent_id']) && (trim($m['title'] ?? '') === 'সবগুলো নিবন্ধ'); 
+                    $legacy_cat_names = ['ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ব', 'ধর্মতত্ত্ব'];
+                    $all_menus = $data['menus'];
+                    $top_menus = array_filter($all_menus, function($m) use ($legacy_cat_names) { 
+                        return empty($m['parent_id']) && !in_array(trim($m['title'] ?? ''), $legacy_cat_names); 
                     });
                     usort($top_menus, function($a, $b) { return $a['order_index'] <=> $b['order_index']; });
                     

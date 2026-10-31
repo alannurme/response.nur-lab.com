@@ -841,13 +841,16 @@ if (empty($current_page)) {
                 <a href="<?= URLROOT ?>/admin/pages" class="nav-item <?= $current_page == 'pages' ? 'active' : '' ?>">
                     <i class="fas fa-file-alt"></i><span>Static Pages</span>
                 </a>
-                <?php $menu_manager_active = in_array($current_page, ['sub_menus', 'social_links', 'add_sub_menu', 'edit_sub_menu']); ?>
+                <?php $menu_manager_active = in_array($current_page, ['menus', 'add_menu', 'edit_menu', 'sub_menus', 'social_links', 'add_sub_menu', 'edit_sub_menu']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $menu_manager_active ? 'active' : '' ?>">
                         <i class="fas fa-list"></i><span>Menu Manager</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </div>
                     <div class="dropdown-content" <?= $menu_manager_active ? 'style="display: block;"' : '' ?>>
+                        <a href="<?= URLROOT ?>/admin/menus" class="<?= in_array($current_page, ['menus', 'add_menu', 'edit_menu']) ? 'active-sub' : '' ?>">
+                            <i class="fas fa-bars"></i> Main Menu (হেডার মেনু)
+                        </a>
                         <a href="<?= URLROOT ?>/admin/sub_menus" class="<?= in_array($current_page, ['sub_menus', 'add_sub_menu', 'edit_sub_menu']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-link"></i> Top Menu Bar
                         </a>

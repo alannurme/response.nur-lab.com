@@ -2929,8 +2929,13 @@ class Admin extends Controller {
     }
 
     public function menus() {
-        header('Location: ' . URLROOT . '/admin');
-        exit;
+        $adminModel = $this->model('AdminModel');
+        $menus = $adminModel->getMenus();
+        $this->view('admin/menus', [
+            'menus' => $menus,
+            'current_page' => 'menus',
+            'settings' => $this->siteSettings
+        ]);
     }
 
     public function blog_manager() {
