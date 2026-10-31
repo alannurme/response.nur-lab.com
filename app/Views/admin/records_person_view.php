@@ -5,8 +5,8 @@
 
 <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 15px;">
     <div>
-        <a href="<?= URLROOT ?>/admin/records_persons" style="color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-            <i class="fa-solid fa-arrow-left"></i> ব্যক্তি তালিকায় ফিরে যান
+        <a href="<?= URLROOT ?>/admin/records" style="color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+            <i class="fa-solid fa-arrow-left"></i> রেকর্ড তালিকায় ফিরে যান
         </a>
         <h1 class="text-premium-glow" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #0f172a; font-family: 'Tiro Bangla', sans-serif;">
             <?= htmlspecialchars($p['name']) ?> &mdash; প্রোফাইল ও রেকর্ড বিবরণ

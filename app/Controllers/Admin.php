@@ -3949,44 +3949,8 @@ class Admin extends Controller {
     }
 
     public function records_persons() {
-        $db = \Config\Database::pdoConnect();
-        $this->ensureRecordsTableExists($db);
-
-        $search = trim($_GET['q'] ?? '');
-        $query = "
-            SELECT p.*, COUNT(r.id) AS total_records 
-            FROM `records_persons` p 
-            LEFT JOIN `records` r ON r.person_id = p.id 
-        ";
-        $params = [];
-        if (!empty($search)) {
-            $query .= " WHERE p.name LIKE ? OR p.alias LIKE ? OR p.nid_passport LIKE ? OR p.phone LIKE ? ";
-            $params = ["%$search%", "%$search%", "%$search%", "%$search%"];
-        }
-        $query .= " GROUP BY p.id ORDER BY p.id DESC";
-
-        $persons = [];
-        try {
-            $stmt = $db->prepare($query);
-            $stmt->execute($params);
-            $persons = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Exception $e) {
-            $persons = [];
-        }
-
-        $flashSuccess = $_SESSION['record_flash_success'] ?? null;
-        $flashError   = $_SESSION['record_flash_error'] ?? null;
-        unset($_SESSION['record_flash_success'], $_SESSION['record_flash_error']);
-
-        $this->view('admin/records_persons', [
-            'current_page'  => 'records_persons',
-            'title'         => 'Person List | Records',
-            'persons'       => $persons,
-            'search'        => $search,
-            'flash_success' => $flashSuccess,
-            'flash_error'   => $flashError,
-            'settings'      => $this->siteSettings
-        ]);
+        header('Location: ' . URLROOT . '/admin/records');
+        exit;
     }
 
     public function records_person_view($id) {
@@ -4000,7 +3964,7 @@ class Admin extends Controller {
 
         if (!$person) {
             $_SESSION['record_flash_error'] = 'ব্যক্তি খুঁজে পাওয়া যায়নি।';
-            header('Location: ' . URLROOT . '/admin/records_persons');
+            header('Location: ' . URLROOT . '/admin/records');
             exit;
         }
 
@@ -4033,7 +3997,7 @@ class Admin extends Controller {
                 $_SESSION['record_flash_error'] = 'ব্যক্তি ডিলিট করা যায়নি: ' . $e->getMessage();
             }
         }
-        header('Location: ' . URLROOT . '/admin/records_persons');
+        header('Location: ' . URLROOT . '/admin/records');
         exit;
     }
 
