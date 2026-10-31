@@ -446,7 +446,7 @@
 
                         <!-- Row 5: Structured Location Selectors & Address -->
                         <div class="odb-form-group full-width">
-                            <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা) *</label>
+                            <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা)</label>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px;">
                                 <select class="odb-form-control loc-division" onchange="filterDistricts(this)">
                                     <option value="">-- বিভাগ সিলেক্ট করুন --</option>
@@ -469,15 +469,15 @@
                                 </select>
                             </div>
 
-                            <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা *</label>
-                            <input type="text" name="address" id="personAddress" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
+                            <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা</label>
+                            <input type="text" name="address" id="personAddress" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা">
                         </div>
                     </div>
 
                     <!-- Right: Large Image Upload Box matching entire section height -->
                     <div class="odb-photo-upload-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <label style="margin: 0; font-size: 0.95rem; font-weight: 700;">প্রোফাইল ছবি *</label>
+                            <label style="margin: 0; font-size: 0.95rem; font-weight: 700;">প্রোফাইল ছবি</label>
                             <button type="button" class="picker-btn" onclick="openMediaModalForPhoto()" style="padding: 4px 10px; font-size: 0.78rem;">
                                 <i class="fa-brands fa-google-drive"></i> ড্রাইভ থেকে নিন
                             </button>
@@ -507,7 +507,7 @@
                 <div class="odb-form-grid-bottom">
                     <div class="odb-form-group full-width">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label style="margin: 0;">ক্যাটাগরি নির্বাচন করুন (একাধিক বেছে নেওয়া যাবে) *</label>
+                            <label style="margin: 0;">ক্যাটাগরি নির্বাচন করুন (একাধিক বেছে নেওয়া যাবে)</label>
                             <a href="<?= URLROOT ?>/admin/records_categories" target="_blank" style="font-size: 0.82rem; color: #2563eb; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
                                 <i class="fa-solid fa-tags"></i> ক্যাটাগরি ম্যানেজ করুন
                             </a>
@@ -531,7 +531,7 @@
                                 <i class="fa-solid fa-circle-info" style="color: #2563eb;"></i> প্রযোজ্য ক্যাটাগরিগুলোতে ক্লিক করে সিলেক্ট বা আনসিলেক্ট করুন।
                             </small>
                         <?php else: ?>
-                            <input type="text" name="crime_type" class="odb-form-control" placeholder="Financial, Cyber, Public (Comma separated)" required>
+                            <input type="text" name="crime_type" class="odb-form-control" placeholder="Financial, Cyber, Public (Comma separated)">
                         <?php endif; ?>
                     </div>
 
@@ -592,8 +592,8 @@
                     </div>
 
                     <div class="odb-form-group full-width">
-                        <label>বিস্তারিত বিবরণী ও মন্তব্য *</label>
-                        <textarea name="description" class="odb-form-control" rows="4" required placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."></textarea>
+                        <label>বিস্তারিত বিবরণী ও মন্তব্য</label>
+                        <textarea name="description" class="odb-form-control" rows="4" placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."></textarea>
                     </div>
                 </div>
             </div>

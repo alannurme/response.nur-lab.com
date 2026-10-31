@@ -454,8 +454,8 @@
 
                         <!-- Row 5: Structured Location Selectors & Address -->
                         <div class="odb-form-group full-width">
-                            <label>সম্পূর্ণ ঠিকানা *</label>
-                            <input type="text" name="address" id="personAddress" value="<?= htmlspecialchars($r['address'] ?? '') ?>" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
+                            <label>সম্পূর্ণ ঠিকানা</label>
+                            <input type="text" name="address" id="personAddress" value="<?= htmlspecialchars($r['address'] ?? '') ?>" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা">
                         </div>
                     </div>
 
@@ -513,7 +513,7 @@
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <input type="text" name="crime_type" value="<?= htmlspecialchars($r['crime_type'] ?? '') ?>" class="odb-form-control" placeholder="Financial, Cyber, Public" required>
+                            <input type="text" name="crime_type" value="<?= htmlspecialchars($r['crime_type'] ?? '') ?>" class="odb-form-control" placeholder="Financial, Cyber, Public">
                         <?php endif; ?>
                     </div>
 
@@ -570,8 +570,8 @@
                     </div>
 
                     <div class="odb-form-group full-width">
-                        <label>বিস্তারিত বিবরণী ও মন্তব্য *</label>
-                        <textarea name="description" class="odb-form-control" rows="4" required placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."><?= htmlspecialchars($r['description'] ?? '') ?></textarea>
+                        <label>বিস্তারিত বিবরণী ও মন্তব্য</label>
+                        <textarea name="description" class="odb-form-control" rows="4" placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."><?= htmlspecialchars($r['description'] ?? '') ?></textarea>
                     </div>
                 </div>
             </div>
