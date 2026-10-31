@@ -2621,7 +2621,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         $subcats = $stmt_sub->fetchAll();
                                                         $has_subcats = !empty($subcats);
                                                     ?>
-                                                        <div class="mega-cat-group <?= $is_first ? 'expanded' : '' ?>" id="group-<?= $tab_slug ?>">
+                                                        <div class="mega-cat-group" id="group-<?= $tab_slug ?>">
                                                             <div class="mega-tab-btn <?= $is_first ? 'active' : '' ?>" data-tab="<?= $tab_slug ?>" data-link="<?= URLROOT . '/' . $cat['slug'] ?>">
                                                                 <div class="mega-tab-btn-title">
                                                                     <i class="fa-solid fa-layer-group mega-tab-icon"></i>
@@ -3552,12 +3552,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetPane = document.getElementById('pane-' + tabId);
             if (targetPane) {
                 targetPane.classList.add('active');
-            }
-
-            // If desktop hover on a parent category, auto-expand its subcategory list if present
-            const parentGroup = tab.closest('.mega-cat-group');
-            if (parentGroup && parentGroup.querySelector('.mega-subcat-list')) {
-                parentGroup.classList.add('expanded');
             }
         };
 
