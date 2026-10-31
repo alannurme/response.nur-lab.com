@@ -9,10 +9,10 @@ if (!function_exists('renderCategoryCheckboxTree')) {
             
             if ($catParent === $filterParent) {
                 $prefix = $depth > 0 ? '↳ ' : '';
-                $isChecked = in_array($cat['id'], $selected_cats) ? 'checked' : '';
+                $isChecked = in_array((int)$cat['id'], array_map('intval', $selected_cats)) ? 'checked' : '';
                 
                 $html .= '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-left: ' . ($depth * 20) . 'px;">';
-                $html .= '<input type="checkbox" name="post_cats[]" value="' . $cat['id'] . '" id="post_cat_' . $cat['id'] . '" ' . $isChecked . ' style="width: 18px; height: 18px;">';
+                $html .= '<input type="checkbox" name="post_cats[]" value="' . $cat['id'] . '" id="post_cat_' . $cat['id'] . '" ' . $isChecked . ' style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">';
                 $html .= '<label for="post_cat_' . $cat['id'] . '" style="cursor: pointer; font-size: 15px; color: #334155; font-weight: ' . ($depth === 0 ? '700' : '500') . '; margin: 0;">' . $prefix . htmlspecialchars($cat['name']) . '</label>';
                 $html .= '</div>';
                 
@@ -24,21 +24,44 @@ if (!function_exists('renderCategoryCheckboxTree')) {
 }
 ?>
 
-<div class="admin-card" style="max-width: 600px; margin: 0 auto;">
-    <div class="justify-content-between d-flex align-items-center mb-5">
-        <h3 class="m-0">Edit Menu: <?= $data['menu']['title'] ?></h3>
-        <a href="<?= URLROOT ?>/admin/menus" class="btn btn-visit-site">Back to List</a>
+<div class="admin-card" style="max-width: 680px; margin: 0 auto; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; padding: 30px;">
+    <div class="justify-content-between d-flex align-items-center mb-4">
+        <div>
+            <h3 class="m-0" style="color: #064e3b; font-weight: 800; font-size: 1.4rem;">হেডার মেনু এডিট: <?= htmlspecialchars($data['menu']['title']) ?></h3>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">মূল নেভিগেশন বারের 'সবগুলো নিবন্ধ' মেগামেনুর তথ্য আপডেট করুন</p>
+        </div>
+        <a href="<?= URLROOT ?>/admin/menus" class="btn btn-visit-site" style="text-decoration: none;">মেনু তালিকায় ফিরুন</a>
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_menu/<?= $data['menu']['id'] ?>" method="POST">
+        <input type="hidden" name="menu_type" value="post_mega">
+
         <div class="form-group mb-4">
-            <label>Menu Title</label>
-            <input type="text" name="title" value="<?= $data['menu']['title'] ?>" class="form-control" required>
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">মেনু টাইটেল (Menu Title)</label>
+            <input type="text" name="title" value="<?= htmlspecialchars($data['menu']['title']) ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+            <small style="color: #64748b; font-size: 13px;">ন্যাভবারে বাটনে যে লেখাটি দেখাবে (যেমন: সবগুলো নিবন্ধ)।</small>
         </div>
 
-        <div class="form-group mb-4" id="url_section">
-            <label>URL (Link)</label>
-            <input type="text" name="url" id="menu_url" value="<?= $data['menu']['url'] ?>" class="form-control" required>
+        <div class="form-group mb-4">
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">ন্যাভিগেশন URL (Link)</label>
+            <input type="text" name="url" id="menu_url" value="<?= htmlspecialchars($data['menu']['url'] ?: '/blog') ?>" class="form-control" required style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+            <small style="color: #64748b; font-size: 13px;">বাটনে সরাসরি ক্লিক করলে যে লিংকে যাবে (ডিফল্ট: /blog)।</small>
+        </div>
+
+        <div class="form-group mb-4">
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">আইকন ক্লাস (FontAwesome Icon Class)</label>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <input type="text" name="icon" id="menu_icon_input" value="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>" class="form-control" placeholder="fa-solid fa-layer-group" style="border-radius: 12px; padding: 12px 16px; font-weight: 600;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; border: 1.5px solid #a7f3d0; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #10b981; flex-shrink: 0;">
+                    <i id="icon_preview" class="<?= htmlspecialchars($data['menu']['icon'] ?: 'fa-solid fa-layer-group') ?>"></i>
+                </div>
+            </div>
+            <small style="color: #64748b; font-size: 13px;">মেনু টাইটেলের বামে প্রদর্শিত আইকন (যেমন: <code>fa-solid fa-layer-group</code> বা <code>fas fa-book-open</code>)।</small>
+        </div>
+
+        <div class="form-group mb-4">
+            <label style="font-weight: 700; color: #1e293b; margin-bottom: 6px; display: block;">ডিসপ্লে অর্ডার (Order Index)</label>
+            <input type="number" name="order_index" value="<?= (int)$data['menu']['order_index'] ?>" class="form-control" style="border-radius: 12px; padding: 12px 16px; font-weight: 600; width: 120px;">
         </div>
 
         <?php 
@@ -46,92 +69,46 @@ if (!function_exists('renderCategoryCheckboxTree')) {
         if (!is_array($selected_cats)) $selected_cats = [];
         ?>
         <div class="form-group mb-4">
-            <label>Menu Type</label>
-            <select name="menu_type" id="menu_type" class="form-control">
-                <option value="custom" <?= ($data['menu']['menu_type'] ?? 'custom') === 'custom' ? 'selected' : '' ?>>Custom Link / Static Nested Hierarchy</option>
-                <option value="post_mega" <?= ($data['menu']['menu_type'] ?? 'custom') === 'post_mega' ? 'selected' : '' ?>>Post Categories (Mega Menu)</option>
-            </select>
-        </div>
-
-        <div class="form-group mb-4" id="post_categories_section" style="display: none;">
-            <label style="font-weight: 700; color: #1e293b;">Select Post Categories to Display as Mega Menu Tabs</label>
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; max-height: 250px; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: 700; color: #1e293b; margin: 0;">মেগামেনুতে প্রদর্শিত ক্যাটাগরিসমূহ</label>
+                <div style="font-size: 13px; display: flex; gap: 10px;">
+                    <a href="javascript:void(0)" onclick="selectAllCats(true)" style="color: var(--primary); font-weight: 600; text-decoration: none;">সবগুলো নির্বাচন করুন</a>
+                    <span style="color: #cbd5e1;">|</span>
+                    <a href="javascript:void(0)" onclick="selectAllCats(false)" style="color: #64748b; font-weight: 600; text-decoration: none;">সব মুছুন</a>
+                </div>
+            </div>
+            <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 18px; max-height: 280px; overflow-y: auto;">
                 <?php if(!empty($data['post_categories'])): ?>
                     <?= renderCategoryCheckboxTree($data['post_categories'], $selected_cats) ?>
                 <?php else: ?>
-                    <p style="color: #64748b; font-style: italic;">No post categories found.</p>
+                    <p style="color: #64748b; font-style: italic; margin: 0;">কোনো ক্যাটাগরি পাওয়া যায়নি।</p>
                 <?php endif; ?>
             </div>
+            <small style="color: #64748b; font-size: 13px; margin-top: 6px; display: block;">
+                * কোনো ক্যাটাগরি সিলেক্ট না থাকলে স্বয়ংক্রিয়ভাবে সক্রিয় সকল প্রধান ক্যাটাগরি মেগামেনুতে প্রদর্শিত হবে।
+            </small>
         </div>
 
-        <div class="form-group mb-4">
-            <label>Parent Menu</label>
-            <select name="parent_id" class="form-control">
-                <option value="">None (Top Level Menu)</option>
-                <?php if(!empty($data['menus'])): ?>
-                    <?php 
-                    $top_levels = array_filter($data['menus'], function($m) { return empty($m['parent_id']); });
-                    foreach($top_levels as $top):
-                        if ($top['id'] == $data['menu']['id']) continue; // Cannot be own parent
-                    ?>
-                        <option value="<?= $top['id'] ?>" <?= $data['menu']['parent_id'] == $top['id'] ? 'selected' : '' ?>><?= htmlspecialchars($top['title']) ?> (Top Level)</option>
-                        <?php 
-                        $sub_levels = array_filter($data['menus'], function($m) use ($top) { return $m['parent_id'] == $top['id']; });
-                        foreach($sub_levels as $sub):
-                            if ($sub['id'] == $data['menu']['id']) continue; // Cannot be own parent
-                        ?>
-                            <option value="<?= $sub['id'] ?>" <?= $data['menu']['parent_id'] == $sub['id'] ? 'selected' : '' ?>>&nbsp;&nbsp;&nbsp;&nbsp;↳ <?= htmlspecialchars($sub['title']) ?> (Sub Level)</option>
-                        <?php endforeach; ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </select>
-            <small style="color: #64748b;">Select parent menu if this is a tab category or a card item.</small>
-        </div>
-
-        <div class="form-group mb-4">
-            <label>Icon Class (FontAwesome)</label>
-            <input type="text" name="icon" value="<?= htmlspecialchars($data['menu']['icon'] ?? '') ?>" class="form-control" placeholder="e.g. fas fa-cloud or fa-solid fa-code">
-            <small style="color: #64748b;">Optional. Used for icons in mega menu dropdowns.</small>
-        </div>
-
-        <div class="form-group mb-5">
-            <label>Order Index</label>
-            <input type="number" name="order_index" value="<?= $data['menu']['order_index'] ?>" class="form-control">
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100" style="height: 55px; font-weight: 700; font-size: 1.1rem;">Update Menu Item</button>
+        <button type="submit" class="btn btn-primary w-100" style="height: 52px; font-weight: 700; font-size: 1.05rem; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fas fa-save"></i> পরিবর্তন সংরক্ষণ করুন
+        </button>
     </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const menuTypeSelect = document.getElementById('menu_type');
-    const postSec = document.getElementById('post_categories_section');
-    const urlSec = document.getElementById('url_section');
-    const urlInput = document.getElementById('menu_url');
-
-    function toggleSections() {
-        const val = menuTypeSelect.value;
-        if (val === 'post_mega') {
-            postSec.style.display = 'block';
-            urlSec.style.display = 'none';
-            urlInput.removeAttribute('required');
-            if (!urlInput.value || urlInput.value === '') {
-                urlInput.value = '#';
-            }
-        } else {
-            postSec.style.display = 'none';
-            urlSec.style.display = 'block';
-            urlInput.setAttribute('required', 'required');
-            if (urlInput.value === '#') {
-                urlInput.value = '';
-            }
-        }
+    const iconInput = document.getElementById('menu_icon_input');
+    const iconPreview = document.getElementById('icon_preview');
+    if (iconInput && iconPreview) {
+        iconInput.addEventListener('input', function() {
+            iconPreview.className = this.value.trim() || 'fa-solid fa-layer-group';
+        });
     }
-
-    menuTypeSelect.addEventListener('change', toggleSections);
-    toggleSections();
 });
+
+function selectAllCats(check) {
+    document.querySelectorAll('input[name="post_cats[]"]').forEach(cb => cb.checked = check);
+}
 </script>
 
 <?php require_once APPROOT . '/Views/admin/footer.php'; ?>

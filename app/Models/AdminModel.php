@@ -233,62 +233,6 @@ class AdminModel extends Model {
             $this->db->query("ALTER TABLE menus ADD COLUMN menu_type VARCHAR(50) DEFAULT 'custom'");
             $this->db->query("ALTER TABLE menus ADD COLUMN category_source TEXT NULL");
         }
-
-        // Seed default Services mega menu if not already populated
-        $has_children = $this->db->query("SELECT COUNT(*) FROM menus WHERE parent_id IS NOT NULL")->fetchColumn();
-        if ($has_children == 0) {
-            // Find or create 'Services' menu
-            $stmt = $this->db->prepare("SELECT id FROM menus WHERE title LIKE :title LIMIT 1");
-            $stmt->execute(['title' => '%Services%']);
-            $parent = $stmt->fetch();
-            if ($parent) {
-                $parent_id = $parent['id'];
-            } else {
-                $stmt = $this->db->prepare("INSERT INTO menus (title, url, order_index) VALUES (:title, :url, :order_index)");
-                $stmt->execute(['title' => 'Services', 'url' => '#', 'order_index' => 2]);
-                $parent_id = $this->db->lastInsertId();
-            }
-
-            // Add tabs
-            $tabs = [
-                ['title' => 'SOFTWARE SOLUTIONS (SAAS)', 'icon' => 'fas fa-cloud', 'order' => 1, 'items' => [
-                    ['title' => 'ISP MANAGMENT SYSTEM', 'icon' => 'fas fa-network-wired', 'url' => '#'],
-                    ['title' => 'EduNur School, College & Madrasha Management Software', 'icon' => 'fas fa-graduation-cap', 'url' => '#'],
-                    ['title' => 'POS SOFTWARE', 'icon' => 'fas fa-cash-register', 'url' => '#'],
-                    ['title' => 'ADVOCATE GO - Complete Legal Case Management Solution', 'icon' => 'fas fa-scale-balanced', 'url' => '#'],
-                    ['title' => 'Our Physical Product', 'icon' => 'fas fa-store', 'url' => '#'],
-                    ['title' => 'SECURE CHAT', 'icon' => 'fas fa-lock', 'url' => '#'],
-                    ['title' => 'Use Your Android Phone as SMS/MMS Gateway', 'icon' => 'fas fa-sms', 'url' => '#']
-                ]],
-                ['title' => 'WEB DEVELOPMENT', 'icon' => 'fas fa-code', 'order' => 2, 'items' => []],
-                ['title' => 'INTERNET SERVICE', 'icon' => 'fas fa-wifi', 'order' => 3, 'items' => []],
-                ['title' => 'CYBER SECURITY SERVICES', 'icon' => 'fas fa-user-secret', 'order' => 4, 'items' => []],
-                ['title' => 'GRAPHICS & BRANDING', 'icon' => 'fas fa-palette', 'order' => 5, 'items' => []],
-                ['title' => 'MOBILE APPS', 'icon' => 'fas fa-mobile-alt', 'order' => 6, 'items' => []]
-            ];
-
-            foreach ($tabs as $tab) {
-                $stmt_tab = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon) VALUES (:title, '#', :order_index, :parent_id, :icon)");
-                $stmt_tab->execute([
-                    'title' => $tab['title'],
-                    'order_index' => $tab['order'],
-                    'parent_id' => $parent_id,
-                    'icon' => $tab['icon']
-                ]);
-                $tab_id = $this->db->lastInsertId();
-
-                foreach ($tab['items'] as $item_index => $item) {
-                    $stmt_item = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon) VALUES (:title, :url, :order_index, :parent_id, :icon)");
-                    $stmt_item->execute([
-                        'title' => $item['title'],
-                        'url' => $item['url'],
-                        'order_index' => $item_index + 1,
-                        'parent_id' => $tab_id,
-                        'icon' => $item['icon']
-                    ]);
-                }
-            }
-        }
     }
 
     private function initSocialLinksTable() {
@@ -1588,35 +1532,28 @@ class AdminModel extends Model {
         return $stmt->execute(['id' => $id]);
     }
 
-    // Menu Management
+    // Menu Management: Manage ONLY 'সবগুলো নিবন্ধ' (Mega Menu)
     public function getMenus() {
-        // Self-healing migration for Live Server: Ensure ONLY 'সবগুলো নিবন্ধ' is the main top-level menu
         try {
-            // Delete legacy hardcoded category menus if present, leaving custom menus intact
-            $this->db->exec("DELETE FROM menus WHERE (parent_id IS NULL OR parent_id = 0) AND TRIM(title) IN ('ইসলাম', 'স্রষ্টা ও সৃষ্টি', 'ইতিহাস', 'বিজ্ঞান ও দর্শন', 'ধর্মতত্ব', 'ধর্মতত্ত্ব')");
+            // Delete legacy/dummy menus so ONLY 'সবগুলো নিবন্ধ' (post_mega) remains in the database
+            $this->db->exec("DELETE FROM menus WHERE menu_type != 'post_mega' AND TRIM(title) != 'সবগুলো নিবন্ধ'");
             if (class_exists('\\App\\Helpers\\Cache')) {
                 \App\Helpers\Cache::clear();
             }
 
-            // Ensure 'সবগুলো নিবন্ধ' has menu_type = 'post_mega' and proper category_source
-            $stmtMega = $this->db->query("SELECT id, menu_type, category_source FROM menus WHERE TRIM(title) = 'সবগুলো নিবন্ধ' LIMIT 1");
+            // Ensure 'সবগুলো নিবন্ধ' exists, has menu_type = 'post_mega' and default icon
+            $stmtMega = $this->db->query("SELECT id, menu_type, icon, category_source FROM menus WHERE TRIM(title) = 'সবগুলো নিবন্ধ' OR menu_type = 'post_mega' LIMIT 1");
             $megaMenu = $stmtMega ? $stmtMega->fetch() : null;
             if ($megaMenu) {
-                if ($megaMenu['menu_type'] !== 'post_mega' || empty($megaMenu['category_source']) || $megaMenu['category_source'] === '[]') {
-                    $catStmt = $this->db->query("SELECT id FROM categories WHERE parent_id IS NULL OR parent_id = 0 ORDER BY order_index ASC, id ASC");
-                    $catIds = $catStmt ? $catStmt->fetchAll(\PDO::FETCH_COLUMN) : [];
-                    $sourceJson = json_encode(array_values(array_map('intval', $catIds)));
-                    $updateStmt = $this->db->prepare("UPDATE menus SET menu_type = 'post_mega', category_source = :source, url = '/blog' WHERE id = :id");
-                    $updateStmt->execute(['source' => $sourceJson, 'id' => $megaMenu['id']]);
-                    if (class_exists('\\App\\Helpers\\Cache')) {
-                        \App\Helpers\Cache::clear();
-                    }
+                $icon = !empty($megaMenu['icon']) ? $megaMenu['icon'] : 'fa-solid fa-layer-group';
+                if ($megaMenu['menu_type'] !== 'post_mega' || empty($megaMenu['icon'])) {
+                    $this->db->prepare("UPDATE menus SET menu_type = 'post_mega', icon = :icon WHERE id = :id")->execute(['icon' => $icon, 'id' => $megaMenu['id']]);
                 }
             } else {
                 $catStmt = $this->db->query("SELECT id FROM categories WHERE parent_id IS NULL OR parent_id = 0 ORDER BY order_index ASC, id ASC");
                 $catIds = $catStmt ? $catStmt->fetchAll(\PDO::FETCH_COLUMN) : [];
                 $sourceJson = json_encode(array_values(array_map('intval', $catIds)));
-                $stmtInsert = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type, category_source) VALUES ('সবগুলো নিবন্ধ', '/blog', 1, NULL, '', 'post_mega', :source)");
+                $stmtInsert = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type, category_source) VALUES ('সবগুলো নিবন্ধ', '/blog', 1, NULL, 'fa-solid fa-layer-group', 'post_mega', :source)");
                 $stmtInsert->execute(['source' => $sourceJson]);
                 if (class_exists('\\App\\Helpers\\Cache')) {
                     \App\Helpers\Cache::clear();
@@ -1624,7 +1561,7 @@ class AdminModel extends Model {
             }
         } catch (\Exception $e) {}
 
-        $stmt = $this->db->query("SELECT * FROM menus ORDER BY order_index ASC");
+        $stmt = $this->db->query("SELECT * FROM menus WHERE menu_type = 'post_mega' OR TRIM(title) = 'সবগুলো নিবন্ধ' ORDER BY order_index ASC LIMIT 1");
         return $stmt->fetchAll();
     }
 
@@ -1663,6 +1600,12 @@ class AdminModel extends Model {
     }
 
     public function deleteMenu($id) {
+        $menu = $this->getMenuById($id);
+        if ($menu && (trim($menu['title']) === 'সবগুলো নিবন্ধ' || ($menu['menu_type'] ?? '') === 'post_mega')) {
+            // Protect 'সবগুলো নিবন্ধ' from deletion
+            return false;
+        }
+
         // Delete child menu items if parent is deleted to prevent orphan menu items
         $stmt_child = $this->db->prepare("DELETE FROM menus WHERE parent_id = :id");
         $stmt_child->execute(['id' => $id]);

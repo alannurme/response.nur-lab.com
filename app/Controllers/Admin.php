@@ -2938,8 +2938,12 @@ class Admin extends Controller {
     public function menus() {
         $adminModel = $this->model('AdminModel');
         $menus = $adminModel->getMenus();
+        $menu = !empty($menus) ? $menus[0] : null;
+        $post_categories = $adminModel->getCategories();
         $this->view('admin/menus', [
             'menus' => $menus,
+            'menu' => $menu,
+            'post_categories' => $post_categories,
             'current_page' => 'menus',
             'settings' => $this->siteSettings
         ]);
@@ -2951,86 +2955,59 @@ class Admin extends Controller {
     }
 
     public function add_menu() {
-        $adminModel = $this->model('AdminModel');
-        $productModel = $this->model('ProductModel');
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $type = $_POST['menu_type'] ?? 'custom';
-            $cats = [];
-            if ($type === 'post_mega') {
-                $cats = $_POST['post_cats'] ?? [];
-            } elseif ($type === 'product_mega') {
-                $cats = $_POST['product_cats'] ?? [];
-            }
-            $data = [
-                'title' => $_POST['title'],
-                'url' => $_POST['url'],
-                'order_index' => $_POST['order_index'],
-                'parent_id' => $_POST['parent_id'] !== '' ? $_POST['parent_id'] : null,
-                'icon' => $_POST['icon'] !== '' ? $_POST['icon'] : null,
-                'menu_type' => $type,
-                'category_source' => !empty($cats) ? json_encode($cats) : null
-            ];
-            if ($adminModel->addMenu($data)) {
-                header('Location: ' . URLROOT . '/admin/menus');
-                exit;
-            }
-        }
-        $menus = $adminModel->getMenus();
-        $post_categories = $adminModel->getCategories();
-        $product_categories = $productModel->getCategories();
-        $this->view('admin/add_menu', [
-            'menus' => $menus,
-            'post_categories' => $post_categories,
-            'product_categories' => $product_categories,
-            'current_page' => 'menus',
-            'settings' => $this->siteSettings
-        ]);
+        // Only 'সবগুলো নিবন্ধ' header menu is manageable; redirect back to menus
+        header('Location: ' . URLROOT . '/admin/menus');
+        exit;
     }
 
     public function edit_menu($id) {
         $adminModel = $this->model('AdminModel');
+        $menu = $adminModel->getMenuById($id);
+        if (!$menu) {
+            $menus = $adminModel->getMenus();
+            $menu = !empty($menus) ? $menus[0] : null;
+        }
+
+        if (!$menu) {
+            header('Location: ' . URLROOT . '/admin/menus');
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $type = $_POST['menu_type'] ?? 'custom';
-            $cats = [];
-            if ($type === 'post_mega') {
-                $cats = $_POST['post_cats'] ?? [];
-            } elseif ($type === 'product_mega') {
-                $cats = $_POST['product_cats'] ?? [];
-            }
+            $cats = $_POST['post_cats'] ?? [];
             $data = [
-                'title' => $_POST['title'],
-                'url' => $_POST['url'],
-                'order_index' => $_POST['order_index'],
-                'parent_id' => $_POST['parent_id'] !== '' ? $_POST['parent_id'] : null,
-                'icon' => $_POST['icon'] !== '' ? $_POST['icon'] : null,
-                'menu_type' => $type,
-                'category_source' => !empty($cats) ? json_encode($cats) : null
+                'title' => !empty(trim($_POST['title'] ?? '')) ? trim($_POST['title']) : 'সবগুলো নিবন্ধ',
+                'url' => !empty(trim($_POST['url'] ?? '')) ? trim($_POST['url']) : '/blog',
+                'order_index' => (int)($_POST['order_index'] ?? 1),
+                'parent_id' => null,
+                'icon' => !empty(trim($_POST['icon'] ?? '')) ? trim($_POST['icon']) : 'fa-solid fa-layer-group',
+                'menu_type' => 'post_mega',
+                'category_source' => !empty($cats) ? json_encode(array_values(array_map('intval', $cats))) : null
             ];
-            if ($adminModel->updateMenu($id, $data)) {
-                header('Location: ' . URLROOT . '/admin/menus');
+            if ($adminModel->updateMenu($menu['id'], $data)) {
+                if (class_exists('\\App\\Helpers\\Cache')) {
+                    \App\Helpers\Cache::clear();
+                }
+                header('Location: ' . URLROOT . '/admin/menus?msg=updated');
                 exit;
             }
         }
-        $menu = $adminModel->getMenuById($id);
+
         $menus = $adminModel->getMenus();
         $post_categories = $adminModel->getCategories();
-        $product_categories = [];
         $this->view('admin/edit_menu', [
             'menu' => $menu,
             'menus' => $menus,
             'post_categories' => $post_categories,
-            'product_categories' => $product_categories,
             'current_page' => 'menus',
             'settings' => $this->siteSettings
         ]);
     }
 
     public function delete_menu($id) {
-        $adminModel = $this->model('AdminModel');
-        if ($adminModel->deleteMenu($id)) {
-            header('Location: ' . URLROOT . '/admin/menus');
-            exit;
-        }
+        // Protect 'সবগুলো নিবন্ধ' from deletion
+        header('Location: ' . URLROOT . '/admin/menus?msg=protected');
+        exit;
     }
 
     public function reorder_categories() {

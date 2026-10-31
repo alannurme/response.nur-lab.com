@@ -2599,15 +2599,28 @@ if (!$is_islamic_dedicated_page):
                         $menu_type = $menu['menu_type'] ?? 'custom';
                         
                         if ($menu_type === 'post_mega'):
-                            // Automatically fetch all active top-level categories dynamically so newly added categories appear instantly in সবগুলো নিবন্ধ
-                            $stmt = $db->query("SELECT * FROM categories WHERE (parent_id IS NULL OR parent_id = 0) ORDER BY order_index ASC, name ASC");
-                            $categories = $stmt->fetchAll();
+                            $selected_cat_ids = !empty($menu['category_source']) ? json_decode($menu['category_source'], true) : [];
+                            if (!empty($selected_cat_ids) && is_array($selected_cat_ids)) {
+                                $clean_ids = array_values(array_filter(array_map('intval', $selected_cat_ids)));
+                                if (!empty($clean_ids)) {
+                                    $placeholders = implode(',', array_fill(0, count($clean_ids), '?'));
+                                    $stmt = $db->prepare("SELECT * FROM categories WHERE id IN ($placeholders) AND (parent_id IS NULL OR parent_id = 0) ORDER BY order_index ASC, name ASC");
+                                    $stmt->execute($clean_ids);
+                                    $categories = $stmt->fetchAll();
+                                } else {
+                                    $stmt = $db->query("SELECT * FROM categories WHERE (parent_id IS NULL OR parent_id = 0) ORDER BY order_index ASC, name ASC");
+                                    $categories = $stmt->fetchAll();
+                                }
+                            } else {
+                                $stmt = $db->query("SELECT * FROM categories WHERE (parent_id IS NULL OR parent_id = 0) ORDER BY order_index ASC, name ASC");
+                                $categories = $stmt->fetchAll();
+                            }
                             if (!empty($categories)):
                                 ?>
                                 <li class="nav-item-megamenu">
                                     <a href="<?= (strpos($menu['url'], 'http') === 0) ? $menu['url'] : (trim($menu['url']) === '#' ? '#' : URLROOT . $menu['url']) ?>" class="megamenu-trigger btn-nav-categories">
                                         <span class="btn-cat-main">
-                                            <i class="fa-solid fa-layer-group btn-cat-icon"></i>
+                                            <i class="<?= !empty($menu['icon']) ? htmlspecialchars($menu['icon']) : 'fa-solid fa-layer-group' ?> btn-cat-icon"></i>
                                             <span><?= htmlspecialchars($menu['title']) ?></span>
                                         </span>
                                         <span class="megamenu-toggle-arrow" title="খুলুন বা বন্ধ করুন">
