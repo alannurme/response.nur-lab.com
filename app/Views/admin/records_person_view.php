@@ -99,9 +99,14 @@
                             </span>
                         </div>
                     </div>
-                    <a href="<?= URLROOT ?>/admin/records_delete/<?= $r['id'] ?>" onclick="return confirm('এই রেকর্ডটি কি মুছে ফেলতে চান?')" style="color: #ef4444; background: #fee2e2; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="মুছে ফেলুন">
-                        <i class="fa-solid fa-trash"></i>
-                    </a>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a href="<?= URLROOT ?>/admin/records_edit/<?= $r['id'] ?>" style="color: #2563eb; background: #eff6ff; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="এডিট করুন">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/records_delete/<?= $r['id'] ?>" onclick="return confirm('এই রেকর্ডটি কি মুছে ফেলতে চান?')" style="color: #ef4444; background: #fee2e2; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="মুছে ফেলুন">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div style="color: #334155; font-size: 0.95rem; line-height: 1.6; margin-bottom: 14px; white-space: pre-wrap;">

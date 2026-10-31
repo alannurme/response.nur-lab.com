@@ -3875,11 +3875,12 @@ class Admin extends Controller {
                 $records = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             }
 
-            // Fetch Persons with counts of records, gallery, videos, documents
+            // Fetch Persons with counts of records, gallery, videos, documents, and first record ID for direct edit
             $pQuery = "
                 SELECT 
                     p.*,
                     COUNT(r.id) AS total_records,
+                    MAX(r.id) AS latest_record_id,
                     GROUP_CONCAT(r.gallery SEPARATOR '||') AS all_galleries,
                     GROUP_CONCAT(r.videos SEPARATOR '||') AS all_videos,
                     GROUP_CONCAT(r.documents SEPARATOR '||') AS all_docs

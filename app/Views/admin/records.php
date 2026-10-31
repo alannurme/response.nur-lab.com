@@ -167,6 +167,11 @@ $totalRecords = count($records);
                     </a>
 
                     <div style="display: flex; gap: 6px;">
+                        <?php if (!empty($p['latest_record_id'])): ?>
+                            <a href="<?= URLROOT ?>/admin/records_edit/<?= $p['latest_record_id'] ?>" title="এডিট করুন (Edit Record)" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s;">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                        <?php endif; ?>
                         <a href="<?= URLROOT ?>/admin/records_add?person_id=<?= $p['id'] ?>" title="এঁর অধীনে নতুন রেকর্ড যোগ করুন" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
                             <i class="fa-solid fa-plus"></i>
                         </a>
