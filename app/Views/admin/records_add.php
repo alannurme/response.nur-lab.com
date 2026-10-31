@@ -527,10 +527,36 @@
                     <input type="hidden" name="status[]" value="Active">
 
                     <div class="odb-form-group full-width">
-                        <label>ভিডিও লিংক (YouTube / Vimeo / Direct Video URL)</label>
+                        <label>ভিডিও ফাইল আপলোড করুন (ভিডিও ফাইলটি সরাসরি গুগল ড্রাইভে সেভ হবে)</label>
+                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                <i class="fa-solid fa-video"></i>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <input type="file" name="video_files[]" class="odb-form-control" accept="video/*" multiple style="background: #fff; padding: 7px 12px;">
+                                <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">MP4, MKV, WebM বা অন্যান্য ফরম্যাটের ভিডিও সিলেক্ট করতে পারেন।</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="odb-form-group full-width">
+                        <label>অথবা ভিডিও লিংক (YouTube / Vimeo / Direct Video URL)</label>
                         <div style="position: relative;">
-                            <i class="fa-solid fa-video" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #ef4444; font-size: 1rem;"></i>
+                            <i class="fa-solid fa-link" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1rem;"></i>
                             <input type="url" name="video_url" class="odb-form-control" style="padding-left: 42px;" placeholder="যেমন: https://www.youtube.com/watch?v=XXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="odb-form-group full-width">
+                        <label>নথি ও অন্যান্য ফাইল (Documents / PDF / Audio / Archive Files)</label>
+                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                <i class="fa-solid fa-file-shield"></i>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <input type="file" name="document_files[]" class="odb-form-control" accept=".pdf,.doc,.docx,.zip,.rar,.tar,.mp3,.wav,.ogg,.txt,.csv" multiple style="background: #fff; padding: 7px 12px;">
+                                <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">PDF, Word, Zip, অডিও এবং অন্যান্য প্রয়োজনীয় ডকুমেন্ট সিলেক্ট করুন। এগুলোও স্বয়ংক্রিয়ভাবে গুগল ড্রাইভে সংরক্ষিত হবে।</small>
+                            </div>
                         </div>
                     </div>
 

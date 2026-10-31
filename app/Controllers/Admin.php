@@ -1074,12 +1074,35 @@ class Admin extends Controller {
                         $file_url = URLROOT . '/public/img/' . $file_name;
 
                         // Cloud Storage check (Google Drive)
+                        $uploadDestination = $_POST['upload_destination'] ?? '';
                         $currentSettings = $this->siteSettings;
-                        if (($currentSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                        $shouldUploadToGdrive = ($uploadDestination === 'google_drive') || (empty($uploadDestination) && ($currentSettings['storage_provider'] ?? 'local') === 'google_drive');
+
+                        if ($shouldUploadToGdrive) {
                             try {
                                 require_once APPPATH . 'Helpers/GoogleDrive.php';
                                 $mime = mime_content_type($upload_dir . $file_name) ?: 'image/jpeg';
-                                $driveResult = \App\Helpers\GoogleDrive::uploadWithFallback($upload_dir . $file_name, $file_name, $mime, $currentSettings);
+                                
+                                // Check if a specific target drive was requested
+                                $targetDriveId = trim($_POST['target_drive_id'] ?? '');
+                                $drivesJson = $currentSettings['google_drives'] ?? '[]';
+                                $drives = json_decode($drivesJson, true) ?: [];
+                                $matchedDrive = null;
+                                if (!empty($targetDriveId)) {
+                                    foreach ($drives as $d) {
+                                        if (($d['id'] ?? '') === $targetDriveId && ($d['status'] ?? 'active') === 'active') {
+                                            $matchedDrive = $d;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if ($matchedDrive) {
+                                    $driveResult = \App\Helpers\GoogleDrive::uploadFile($upload_dir . $file_name, $file_name, $mime, $matchedDrive);
+                                } else {
+                                    $driveResult = \App\Helpers\GoogleDrive::uploadWithFallback($upload_dir . $file_name, $file_name, $mime, $currentSettings);
+                                }
+
                                 if (!empty($driveResult['url'])) {
                                     $file_url = $driveResult['url'];
                                 }
@@ -1088,15 +1111,27 @@ class Admin extends Controller {
                                 }
                             } catch (\Exception $e) {
                                 error_log("Google Drive upload error: " . $e->getMessage());
+                                if ($uploadDestination === 'google_drive') {
+                                    @unlink($upload_dir . $file_name);
+                                    if ($is_ajax) {
+                                        header('Content-Type: application/json');
+                                        echo json_encode(['success' => false, 'error' => 'গুগল ড্রাইভ আপলোড ব্যর্থ: ' . $e->getMessage()]);
+                                        exit;
+                                    }
+                                    $data['error'] = 'গুগল ড্রাইভ আপলোড ব্যর্থ: ' . $e->getMessage();
+                                    $file_name = null;
+                                }
                             }
                         }
 
-                        if ($is_ajax) {
-                            header('Content-Type: application/json');
-                            echo json_encode(['success' => true, 'url' => $file_url]);
-                            exit;
+                        if (!empty($file_name)) {
+                            if ($is_ajax) {
+                                header('Content-Type: application/json');
+                                echo json_encode(['success' => true, 'url' => $file_url]);
+                                exit;
+                            }
+                            $data['success'] = "Image uploaded successfully!";
                         }
-                        $data['success'] = "Image uploaded successfully!";
                     } else {
                         if ($is_ajax) {
                             header('Content-Type: application/json');
@@ -1114,148 +1149,278 @@ class Admin extends Controller {
             }
         }
 
-        // Scan all public media directories recursively or by list
-        $dirs_to_scan = [
-            \PUBROOT . '/img',
-            \PUBROOT . '/uploads/settings',
-            \PUBROOT . '/uploads/products',
-            \PUBROOT . '/uploads/pdf',
-            \PUBROOT . '/uploads'
-        ];
-        
-        $all_files = [];
-        $scanned_paths = [];
+        $currentSettings = $this->siteSettings;
+        $activeTab = isset($_GET['tab']) ? trim($_GET['tab']) : 'local';
+        if (!in_array($activeTab, ['local', 'google_drive'])) {
+            $activeTab = 'local';
+        }
 
-        foreach ($dirs_to_scan as $dir) {
-            if (is_dir($dir)) {
-                $items = array_diff(scandir($dir), array('..', '.'));
-                foreach ($items as $item) {
-                    $path = $dir . '/' . $item;
-                    if (is_file($path) && !isset($scanned_paths[$path])) {
-                        $scanned_paths[$path] = true;
-                        
-                        // Calculate relative path from PUBROOT
-                        $relPath = str_replace('\\', '/', substr($path, strlen(\PUBROOT)));
-                        $url = URLROOT . '/public' . $relPath;
+        // Available Google Drive accounts from settings
+        $drivesJson = $currentSettings['google_drives'] ?? '[]';
+        $googleDrives = json_decode($drivesJson, true) ?: [];
+        $selectedDriveId = isset($_GET['drive_id']) ? trim($_GET['drive_id']) : '';
 
-                        $all_files[] = [
-                            'name' => $item,
-                            'url' => $url,
-                            'path' => $path,
-                            'mtime' => filemtime($path)
-                        ];
+        // Pick default drive if not specified
+        $selectedDrive = null;
+        if (!empty($googleDrives)) {
+            if (!empty($selectedDriveId)) {
+                foreach ($googleDrives as $d) {
+                    if (($d['id'] ?? '') === $selectedDriveId) {
+                        $selectedDrive = $d;
+                        break;
                     }
                 }
             }
+            if (!$selectedDrive) {
+                // Find first default or active drive
+                foreach ($googleDrives as $d) {
+                    if (!empty($d['is_default'])) {
+                        $selectedDrive = $d;
+                        break;
+                    }
+                }
+                if (!$selectedDrive && !empty($googleDrives[0])) {
+                    $selectedDrive = $googleDrives[0];
+                }
+            }
+            if ($selectedDrive) {
+                $selectedDriveId = $selectedDrive['id'] ?? '';
+            }
         }
 
-        // Search filter if provided
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-        if ($search !== '') {
-            $all_files = array_filter($all_files, function($f) use ($search) {
-                return mb_stripos($f['name'], $search) !== false;
-            });
-        }
-
-        // Sort by modification time descending (newest first)
-        usort($all_files, function($a, $b) {
-            return $b['mtime'] - $a['mtime'];
-        });
-
-        // Pagination parameters
-        $limit = 24;
-        $total_files = count($all_files);
-        $total_pages = ceil($total_files / $limit);
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         if ($page < 1) $page = 1;
-        if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
-        
-        $offset = ($page - 1) * $limit;
-        $sliced_files = array_slice($all_files, $offset, $limit);
+        $limit = 24;
 
-        // Fetch details (like size) ONLY for sliced files to improve disk read efficiency
         $files = [];
-        foreach ($sliced_files as $file) {
-            $size = '0 KB';
-            if (file_exists($file['path'])) {
-                $size = round(filesize($file['path']) / 1024, 2) . ' KB';
+        $total_files = 0;
+        $total_pages = 1;
+        $gdrive_error = '';
+
+        if ($activeTab === 'google_drive') {
+            if (!$selectedDrive) {
+                $gdrive_error = 'কোনো গুগল ড্রাইভ অ্যাকাউন্ট পাওয়া যায়নি। সেটিংস থেকে ড্রাইভ অ্যাকাউন্ট যুক্ত করুন।';
+            } else {
+                try {
+                    require_once APPPATH . 'Helpers/GoogleDrive.php';
+                    $driveResult = \App\Helpers\GoogleDrive::listFiles($selectedDrive, 100, null, $search);
+                    $driveFiles = $driveResult['files'] ?? [];
+
+                    $total_files = count($driveFiles);
+                    $total_pages = ceil($total_files / $limit) ?: 1;
+                    if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
+
+                    $offset = ($page - 1) * $limit;
+                    $files = array_slice($driveFiles, $offset, $limit);
+                } catch (\Exception $e) {
+                    $gdrive_error = 'গুগল ড্রাইভ ফাইল লোড করতে সমস্যা: ' . $e->getMessage();
+                }
             }
-            $files[] = [
-                'name' => $file['name'],
-                'url' => $file['url'],
-                'path' => $file['path'],
-                'size' => $size
+        } else {
+            // Local Host Storage
+            $dirs_to_scan = [
+                \PUBROOT . '/img',
+                \PUBROOT . '/uploads/settings',
+                \PUBROOT . '/uploads/products',
+                \PUBROOT . '/uploads/pdf',
+                \PUBROOT . '/uploads'
             ];
+            
+            $all_files = [];
+            $scanned_paths = [];
+
+            foreach ($dirs_to_scan as $dir) {
+                if (is_dir($dir)) {
+                    $items = array_diff(scandir($dir), array('..', '.'));
+                    foreach ($items as $item) {
+                        $path = $dir . '/' . $item;
+                        if (is_file($path) && !isset($scanned_paths[$path])) {
+                            $scanned_paths[$path] = true;
+                            
+                            $relPath = str_replace('\\', '/', substr($path, strlen(\PUBROOT)));
+                            $url = URLROOT . '/public' . $relPath;
+
+                            $all_files[] = [
+                                'name' => $item,
+                                'url' => $url,
+                                'path' => $path,
+                                'mtime' => filemtime($path)
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if ($search !== '') {
+                $all_files = array_filter($all_files, function($f) use ($search) {
+                    return mb_stripos($f['name'], $search) !== false;
+                });
+            }
+
+            usort($all_files, function($a, $b) {
+                return $b['mtime'] - $a['mtime'];
+            });
+
+            $total_files = count($all_files);
+            $total_pages = ceil($total_files / $limit) ?: 1;
+            if ($page > $total_pages && $total_pages > 0) $page = $total_pages;
+            
+            $offset = ($page - 1) * $limit;
+            $sliced_files = array_slice($all_files, $offset, $limit);
+
+            foreach ($sliced_files as $file) {
+                $size = '0 KB';
+                if (file_exists($file['path'])) {
+                    $size = round(filesize($file['path']) / 1024, 2) . ' KB';
+                }
+                $files[] = [
+                    'name' => $file['name'],
+                    'url' => $file['url'],
+                    'path' => $file['path'],
+                    'size' => $size,
+                    'storage' => 'local'
+                ];
+            }
         }
 
         $this->view('admin/media', [
-            'files' => $files,
-            'page' => $page,
-            'total_pages' => $total_pages,
-            'total_files' => $total_files,
-            'search' => $search,
-            'settings' => $this->siteSettings,
-            'success' => $data['success'] ?? '',
-            'error' => $data['error'] ?? ''
+            'files'            => $files,
+            'page'             => $page,
+            'total_pages'      => $total_pages,
+            'total_files'      => $total_files,
+            'search'           => $search,
+            'active_tab'       => $activeTab,
+            'google_drives'    => $googleDrives,
+            'selected_drive_id'=> $selectedDriveId,
+            'selected_drive'   => $selectedDrive,
+            'gdrive_error'     => $gdrive_error,
+            'current_page'     => 'media',
+            'settings'         => $this->siteSettings,
+            'success'          => $data['success'] ?? '',
+            'error'            => $data['error'] ?? ''
         ]);
     }
 
     public function api_media() {
-        $dirs_to_scan = [
-            \PUBROOT . '/img',
-            \PUBROOT . '/uploads/settings',
-            \PUBROOT . '/uploads/products',
-            \PUBROOT . '/uploads/pdf',
-            \PUBROOT . '/uploads'
-        ];
-        
+        $storage = $_GET['storage'] ?? 'all';
         $all_files = [];
         $scanned_paths = [];
 
-        foreach ($dirs_to_scan as $dir) {
-            if (is_dir($dir)) {
-                $items = array_diff(scandir($dir), array('..', '.'));
-                foreach ($items as $item) {
-                    $path = $dir . '/' . $item;
-                    if (is_file($path) && !isset($scanned_paths[$path])) {
-                        $scanned_paths[$path] = true;
-                        
-                        $relPath = str_replace('\\', '/', substr($path, strlen(\PUBROOT)));
-                        $url = URLROOT . '/public' . $relPath;
+        // 1. Local Files
+        if ($storage === 'all' || $storage === 'local') {
+            $dirs_to_scan = [
+                \PUBROOT . '/img',
+                \PUBROOT . '/uploads/settings',
+                \PUBROOT . '/uploads/products',
+                \PUBROOT . '/uploads/pdf',
+                \PUBROOT . '/uploads'
+            ];
+            
+            foreach ($dirs_to_scan as $dir) {
+                if (is_dir($dir)) {
+                    $items = array_diff(scandir($dir), array('..', '.'));
+                    foreach ($items as $item) {
+                        $path = $dir . '/' . $item;
+                        if (is_file($path) && !isset($scanned_paths[$path])) {
+                            $scanned_paths[$path] = true;
+                            
+                            $relPath = str_replace('\\', '/', substr($path, strlen(\PUBROOT)));
+                            $url = URLROOT . '/public' . $relPath;
 
-                        $all_files[] = [
-                            'name' => $item,
-                            'url' => $url,
-                            'mtime' => filemtime($path)
-                        ];
+                            $all_files[] = [
+                                'name' => $item,
+                                'url' => $url,
+                                'storage' => 'local',
+                                'mtime' => filemtime($path)
+                            ];
+                        }
                     }
                 }
             }
         }
 
+        // 2. Google Drive Files
+        if ($storage === 'all' || $storage === 'google_drive') {
+            $drivesJson = $this->siteSettings['google_drives'] ?? '[]';
+            $googleDrives = json_decode($drivesJson, true) ?: [];
+            if (!empty($googleDrives)) {
+                try {
+                    require_once APPPATH . 'Helpers/GoogleDrive.php';
+                    foreach ($googleDrives as $drive) {
+                        if (($drive['status'] ?? 'active') === 'active') {
+                            $res = \App\Helpers\GoogleDrive::listFiles($drive, 50);
+                            foreach ($res['files'] ?? [] as $gf) {
+                                $all_files[] = [
+                                    'id'      => $gf['id'],
+                                    'name'    => $gf['name'],
+                                    'url'     => $gf['url'],
+                                    'storage' => 'google_drive',
+                                    'mtime'   => $gf['mtime'] ?? time()
+                                ];
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {}
+            }
+        }
+
         // Sort by modification time descending (newest first)
         usort($all_files, function($a, $b) {
-            return $b['mtime'] - $a['mtime'];
+            return ($b['mtime'] ?? 0) - ($a['mtime'] ?? 0);
         });
 
         // Limit the JSON response to prevent frontend rendering lag in modals (e.g. latest 200 items)
         $limit = 200;
         $sliced_files = array_slice($all_files, 0, $limit);
 
-        $files = [];
-        foreach ($sliced_files as $file) {
-            $files[] = [
-                'name' => $file['name'],
-                'url' => $file['url']
-            ];
-        }
-
         header('Content-Type: application/json');
-        echo json_encode($files);
+        echo json_encode($sliced_files);
         exit;
     }
 
     public function delete_media() {
+        $storage = $_POST['storage'] ?? 'local';
+
+        if ($storage === 'google_drive') {
+            $fileId = trim($_POST['file_id'] ?? '');
+            $driveId = trim($_POST['drive_id'] ?? '');
+
+            if (!empty($fileId)) {
+                try {
+                    require_once APPPATH . 'Helpers/GoogleDrive.php';
+                    $drivesJson = $this->siteSettings['google_drives'] ?? '[]';
+                    $googleDrives = json_decode($drivesJson, true) ?: [];
+                    $targetDrive = null;
+                    if (!empty($driveId)) {
+                        foreach ($googleDrives as $d) {
+                            if (($d['id'] ?? '') === $driveId) {
+                                $targetDrive = $d;
+                                break;
+                            }
+                        }
+                    }
+                    if (!$targetDrive && !empty($googleDrives[0])) {
+                        $targetDrive = $googleDrives[0];
+                    }
+
+                    if ($targetDrive) {
+                        \App\Helpers\GoogleDrive::deleteFile($fileId, $targetDrive);
+                        $_SESSION['media_success'] = 'গুগল ড্রাইভ থেকে ফাইল সফলভাবে মুছে ফেলা হয়েছে!';
+                    } else {
+                        $_SESSION['media_error'] = 'ড্রাইভ অ্যাকাউন্ট পাওয়া যায়নি।';
+                    }
+                } catch (\Exception $e) {
+                    $_SESSION['media_error'] = 'গুগল ড্রাইভ ফাইল ডিলিট ব্যর্থ: ' . $e->getMessage();
+                }
+            } else {
+                $_SESSION['media_error'] = 'সঠিক ফাইল আইডি পাওয়া যায়নি।';
+            }
+            header('Location: ' . URLROOT . '/admin/media?tab=google_drive' . (!empty($driveId) ? '&drive_id=' . urlencode($driveId) : ''));
+            exit;
+        }
+
+        // Local deletion
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['file_path'])) {
             $path = $_POST['file_path'];
             $realPath = realpath($path);
@@ -1271,7 +1436,7 @@ class Admin extends Controller {
                 $_SESSION['media_error'] = 'Invalid file path or file does not exist.';
             }
         }
-        header('Location: ' . URLROOT . '/admin/media');
+        header('Location: ' . URLROOT . '/admin/media?tab=local');
         exit;
     }
 

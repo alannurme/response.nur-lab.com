@@ -329,5 +329,117 @@ class GoogleDrive {
 
         throw new \Exception('Upload failed on all available Google Drives. Last error: ' . $lastError);
     }
+
+    /**
+     * List files in a Google Drive
+     */
+    public static function listFiles($drive, $pageSize = 50, $pageToken = null, $query = null) {
+        $token = self::getAccessToken($drive);
+        $folderId = trim($drive['folder_id'] ?? '');
+
+        $qParts = ["trashed = false"];
+        if (!empty($folderId)) {
+            $qParts[] = "'$folderId' in parents";
+        }
+        if (!empty($query)) {
+            $sanitized = addslashes($query);
+            $qParts[] = "name contains '$sanitized'";
+        }
+        $q = implode(' and ', $qParts);
+
+        $params = [
+            'q' => $q,
+            'pageSize' => $pageSize,
+            'fields' => 'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink, webContentLink, thumbnailLink)',
+            'orderBy' => 'modifiedTime desc'
+        ];
+        if (!empty($pageToken)) {
+            $params['pageToken'] = $pageToken;
+        }
+
+        $url = 'https://www.googleapis.com/drive/v3/files?' . http_build_query($params);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $data = json_decode($resp, true);
+        if ($httpCode !== 200 || !isset($data['files'])) {
+            $err = $data['error']['message'] ?? ('HTTP Error ' . $httpCode);
+            throw new \Exception('Google Drive listing error: ' . $err);
+        }
+
+        $formattedFiles = [];
+        foreach ($data['files'] as $f) {
+            $fId = $f['id'];
+            $directUrl = 'https://lh3.googleusercontent.com/d/' . $fId;
+            $exportUrl = 'https://drive.google.com/uc?id=' . $fId . '&export=view';
+
+            $sizeBytes = isset($f['size']) ? intval($f['size']) : 0;
+            if ($sizeBytes >= 1048576) {
+                $sizeFormatted = round($sizeBytes / 1048576, 2) . ' MB';
+            } elseif ($sizeBytes >= 1024) {
+                $sizeFormatted = round($sizeBytes / 1024, 2) . ' KB';
+            } else {
+                $sizeFormatted = $sizeBytes . ' B';
+            }
+
+            $formattedFiles[] = [
+                'id'            => $fId,
+                'name'          => $f['name'],
+                'mimeType'      => $f['mimeType'] ?? '',
+                'size'          => $sizeFormatted,
+                'size_bytes'    => $sizeBytes,
+                'modifiedTime'  => $f['modifiedTime'] ?? '',
+                'mtime'         => !empty($f['modifiedTime']) ? strtotime($f['modifiedTime']) : time(),
+                'url'           => $directUrl,
+                'export_url'    => $exportUrl,
+                'web_link'      => $f['webViewLink'] ?? $exportUrl,
+                'thumbnail'     => $f['thumbnailLink'] ?? $directUrl,
+                'drive_id'      => $drive['id'] ?? '',
+                'drive_name'    => $drive['name'] ?? 'Google Drive'
+            ];
+        }
+
+        return [
+            'files'         => $formattedFiles,
+            'nextPageToken' => $data['nextPageToken'] ?? null
+        ];
+    }
+
+    /**
+     * Delete a file from Google Drive
+     */
+    public static function deleteFile($fileId, $drive) {
+        $token = self::getAccessToken($drive);
+        $url = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 204 || $httpCode === 200 || $httpCode === 404) {
+            return true;
+        }
+
+        $data = json_decode($resp, true);
+        $err = $data['error']['message'] ?? ('HTTP Error ' . $httpCode);
+        throw new \Exception('Failed to delete Google Drive file: ' . $err);
+    }
 }
 
