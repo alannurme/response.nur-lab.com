@@ -158,8 +158,8 @@ if (empty($current_page)) {
             align-items: center !important;
             justify-content: center !important;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            z-index: 105;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            z-index: 1050;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 0 !important;
         }
@@ -768,6 +768,9 @@ if (empty($current_page)) {
     <div id="sidebar-overlay" style="position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 95; display: none;"></div>
 
     <div class="sidebar">
+        <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" title="সাইডবার টগল করুন">
+            <i class="fas fa-angle-left"></i>
+        </button>
         <div class="sidebar-logo" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <a href="<?= URLROOT ?>/admin" style="text-decoration: none; display: flex; align-items: center; gap: 10px; overflow: hidden; white-space: nowrap; min-width: 0;">
                 <?php if (!empty($settings['site_logo'])): ?>
@@ -776,9 +779,6 @@ if (empty($current_page)) {
                     <h2 style="color: #0f172a; margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; flex-shrink: 0;">NUR<span style="color: #2563eb;">LAB</span></h2>
                 <?php endif; ?>
             </a>
-            <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" title="সাইডবার টগল করুন">
-                <i class="fas fa-angle-left"></i>
-            </button>
         </div>
         
         <nav class="sidebar-nav">
