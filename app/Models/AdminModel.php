@@ -1553,18 +1553,6 @@ class AdminModel extends Model {
                 $stmtInsert = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type, category_source) VALUES ('সবগুলো নিবন্ধ', '/blog', 1, NULL, 'fa-solid fa-layer-group', 'post_mega', :source)");
                 $stmtInsert->execute(['source' => $sourceJson]);
             }
-
-            // Ensure 'Open Database' exists as a direct top-level menu
-            $stmtOpenDb = $this->db->query("SELECT id FROM menus WHERE TRIM(title) = 'Open Database' AND parent_id IS NULL LIMIT 1");
-            $openDb = $stmtOpenDb ? $stmtOpenDb->fetch() : null;
-            if (!$openDb) {
-                $ins = $this->db->prepare("INSERT INTO menus (title, url, order_index, parent_id, icon, menu_type) VALUES ('Open Database', '/open_database', 2, NULL, 'fas fa-database', 'custom')");
-                $ins->execute();
-            }
-
-            if (class_exists('\\App\\Helpers\\Cache')) {
-                \App\Helpers\Cache::clear();
-            }
         } catch (\Exception $e) {}
 
         $stmt = $this->db->query("SELECT * FROM menus ORDER BY order_index ASC, id ASC");

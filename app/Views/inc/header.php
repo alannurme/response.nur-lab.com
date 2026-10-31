@@ -872,14 +872,26 @@ if (!function_exists('getBengaliDate')) {
             box-shadow: 0 8px 15px var(--primary-glow);
         }
 
+        .mobile-actions-wrapper {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+        @media (max-width: 1200px) {
+            .mobile-actions-wrapper {
+                display: flex !important;
+            }
+        }
+
         .nav-links {
             flex: 1;
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            gap: 15px;
+            gap: 8px;
             list-style: none;
-            margin-left: 30px;
+            margin-left: 15px;
         }
 
         .nav-links a {
@@ -933,11 +945,11 @@ if (!function_exists('getBengaliDate')) {
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 0 40px;
+            padding: 0 24px;
             display: flex;
             justify-content: flex-start;
             align-items: stretch;
-            min-height: 66px;
+            min-height: 62px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(11, 124, 77, 0.12);
             position: relative;
         }
@@ -947,9 +959,9 @@ if (!function_exists('getBengaliDate')) {
             display: flex;
             justify-content: flex-start;
             align-items: stretch;
-            gap: 15px;
+            gap: 8px;
             list-style: none;
-            margin-left: 30px;
+            margin-left: 16px;
         }
 
         .nav-links > li {
@@ -964,16 +976,16 @@ if (!function_exists('getBengaliDate')) {
         .btn-nav-categories {
             background: #f1f5f9 !important;
             color: #0f172a !important;
-            padding: 0 24px !important;
+            padding: 0 16px !important;
             border-radius: 0 !important;
             font-size: 15px !important;
             font-weight: 700 !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 8px !important;
+            gap: 6px !important;
             height: 100% !important;
-            min-height: 66px !important;
+            min-height: 62px !important;
             margin: 0 !important;
             box-shadow: none !important;
             border-top: none !important;
@@ -1021,11 +1033,11 @@ if (!function_exists('getBengaliDate')) {
         .nav-links a.nav-regular-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-size: 15px;
             font-weight: 700;
             color: #0f172a;
-            padding: 8px 14px;
+            padding: 7px 12px;
             border-radius: 8px;
             transition: all 0.25s ease;
             text-decoration: none;
@@ -2713,7 +2725,7 @@ if (!$is_islamic_dedicated_page):
             </a>
 
             <!-- Mobile Actions Wrapper -->
-            <div style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+            <div class="mobile-actions-wrapper">
                 <!-- Mobile Menu Toggle Button -->
                 <button class="mobile-nav-toggle" aria-label="Toggle Menu">
                     <i class="fas fa-bars"></i>

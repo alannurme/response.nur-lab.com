@@ -3,9 +3,9 @@
 <div class="admin-header">
     <div>
         <h1 class="text-premium-glow">Record List</h1>
-        <p>Open Database &mdash; View and manage all database records</p>
+        <p>Records &mdash; View and manage all database records</p>
     </div>
-    <a href="<?= URLROOT ?>/admin/open_database_add" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+    <a href="<?= URLROOT ?>/admin/records_add" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
         <i class="fas fa-plus-circle"></i> Add New Record
     </a>
 </div>

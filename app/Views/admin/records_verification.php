@@ -3,7 +3,7 @@
 <div class="admin-header">
     <div>
         <h1 class="text-premium-glow">Verification Section</h1>
-        <p>Open Database &mdash; Review and verify submitted records</p>
+        <p>Records &mdash; Review and verify submitted records</p>
     </div>
 </div>
 

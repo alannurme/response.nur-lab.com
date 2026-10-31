@@ -1071,9 +1071,29 @@ class Admin extends Controller {
                     }
                     
                     if (!empty($file_name) && move_uploaded_file($file['tmp_name'], $upload_dir . $file_name)) {
+                        $file_url = URLROOT . '/public/img/' . $file_name;
+
+                        // Cloud Storage check (Google Drive)
+                        $currentSettings = $this->siteSettings;
+                        if (($currentSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                            try {
+                                require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                $mime = mime_content_type($upload_dir . $file_name) ?: 'image/jpeg';
+                                $driveResult = \App\Helpers\GoogleDrive::uploadWithFallback($upload_dir . $file_name, $file_name, $mime, $currentSettings);
+                                if (!empty($driveResult['url'])) {
+                                    $file_url = $driveResult['url'];
+                                }
+                                if (($currentSettings['gdrive_sync_local'] ?? '1') !== '1') {
+                                    @unlink($upload_dir . $file_name);
+                                }
+                            } catch (\Exception $e) {
+                                error_log("Google Drive upload error: " . $e->getMessage());
+                            }
+                        }
+
                         if ($is_ajax) {
                             header('Content-Type: application/json');
-                            echo json_encode(['success' => true, 'url' => URLROOT . '/public/img/' . $file_name]);
+                            echo json_encode(['success' => true, 'url' => $file_url]);
                             exit;
                         }
                         $data['success'] = "Image uploaded successfully!";
@@ -1776,6 +1796,20 @@ class Admin extends Controller {
                     $settings['show_scopes'] = '0';
                 }
 
+                // Handle Google Drive / Storage settings fallback
+                if (!isset($settings['storage_provider'])) {
+                    $settings['storage_provider'] = 'local';
+                }
+                if (!isset($settings['gdrive_auto_fallback'])) {
+                    $settings['gdrive_auto_fallback'] = '0';
+                }
+                if (!isset($settings['gdrive_sync_local'])) {
+                    $settings['gdrive_sync_local'] = '0';
+                }
+                if (!isset($settings['google_drives'])) {
+                    $settings['google_drives'] = '[]';
+                }
+
                 // Preserve existing SMTP password if left empty
                 if (empty($settings['smtp_pass'])) {
                     unset($settings['smtp_pass']);
@@ -1791,6 +1825,39 @@ class Admin extends Controller {
         $data['categories'] = $adminModel->getCategories();
         $data['current_page'] = 'settings';
         $this->view('admin/settings', $data);
+    }
+
+    public function storage_settings() {
+        $adminModel = $this->model('AdminModel');
+        $data = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['settings'])) {
+                $settings = $_POST['settings'];
+
+                if (!isset($settings['storage_provider'])) {
+                    $settings['storage_provider'] = 'local';
+                }
+                if (!isset($settings['gdrive_auto_fallback'])) {
+                    $settings['gdrive_auto_fallback'] = '0';
+                }
+                if (!isset($settings['gdrive_sync_local'])) {
+                    $settings['gdrive_sync_local'] = '0';
+                }
+                if (!isset($settings['google_drives'])) {
+                    $settings['google_drives'] = '[]';
+                }
+
+                $adminModel->updateSettings($settings);
+                \App\Helpers\Cache::clear();
+                $data['success'] = 'গুগল ড্রাইভ ও ক্লাউড স্টোরেজ সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।';
+            }
+        }
+
+        $data['settings'] = $adminModel->getSettings();
+        $data['current_page'] = 'storage_settings';
+        $data['title'] = 'Google Drive & Storage Settings';
+        $this->view('admin/storage_settings', $data);
     }
 
     public function system_update() {
@@ -3256,35 +3323,204 @@ class Admin extends Controller {
     }
 
     // ==========================================
-    // Open Database Section (Blank / Ready)
+    // Records Section (Formerly Open Database)
     // ==========================================
+    public function records() {
+        $this->view('admin/records', [
+            'current_page' => 'records',
+            'title'        => 'Record List | Records',
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function records_add() {
+        $locationsFile = APPPATH . 'cache/locations.json';
+        $locations = file_exists($locationsFile) ? json_decode(file_get_contents($locationsFile), true) : [];
+
+        // Fetch categories dynamically from open_database_categories table
+        $categories = [];
+        try {
+            $db = \Config\Database::pdoConnect();
+            $stmt = $db->query("SELECT * FROM `open_database_categories` ORDER BY `id` ASC");
+            if ($stmt) {
+                $categories = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        } catch (\Exception $e) {
+            $categories = [];
+        }
+
+        $this->view('admin/records_add', [
+            'current_page' => 'records_add',
+            'title'        => 'নতুন ডাটা রেকর্ড যোগ করুন (Add Record)',
+            'categories'   => $categories,
+            'locations'    => $locations,
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function records_categories() {
+        $categories = [];
+        try {
+            $db = \Config\Database::pdoConnect();
+            $stmt = $db->query("SELECT * FROM `open_database_categories` ORDER BY `id` DESC");
+            if ($stmt) {
+                $categories = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        } catch (\Exception $e) {
+            $categories = [];
+        }
+
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError   = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        $this->view('admin/records_categories', [
+            'current_page'  => 'records_categories',
+            'title'         => 'ক্যাটাগরি ব্যবস্থাপনা | Records',
+            'categories'    => $categories,
+            'flash_success' => $flashSuccess,
+            'flash_error'   => $flashError,
+            'settings'      => $this->siteSettings
+        ]);
+    }
+
+    public function records_categories_save() {
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || isset($_POST['ajax']);
+
+        $id = !empty($_POST['id']) ? intval($_POST['id']) : null;
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+
+        if (empty($name)) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'ক্যাটাগরির নাম দেওয়া বাধ্যতামূলক।']);
+                exit;
+            }
+            $_SESSION['flash_error'] = 'ক্যাটাগরির নাম দেওয়া বাধ্যতামূলক।';
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            $now = date('Y-m-d H:i:s');
+
+            if ($id) {
+                $stmt = $db->prepare("UPDATE `open_database_categories` SET `name` = ?, `description` = ?, `updated_at` = ? WHERE `id` = ?");
+                $stmt->execute([$name, $description, $now, $id]);
+                $message = 'ক্যাটাগরি সফলভাবে আপডেট করা হয়েছে।';
+            } else {
+                $stmt = $db->prepare("INSERT INTO `open_database_categories` (`name`, `description`, `created_at`, `updated_at`) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$name, $description, $now, $now]);
+                $id = $db->lastInsertId();
+                $message = 'নতুন ক্যাটাগরি সফলভাবে যুক্ত করা হয়েছে।';
+            }
+
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success'  => true,
+                    'message'  => $message,
+                    'category' => [
+                        'id'          => $id,
+                        'name'        => $name,
+                        'description' => $description
+                    ]
+                ]);
+                exit;
+            }
+
+            $_SESSION['flash_success'] = $message;
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        } catch (\Exception $e) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'ডাটাবেজ সমস্যা: ' . $e->getMessage()]);
+                exit;
+            }
+            $_SESSION['flash_error'] = 'ডাটাবেজ সমস্যা: ' . $e->getMessage();
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        }
+    }
+
+    public function records_categories_delete($id = null) {
+        $id = $id ? intval($id) : intval($_POST['id'] ?? 0);
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || isset($_POST['ajax']);
+
+        if (!$id) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'সঠিক ক্যাটাগরি আইডি পাওয়া যায়নি।']);
+                exit;
+            }
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            $stmt = $db->prepare("DELETE FROM `open_database_categories` WHERE `id` = ?");
+            $stmt->execute([$id]);
+
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => 'ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে।']);
+                exit;
+            }
+            $_SESSION['flash_success'] = 'ক্যাটাগরি সফলভাবে মুছে ফেলা হয়েছে।';
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        } catch (\Exception $e) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'মুছে ফেলতে ব্যর্থ হয়েছে: ' . $e->getMessage()]);
+                exit;
+            }
+            $_SESSION['flash_error'] = 'মুছে ফেলতে ব্যর্থ হয়েছে: ' . $e->getMessage();
+            header('Location: ' . URLROOT . '/admin/records_categories');
+            exit;
+        }
+    }
+
+    public function records_verification() {
+        $this->view('admin/records_verification', [
+            'current_page' => 'records_verification',
+            'title'        => 'Verification Section | Records',
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    // Aliases for Backward Compatibility
     public function open_database() {
-        header('Location: ' . URLROOT . '/admin/open_database_records');
+        header('Location: ' . URLROOT . '/admin/records');
         exit;
     }
 
-    public function open_database_add() {
-        $this->view('admin/open_database_add', [
-            'current_page' => 'open_database_add',
-            'title'        => 'Add Record | Open Database',
-            'settings'     => $this->siteSettings
-        ]);
+    public function open_database_records() {
+        return $this->records();
     }
 
-    public function open_database_records() {
-        $this->view('admin/open_database_records', [
-            'current_page' => 'open_database_records',
-            'title'        => 'Record List | Open Database',
-            'settings'     => $this->siteSettings
-        ]);
+    public function open_database_add() {
+        return $this->records_add();
+    }
+
+    public function open_database_categories() {
+        return $this->records_categories();
+    }
+
+    public function open_database_categories_save() {
+        return $this->records_categories_save();
+    }
+
+    public function open_database_categories_delete($id = null) {
+        return $this->records_categories_delete($id);
     }
 
     public function open_database_verification() {
-        $this->view('admin/open_database_verification', [
-            'current_page' => 'open_database_verification',
-            'title'        => 'Verification Section | Open Database',
-            'settings'     => $this->siteSettings
-        ]);
+        return $this->records_verification();
     }
 
     // YouTube Video Management
@@ -4074,6 +4310,49 @@ class Admin extends Controller {
             }
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'SMTP সংযোগ ত্রুটি: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    public function test_gdrive_connection() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+            exit;
+        }
+
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        if (!$data && !empty($_POST)) {
+            $data = $_POST;
+        }
+
+        if (empty($data)) {
+            echo json_encode(['success' => false, 'message' => 'কোনো ড্রাইভ ডাটা পাওয়া যায়নি।']);
+            exit;
+        }
+
+        try {
+            require_once APPPATH . 'Helpers/GoogleDrive.php';
+            $res = \App\Helpers\GoogleDrive::testConnection($data);
+            if (!empty($res['success'])) {
+                echo json_encode([
+                    'success'     => true,
+                    'message'     => $res['message'] ?? 'গুগল ড্রাইভ সফলভাবে কানেক্ট হয়েছে!',
+                    'folder_name' => $res['folder_name'] ?? null
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $res['error'] ?? 'গুগল ড্রাইভ কানেকশন ব্যর্থ হয়েছে।'
+                ]);
+            }
+        } catch (\Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'কানেকশন ত্রুটি: ' . $e->getMessage()
+            ]);
         }
         exit;
     }

@@ -7,7 +7,7 @@
             <i class="fas fa-database"></i> উন্মুক্ত তথ্যভাণ্ডার
         </div>
         <h1 style="font-size: 2.8rem; font-weight: 900; color: #0f172a; margin-bottom: 15px; font-family: 'Hind Siliguri', sans-serif;">
-            Open <span style="color: var(--primary);">Database</span>
+            <span style="color: var(--primary);">Records</span>
         </h1>
         <p style="color: #64748b; font-size: 1.15rem; max-width: 650px; margin: 0 auto; line-height: 1.7; font-family: 'Hind Siliguri', sans-serif;">
             উন্মুক্ত ডাটাবেজ ও ভেরিফায়েড ইসলামিক নলেজবেইজ তথ্যভাণ্ডার।
@@ -23,7 +23,7 @@
                 <i class="fas fa-database"></i>
             </div>
             <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; font-family: 'Hind Siliguri', sans-serif;">
-                Open Database সেকশনে স্বাগতম
+                Records সেকশনে স্বাগতম
             </h2>
             <p style="color: #64748b; font-size: 1.05rem; max-width: 580px; margin: 0 auto 30px auto; line-height: 1.7; font-family: 'Hind Siliguri', sans-serif;">
                 এই সেকশনের তথ্যভাণ্ডার প্রস্তুত হচ্ছে। খুব শীঘ্রই এখানে উন্মুক্ত রেকর্ডসমূহ, ফিল্টারিং ও ভেরিফিকেশন ব্যবস্থা সরাসরি দেখা যাবে।

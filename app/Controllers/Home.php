@@ -633,17 +633,22 @@ class Home extends Controller {
         $this->view('home/about', $data);
     }
 
-    public function open_database() {
+    public function records() {
         $adminModel = $this->model('AdminModel');
         $data = [
-            'title' => 'Open Database | উন্মুক্ত ডাটাবেজ',
+            'title' => 'Records | উন্মুক্ত তথ্যভাণ্ডার',
             'settings' => $adminModel->getSettings(),
             'menus' => $adminModel->getMenus(),
             'sub_menus' => $adminModel->getSubMenus(),
             'breaking_news' => $adminModel->getBreakingNews(),
             'prayer_times' => $adminModel->getPrayerTimes()
         ];
-        $this->view('home/open_database', $data);
+        $this->view('home/records', $data);
+    }
+
+    public function open_database() {
+        header('Location: ' . URLROOT . '/records', true, 301);
+        exit;
     }
 
     public function donate() {

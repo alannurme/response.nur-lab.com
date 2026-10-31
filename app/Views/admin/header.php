@@ -813,20 +813,20 @@ if (empty($current_page)) {
                     <i class="fas fa-comments"></i><span>Comments</span>
                 </a>
 
-                <?php $open_db_active = in_array($current_page, ['open_database', 'open_database_add', 'open_database_records', 'open_database_verification']); ?>
+                <?php $records_active = in_array($current_page, ['records', 'records_add', 'records_categories', 'records_verification', 'open_database', 'open_database_add', 'open_database_records', 'open_database_categories', 'open_database_verification']); ?>
                 <div class="dropdown-wrapper">
-                    <div class="nav-item has-dropdown <?= $open_db_active ? 'active' : '' ?>">
-                        <i class="fas fa-database"></i><span>Open Database</span>
+                    <div class="nav-item has-dropdown <?= $records_active ? 'active' : '' ?>">
+                        <i class="fas fa-database"></i><span>Records</span>
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </div>
-                    <div class="dropdown-content" <?= $open_db_active ? 'style="display: block;"' : '' ?>>
-                        <a href="<?= URLROOT ?>/admin/open_database_add" class="<?= $current_page == 'open_database_add' ? 'active-sub' : '' ?>">
-                            <i class="fas fa-plus-circle"></i> Add Record
-                        </a>
-                        <a href="<?= URLROOT ?>/admin/open_database_records" class="<?= $current_page == 'open_database_records' || $current_page == 'open_database' ? 'active-sub' : '' ?>">
+                    <div class="dropdown-content" <?= $records_active ? 'style="display: block;"' : '' ?>>
+                        <a href="<?= URLROOT ?>/admin/records" class="<?= in_array($current_page, ['records', 'records_add', 'open_database_records', 'open_database_add', 'open_database']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-list-ul"></i> Record List
                         </a>
-                        <a href="<?= URLROOT ?>/admin/open_database_verification" class="<?= $current_page == 'open_database_verification' ? 'active-sub' : '' ?>">
+                        <a href="<?= URLROOT ?>/admin/records_categories" class="<?= in_array($current_page, ['records_categories', 'open_database_categories']) ? 'active-sub' : '' ?>">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/records_verification" class="<?= in_array($current_page, ['records_verification', 'open_database_verification']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-check-double"></i> Verification Section
                         </a>
                     </div>
@@ -921,7 +921,7 @@ if (empty($current_page)) {
                     </div>
                 </div>
                 
-                <?php $settings_active = in_array($current_page, ['settings', 'payment_settings', 'payment_methods', 'payment_gateway', 'permissions', 'users', 'backup', 'system_update', 'facebook_pixel', 'google_analytics', 'sitemap']); ?>
+                <?php $settings_active = in_array($current_page, ['settings', 'storage_settings', 'payment_settings', 'payment_methods', 'payment_gateway', 'permissions', 'users', 'backup', 'system_update', 'facebook_pixel', 'google_analytics', 'sitemap']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $settings_active ? 'active' : '' ?>">
                         <i class="fas fa-cog"></i><span>Settings</span>
@@ -930,6 +930,9 @@ if (empty($current_page)) {
                     <div class="dropdown-content" <?= $settings_active ? 'style="display: block;"' : '' ?>>
                         <a href="<?= URLROOT ?>/admin/settings" class="<?= $current_page == 'settings' ? 'active-sub' : '' ?>">
                             <i class="fas fa-sliders-h"></i> Site Settings
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/storage_settings" class="<?= $current_page == 'storage_settings' ? 'active-sub' : '' ?>">
+                            <i class="fab fa-google-drive" style="color: #0f9d58;"></i> Google Drive / Storage
                         </a>
                         <a href="<?= URLROOT ?>/admin/payment_settings" class="<?= in_array($current_page, ['payment_settings', 'payment_methods', 'payment_gateway']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-credit-card"></i> Payment Methods
