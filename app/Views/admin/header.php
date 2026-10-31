@@ -813,7 +813,7 @@ if (empty($current_page)) {
                     <i class="fas fa-comments"></i><span>Comments</span>
                 </a>
 
-                <?php $records_active = in_array($current_page, ['records', 'records_add', 'records_categories', 'records_verification', 'open_database', 'open_database_add', 'open_database_records', 'open_database_categories', 'open_database_verification']); ?>
+                <?php $records_active = in_array($current_page, ['records', 'records_add', 'records_persons', 'records_person_view', 'records_categories', 'records_verification', 'open_database', 'open_database_add', 'open_database_records', 'open_database_categories', 'open_database_verification']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $records_active ? 'active' : '' ?>">
                         <i class="fas fa-database"></i><span>Records</span>
@@ -822,6 +822,9 @@ if (empty($current_page)) {
                     <div class="dropdown-content" <?= $records_active ? 'style="display: block;"' : '' ?>>
                         <a href="<?= URLROOT ?>/admin/records" class="<?= in_array($current_page, ['records', 'records_add', 'open_database_records', 'open_database_add', 'open_database']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-list-ul"></i> Record List
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/records_persons" class="<?= in_array($current_page, ['records_persons', 'records_person_view']) ? 'active-sub' : '' ?>">
+                            <i class="fas fa-users"></i> Person List
                         </a>
                         <a href="<?= URLROOT ?>/admin/records_categories" class="<?= in_array($current_page, ['records_categories', 'open_database_categories']) ? 'active-sub' : '' ?>">
                             <i class="fas fa-tags"></i> Categories

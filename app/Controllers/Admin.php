@@ -3525,9 +3525,31 @@ class Admin extends Controller {
     // Records Section (Formerly Open Database)
     // ==========================================
     private function ensureRecordsTableExists($db) {
+        // 1. Persons Table
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `records_persons` (
+                `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `name` VARCHAR(255) NOT NULL,
+                `alias` VARCHAR(255) NULL,
+                `nid_passport` VARCHAR(100) NULL,
+                `gender` VARCHAR(50) DEFAULT 'Male',
+                `age` INT NULL,
+                `height_cm` INT NULL,
+                `phone` VARCHAR(100) NULL,
+                `social_media` VARCHAR(500) NULL,
+                `address` TEXT NULL,
+                `is_most_wanted` TINYINT(1) DEFAULT 0,
+                `photo` VARCHAR(1000) NULL,
+                `created_at` DATETIME NULL,
+                `updated_at` DATETIME NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        // 2. Records Table (with person_id)
         $db->exec("
             CREATE TABLE IF NOT EXISTS `records` (
                 `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `person_id` INT UNSIGNED NULL,
                 `name` VARCHAR(255) NOT NULL,
                 `alias` VARCHAR(255) NULL,
                 `nid_passport` VARCHAR(100) NULL,
@@ -3550,6 +3572,14 @@ class Admin extends Controller {
                 `updated_at` DATETIME NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
+
+        // Ensure person_id column exists if table was created previously
+        try {
+            $cols = $db->query("SHOW COLUMNS FROM `records` LIKE 'person_id'")->fetchAll();
+            if (empty($cols)) {
+                $db->exec("ALTER TABLE `records` ADD COLUMN `person_id` INT UNSIGNED NULL AFTER `id`");
+            }
+        } catch (\Exception $e) {}
     }
 
     public function records() {
@@ -3597,8 +3627,24 @@ class Admin extends Controller {
                 return $finalUrl;
             };
 
-            // 1. Process Video files
+            // 1. Process Video files (Local upload + Google Drive / Media Picker)
             $uploadedVideos = [];
+            // Picked from Media Library (Drive / Local)
+            if (!empty($_POST['selected_drive_videos'])) {
+                $selVideos = is_array($_POST['selected_drive_videos']) ? $_POST['selected_drive_videos'] : json_decode($_POST['selected_drive_videos'], true);
+                if (is_array($selVideos)) {
+                    foreach ($selVideos as $sv) {
+                        if (!empty($sv)) {
+                            $vUrl = is_array($sv) ? ($sv['url'] ?? '') : $sv;
+                            $vName = is_array($sv) ? ($sv['name'] ?? basename($vUrl)) : basename($vUrl);
+                            if ($vUrl) {
+                                $uploadedVideos[] = ['name' => $vName, 'url' => $vUrl];
+                            }
+                        }
+                    }
+                }
+            }
+            // Uploaded from computer
             if (!empty($_FILES['video_files']['name'][0])) {
                 $totalVideos = count($_FILES['video_files']['name']);
                 for ($v = 0; $v < $totalVideos; $v++) {
@@ -3618,8 +3664,22 @@ class Admin extends Controller {
                 }
             }
 
-            // 2. Process Document files
+            // 2. Process Document files (Local upload + Google Drive / Media Picker)
             $uploadedDocs = [];
+            if (!empty($_POST['selected_drive_documents'])) {
+                $selDocs = is_array($_POST['selected_drive_documents']) ? $_POST['selected_drive_documents'] : json_decode($_POST['selected_drive_documents'], true);
+                if (is_array($selDocs)) {
+                    foreach ($selDocs as $sd) {
+                        if (!empty($sd)) {
+                            $dUrl = is_array($sd) ? ($sd['url'] ?? '') : $sd;
+                            $dName = is_array($sd) ? ($sd['name'] ?? basename($dUrl)) : basename($dUrl);
+                            if ($dUrl) {
+                                $uploadedDocs[] = ['name' => $dName, 'url' => $dUrl];
+                            }
+                        }
+                    }
+                }
+            }
             if (!empty($_FILES['document_files']['name'][0])) {
                 $totalDocs = count($_FILES['document_files']['name']);
                 for ($d = 0; $d < $totalDocs; $d++) {
@@ -3639,8 +3699,18 @@ class Admin extends Controller {
                 }
             }
 
-            // 3. Process Extra Photos / Gallery
+            // 3. Process Extra Photos / Gallery (Local upload + Google Drive / Media Picker)
             $uploadedGallery = [];
+            if (!empty($_POST['selected_drive_gallery'])) {
+                $selGal = is_array($_POST['selected_drive_gallery']) ? $_POST['selected_drive_gallery'] : json_decode($_POST['selected_drive_gallery'], true);
+                if (is_array($selGal)) {
+                    foreach ($selGal as $sg) {
+                        if (!empty($sg)) {
+                            $uploadedGallery[] = is_array($sg) ? ($sg['url'] ?? '') : $sg;
+                        }
+                    }
+                }
+            }
             if (!empty($_FILES['additional_photos']['name'][0])) {
                 $totalGal = count($_FILES['additional_photos']['name']);
                 for ($g = 0; $g < $totalGal; $g++) {
@@ -3656,60 +3726,98 @@ class Admin extends Controller {
                     }
                 }
             }
+            $uploadedGallery = array_values(array_unique(array_filter($uploadedGallery)));
 
             // Crime types
             $crimeTypeInput = $_POST['crime_type'] ?? [];
             $crimeTypeStr = is_array($crimeTypeInput) ? implode(', ', array_filter($crimeTypeInput)) : trim($crimeTypeInput);
 
             $videoUrlInput = trim($_POST['video_url'] ?? '');
-            $descriptions = $_POST['description'] ?? [];
-            $mainDesc = is_array($descriptions) ? trim($descriptions[0] ?? '') : trim($descriptions);
+            $mainDesc = trim($_POST['description'] ?? '');
 
-            // Process Personal Cards (one or multiple people in this record)
-            $names = $_POST['name'] ?? [];
-            $aliases = $_POST['alias'] ?? [];
-            $nidPassports = $_POST['nid_passport'] ?? [];
-            $genders = $_POST['gender'] ?? [];
-            $ages = $_POST['age'] ?? [];
-            $heights = $_POST['height_cm'] ?? [];
-            $phones = $_POST['phone'] ?? [];
-            $socialMedias = $_POST['social_media'] ?? [];
-            $addresses = $_POST['address'] ?? [];
-            $mostWantedFlags = $_POST['is_most_wanted'] ?? [];
+            // Person details (Single person per record)
+            $personId = !empty($_POST['person_id']) ? intval($_POST['person_id']) : null;
+            $personName = trim($_POST['name'] ?? '');
+            $alias = trim($_POST['alias'] ?? '');
+            $nid = trim($_POST['nid_passport'] ?? '');
+            $gender = trim($_POST['gender'] ?? 'Male');
+            $age = !empty($_POST['age']) ? intval($_POST['age']) : null;
+            $height = !empty($_POST['height_cm']) ? intval($_POST['height_cm']) : null;
+            $phone = trim($_POST['phone'] ?? '');
+            $social = trim($_POST['social_media'] ?? '');
+            $address = trim($_POST['address'] ?? '');
+            $isMostWanted = !empty($_POST['is_most_wanted']) ? 1 : 0;
+            $status = 'Active';
 
-            $insertStmt = $db->prepare("
-                INSERT INTO `records` 
-                (`name`, `alias`, `nid_passport`, `gender`, `age`, `height_cm`, `phone`, `social_media`, `address`, `crime_type`, `status`, `is_most_wanted`, `photo`, `gallery`, `videos`, `video_url`, `documents`, `description`, `created_at`, `updated_at`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
-            $savedCount = 0;
-            foreach ($names as $idx => $personName) {
-                $personName = trim($personName);
-                if (empty($personName)) continue;
-
-                // Photo for this person
-                $photoUrl = null;
-                if (!empty($_FILES['photo']['name'][$idx]) && $_FILES['photo']['error'][$idx] === UPLOAD_ERR_OK) {
-                    $photoUrl = $uploadSingleFile(
-                        $_FILES['photo']['tmp_name'][$idx],
-                        $_FILES['photo']['name'][$idx],
-                        $_FILES['photo']['type'][$idx] ?? null
-                    );
+            // Selected photo from drive/picker vs uploaded from PC
+            $photoUrl = trim($_POST['selected_drive_photo'] ?? '');
+            if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                $uploadedPhotoUrl = $uploadSingleFile(
+                    $_FILES['photo']['tmp_name'],
+                    $_FILES['photo']['name'],
+                    $_FILES['photo']['type'] ?? null
+                );
+                if ($uploadedPhotoUrl) {
+                    $photoUrl = $uploadedPhotoUrl;
                 }
+            }
 
-                $alias = trim($aliases[$idx] ?? '');
-                $nid = trim($nidPassports[$idx] ?? '');
-                $gender = trim($genders[$idx] ?? 'Male');
-                $age = !empty($ages[$idx]) ? intval($ages[$idx]) : null;
-                $height = !empty($heights[$idx]) ? intval($heights[$idx]) : null;
-                $phone = trim($phones[$idx] ?? '');
-                $social = trim($socialMedias[$idx] ?? '');
-                $address = trim($addresses[$idx] ?? '');
-                $isMostWanted = !empty($mostWantedFlags[$idx]) ? 1 : 0;
-                $status = 'Active';
+            // If an existing person was chosen:
+            if ($personId > 0) {
+                $pStmt = $db->prepare("SELECT * FROM `records_persons` WHERE `id` = ?");
+                $pStmt->execute([$personId]);
+                $existingPerson = $pStmt->fetch(\PDO::FETCH_ASSOC);
+
+                if ($existingPerson) {
+                    if (empty($personName)) $personName = $existingPerson['name'];
+                    if (empty($alias)) $alias = $existingPerson['alias'];
+                    if (empty($nid)) $nid = $existingPerson['nid_passport'];
+                    if (empty($phone)) $phone = $existingPerson['phone'];
+                    if (empty($address)) $address = $existingPerson['address'];
+                    if (empty($social)) $social = $existingPerson['social_media'];
+                    if (empty($photoUrl)) $photoUrl = $existingPerson['photo'];
+                    if (empty($age)) $age = $existingPerson['age'];
+                    if (empty($height)) $height = $existingPerson['height_cm'];
+                    if (empty($_POST['gender'])) $gender = $existingPerson['gender'];
+
+                    // Update existing person with any newly provided photo or info
+                    $uStmt = $db->prepare("
+                        UPDATE `records_persons` SET 
+                            `name` = ?, `alias` = ?, `nid_passport` = ?, `gender` = ?, `age` = ?, 
+                            `height_cm` = ?, `phone` = ?, `social_media` = ?, `address` = ?, 
+                            `is_most_wanted` = ?, `photo` = ?, `updated_at` = ?
+                        WHERE `id` = ?
+                    ");
+                    $uStmt->execute([
+                        $personName, $alias, $nid, $gender, $age,
+                        $height, $phone, $social, $address,
+                        $isMostWanted, $photoUrl, $now, $personId
+                    ]);
+                }
+            } else if (!empty($personName)) {
+                // Create new person in records_persons
+                $pIns = $db->prepare("
+                    INSERT INTO `records_persons` 
+                    (`name`, `alias`, `nid_passport`, `gender`, `age`, `height_cm`, `phone`, `social_media`, `address`, `is_most_wanted`, `photo`, `created_at`, `updated_at`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $pIns->execute([
+                    $personName, $alias, $nid, $gender, $age,
+                    $height, $phone, $social, $address,
+                    $isMostWanted, $photoUrl, $now, $now
+                ]);
+                $personId = $db->lastInsertId();
+            }
+
+            if (!empty($personName)) {
+                $insertStmt = $db->prepare("
+                    INSERT INTO `records` 
+                    (`person_id`, `name`, `alias`, `nid_passport`, `gender`, `age`, `height_cm`, `phone`, `social_media`, `address`, `crime_type`, `status`, `is_most_wanted`, `photo`, `gallery`, `videos`, `video_url`, `documents`, `description`, `created_at`, `updated_at`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
 
                 $insertStmt->execute([
+                    $personId,
                     $personName,
                     $alias,
                     $nid,
@@ -3731,13 +3839,10 @@ class Admin extends Controller {
                     $now,
                     $now
                 ]);
-                $savedCount++;
-            }
 
-            if ($savedCount > 0) {
-                $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে! সকল ছবি, ভিডিও ও ফাইল গুগল ড্রাইভে সংরক্ষিত হয়েছে।";
+                $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে! সকল ছবি, ভিডিও ও ফাইল সংরক্ষিত হয়েছে।";
             } else {
-                $_SESSION['record_flash_error'] = "রেকর্ড সংরক্ষণ করা সম্ভব হয়নি। প্রয়োজনীয় তথ্য সঠিকভাবে পূরণ করুন।";
+                $_SESSION['record_flash_error'] = "রেকর্ড সংরক্ষণ করা সম্ভব হয়নি। ব্যক্তির নাম বা তথ্য প্রদান করুন।";
             }
 
             header('Location: ' . URLROOT . '/admin/records');
@@ -3747,7 +3852,12 @@ class Admin extends Controller {
         // Fetch records for listing
         $records = [];
         try {
-            $stmt = $db->query("SELECT * FROM `records` ORDER BY `id` DESC");
+            $stmt = $db->query("
+                SELECT r.*, p.name AS person_master_name, p.photo AS person_master_photo 
+                FROM `records` r 
+                LEFT JOIN `records_persons` p ON r.person_id = p.id 
+                ORDER BY r.id DESC
+            ");
             if ($stmt) {
                 $records = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             }
@@ -3767,6 +3877,95 @@ class Admin extends Controller {
             'flash_error'   => $flashError,
             'settings'      => $this->siteSettings
         ]);
+    }
+
+    public function records_persons() {
+        $db = \Config\Database::pdoConnect();
+        $this->ensureRecordsTableExists($db);
+
+        $search = trim($_GET['q'] ?? '');
+        $query = "
+            SELECT p.*, COUNT(r.id) AS total_records 
+            FROM `records_persons` p 
+            LEFT JOIN `records` r ON r.person_id = p.id 
+        ";
+        $params = [];
+        if (!empty($search)) {
+            $query .= " WHERE p.name LIKE ? OR p.alias LIKE ? OR p.nid_passport LIKE ? OR p.phone LIKE ? ";
+            $params = ["%$search%", "%$search%", "%$search%", "%$search%"];
+        }
+        $query .= " GROUP BY p.id ORDER BY p.id DESC";
+
+        $persons = [];
+        try {
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            $persons = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $persons = [];
+        }
+
+        $flashSuccess = $_SESSION['record_flash_success'] ?? null;
+        $flashError   = $_SESSION['record_flash_error'] ?? null;
+        unset($_SESSION['record_flash_success'], $_SESSION['record_flash_error']);
+
+        $this->view('admin/records_persons', [
+            'current_page'  => 'records_persons',
+            'title'         => 'Person List | Records',
+            'persons'       => $persons,
+            'search'        => $search,
+            'flash_success' => $flashSuccess,
+            'flash_error'   => $flashError,
+            'settings'      => $this->siteSettings
+        ]);
+    }
+
+    public function records_person_view($id) {
+        $id = intval($id);
+        $db = \Config\Database::pdoConnect();
+        $this->ensureRecordsTableExists($db);
+
+        $stmt = $db->prepare("SELECT * FROM `records_persons` WHERE `id` = ?");
+        $stmt->execute([$id]);
+        $person = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$person) {
+            $_SESSION['record_flash_error'] = 'ব্যক্তি খুঁজে পাওয়া যায়নি।';
+            header('Location: ' . URLROOT . '/admin/records_persons');
+            exit;
+        }
+
+        // Fetch all records related to this person
+        $rStmt = $db->prepare("SELECT * FROM `records` WHERE `person_id` = ? ORDER BY `id` DESC");
+        $rStmt->execute([$id]);
+        $records = $rStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->view('admin/records_person_view', [
+            'current_page' => 'records_person_view',
+            'title'        => $person['name'] . ' - Profile & Records',
+            'person'       => $person,
+            'records'      => $records,
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function records_person_delete($id) {
+        $id = intval($id);
+        if ($id > 0) {
+            try {
+                $db = \Config\Database::pdoConnect();
+                $this->ensureRecordsTableExists($db);
+                $stmt = $db->prepare("DELETE FROM `records_persons` WHERE `id` = ?");
+                $stmt->execute([$id]);
+                // Set person_id to NULL on their records
+                $db->prepare("UPDATE `records` SET `person_id` = NULL WHERE `person_id` = ?")->execute([$id]);
+                $_SESSION['record_flash_success'] = 'ব্যক্তি তালিকা থেকে সফলভাবে মুছে ফেলা হয়েছে!';
+            } catch (\Exception $e) {
+                $_SESSION['record_flash_error'] = 'ব্যক্তি ডিলিট করা যায়নি: ' . $e->getMessage();
+            }
+        }
+        header('Location: ' . URLROOT . '/admin/records_persons');
+        exit;
     }
 
     public function records_delete($id = null) {
@@ -3790,10 +3989,12 @@ class Admin extends Controller {
         $locationsFile = APPPATH . 'cache/locations.json';
         $locations = file_exists($locationsFile) ? json_decode(file_get_contents($locationsFile), true) : [];
 
+        $db = \Config\Database::pdoConnect();
+        $this->ensureRecordsTableExists($db);
+
         // Fetch categories dynamically from open_database_categories table
         $categories = [];
         try {
-            $db = \Config\Database::pdoConnect();
             $stmt = $db->query("SELECT * FROM `open_database_categories` ORDER BY `id` ASC");
             if ($stmt) {
                 $categories = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -3802,11 +4003,23 @@ class Admin extends Controller {
             $categories = [];
         }
 
+        // Fetch existing persons for selection
+        $persons = [];
+        try {
+            $pStmt = $db->query("SELECT * FROM `records_persons` ORDER BY `name` ASC");
+            if ($pStmt) {
+                $persons = $pStmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        } catch (\Exception $e) {
+            $persons = [];
+        }
+
         $this->view('admin/records_add', [
             'current_page' => 'records_add',
             'title'        => 'নতুন ডাটা রেকর্ড যোগ করুন (Add Record)',
             'categories'   => $categories,
             'locations'    => $locations,
+            'persons'      => $persons,
             'settings'     => $this->siteSettings
         ]);
     }

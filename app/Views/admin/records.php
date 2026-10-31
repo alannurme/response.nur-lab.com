@@ -8,6 +8,9 @@
         <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">সংরক্ষিত সকল রেকর্ড দেখুন ও পরিচালনা করুন (ছবি, ভিডিও এবং ফাইলসমূহ গুগল ড্রাইভে সংরক্ষিত)</p>
     </div>
     <div style="display: flex; gap: 10px;">
+        <a href="<?= URLROOT ?>/admin/records_persons" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
+            <i class="fa-solid fa-users"></i> ব্যক্তি তালিকা (Person List)
+        </a>
         <a href="<?= URLROOT ?>/admin/records_categories" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
             <i class="fa-solid fa-tags"></i> ক্যাটাগরি
         </a>

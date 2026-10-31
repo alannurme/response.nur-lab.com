@@ -31,177 +31,130 @@
     }
 
     .odb-form-title {
-        font-size: 1.45rem;
+        font-size: 1.6rem;
         font-weight: 800;
         color: #0f172a;
-        margin-bottom: 1.4rem;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 0.9rem;
+        margin-bottom: 1.8rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 1.2rem;
     }
 
     .odb-section-card {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        padding: 1.8rem;
+        margin-bottom: 1.8rem;
+        position: relative;
     }
 
     .odb-section-card-title {
-        font-size: 1.02rem;
-        font-weight: 800;
-        color: #0f172a;
-        margin-bottom: 1.2rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.4rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
-        padding-bottom: 0.7rem;
-        border-bottom: 1px dashed #cbd5e1;
-    }
-    .odb-section-card-title i {
-        color: #2563eb;
-    }
-
-    .odb-btn-add-small {
-        background: #eff6ff;
-        border: 1.5px dashed #3b82f6;
-        color: #2563eb;
-        padding: 0.4rem 0.9rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease;
-    }
-    .odb-btn-add-small:hover {
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .odb-btn-remove-entry {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #ef4444;
-        padding: 0.4rem 0.9rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease;
-    }
-    .odb-btn-remove-entry:hover {
-        background: #ef4444;
-        color: #fff;
+        border-bottom: 1.5px solid #e2e8f0;
+        padding-bottom: 0.8rem;
     }
 
     .odb-form-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 340px;
-        gap: 1.2rem;
+        grid-template-columns: repeat(2, 1fr) 200px;
+        grid-auto-flow: dense;
+        gap: 1.2rem 1.5rem;
     }
 
     .odb-form-grid-bottom {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1.2rem;
-    }
-    .odb-form-grid-bottom .full-width {
-        grid-column: 1 / -1;
+        gap: 1.2rem 1.5rem;
     }
 
     .odb-form-group {
-        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
+
     .odb-form-group.full-width {
         grid-column: 1 / -1;
     }
 
     .odb-form-group label {
-        display: block;
         font-size: 0.88rem;
         font-weight: 700;
         color: #334155;
-        margin-bottom: 6px;
     }
 
     .odb-form-control {
         width: 100%;
-        background: #ffffff;
+        padding: 0.75rem 1rem;
         border: 1.5px solid #cbd5e1;
-        color: #0f172a;
-        padding: 0.65rem 0.9rem;
         border-radius: 10px;
-        font-size: 0.92rem;
-        font-weight: 600;
-        outline: none;
+        background-color: #ffffff;
+        color: #0f172a;
+        font-size: 0.95rem;
+        font-family: inherit;
         transition: all 0.2s ease;
+        outline: none;
         box-sizing: border-box;
     }
+
     .odb-form-control:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-    select.odb-form-control option {
-        background: #ffffff;
-        color: #0f172a;
-    }
-    textarea.odb-form-control {
-        resize: vertical;
-        min-height: 85px;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        background-color: #ffffff;
     }
 
     /* Photo Upload Box */
     .odb-photo-upload-box {
         grid-column: 3;
-        grid-row: 1 / span 5;
+        grid-row: span 3;
         display: flex;
         flex-direction: column;
-        margin-bottom: 0;
     }
 
     .odb-photo-dropzone {
-        position: relative;
-        width: 100%;
-        flex: 1;
-        min-height: 250px;
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed #94a3b8;
         border-radius: 12px;
         background: #ffffff;
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 6px;
         cursor: pointer;
+        position: relative;
         overflow: hidden;
+        min-height: 180px;
         transition: all 0.2s ease;
-        text-align: center;
         padding: 10px;
+        text-align: center;
     }
+
     .odb-photo-dropzone:hover {
         border-color: #2563eb;
         background: #eff6ff;
     }
+
     .odb-photo-dropzone i.fa-cloud-arrow-up {
-        font-size: 2rem;
-        color: #2563eb;
-    }
-    .odb-photo-dropzone span.upload-label {
-        font-size: 0.85rem;
+        font-size: 2.2rem;
         color: #64748b;
-        font-weight: 700;
+        margin-bottom: 6px;
     }
+
+    .odb-photo-dropzone span.upload-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
     .odb-photo-file-input {
         position: absolute;
         top: 0;
@@ -212,6 +165,7 @@
         cursor: pointer;
         z-index: 5;
     }
+
     .odb-photo-preview {
         position: absolute;
         top: 0;
@@ -219,144 +173,113 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 12px;
-        z-index: 3;
         display: none;
-    }
-    .odb-photo-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 0.85rem;
-        font-weight: 700;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        z-index: 4;
-        pointer-events: none;
-    }
-    .odb-photo-dropzone:hover .odb-photo-overlay {
-        opacity: 1;
+        z-index: 2;
     }
 
-    /* Category Pills */
+    .odb-photo-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 23, 42, 0.75);
+        color: white;
+        padding: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        z-index: 3;
+        display: none;
+        transition: all 0.2s;
+    }
+
     .odb-category-pills-container {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        padding: 16px;
+        padding: 12px;
         background: #ffffff;
         border: 1.5px solid #cbd5e1;
         border-radius: 12px;
-        max-height: 220px;
-        overflow-y: auto;
+        min-height: 52px;
     }
+
     .odb-category-pill {
+        display: inline-flex;
+        align-items: center;
         cursor: pointer;
         user-select: none;
-        display: inline-block;
         margin: 0;
     }
+
     .odb-category-pill input {
         display: none;
     }
+
     .odb-pill-content {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 0.55rem 1.15rem;
+        gap: 6px;
+        padding: 8px 14px;
         background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        border-radius: 30px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #475569;
-        transition: all 0.25s ease;
-    }
-    .odb-category-pill:hover .odb-pill-content {
-        border-color: #2563eb;
-        color: #2563eb;
-        background: #eff6ff;
-    }
-    .odb-category-pill input:checked + .odb-pill-content {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        border-color: #2563eb;
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-        transform: translateY(-1px);
-    }
-    .odb-category-pill input:checked + .odb-pill-content .check-icon {
-        display: inline-block !important;
-    }
-    .odb-category-pill input:not(:checked) + .odb-pill-content .check-icon {
-        display: none !important;
-    }
-
-    /* Gallery Dropzone */
-    .gallery-dropzone {
-        border: 2px dashed #93c5fd !important;
-        background: #ffffff !important;
-        border-radius: 14px;
-        padding: 2.2rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.25s ease;
-    }
-    .gallery-dropzone:hover {
-        border-color: #2563eb !important;
-        background: #eff6ff !important;
-    }
-    .gallery-dropzone i.fa-cloud-arrow-up {
-        font-size: 2.4rem;
-        color: #2563eb;
-        margin-bottom: 8px;
-    }
-    .gallery-dropzone h4 {
-        font-size: 1.05rem;
+        color: #334155;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 20px;
+        font-size: 0.85rem;
         font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 5px;
-    }
-    .gallery-dropzone p {
-        font-size: 0.88rem;
-        color: #64748b;
-        margin: 0;
+        transition: all 0.2s ease;
     }
 
-    /* Submit Button */
+    .odb-category-pill input:checked + .odb-pill-content {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #1d4ed8;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
     .odb-btn-submit {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: #fff;
+        background: #2563eb;
+        color: #ffffff;
         border: none;
-        padding: 0.95rem 2.4rem;
+        padding: 0.85rem 2.2rem;
         border-radius: 12px;
-        font-weight: 800;
-        font-size: 1.05rem;
+        font-size: 1rem;
+        font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        transition: all 0.25s ease;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
     }
     .odb-btn-submit:hover {
+        background: #1d4ed8;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
     }
 
-    @media (max-width: 1100px) {
-        .odb-form-grid { grid-template-columns: repeat(2, 1fr); }
-        .odb-photo-upload-box { grid-column: 1 / -1; grid-row: auto; min-height: 200px; }
+    .picker-btn {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1.5px solid #bfdbfe;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
     }
-    @media (max-width: 768px) { 
+    .picker-btn:hover {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    @media (max-width: 900px) {
         .odb-form-grid { grid-template-columns: 1fr; }
         .odb-form-grid-bottom { grid-template-columns: 1fr; }
+        .odb-photo-upload-box { grid-column: 1 / -1; grid-row: auto; min-height: 200px; }
     }
 </style>
 
@@ -372,118 +295,148 @@
 
         <form action="<?= URLROOT ?>/admin/records" method="post" enctype="multipart/form-data">
             
-            <!-- Wrapper for Personal Info Cards ONLY -->
-            <div id="personalCardsWrapper">
-                <!-- Section Card 1: Personal Details & Photo -->
-                <div class="odb-section-card personal-card-block">
-                    <div class="odb-section-card-title">
-                        <span><i class="fa-solid fa-id-card"></i> ব্যক্তিগত তথ্য ও ছবি</span>
-                        
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 0.85rem; color: #854d0e; font-weight: 700; cursor: pointer; background: #fefce8; padding: 5px 12px; border-radius: 20px; border: 1px solid #fde047;">
-                                <input type="checkbox" name="is_most_wanted_check[]" value="1" onchange="this.nextElementSibling.value = this.checked ? '1' : '0'" style="accent-color: #f59e0b; cursor: pointer;">
-                                <input type="hidden" name="is_most_wanted[]" value="0">
-                                ★ বিশেষ এন্ট্রি
-                            </label>
+            <!-- Person Mode Selector: Choose existing person or Add new person -->
+            <?php 
+                $preSelectedPersonId = intval($_GET['person_id'] ?? 0);
+                $personsList = $data['persons'] ?? []; 
+            ?>
+            <div class="odb-section-card" style="background: #f0fdf4; border-color: #bbf7d0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <strong style="color: #166534; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-user-check" style="font-size: 1.2rem;"></i> ব্যক্তি নির্বাচন (Person Selection)
+                        </strong>
+                        <p style="margin: 4px 0 0 0; font-size: 0.84rem; color: #15803d;">
+                            পূর্বে সংরক্ষিত কোনো ব্যক্তির অধীনে এই রেকর্ডটি যোগ করতে চাইলে নিচে থেকে ব্যক্তি সিলেক্ট করুন অথবা নতুন ব্যক্তির তথ্য পূরণ করুন।
+                        </p>
+                    </div>
 
-                            <button type="button" id="btnAddPersonalCard" class="odb-btn-add-small">
-                                <i class="fa-solid fa-user-plus"></i> + আরও একজন যোগ করুন
+                    <div style="min-width: 300px; flex-grow: 1; max-width: 450px;">
+                        <select name="person_id" id="personSelector" class="odb-form-control" onchange="onPersonSelected(this)" style="border-color: #86efac; font-weight: 600; background: #fff;">
+                            <option value="">-- নতুন ব্যক্তি হিসেবে এন্ট্রি করুন --</option>
+                            <?php foreach ($personsList as $per): ?>
+                                <option value="<?= $per['id'] ?>" 
+                                    <?= ($preSelectedPersonId == $per['id']) ? 'selected' : '' ?>
+                                    data-person='<?= htmlspecialchars(json_encode($per), ENT_QUOTES, 'UTF-8') ?>'>
+                                    <?= htmlspecialchars($per['name']) ?> <?= !empty($per['alias']) ? '(' . htmlspecialchars($per['alias']) . ')' : '' ?> - <?= !empty($per['phone']) ? htmlspecialchars($per['phone']) : 'ID: #' . $per['id'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Person Information Block -->
+            <div class="odb-section-card">
+                <div class="odb-section-card-title">
+                    <span><i class="fa-solid fa-id-card"></i> ব্যক্তির তথ্য ও ছবি (Single Person Profile)</span>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 0.85rem; color: #854d0e; font-weight: 700; cursor: pointer; background: #fefce8; padding: 5px 12px; border-radius: 20px; border: 1px solid #fde047;">
+                            <input type="checkbox" id="isMostWantedCheckbox" name="is_most_wanted" value="1" style="accent-color: #f59e0b; cursor: pointer;">
+                            ★ বিশেষ এন্ট্রি
+                        </label>
+                    </div>
+                </div>
+
+                <div class="odb-form-grid">
+                    <!-- Row 1: Full Name, Alias -->
+                    <div class="odb-form-group">
+                        <label>পূর্ণ নাম *</label>
+                        <input type="text" name="name" id="personName" class="odb-form-control" placeholder="যেমন: কায়সার আহমেদ" required>
+                    </div>
+
+                    <div class="odb-form-group">
+                        <label>উপনাম (Alias)</label>
+                        <input type="text" name="alias" id="personAlias" class="odb-form-control" placeholder="যেমন: কালা কায়সার">
+                    </div>
+
+                    <!-- Photo Upload Dropzone with Drive Picker -->
+                    <div class="odb-form-group odb-photo-upload-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <label style="margin: 0;">ছবি *</label>
+                            <button type="button" class="picker-btn" onclick="openMediaModalForPhoto()" style="padding: 2px 8px; font-size: 0.72rem;">
+                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ
                             </button>
+                        </div>
+                        <input type="hidden" name="selected_drive_photo" id="selectedDrivePhoto" value="">
+                        
+                        <div class="odb-photo-dropzone" id="photoDropzoneBox">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span class="upload-label">কম্পিউটার থেকে ড্রপ/ব্রাউজ</span>
+                            
+                            <input type="file" name="photo" id="photoFileInput" class="odb-photo-file-input" accept="image/*" onchange="previewPhoto(this)">
+                            <img class="odb-photo-preview" id="photoPreviewImg" src="" alt="Preview">
+                            <div class="odb-photo-overlay" id="photoOverlayText">
+                                <i class="fa-solid fa-camera" style="margin-right: 5px;"></i> ছবি পরিবর্তন
+                            </div>
                         </div>
                     </div>
 
-                    <div class="odb-form-grid">
-                        <!-- Row 1: Full Name, Alias -->
-                        <div class="odb-form-group">
-                            <label>পূর্ণ নাম *</label>
-                            <input type="text" name="name[]" class="odb-form-control" placeholder="যেমন: কায়সার আহমেদ" required>
-                        </div>
+                    <!-- Row 2: NID/Passport, Gender -->
+                    <div class="odb-form-group">
+                        <label>এনআইডি / পাসপোর্ট নম্বর</label>
+                        <input type="text" name="nid_passport" id="personNid" class="odb-form-control" placeholder="1992269123450001">
+                    </div>
 
-                        <div class="odb-form-group">
-                            <label>উপনাম (Alias)</label>
-                            <input type="text" name="alias[]" class="odb-form-control" placeholder="যেমন: কালা কায়সার">
-                        </div>
+                    <div class="odb-form-group">
+                        <label>লিঙ্গ</label>
+                        <select name="gender" id="personGender" class="odb-form-control">
+                            <option value="Male">পুরুষ</option>
+                            <option value="Female">নারী</option>
+                            <option value="Other">অন্যান্য</option>
+                        </select>
+                    </div>
 
-                        <!-- Photo Upload Dropzone -->
-                        <div class="odb-form-group odb-photo-upload-box">
-                            <label>ছবি নির্বাচন করুন *</label>
-                            <div class="odb-photo-dropzone">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <span class="upload-label">ছবি আপলোড</span>
-                                
-                                <input type="file" name="photo[]" class="odb-photo-file-input" accept="image/*" onchange="previewPhoto(this)">
-                                <img class="odb-photo-preview" src="" alt="Preview">
-                                <div class="odb-photo-overlay">
-                                    <i class="fa-solid fa-camera" style="margin-right: 5px;"></i> ছবি পরিবর্তন করুন
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Row 3: Age, Height -->
+                    <div class="odb-form-group">
+                        <label>বয়স</label>
+                        <input type="number" name="age" id="personAge" class="odb-form-control" placeholder="34">
+                    </div>
 
-                        <!-- Row 2: NID/Passport, Gender -->
-                        <div class="odb-form-group">
-                            <label>এনআইডি / পাসপোর্ট নম্বর</label>
-                            <input type="text" name="nid_passport[]" class="odb-form-control" placeholder="1992269123450001">
-                        </div>
+                    <div class="odb-form-group">
+                        <label>উচ্চতা (সেমি)</label>
+                        <input type="number" name="height_cm" id="personHeight" class="odb-form-control" placeholder="175">
+                    </div>
 
-                        <div class="odb-form-group">
-                            <label>লিঙ্গ</label>
-                            <select name="gender[]" class="odb-form-control">
-                                <option value="Male">পুরুষ</option>
-                                <option value="Female">নারী</option>
-                                <option value="Other">অন্যান্য</option>
+                    <!-- Row 4: Phone, Social Media Link -->
+                    <div class="odb-form-group">
+                        <label>ফোন / মোবাইল নম্বর</label>
+                        <input type="text" name="phone" id="personPhone" class="odb-form-control" placeholder="+880 1700-000000">
+                    </div>
+
+                    <div class="odb-form-group">
+                        <label>সোশ্যাল মিডিয়া প্রোফাইল লিংক</label>
+                        <input type="url" name="social_media" id="personSocial" class="odb-form-control" placeholder="https://facebook.com/username">
+                    </div>
+
+                    <!-- Row 5: Structured Location Selectors & Address -->
+                    <div class="odb-form-group" style="grid-column: 1 / span 2;">
+                        <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা) *</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                            <select class="odb-form-control loc-division" onchange="filterDistricts(this)">
+                                <option value="">-- বিভাগ সিলেক্ট করুন --</option>
+                                <?php 
+                                    $locationsList = $data['locations'] ?? [];
+                                    $divisions = !empty($locationsList) ? array_unique(array_column($locationsList, 'division')) : ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'];
+                                    sort($divisions);
+                                    foreach ($divisions as $div): 
+                                ?>
+                                    <option value="<?= htmlspecialchars($div) ?>"><?= htmlspecialchars($div) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <select class="odb-form-control loc-district" onchange="filterUpazilas(this)" disabled>
+                                <option value="">-- জেলা সিলেক্ট করুন --</option>
+                            </select>
+
+                            <select class="odb-form-control loc-upazila" onchange="updateFullAddress(this)" disabled>
+                                <option value="">-- থানা / উপজেলা সিলেক্ট করুন --</option>
                             </select>
                         </div>
 
-                        <!-- Row 3: Age, Height -->
-                        <div class="odb-form-group">
-                            <label>বয়স</label>
-                            <input type="number" name="age[]" class="odb-form-control" placeholder="34">
-                        </div>
-
-                        <div class="odb-form-group">
-                            <label>উচ্চতা (সেমি)</label>
-                            <input type="number" name="height_cm[]" class="odb-form-control" placeholder="175">
-                        </div>
-
-                        <!-- Row 4: Phone, Social Media Link -->
-                        <div class="odb-form-group">
-                            <label>ফোন / মোবাইল নম্বর</label>
-                            <input type="text" name="phone[]" class="odb-form-control" placeholder="+880 1700-000000">
-                        </div>
-
-                        <div class="odb-form-group">
-                            <label>সোশ্যাল মিডিয়া প্রোফাইল লিংক</label>
-                            <input type="url" name="social_media[]" class="odb-form-control" placeholder="https://facebook.com/username">
-                        </div>
-
-                        <!-- Row 5: Structured Location Selectors & Address -->
-                        <div class="odb-form-group" style="grid-column: 1 / span 2;">
-                            <label>অবস্থান নির্বাচন করুন (বিভাগ / জেলা / থানা) *</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px;">
-                                <select class="odb-form-control loc-division" onchange="filterDistricts(this)">
-                                    <option value="">-- বিভাগ সিলেক্ট করুন --</option>
-                                    <?php 
-                                        $locationsList = $data['locations'] ?? [];
-                                        $divisions = !empty($locationsList) ? array_unique(array_column($locationsList, 'division')) : ['Dhaka', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh'];
-                                        sort($divisions);
-                                        foreach ($divisions as $div): 
-                                    ?>
-                                        <option value="<?= htmlspecialchars($div) ?>"><?= htmlspecialchars($div) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <select class="odb-form-control loc-district" onchange="filterUpazilas(this)" disabled>
-                                    <option value="">-- জেলা সিলেক্ট করুন --</option>
-                                </select>
-
-                                <select class="odb-form-control loc-upazila" onchange="updateFullAddress(this)" disabled>
-                                    <option value="">-- থানা / উপজেলা সিলেক্ট করুন --</option>
-                                </select>
-                            </div>
-
-                            <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা *</label>
-                            <input type="text" name="address[]" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
-                        </div>
+                        <label style="font-size: 0.85rem; color: #64748b; font-weight: 700; margin-bottom: 5px; display: block;">সম্পূর্ণ বিবরণ বা অতিরিক্ত বিস্তারিত ঠিকানা *</label>
+                        <input type="text" name="address" id="personAddress" class="odb-form-control loc-full-address" placeholder="যেমন: বাড়ি #১২, রোড #৪, সাভার, ঢাকা" required>
                     </div>
                 </div>
             </div>
@@ -524,67 +477,91 @@
                         <?php endif; ?>
                     </div>
 
-                    <input type="hidden" name="status[]" value="Active">
+                    <input type="hidden" name="status" value="Active">
 
+                    <!-- Video Section (Local upload + Google Drive selection) -->
                     <div class="odb-form-group full-width">
-                        <label>ভিডিও ফাইল আপলোড করুন (ভিডিও ফাইলটি সরাসরি গুগল ড্রাইভে সেভ হবে)</label>
-                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc; display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-                                <i class="fa-solid fa-video"></i>
-                            </div>
-                            <div style="flex-grow: 1;">
-                                <input type="file" name="video_files[]" class="odb-form-control" accept="video/*" multiple style="background: #fff; padding: 7px 12px;">
-                                <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">MP4, MKV, WebM বা অন্যান্য ফরম্যাটের ভিডিও সিলেক্ট করতে পারেন।</small>
-                            </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <label style="margin: 0;">ভিডিও ফাইল (কম্পিউটার থেকে আপলোড অথবা ড্রাইভ থেকে বেছে নিন)</label>
+                            <button type="button" class="picker-btn" onclick="openMediaModalForVideos()">
+                                <i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ থেকে ভিডিও সিলেক্ট করুন
+                            </button>
                         </div>
+                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                    <i class="fa-solid fa-video"></i>
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <input type="file" name="video_files[]" class="odb-form-control" accept="video/*" multiple style="background: #fff; padding: 7px 12px;">
+                                    <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">MP4, MKV, WebM ভিডিও ফাইল (আপলোড করলে ড্রাইভে সেভ হবে)।</small>
+                                </div>
+                            </div>
+                            <div id="selectedDriveVideosContainer" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;"></div>
+                        </div>
+                        <input type="hidden" name="selected_drive_videos" id="selectedDriveVideosInput" value="[]">
                     </div>
 
                     <div class="odb-form-group full-width">
-                        <label>অথবা ভিডিও লিংক (YouTube / Vimeo / Direct Video URL)</label>
+                        <label>অথবা অনলাইন ভিডিও লিংক (YouTube / Vimeo / Direct Video URL)</label>
                         <div style="position: relative;">
                             <i class="fa-solid fa-link" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1rem;"></i>
                             <input type="url" name="video_url" class="odb-form-control" style="padding-left: 42px;" placeholder="যেমন: https://www.youtube.com/watch?v=XXXXXX">
                         </div>
                     </div>
 
+                    <!-- Documents Section (Local + Google Drive) -->
                     <div class="odb-form-group full-width">
-                        <label>নথি ও অন্যান্য ফাইল (Documents / PDF / Audio / Archive Files)</label>
-                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc; display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-                                <i class="fa-solid fa-file-shield"></i>
-                            </div>
-                            <div style="flex-grow: 1;">
-                                <input type="file" name="document_files[]" class="odb-form-control" accept=".pdf,.doc,.docx,.zip,.rar,.tar,.mp3,.wav,.ogg,.txt,.csv" multiple style="background: #fff; padding: 7px 12px;">
-                                <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">PDF, Word, Zip, অডিও এবং অন্যান্য প্রয়োজনীয় ডকুমেন্ট সিলেক্ট করুন। এগুলোও স্বয়ংক্রিয়ভাবে গুগল ড্রাইভে সংরক্ষিত হবে।</small>
-                            </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <label style="margin: 0;">নথি ও অন্যান্য ফাইল (কম্পিউটার বা গুগল ড্রাইভ থেকে)</label>
+                            <button type="button" class="picker-btn" onclick="openMediaModalForDocs()">
+                                <i class="fa-brands fa-google-drive"></i> ড্রাইভ থেকে ফাইল সিলেক্ট করুন
+                            </button>
                         </div>
+                        <div style="border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 16px; background: #f8fafc;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                    <i class="fa-solid fa-file-shield"></i>
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <input type="file" name="document_files[]" class="odb-form-control" accept=".pdf,.doc,.docx,.zip,.rar,.tar,.mp3,.wav,.ogg,.txt,.csv" multiple style="background: #fff; padding: 7px 12px;">
+                                    <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">PDF, Word, Zip, অডিও এবং অন্যান্য প্রয়োজনীয় ডকুমেন্ট।</small>
+                                </div>
+                            </div>
+                            <div id="selectedDriveDocsContainer" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;"></div>
+                        </div>
+                        <input type="hidden" name="selected_drive_documents" id="selectedDriveDocsInput" value="[]">
                     </div>
 
                     <div class="odb-form-group full-width">
                         <label>বিস্তারিত বিবরণী ও মন্তব্য *</label>
-                        <textarea name="description[]" class="odb-form-control" required placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."></textarea>
+                        <textarea name="description" class="odb-form-control" rows="4" required placeholder="রেকর্ডের বিস্তারিত বিবরণ প্রদান করুন..."></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Section Card 3: Additional Multiple Photos & Gallery -->
+            <!-- Section Card 3: Additional Photos & Gallery -->
             <div class="odb-section-card">
                 <div class="odb-section-card-title">
                     <span><i class="fa-solid fa-images"></i> গ্যালারি ও অতিরিক্ত ছবি (Photo Gallery)</span>
+                    <button type="button" class="picker-btn" onclick="openMediaModalForGallery()">
+                        <i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ থেকে ছবি যুক্ত করুন
+                    </button>
                 </div>
                 <div class="odb-form-group full-width">
-                    <div class="gallery-dropzone" onclick="document.getElementById('galleryFileInput').click()" style="border: 2px dashed #93c5fd; background: #ffffff; border-radius: 14px; padding: 2.2rem; text-align: center; cursor: pointer; transition: all 0.25s ease;">
+                    <div class="gallery-dropzone" onclick="document.getElementById('galleryFileInput').click()" style="border: 2px dashed #93c5fd; background: #ffffff; border-radius: 14px; padding: 1.8rem; text-align: center; cursor: pointer; transition: all 0.25s ease;">
                         <input type="file" id="galleryFileInput" name="additional_photos[]" multiple accept="image/*" style="display: none;" onchange="previewExtraPhotos(this)">
-                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.3rem; color: #2563eb; margin-bottom: 8px;"></i>
-                        <h4 style="font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px;">
-                            এখানে গ্যালারির ছবি ড্রপ করুন অথবা ব্রাউজ করুন
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; color: #2563eb; margin-bottom: 6px;"></i>
+                        <h4 style="font-size: 0.98rem; font-weight: 700; color: #0f172a; margin-bottom: 4px;">
+                            কম্পিউটার থেকে ছবি ড্রপ করুন বা ব্রাউজ করুন
                         </h4>
-                        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
-                            একাধিক ছবি ও ডকুমেন্টস একসাথে সিলেক্ট করতে পারবেন (PNG, JPG, WEBP)
+                        <p style="font-size: 0.82rem; color: #64748b; margin: 0;">
+                            একাধিক ছবি একসাথে সিলেক্ট করা যাবে (PNG, JPG, WEBP)
                         </p>
                     </div>
                     
-                    <div id="extraPhotosPreviewContainer" style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 20px;"></div>
+                    <div id="extraPhotosPreviewContainer" style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px;"></div>
+                    <input type="hidden" name="selected_drive_gallery" id="selectedDriveGalleryInput" value="[]">
                 </div>
             </div>
 
@@ -597,84 +574,350 @@
     </div>
 </div>
 
-<script>
-    function previewPhoto(input) {
-        const dropzone = input.closest('.odb-photo-dropzone');
-        if (!dropzone) return;
-        let preview = dropzone.querySelector('.odb-photo-preview');
-        let icon = dropzone.querySelector('i.fa-cloud-arrow-up');
-        let span = dropzone.querySelector('.upload-label');
-        let overlay = dropzone.querySelector('.odb-photo-overlay');
+<!-- Reusable Media / Google Drive Picker Modal -->
+<div id="mediaModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+    <div style="background: white; border-radius: 20px; width: 100%; max-width: 850px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <!-- Modal Header -->
+        <div style="padding: 16px 22px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fa-brands fa-google-drive"></i>
+                </div>
+                <div>
+                    <h3 style="font-weight: 700; color: #1e293b; margin: 0; font-size: 1.05rem;" id="mediaModalTitle">
+                        ফাইল নির্বাচন করুন (Google Drive / Media Library)
+                    </h3>
+                    <span style="font-size: 0.76rem; color: #64748b;">ক্লিক করে রেকর্ডটির সাথে সরাসরি যুক্ত করুন</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="modalStorageFilter" onchange="loadMediaLibrary()" style="padding: 6px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.82rem; font-weight: 600;">
+                    <option value="all">সকল ফাইল (ড্রাইভ + লোকাল)</option>
+                    <option value="google_drive" selected>শুধু গুগল ড্রাইভ (Google Drive)</option>
+                    <option value="local">শুধু লোকাল স্টোরেজ</option>
+                </select>
+                <button type="button" onclick="closeMediaModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; padding: 4px;"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
 
+        <!-- Modal Body -->
+        <div style="padding: 20px; overflow-y: auto; flex: 1; min-height: 320px;">
+            <div id="mediaLoading" style="text-align: center; padding: 50px 0; color: #64748b;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; color: #2563eb; margin-bottom: 12px;"></i>
+                <p style="margin: 0; font-weight: 600;">ফাইল লোড হচ্ছে...</p>
+            </div>
+            <div id="mediaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 14px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Existing Person Auto-population
+    function onPersonSelected(selectEl) {
+        const selectedOpt = selectEl.options[selectEl.selectedIndex];
+        const personData = selectedOpt.getAttribute('data-person');
+
+        if (!personData) {
+            // Reset to empty
+            document.getElementById('personName').value = '';
+            document.getElementById('personAlias').value = '';
+            document.getElementById('personNid').value = '';
+            document.getElementById('personPhone').value = '';
+            document.getElementById('personAge').value = '';
+            document.getElementById('personHeight').value = '';
+            document.getElementById('personSocial').value = '';
+            document.getElementById('personAddress').value = '';
+            document.getElementById('personGender').value = 'Male';
+            document.getElementById('isMostWantedCheckbox').checked = false;
+            document.getElementById('selectedDrivePhoto').value = '';
+            document.getElementById('photoPreviewImg').src = '';
+            document.getElementById('photoPreviewImg').style.display = 'none';
+            document.getElementById('photoOverlayText').style.display = 'none';
+            return;
+        }
+
+        try {
+            const p = JSON.parse(personData);
+            document.getElementById('personName').value = p.name || '';
+            document.getElementById('personAlias').value = p.alias || '';
+            document.getElementById('personNid').value = p.nid_passport || '';
+            document.getElementById('personPhone').value = p.phone || '';
+            document.getElementById('personAge').value = p.age || '';
+            document.getElementById('personHeight').value = p.height_cm || '';
+            document.getElementById('personSocial').value = p.social_media || '';
+            document.getElementById('personAddress').value = p.address || '';
+            if (p.gender) document.getElementById('personGender').value = p.gender;
+            document.getElementById('isMostWantedCheckbox').checked = (p.is_most_wanted == 1);
+
+            if (p.photo) {
+                document.getElementById('selectedDrivePhoto').value = p.photo;
+                const prev = document.getElementById('photoPreviewImg');
+                prev.src = p.photo;
+                prev.style.display = 'block';
+                document.getElementById('photoOverlayText').style.display = 'block';
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // Trigger on page load if preselected
+    document.addEventListener('DOMContentLoaded', function() {
+        const sel = document.getElementById('personSelector');
+        if (sel && sel.value) {
+            onPersonSelected(sel);
+        }
+    });
+
+    // Single Photo Preview
+    function previewPhoto(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                if (preview) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                if (icon) icon.style.display = 'none';
-                if (span) span.style.display = 'none';
-                if (overlay) overlay.style.display = 'flex';
+                const prev = document.getElementById('photoPreviewImg');
+                prev.src = e.target.result;
+                prev.style.display = 'block';
+                document.getElementById('photoOverlayText').style.display = 'block';
+                document.getElementById('selectedDrivePhoto').value = ''; // Local upload overrides drive choice
             }
             reader.readAsDataURL(input.files[0]);
         }
     }
 
+    // Gallery Photos Preview (Local PC)
+    let selectedDriveGallery = [];
     function previewExtraPhotos(input) {
+        renderGalleryPreview();
+    }
+
+    function renderGalleryPreview() {
         const container = document.getElementById('extraPhotosPreviewContainer');
         if (!container) return;
         container.innerHTML = '';
 
-        if (input.files) {
+        // 1. Render Google Drive picked images
+        selectedDriveGallery.forEach((url, idx) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position: relative; width: 90px; height: 90px; border-radius: 10px; overflow: hidden; border: 1.5px solid #2563eb; box-shadow: 0 4px 10px rgba(0,0,0,0.06); background: #f8fafc;';
+            wrapper.innerHTML = `
+                <img src="${url}" style="width:100%; height:100%; object-fit:cover;">
+                <span title="Google Drive File" style="position: absolute; top: 4px; left: 4px; background: #2563eb; color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-brands fa-google-drive"></i>
+                </span>
+                <button type="button" onclick="removeDriveGalleryItem(${idx})" style="position: absolute; top: 4px; right: 4px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(wrapper);
+        });
+
+        // 2. Render PC selected images
+        const input = document.getElementById('galleryFileInput');
+        if (input && input.files) {
             Array.from(input.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const wrapper = document.createElement('div');
                     wrapper.style.cssText = 'position: relative; width: 90px; height: 90px; border-radius: 10px; overflow: hidden; border: 1.5px solid #bfdbfe; box-shadow: 0 4px 10px rgba(0,0,0,0.06); background: #f8fafc;';
-                    wrapper.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">
+                        <span title="Local PC File" style="position: absolute; top: 4px; left: 4px; background: #64748b; color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-laptop"></i>
+                        </span>
+                    `;
                     container.appendChild(wrapper);
                 }
                 reader.readAsDataURL(file);
             });
         }
+        document.getElementById('selectedDriveGalleryInput').value = JSON.stringify(selectedDriveGallery);
     }
 
-    const btnAddPersonalCard = document.getElementById('btnAddPersonalCard');
-    if (btnAddPersonalCard) {
-        let cardCount = 1;
-        btnAddPersonalCard.addEventListener('click', function() {
-            cardCount++;
-            const wrapper = document.getElementById('personalCardsWrapper');
-            const firstCard = wrapper.querySelector('.personal-card-block');
-            const clone = firstCard.cloneNode(true);
+    function removeDriveGalleryItem(idx) {
+        selectedDriveGallery.splice(idx, 1);
+        renderGalleryPreview();
+    }
 
-            // Clear inputs inside clone
-            clone.querySelectorAll('input[type="text"], input[type="number"], input[type="file"]').forEach(i => i.value = '');
-            clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    // Media Modal State & Handler
+    let modalTargetType = null; // 'photo', 'gallery', 'video', 'document'
+    let selectedDriveVideos = [];
+    let selectedDriveDocs = [];
 
-            // Reset photo preview in clone
-            clone.querySelectorAll('.odb-photo-preview').forEach(p => { p.src = ''; p.style.display = 'none'; });
-            clone.querySelectorAll('i.fa-cloud-arrow-up').forEach(i => i.style.display = 'block');
-            clone.querySelectorAll('.upload-label').forEach(s => s.style.display = 'block');
-            clone.querySelectorAll('.odb-photo-overlay').forEach(o => o.style.display = 'none');
+    function openMediaModalForPhoto() {
+        modalTargetType = 'photo';
+        document.getElementById('mediaModalTitle').innerHTML = '<i class="fa-brands fa-google-drive"></i> প্রোফাইল ছবি নির্বাচন করুন';
+        openMediaModal();
+    }
 
-            // Remove cloned add button if present and set remove button
-            const cloneAddBtn = clone.querySelector('#btnAddPersonalCard');
-            if (cloneAddBtn) cloneAddBtn.remove();
+    function openMediaModalForGallery() {
+        modalTargetType = 'gallery';
+        document.getElementById('mediaModalTitle').innerHTML = '<i class="fa-brands fa-google-drive"></i> গ্যালারি ছবি নির্বাচন করুন';
+        openMediaModal();
+    }
 
-            const titleEl = clone.querySelector('.odb-section-card-title');
-            if (titleEl) {
-                titleEl.innerHTML = `
-                    <span><i class="fa-solid fa-id-card"></i> ব্যক্তিগত তথ্য ও ছবি #${cardCount}</span>
-                    <button type="button" class="odb-btn-remove-entry" onclick="this.closest('.personal-card-block').remove()">
-                        <i class="fa-solid fa-trash"></i> মুছে ফেলুন
-                    </button>
-                `;
+    function openMediaModalForVideos() {
+        modalTargetType = 'video';
+        document.getElementById('mediaModalTitle').innerHTML = '<i class="fa-brands fa-google-drive"></i> ভিডিও ফাইল নির্বাচন করুন';
+        openMediaModal();
+    }
+
+    function openMediaModalForDocs() {
+        modalTargetType = 'document';
+        document.getElementById('mediaModalTitle').innerHTML = '<i class="fa-brands fa-google-drive"></i> ডকুমেন্ট বা ফাইল নির্বাচন করুন';
+        openMediaModal();
+    }
+
+    function openMediaModal() {
+        document.getElementById('mediaModal').style.display = 'flex';
+        loadMediaLibrary();
+    }
+
+    function closeMediaModal() {
+        document.getElementById('mediaModal').style.display = 'none';
+        modalTargetType = null;
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('mediaModal')) {
+            closeMediaModal();
+        }
+    });
+
+    function loadMediaLibrary() {
+        const grid = document.getElementById('mediaGrid');
+        const loading = document.getElementById('mediaLoading');
+        const storage = document.getElementById('modalStorageFilter').value;
+
+        grid.innerHTML = '';
+        loading.style.display = 'block';
+
+        fetch('<?= URLROOT ?>/admin/api_media?storage=' + encodeURIComponent(storage))
+            .then(res => res.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (!Array.isArray(data) || data.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 40px 0;">কোনো ফাইল পাওয়া যায়নি।</p>';
+                    return;
+                }
+
+                data.forEach(file => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.2s; background: #ffffff; position: relative; display: flex; flex-direction: column;';
+                    
+                    const isGdrive = (file.storage === 'google_drive');
+                    const badgeHtml = isGdrive 
+                        ? `<span style="position: absolute; top: 6px; left: 6px; background: rgba(37,99,235,0.9); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; z-index: 2;"><i class="fa-brands fa-google-drive"></i> GDrive</span>`
+                        : `<span style="position: absolute; top: 6px; left: 6px; background: rgba(100,116,139,0.9); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; z-index: 2;"><i class="fas fa-server"></i> Local</span>`;
+
+                    let previewHtml = '';
+                    const isImg = file.url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || isGdrive;
+                    if (isImg) {
+                        previewHtml = `<img src="${file.url}" style="width: 100%; height: 95px; object-fit: cover;" loading="lazy">`;
+                    } else {
+                        previewHtml = `<div style="width: 100%; height: 95px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #64748b; font-size: 2rem;"><i class="fas fa-file"></i></div>`;
+                    }
+
+                    card.innerHTML = `
+                        ${badgeHtml}
+                        <div style="height: 95px; position: relative; background: #f8fafc; overflow: hidden;">
+                            ${previewHtml}
+                        </div>
+                        <div style="padding: 8px 10px; font-size: 0.76rem; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${file.name}">
+                            ${file.name}
+                        </div>
+                    `;
+
+                    card.addEventListener('mouseover', () => {
+                        card.style.borderColor = '#2563eb';
+                        card.style.transform = 'translateY(-2px)';
+                        card.style.boxShadow = '0 6px 14px rgba(37,99,235,0.12)';
+                    });
+                    card.addEventListener('mouseout', () => {
+                        card.style.borderColor = '#e2e8f0';
+                        card.style.transform = 'none';
+                        card.style.boxShadow = 'none';
+                    });
+
+                    card.addEventListener('click', () => {
+                        handleFileSelection(file);
+                        closeMediaModal();
+                    });
+
+                    grid.appendChild(card);
+                });
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 40px 0;">ফাইল লোড করতে সমস্যা হয়েছে।</p>';
+            });
+    }
+
+    function handleFileSelection(file) {
+        if (modalTargetType === 'photo') {
+            document.getElementById('selectedDrivePhoto').value = file.url;
+            const prev = document.getElementById('photoPreviewImg');
+            prev.src = file.url;
+            prev.style.display = 'block';
+            document.getElementById('photoOverlayText').style.display = 'block';
+        } else if (modalTargetType === 'gallery') {
+            if (!selectedDriveGallery.includes(file.url)) {
+                selectedDriveGallery.push(file.url);
+                renderGalleryPreview();
             }
+        } else if (modalTargetType === 'video') {
+            selectedDriveVideos.push({ name: file.name, url: file.url });
+            renderDriveVideosList();
+        } else if (modalTargetType === 'document') {
+            selectedDriveDocs.push({ name: file.name, url: file.url });
+            renderDriveDocsList();
+        }
+    }
 
-            wrapper.appendChild(clone);
+    function renderDriveVideosList() {
+        const container = document.getElementById('selectedDriveVideosContainer');
+        container.innerHTML = '';
+        selectedDriveVideos.forEach((v, idx) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'background: #fff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;';
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                    <i class="fa-brands fa-google-drive" style="color: #2563eb;"></i>
+                    <span style="font-weight: 600; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${v.name}</span>
+                </div>
+                <button type="button" onclick="removeDriveVideo(${idx})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(item);
         });
+        document.getElementById('selectedDriveVideosInput').value = JSON.stringify(selectedDriveVideos);
+    }
+
+    function removeDriveVideo(idx) {
+        selectedDriveVideos.splice(idx, 1);
+        renderDriveVideosList();
+    }
+
+    function renderDriveDocsList() {
+        const container = document.getElementById('selectedDriveDocsContainer');
+        container.innerHTML = '';
+        selectedDriveDocs.forEach((d, idx) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'background: #fff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;';
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                    <i class="fa-solid fa-file-shield" style="color: #4f46e5;"></i>
+                    <span style="font-weight: 600; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${d.name}</span>
+                </div>
+                <button type="button" onclick="removeDriveDoc(${idx})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(item);
+        });
+        document.getElementById('selectedDriveDocsInput').value = JSON.stringify(selectedDriveDocs);
+    }
+
+    function removeDriveDoc(idx) {
+        selectedDriveDocs.splice(idx, 1);
+        renderDriveDocsList();
     }
 
     // Location Cascade Logic
