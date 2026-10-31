@@ -3490,12 +3490,266 @@ class Admin extends Controller {
     // ==========================================
     // Records Section (Formerly Open Database)
     // ==========================================
+    private function ensureRecordsTableExists($db) {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `records` (
+                `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `name` VARCHAR(255) NOT NULL,
+                `alias` VARCHAR(255) NULL,
+                `nid_passport` VARCHAR(100) NULL,
+                `gender` VARCHAR(50) NULL,
+                `age` INT NULL,
+                `height_cm` INT NULL,
+                `phone` VARCHAR(100) NULL,
+                `social_media` VARCHAR(500) NULL,
+                `address` TEXT NULL,
+                `crime_type` TEXT NULL,
+                `status` VARCHAR(50) DEFAULT 'Active',
+                `is_most_wanted` TINYINT(1) DEFAULT 0,
+                `photo` VARCHAR(1000) NULL,
+                `gallery` LONGTEXT NULL,
+                `videos` LONGTEXT NULL,
+                `video_url` VARCHAR(500) NULL,
+                `documents` LONGTEXT NULL,
+                `description` LONGTEXT NULL,
+                `created_at` DATETIME NULL,
+                `updated_at` DATETIME NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+    }
+
     public function records() {
+        $db = \Config\Database::pdoConnect();
+        $this->ensureRecordsTableExists($db);
+
+        // Handle POST submission from records_add
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once APPPATH . 'Helpers/GoogleDrive.php';
+            $now = date('Y-m-d H:i:s');
+            $upload_dir = FCPATH . 'public/img/records/';
+            if (!is_dir($upload_dir)) {
+                @mkdir($upload_dir, 0777, true);
+            }
+
+            // Helper to upload single file (preferring Google Drive)
+            $uploadSingleFile = function($tmpName, $origName, $mimeType = null) use ($upload_dir) {
+                if (empty($tmpName) || !file_exists($tmpName)) {
+                    return null;
+                }
+                $ext = pathinfo($origName, PATHINFO_EXTENSION);
+                $cleanName = time() . '_' . bin2hex(random_bytes(4)) . '.' . ($ext ?: 'bin');
+                $localTarget = $upload_dir . $cleanName;
+                if (!@move_uploaded_file($tmpName, $localTarget)) {
+                    if (!@copy($tmpName, $localTarget)) {
+                        return null;
+                    }
+                }
+                $mime = $mimeType ?: (mime_content_type($localTarget) ?: 'application/octet-stream');
+                $finalUrl = URLROOT . '/public/img/records/' . $cleanName;
+
+                // Upload to Google Drive
+                try {
+                    $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($localTarget, $cleanName, $mime, $this->siteSettings);
+                    if (!empty($driveRes['url'])) {
+                        $finalUrl = $driveRes['url'];
+                        // Delete local file if sync local is not turned on
+                        if (($this->siteSettings['gdrive_sync_local'] ?? '0') != '1') {
+                            @unlink($localTarget);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    error_log("Google drive upload for record media failed: " . $e->getMessage());
+                }
+                return $finalUrl;
+            };
+
+            // 1. Process Video files
+            $uploadedVideos = [];
+            if (!empty($_FILES['video_files']['name'][0])) {
+                $totalVideos = count($_FILES['video_files']['name']);
+                for ($v = 0; $v < $totalVideos; $v++) {
+                    if ($_FILES['video_files']['error'][$v] === UPLOAD_ERR_OK) {
+                        $vUrl = $uploadSingleFile(
+                            $_FILES['video_files']['tmp_name'][$v],
+                            $_FILES['video_files']['name'][$v],
+                            $_FILES['video_files']['type'][$v] ?? null
+                        );
+                        if ($vUrl) {
+                            $uploadedVideos[] = [
+                                'name' => $_FILES['video_files']['name'][$v],
+                                'url'  => $vUrl
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // 2. Process Document files
+            $uploadedDocs = [];
+            if (!empty($_FILES['document_files']['name'][0])) {
+                $totalDocs = count($_FILES['document_files']['name']);
+                for ($d = 0; $d < $totalDocs; $d++) {
+                    if ($_FILES['document_files']['error'][$d] === UPLOAD_ERR_OK) {
+                        $dUrl = $uploadSingleFile(
+                            $_FILES['document_files']['tmp_name'][$d],
+                            $_FILES['document_files']['name'][$d],
+                            $_FILES['document_files']['type'][$d] ?? null
+                        );
+                        if ($dUrl) {
+                            $uploadedDocs[] = [
+                                'name' => $_FILES['document_files']['name'][$d],
+                                'url'  => $dUrl
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // 3. Process Extra Photos / Gallery
+            $uploadedGallery = [];
+            if (!empty($_FILES['additional_photos']['name'][0])) {
+                $totalGal = count($_FILES['additional_photos']['name']);
+                for ($g = 0; $g < $totalGal; $g++) {
+                    if ($_FILES['additional_photos']['error'][$g] === UPLOAD_ERR_OK) {
+                        $gUrl = $uploadSingleFile(
+                            $_FILES['additional_photos']['tmp_name'][$g],
+                            $_FILES['additional_photos']['name'][$g],
+                            $_FILES['additional_photos']['type'][$g] ?? null
+                        );
+                        if ($gUrl) {
+                            $uploadedGallery[] = $gUrl;
+                        }
+                    }
+                }
+            }
+
+            // Crime types
+            $crimeTypeInput = $_POST['crime_type'] ?? [];
+            $crimeTypeStr = is_array($crimeTypeInput) ? implode(', ', array_filter($crimeTypeInput)) : trim($crimeTypeInput);
+
+            $videoUrlInput = trim($_POST['video_url'] ?? '');
+            $descriptions = $_POST['description'] ?? [];
+            $mainDesc = is_array($descriptions) ? trim($descriptions[0] ?? '') : trim($descriptions);
+
+            // Process Personal Cards (one or multiple people in this record)
+            $names = $_POST['name'] ?? [];
+            $aliases = $_POST['alias'] ?? [];
+            $nidPassports = $_POST['nid_passport'] ?? [];
+            $genders = $_POST['gender'] ?? [];
+            $ages = $_POST['age'] ?? [];
+            $heights = $_POST['height_cm'] ?? [];
+            $phones = $_POST['phone'] ?? [];
+            $socialMedias = $_POST['social_media'] ?? [];
+            $addresses = $_POST['address'] ?? [];
+            $mostWantedFlags = $_POST['is_most_wanted'] ?? [];
+
+            $insertStmt = $db->prepare("
+                INSERT INTO `records` 
+                (`name`, `alias`, `nid_passport`, `gender`, `age`, `height_cm`, `phone`, `social_media`, `address`, `crime_type`, `status`, `is_most_wanted`, `photo`, `gallery`, `videos`, `video_url`, `documents`, `description`, `created_at`, `updated_at`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $savedCount = 0;
+            foreach ($names as $idx => $personName) {
+                $personName = trim($personName);
+                if (empty($personName)) continue;
+
+                // Photo for this person
+                $photoUrl = null;
+                if (!empty($_FILES['photo']['name'][$idx]) && $_FILES['photo']['error'][$idx] === UPLOAD_ERR_OK) {
+                    $photoUrl = $uploadSingleFile(
+                        $_FILES['photo']['tmp_name'][$idx],
+                        $_FILES['photo']['name'][$idx],
+                        $_FILES['photo']['type'][$idx] ?? null
+                    );
+                }
+
+                $alias = trim($aliases[$idx] ?? '');
+                $nid = trim($nidPassports[$idx] ?? '');
+                $gender = trim($genders[$idx] ?? 'Male');
+                $age = !empty($ages[$idx]) ? intval($ages[$idx]) : null;
+                $height = !empty($heights[$idx]) ? intval($heights[$idx]) : null;
+                $phone = trim($phones[$idx] ?? '');
+                $social = trim($socialMedias[$idx] ?? '');
+                $address = trim($addresses[$idx] ?? '');
+                $isMostWanted = !empty($mostWantedFlags[$idx]) ? 1 : 0;
+                $status = 'Active';
+
+                $insertStmt->execute([
+                    $personName,
+                    $alias,
+                    $nid,
+                    $gender,
+                    $age,
+                    $height,
+                    $phone,
+                    $social,
+                    $address,
+                    $crimeTypeStr,
+                    $status,
+                    $isMostWanted,
+                    $photoUrl,
+                    !empty($uploadedGallery) ? json_encode($uploadedGallery, JSON_UNESCAPED_SLASHES) : null,
+                    !empty($uploadedVideos) ? json_encode($uploadedVideos, JSON_UNESCAPED_SLASHES) : null,
+                    $videoUrlInput ?: null,
+                    !empty($uploadedDocs) ? json_encode($uploadedDocs, JSON_UNESCAPED_SLASHES) : null,
+                    $mainDesc,
+                    $now,
+                    $now
+                ]);
+                $savedCount++;
+            }
+
+            if ($savedCount > 0) {
+                $_SESSION['record_flash_success'] = "রেকর্ড সফলভাবে সংরক্ষণ করা হয়েছে! সকল ছবি, ভিডিও ও ফাইল গুগল ড্রাইভে সংরক্ষিত হয়েছে।";
+            } else {
+                $_SESSION['record_flash_error'] = "রেকর্ড সংরক্ষণ করা সম্ভব হয়নি। প্রয়োজনীয় তথ্য সঠিকভাবে পূরণ করুন।";
+            }
+
+            header('Location: ' . URLROOT . '/admin/records');
+            exit;
+        }
+
+        // Fetch records for listing
+        $records = [];
+        try {
+            $stmt = $db->query("SELECT * FROM `records` ORDER BY `id` DESC");
+            if ($stmt) {
+                $records = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        } catch (\Exception $e) {
+            $records = [];
+        }
+
+        $flashSuccess = $_SESSION['record_flash_success'] ?? null;
+        $flashError   = $_SESSION['record_flash_error'] ?? null;
+        unset($_SESSION['record_flash_success'], $_SESSION['record_flash_error']);
+
         $this->view('admin/records', [
-            'current_page' => 'records',
-            'title'        => 'Record List | Records',
-            'settings'     => $this->siteSettings
+            'current_page'  => 'records',
+            'title'         => 'Record List | Records',
+            'records'       => $records,
+            'flash_success' => $flashSuccess,
+            'flash_error'   => $flashError,
+            'settings'      => $this->siteSettings
         ]);
+    }
+
+    public function records_delete($id = null) {
+        $id = $id ? intval($id) : intval($_POST['id'] ?? 0);
+        if ($id > 0) {
+            try {
+                $db = \Config\Database::pdoConnect();
+                $this->ensureRecordsTableExists($db);
+                $stmt = $db->prepare("DELETE FROM `records` WHERE `id` = ?");
+                $stmt->execute([$id]);
+                $_SESSION['record_flash_success'] = 'রেকর্ড সফলভাবে মুছে ফেলা হয়েছে!';
+            } catch (\Exception $e) {
+                $_SESSION['record_flash_error'] = 'রেকর্ড মোছা সম্ভব হয়নি: ' . $e->getMessage();
+            }
+        }
+        header('Location: ' . URLROOT . '/admin/records');
+        exit;
     }
 
     public function records_add() {

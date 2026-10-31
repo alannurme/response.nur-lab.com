@@ -43,8 +43,10 @@ $routes->post('admin/login', 'Admin::login');
 $routes->get('admin/logout', 'Admin::logout');
 $routes->get('admin/posts', 'Admin::posts');
 // Records Routes
-$routes->get('admin/records', 'Admin::records');
+$routes->match(['get', 'post'], 'admin/records', 'Admin::records');
 $routes->get('admin/records_add', 'Admin::records_add');
+$routes->match(['get', 'post'], 'admin/records_delete/(:num)', 'Admin::records_delete/$1');
+$routes->match(['get', 'post'], 'admin/records_delete', 'Admin::records_delete');
 $routes->get('admin/records_categories', 'Admin::records_categories');
 $routes->post('admin/records_categories_save', 'Admin::records_categories_save');
 $routes->get('admin/records_categories_delete/(:num)', 'Admin::records_categories_delete/$1');
