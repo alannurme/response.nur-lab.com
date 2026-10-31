@@ -5343,15 +5343,11 @@ class Admin extends Controller {
         ];
         $drives[] = $newDrive;
 
-        // Save updated settings to DB
-        $db = \Config\Database::pdoConnect();
-        $stmt = $db->prepare("
-            INSERT INTO `settings` (`setting_key`, `setting_value`, `created_at`, `updated_at`) 
-            VALUES (?, ?, NOW(), NOW())
-            ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`), `updated_at` = NOW()
-        ");
-        $stmt->execute(['google_drives', json_encode($drives, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]);
-        $stmt->execute(['storage_provider', 'google_drive']);
+        // Save updated settings using AdminModel
+        $this->adminModel->updateSettings([
+            'google_drives'    => json_encode($drives, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'storage_provider' => 'google_drive'
+        ]);
 
         $_SESSION['flash_success'] = "গুগল ড্রাইভ ({$userEmail}) সফলভাবে ১-ক্লিকে যুক্ত ও সক্রিয় হয়েছে! স্বয়ংক্রিয়ভাবে '{$folderName}' ফোল্ডার তৈরি ও কনফিগার করা হয়েছে।";
         header('Location: ' . URLROOT . '/admin/storage_settings');
