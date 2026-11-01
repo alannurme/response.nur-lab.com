@@ -3956,27 +3956,56 @@ body.organize-drag-active #organize-root-list {
     }
 
     // -------------------------------------------------------------
-    // Live AJAX Search for Admin Posts Explorer & Dropdown
+    // Instant Live Search Filter for Articles Table
     // -------------------------------------------------------------
-    let adminSearchTimer = null;
-    let initialTbodyHTML = null;
-    let initialTheadHTML = null;
-    let initialSubFoldersDisplay = null;
-    let lastSearchData = null;
-    let activeDropdownTab = 'all';
-    let activeTableTab = 'posts';
+    function filterPostsTable(query) {
+        const q = (query || '').trim().toLowerCase();
+        const clearBtn = document.getElementById('postSearchClearBtn');
+        const icon = document.getElementById('postSearchIcon');
+        if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
 
-    function captureInitialExplorerState() {
-        if (initialTbodyHTML === null) {
-            const tbody = document.querySelector('.explorer-table tbody');
-            if (tbody) initialTbodyHTML = tbody.innerHTML;
-            
-            const thead = document.querySelector('.explorer-table thead');
-            if (thead) initialTheadHTML = thead.innerHTML;
+        const rows = document.querySelectorAll('.explorer-table tbody tr');
+        let visibleCount = 0;
 
-            const subFolders = document.querySelector('.folder-grid');
-            if (subFolders && subFolders.parentElement) {
-                initialSubFoldersDisplay = subFolders.parentElement.style.display || '';
+        rows.forEach(row => {
+            // Ignore the special no-match row if already present
+            if (row.id === 'posts-table-no-results-row') return;
+
+            const titleEl = row.querySelector('.post-title-link span') || row.querySelector('.post-title-link');
+            const categoryEl = row.children[2]; // Category column
+            const titleText = titleEl ? titleEl.textContent.toLowerCase() : '';
+            const categoryText = categoryEl ? categoryEl.textContent.toLowerCase() : '';
+            const rowFullText = row.textContent.toLowerCase();
+
+            if (!q || titleText.includes(q) || categoryText.includes(q) || rowFullText.includes(q)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show/hide empty state row if no articles match
+        let noMatchRow = document.getElementById('posts-table-no-results-row');
+        const tbody = document.querySelector('.explorer-table tbody');
+
+        if (tbody) {
+            if (q.length > 0 && visibleCount === 0) {
+                if (!noMatchRow) {
+                    noMatchRow = document.createElement('tr');
+                    noMatchRow.id = 'posts-table-no-results-row';
+                    noMatchRow.innerHTML = `
+                        <td colspan="5" style="text-align: center; padding: 40px 15px; color: #94a3b8;">
+                            <i class="fas fa-search" style="font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
+                            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #475569;">কোনো নিবন্ধ পাওয়া যায়নি</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">অন্য কোনো শব্দ বা বানান দিয়ে চেষ্টা করুন</p>
+                        </td>`;
+                    tbody.appendChild(noMatchRow);
+                } else {
+                    noMatchRow.style.display = '';
+                }
+            } else if (noMatchRow) {
+                noMatchRow.style.display = 'none';
             }
         }
     }
@@ -3988,305 +4017,7 @@ body.organize-drag-active #organize-root-list {
         if (clearBtn) clearBtn.style.display = 'none';
         const icon = document.getElementById('postSearchIcon');
         if (icon) icon.className = 'fas fa-search';
-        lastSearchData = null;
         filterPostsTable('');
-    }
-
-    function renderAdminTable(data) {
-        const thead = document.querySelector('.explorer-table thead');
-        const tbody = document.querySelector('.explorer-table tbody');
-        if (!tbody) return;
-
-        const posts = data.posts || [];
-        const questions = data.questions || [];
-
-        if (activeTableTab === 'posts') {
-            // Restore standard table headers if needed
-            if (thead && initialTheadHTML) {
-                thead.innerHTML = initialTheadHTML;
-            }
-
-            if (posts.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center; padding: 45px 20px; color: #94a3b8;">
-                            <i class="fas fa-search" style="font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
-                            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #475569;">No posts matched your search</p>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">Try another spelling or keyword</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            let rowsHtml = '';
-            posts.forEach(post => {
-                const isDraft = (post.status && post.status.toLowerCase() === 'draft');
-                const mainCat = post.main_category || '';
-                const otherCats = post.secondary_categories ? post.secondary_categories.split(', ').filter(c => c !== mainCat) : [];
-                const hasCategory = mainCat !== '' || otherCats.length > 0;
-                const dateStr = post.created_at ? post.created_at.substring(0, 10).replace(/-/g, '/') : '';
-
-                let matchBadgeHtml = '';
-                if (post.match_badge === 'Title Match') {
-                    matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> Title Match</span>`;
-                } else if (post.match_badge === 'Keyword Match') {
-                    matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> Keyword Match</span>`;
-                } else {
-                    matchBadgeHtml = `<span style="font-size: 10px; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;">Content Match</span>`;
-                }
-
-                const titleDisplay = post.highlighted_title || escapeHtmlAttr(post.title);
-                const snippetDisplay = post.highlighted_snippet || (post.snippet ? escapeHtmlAttr(post.snippet) : '');
-
-                rowsHtml += `
-                    <tr data-post-id="${post.id}">
-                        <td style="text-align: center;">
-                            <input type="checkbox" value="${post.id}" class="post-checkbox">
-                        </td>
-                        <td>
-                            <a href="#" onclick="openQuickView(event, ${post.id})" class="post-title-link">
-                                <i class="far fa-file-alt" style="color: #64748b;"></i>
-                                <span>${titleDisplay}</span>
-                            </a>
-                            <span class="post-badge post-badge-${isDraft ? 'draft' : 'published'}" id="post-badge-${post.id}">
-                                ${isDraft ? 'Draft' : 'Published'}
-                            </span>
-                            ${matchBadgeHtml}
-                            ${snippetDisplay ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.45;">${snippetDisplay}</div>` : ''}
-                            <!-- Mobile Inline Actions -->
-                            <div class="mobile-row-actions" style="display: none; margin-top: 8px; gap: 12px; align-items: center;">
-                                 <button type="button" 
-                                         class="btn-row-action btn-row-action-status ${isDraft ? 'is-draft' : 'is-published'}" 
-                                         id="mobile-status-toggle-${post.id}"
-                                         onclick="togglePostStatus(${post.id}, event)"
-                                         title="${isDraft ? 'বর্তমানে আনপাবলিশড। ক্লিক করে পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন।'}">
-                                     <span class="status-toggle-track">
-                                         <span class="status-toggle-thumb"></span>
-                                     </span>
-                                 </button>
-                                 <button type="button" onclick="copyPostLink('<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}', this)" style="color: #6366f1; font-size: 13px; background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                     <i class="far fa-copy"></i> Copy Link
-                                 </button>
-                                 <a href="<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                                     <i class="far fa-eye"></i> View
-                                 </a>
-                                 <a href="<?= URLROOT ?>/admin/edit_post/${post.id}" style="color: #059669; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                                     <i class="far fa-edit"></i> Edit
-                                 </a>
-                                 <button type="button" onclick="deletePost(${post.id})" style="color: #dc2626; font-size: 13px; background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                     <i class="far fa-trash-alt"></i> Delete
-                                 </button>
-                            </div>
-                        </td>
-                        <td style="text-align: center; vertical-align: middle; position: relative;">
-                            <button type="button" class="cat-trigger-icon ${hasCategory ? '' : 'is-empty'}" 
-                                    title="ক্লিক করে ক্যাটাগরি যোগ/মুছুন"
-                                    onclick="openManagePostCategoriesModal(${post.id}, ${JSON.stringify(post.title)})"
-                                    style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: ${hasCategory ? '#eff6ff' : '#f8fafc'}; color: ${hasCategory ? '#2563eb' : '#94a3b8'}; cursor: pointer; border: 1px ${hasCategory ? 'solid #dbeafe' : 'dashed #cbd5e1'};">
-                                <i class="fas ${hasCategory ? 'fa-tags' : 'fa-plus'}" style="font-size: 13px;"></i>
-                            </button>
-                        </td>
-                        <td style="color: #64748b; font-size: 13px;">${dateStr}</td>
-                        <td class="desktop-actions-cell">
-                            <div class="row-actions-group" style="justify-content: flex-end; align-items: center; gap: 6px;">
-                                 <button type="button" 
-                                         class="btn-row-action btn-row-action-status ${isDraft ? 'is-draft' : 'is-published'}" 
-                                         id="status-toggle-${post.id}"
-                                         onclick="togglePostStatus(${post.id}, event)"
-                                         title="${isDraft ? 'বর্তমানে আনপাবলিশড। ক্লিক করে পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন।'}">
-                                     <span class="status-toggle-track">
-                                         <span class="status-toggle-thumb"></span>
-                                     </span>
-                                 </button>
-                                 <button type="button" class="btn-row-action" title="Copy Direct Link" onclick="copyPostLink('<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}', this)">
-                                     <i class="far fa-copy"></i>
-                                 </button>
-                                 <a href="<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}" target="_blank" class="btn-row-action" title="View on Live Site">
-                                     <i class="far fa-eye"></i>
-                                 </a>
-                                 <a href="<?= URLROOT ?>/admin/edit_post/${post.id}" class="btn-row-action" title="Edit Article">
-                                     <i class="far fa-edit"></i>
-                                 </a>
-                                 <button type="button" class="btn-row-action btn-row-action-delete" title="Move to Trash" onclick="deletePost(${post.id})">
-                                     <i class="far fa-trash-alt"></i>
-                                 </button>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
-            tbody.innerHTML = rowsHtml;
-        } else {
-            // Render Questions view in Explorer table
-            if (thead) {
-                thead.innerHTML = `
-                    <tr>
-                        <th style="width: 35%;">প্রশ্ন (Question)</th>
-                        <th style="width: 35%;">উত্তর (Answer Preview)</th>
-                        <th style="width: 12%;">ক্যাটাগরি</th>
-                        <th style="width: 10%;">স্ট্যাটাস</th>
-                        <th style="width: 8%; text-align: right;">অ্যাকশন</th>
-                    </tr>`;
-            }
-
-            if (questions.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center; padding: 45px 20px; color: #94a3b8;">
-                            <i class="fas fa-question-circle" style="font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
-                            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #475569;">No questions matched your search</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            let qRowsHtml = '';
-            questions.forEach(q => {
-                const isAnswered = (q.status === 'answered');
-                const qText = q.highlighted_question || escapeHtmlAttr(q.question);
-                const ansText = q.highlighted_answer || (q.answer ? escapeHtmlAttr(q.answer) : '');
-                const catName = q.category_name || 'সাধারণ';
-
-                qRowsHtml += `
-                    <tr>
-                        <td>
-                            <a href="<?= URLROOT ?>/admin/answer_question/${q.id}" style="font-weight: 700; color: #1e293b; text-decoration: none; font-size: 13.5px; line-height: 1.45; display: inline-block;">
-                                <i class="fas fa-question-circle" style="color: #d97706; margin-right: 4px;"></i>${qText}
-                            </a>
-                        </td>
-                        <td style="font-size: 12.5px; color: #475569; line-height: 1.45;">
-                            ${ansText ? `<div>${ansText}</div>` : `<span style="color: #94a3b8; font-style: italic;">এখনো উত্তর দেওয়া হয়নি</span>`}
-                        </td>
-                        <td style="font-size: 12px; color: #64748b;">
-                            <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">${escapeHtmlAttr(catName)}</span>
-                        </td>
-                        <td>
-                            <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: ${isAnswered ? '#ecfdf5' : '#fee2e2'}; color: ${isAnswered ? '#059669' : '#dc2626'};">
-                                ${isAnswered ? 'Answered' : 'Pending'}
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            <a href="<?= URLROOT ?>/admin/answer_question/${q.id}" class="btn-explorer btn-explorer-primary" style="padding: 4px 10px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="fas fa-edit"></i> ${isAnswered ? 'Edit' : 'Answer'}
-                            </a>
-                        </td>
-                    </tr>`;
-            });
-            tbody.innerHTML = qRowsHtml;
-        }
-    }
-
-    function filterPostsTable(query) {
-        captureInitialExplorerState();
-
-        const q = (query || '').trim();
-        const clearBtn = document.getElementById('postSearchClearBtn');
-        const icon = document.getElementById('postSearchIcon');
-        if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
-
-        clearTimeout(adminSearchTimer);
-
-        if (q.length === 0) {
-            if (icon) icon.className = 'fas fa-search';
-            lastSearchData = null;
-            
-            // Restore initial table rows & headers
-            const tbody = document.querySelector('.explorer-table tbody');
-            const thead = document.querySelector('.explorer-table thead');
-            if (tbody && initialTbodyHTML !== null) {
-                tbody.innerHTML = initialTbodyHTML;
-            }
-            if (thead && initialTheadHTML !== null) {
-                thead.innerHTML = initialTheadHTML;
-            }
-
-            // Restore subfolders section
-            const subFolders = document.querySelector('.folder-grid');
-            if (subFolders && subFolders.parentElement) {
-                subFolders.parentElement.style.display = initialSubFoldersDisplay;
-            }
-
-            // Hide banner
-            const banner = document.getElementById('admin-search-status-banner');
-            if (banner) banner.style.display = 'none';
-
-            // Show pagination if hidden
-            const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
-            paginations.forEach(p => p.style.display = '');
-
-            return;
-        }
-
-        if (icon) icon.className = 'fas fa-circle-notch fa-spin';
-
-        adminSearchTimer = setTimeout(() => {
-            const url = '<?= URLROOT ?>/admin/ajax_search_posts?q=' + encodeURIComponent(q);
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    if (icon) icon.className = 'fas fa-search';
-
-                    const tbody = document.querySelector('.explorer-table tbody');
-                    const subFolders = document.querySelector('.folder-grid');
-                    if (subFolders && subFolders.parentElement) {
-                        subFolders.parentElement.style.display = 'none';
-                    }
-
-                    // Hide pagination during search
-                    const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
-                    paginations.forEach(p => p.style.display = 'none');
-
-                    // Setup banner
-                    let banner = document.getElementById('admin-search-status-banner');
-                    if (!banner) {
-                        banner = document.createElement('div');
-                        banner.id = 'admin-search-status-banner';
-                        banner.style.cssText = 'margin-bottom: 16px; padding: 10px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; color: #1e40af; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: inherit;';
-                        const filesSection = document.querySelector('.files-section');
-                        if (filesSection) filesSection.parentElement.insertBefore(banner, filesSection);
-                    }
-
-                    if (!data.success || (data.total === 0 && data.questions_count === 0)) {
-                        banner.style.display = 'flex';
-                        banner.innerHTML = `
-                            <div>
-                                <i class="fas fa-info-circle" style="color: #3b82f6; margin-right: 6px;"></i>
-                                "<strong>${escapeHtmlAttr(q)}</strong>" দিয়ে কোনো পোস্ট বা প্রশ্ন পাওয়া যায়নি। (বাংলা, Banglish বা English এ চেষ্টা করুন)
-                            </div>
-                            <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">Reset</button>`;
-                        
-                        lastSearchData = data;
-                        renderAdminTable(data);
-                        return;
-                    }
-
-                    banner.style.display = 'flex';
-                    banner.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <span style="font-weight: 600;">
-                                <i class="fas fa-check-circle" style="color: #059669; margin-right: 5px;"></i>
-                                ফলাফল:
-                            </span>
-                            <div style="display: flex; gap: 6px; align-items: center;">
-                                <button type="button" id="banner-tab-posts" onclick="switchAdminTableTab('posts')" style="padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; background: ${activeTableTab === 'posts' ? '#2563eb' : '#fff'}; color: ${activeTableTab === 'posts' ? '#fff' : '#475569'}; border: 1px solid ${activeTableTab === 'posts' ? '#2563eb' : '#cbd5e1'}; cursor: pointer;">
-                                    <i class="fas fa-file-alt"></i> পোস্টসমূহ (${data.total})
-                                </button>
-                                <button type="button" id="banner-tab-qa" onclick="switchAdminTableTab('questions')" style="padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid ${activeTableTab === 'questions' ? '#2563eb' : '#cbd5e1'}; background: ${activeTableTab === 'questions' ? '#2563eb' : '#fff'}; color: ${activeTableTab === 'questions' ? '#fff' : '#475569'}; cursor: pointer;">
-                                    <i class="fas fa-question-circle"></i> প্রশ্নোত্তর (${data.questions_count})
-                                </button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">
-                            <i class="fas fa-times"></i> Clear Search
-                        </button>`;
-
-                    lastSearchData = data;
-                    renderAdminTable(data);
-                })
-                .catch(err => {
-                    console.error('Admin post live search failed:', err);
-                    if (icon) icon.className = 'fas fa-search';
-                });
-        }, 220);
     }
 
     function toggleFolderMenu(e, menuId) {
