@@ -49,7 +49,7 @@ class Admin extends Controller {
         $uri = service('request')->getUri()->getPath();
         $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false) || strpos($uri, 'gdrive_oauth_callback') !== false);
 
-        $isAjaxRoute = (strpos($uri, 'ajax_') !== false);
+        $isAjaxRoute = (strpos($uri, 'ajax_') !== false || strpos($uri, '_ajax') !== false || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
 
         if (!$isLoginRoute && empty($_SESSION['admin_id'])) {
             if ($isAjaxRoute) {
@@ -755,7 +755,9 @@ class Admin extends Controller {
     }
 
     public function create_category_ajax() {
-        header('Content-Type: application/json; charset=utf-8');
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo json_encode(['success' => false, 'error' => 'Invalid request method']);
             exit;
@@ -763,6 +765,7 @@ class Admin extends Controller {
 
         $name = trim($_POST['name'] ?? '');
         $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
+        $parent_name = trim($_POST['parent_name'] ?? '');
 
         if ($name === '') {
             echo json_encode(['success' => false, 'error' => 'Category name is required']);
@@ -777,18 +780,144 @@ class Admin extends Controller {
         $existing = $stmt_check->fetch(\PDO::FETCH_ASSOC);
 
         if ($existing) {
+            $parentName = null;
+            if (!empty($existing['parent_id'])) {
+                $pStmt = $db->prepare("SELECT name FROM categories WHERE id = :pid LIMIT 1");
+                $pStmt->execute(['pid' => $existing['parent_id']]);
+                $parentName = $pStmt->fetchColumn() ?: null;
+            }
+
             echo json_encode([
                 'success' => true,
                 'is_new' => false,
                 'category' => [
                     'id' => (int)$existing['id'],
                     'name' => $existing['name'],
-                    'parent_id' => $existing['parent_id'] !== null ? (int)$existing['parent_id'] : null
+                    'parent_id' => $existing['parent_id'] !== null ? (int)$existing['parent_id'] : null,
+                    'parent_name' => $parentName
                 ]
             ]);
             exit;
         }
 
+        // If parent_id not provided, try resolving from parent_name if supplied
+        if (empty($parent_id) && $parent_name !== '') {
+            $pStmt = $db->prepare("SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:pname) LIMIT 1");
+            $pStmt->execute(['pname' => $parent_name]);
+            $foundParent = $pStmt->fetchColumn();
+            if ($foundParent) {
+                $parent_id = (int)$foundParent;
+            }
+        }
+
+        // If parent_id still empty, resolve intelligently from known taxonomy
+        if (empty($parent_id)) {
+            $knownMap = [
+                // সামাজিক ও পারিবারিক বিধান
+                'গানবাজনা ও সঙ্গীত বিধান' => 'সামাজিক ও পারিবারিক বিধান',
+                'গানবাজনা' => 'সামাজিক ও পারিবারিক বিধান',
+                'সঙ্গীত বিধান' => 'সামাজিক ও পারিবারিক বিধান',
+                'উত্তরাধিকার ও ফারায়েজ' => 'সামাজিক ও পারিবারিক বিধান',
+                'উত্তরাধিকার' => 'সামাজিক ও পারিবারিক বিধান',
+                'ফারায়েজ' => 'সামাজিক ও পারিবারিক বিধান',
+                'অমুসলিমদের সাথে সহাবস্থান' => 'সামাজিক ও পারিবারিক বিধান',
+                'আধুনিক চিকিৎসা ও অঙ্গদান' => 'সামাজিক ও পারিবারিক বিধান',
+                'দাসপ্রথা ও যুদ্ধবন্দী বিধান' => 'সামাজিক ও পারিবারিক বিধান',
+                'ইসলামে প্রাণীর অধিকার' => 'সামাজিক ও পারিবারিক বিধান',
+                'সামাজিক নিরাপত্তা ও অধিকার' => 'সামাজিক ও পারিবারিক বিধান',
+                'সন্তান প্রতিপালন ও পারিবারিক শিক্ষা' => 'সামাজিক ও পারিবারিক বিধান',
+                'পারিবারিক বিধান' => 'সামাজিক ও পারিবারিক বিধান',
+                'সামাজিক বিধান' => 'সামাজিক ও পারিবারিক বিধান',
+
+                // কুরআন সম্পর্কিত
+                'কুরআন ও বিজ্ঞান' => 'কুরআন সম্পর্কিত',
+                'কুরআন সংকলন ও সংরক্ষণ' => 'কুরআন সম্পর্কিত',
+                'কুরআনের চ্যালেঞ্জ ও অলৌকিকত্ব' => 'কুরআন সম্পর্কিত',
+                'কুরআন শিক্ষা ও বিধান' => 'কুরআন সম্পর্কিত',
+
+                // রাসুল (সাঃ) সম্পর্কিত
+                'রাসুলের বংশ ও পরিবার' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'নবুওয়ত ও ওহীর সূচনা' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'নবুওয়তপূর্ব জীবন ও চরিত্র' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'মাক্কী জীবন ও দাওয়াত' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'রাসুলের জীবিকা ও অর্থনীতি' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'নবুওয়তের সত্যতা ও মিথ্যা দাবিদার' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'নবীর চরিত্র ও নৈতিক দর্শন' => 'রাসুল (সাঃ) সম্পর্কিত',
+                'সুন্নাহ' => 'রাসুল (সাঃ) সম্পর্কিত',
+
+                // ঈমান,তাকদীর ও ইলম
+                'তাকদীর' => 'ঈমান,তাকদীর ও ইলম',
+                'ঈমান' => 'ঈমান,তাকদীর ও ইলম',
+                'ইলম' => 'ঈমান,তাকদীর ও ইলম',
+                'শিরক ও তাওহীদ' => 'ঈমান,তাকদীর ও ইলম',
+                'তাওহীদ' => 'ঈমান,তাকদীর ও ইলম',
+                'শিরক' => 'ঈমান,তাকদীর ও ইলম',
+
+                // সালাত,সাওম ও হজ্জ
+                'মসজিদের আদব ও বিধান' => 'সালাত,সাওম ও হজ্জ',
+
+                // বিবাহ, তালাক ও যিনা
+                'বিবাহ' => 'বিবাহ, তালাক ও যিনা',
+                'তালাক' => 'বিবাহ, তালাক ও যিনা',
+                'যিনা' => 'বিবাহ, তালাক ও যিনা',
+                'সমকামিতা' => 'বিবাহ, তালাক ও যিনা',
+
+                // স্রষ্টা ও সৃষ্টি
+                'স্রষ্টার অস্তিত্বের প্রমাণ ও যুক্তি' => 'স্রষ্টা',
+                'ঐশ্বরিক গুণাবলী ও সংশয় নিরসন' => 'স্রষ্টা',
+
+                // বিজ্ঞান ও দর্শন
+                'জীববিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
+                'পদার্থবিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
+                'সমাজবিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
+                'বিবর্তনবাদ' => 'বিজ্ঞান ও দর্শন',
+
+                // হিন্দু ধর্ম
+                'উৎসব ও পার্বণ' => 'হিন্দু ধর্ম',
+                'ঋষি' => 'হিন্দু ধর্ম',
+                'কৃষ্ণ' => 'হিন্দু ধর্ম',
+                'দেব-দেবী' => 'হিন্দু ধর্ম',
+                'নারী কেলেঙ্কারী' => 'হিন্দু ধর্ম',
+                'পূজা' => 'হিন্দু ধর্ম',
+                'বিষ্ণু' => 'হিন্দু ধর্ম',
+                'ব্রহ্মা' => 'হিন্দু ধর্ম',
+                'মহাভারত' => 'হিন্দু ধর্ম',
+                'রাম' => 'হিন্দু ধর্ম',
+                'রীতি-নীতি ও আচার' => 'হিন্দু ধর্ম',
+                'শিব' => 'হিন্দু ধর্ম',
+
+                // ধর্মতত্ব
+                'নাস্তিক্যবাদ' => 'ধর্মতত্ব',
+                'নারীবাদ' => 'ধর্মতত্ব',
+                'খ্রিষ্টান ধর্ম' => 'ধর্মতত্ব',
+
+                // ইতিহাস
+                'ইসলামিক ইতিহাস' => 'ইতিহাস',
+            ];
+
+            $matchedParentName = null;
+            if (isset($knownMap[$name])) {
+                $matchedParentName = $knownMap[$name];
+            } else {
+                foreach ($knownMap as $k => $p) {
+                    if (mb_stripos($name, $k) !== false || mb_stripos($k, $name) !== false) {
+                        $matchedParentName = $p;
+                        break;
+                    }
+                }
+            }
+
+            if ($matchedParentName) {
+                $pStmt = $db->prepare("SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:pname) LIMIT 1");
+                $pStmt->execute(['pname' => $matchedParentName]);
+                $foundParent = $pStmt->fetchColumn();
+                if ($foundParent) {
+                    $parent_id = (int)$foundParent;
+                }
+            }
+        }
+
+        // Ultimate fallback to root 'ইসলাম' (id 39)
         if (empty($parent_id)) {
             $defaultParent = $db->query("SELECT id FROM categories WHERE name = 'ইসলাম' LIMIT 1")->fetchColumn();
             if ($defaultParent) {
@@ -800,13 +929,21 @@ class Admin extends Controller {
         $newId = $adminModel->addCategory($name, $parent_id);
 
         if ($newId) {
+            $resolvedParentName = null;
+            if (!empty($parent_id)) {
+                $pStmt = $db->prepare("SELECT name FROM categories WHERE id = :pid LIMIT 1");
+                $pStmt->execute(['pid' => $parent_id]);
+                $resolvedParentName = $pStmt->fetchColumn() ?: null;
+            }
+
             echo json_encode([
                 'success' => true,
                 'is_new' => true,
                 'category' => [
                     'id' => (int)$newId,
                     'name' => $name,
-                    'parent_id' => $parent_id
+                    'parent_id' => $parent_id,
+                    'parent_name' => $resolvedParentName
                 ]
             ]);
             exit;

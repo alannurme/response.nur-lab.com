@@ -1118,10 +1118,13 @@
         };
 
         // 1. Parse YAML Frontmatter if present
-        let yamlMatch = raw.match(/---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---/);
+        let yamlMatch = raw.match(/^\s*---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---/);
+        if (!yamlMatch) {
+            yamlMatch = raw.match(/---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---/);
+        }
         if (yamlMatch) {
             const yaml = yamlMatch[1];
-            raw = raw.replace(/---\s*[\r\n]+[\s\S]*?\s*[\r\n]+---\s*[\r\n]*/, '').trim();
+            raw = raw.replace(/^\s*---\s*[\r\n]+[\s\S]*?\s*[\r\n]+---\s*[\r\n]*/, '').trim();
             yaml.split('\n').forEach(line => {
                 const idx = line.indexOf(':');
                 if (idx > -1) {
@@ -1347,18 +1350,21 @@
             }
         });
 
-        // 3. Find exact match first, then substring match if not found
+        // 3. Find match: Exact match first, then normalized/stripped match, then substring match
         let matched = domCategories.find(c => c.nameLower === targetLower);
+        if (!matched) {
+            const normTarget = targetLower.replace(/[\s\-_,।]/g, '');
+            matched = domCategories.find(c => c.nameLower.replace(/[\s\-_,।]/g, '') === normTarget);
+        }
         if (!matched) {
             matched = domCategories.find(c => targetLower.includes(c.nameLower) || c.nameLower.includes(targetLower));
         }
 
         if (matched) {
-            // Select ONLY THIS SINGLE CATEGORY (No parents, no siblings, no secondary)
             matched.checkbox.checked = true;
             handleCategoryCheckboxChange(matched.checkbox);
 
-            // Highlight the single matched item
+            // Highlight the matched item
             matched.wrapper.style.transition = 'all 0.4s ease';
             matched.wrapper.style.backgroundColor = '#ecfdf5';
             matched.wrapper.style.boxShadow = '0 0 0 2px #10b981';
@@ -1371,12 +1377,23 @@
         } else {
             // If doesn't exist in DB/DOM, auto-create via AJAX
             try {
+                let ajaxUrl = '<?= rtrim(URLROOT, '/') ?>/admin/create_category_ajax';
+                try {
+                    const parsedUrl = new URL(ajaxUrl, window.location.origin);
+                    if (parsedUrl.origin !== window.location.origin) {
+                        ajaxUrl = window.location.pathname.replace(/\/admin\/[^\/]*$/, '/admin/create_category_ajax');
+                    }
+                } catch(e) {}
+
                 const formData = new FormData();
                 formData.append('name', cleanTarget);
 
-                const res = await fetch('<?= URLROOT ?>/admin/create_category_ajax', {
+                const res = await fetch(ajaxUrl, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 const resData = await res.json();
 
@@ -1384,10 +1401,28 @@
                     const newCat = resData.category;
                     const checklist = document.querySelector('.categories-checklist');
                     if (checklist) {
-                        let rootUl = checklist.querySelector(':scope > ul');
-                        if (!rootUl) {
-                            rootUl = document.createElement('ul');
-                            checklist.appendChild(rootUl);
+                        // Find parent container in DOM if parent_id exists
+                        let targetUl = null;
+                        if (newCat.parent_id) {
+                            const parentCb = checklist.querySelector(`input[name="category_ids[]"][value="${newCat.parent_id}"]`);
+                            if (parentCb) {
+                                const parentLi = parentCb.closest('li');
+                                if (parentLi) {
+                                    targetUl = parentLi.querySelector(':scope > ul');
+                                    if (!targetUl) {
+                                        targetUl = document.createElement('ul');
+                                        parentLi.appendChild(targetUl);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!targetUl) {
+                            targetUl = checklist.querySelector(':scope > ul');
+                            if (!targetUl) {
+                                targetUl = document.createElement('ul');
+                                checklist.appendChild(targetUl);
+                            }
                         }
 
                         const li = document.createElement('li');
@@ -1402,21 +1437,19 @@
                                 </span>
                             </div>
                         `;
-                        rootUl.insertBefore(li, rootUl.firstChild);
-                        if (newCat.parent_id) {
-                            const parentCb = document.querySelector(`input[name="category_ids[]"][value="${newCat.parent_id}"]`);
-                            if (parentCb && !parentCb.checked) {
-                                parentCb.checked = true;
-                                const pw = parentCb.closest('.category-tree-item-wrapper');
-                                if (pw) {
-                                    const pb = pw.querySelector('.main-cat-badge-container');
-                                    if (pb) pb.style.display = 'inline-flex';
-                                }
-                            }
+                        targetUl.appendChild(li);
+
+                        const newCheckbox = li.querySelector(`input[name="category_ids[]"]`);
+                        if (newCheckbox) {
+                            newCheckbox.checked = true;
+                            handleCategoryCheckboxChange(newCheckbox);
                         }
+
                         li.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সিলেক্ট করা হয়েছে!`, 'success');
+                        showToast(`✨ নতুন ক্যাটাগরি '${newCat.name}' তৈরি করে সঠিকভাবে লিংক করা হয়েছে!`, 'success');
                     }
+                } else {
+                    console.error('Category creation failed:', resData.error);
                 }
             } catch (err) {
                 console.error('Error auto-creating category:', err);
