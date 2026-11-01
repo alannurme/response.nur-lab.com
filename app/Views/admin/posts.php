@@ -3956,58 +3956,232 @@ body.organize-drag-active #organize-root-list {
     }
 
     // -------------------------------------------------------------
-    // Instant Live Search Filter for Articles Table
+    // Live AJAX Search for Admin Posts (Direct Table Replacement)
     // -------------------------------------------------------------
+    let adminSearchTimer = null;
+    let initialTbodyHTML = null;
+    let initialTheadHTML = null;
+    let initialSubFoldersDisplay = null;
+
+    function captureInitialExplorerState() {
+        if (initialTbodyHTML === null) {
+            const tbody = document.querySelector('.explorer-table tbody');
+            if (tbody) initialTbodyHTML = tbody.innerHTML;
+            
+            const thead = document.querySelector('.explorer-table thead');
+            if (thead) initialTheadHTML = thead.innerHTML;
+
+            const subFolders = document.querySelector('.folder-grid');
+            if (subFolders && subFolders.parentElement) {
+                initialSubFoldersDisplay = subFolders.parentElement.style.display || '';
+            }
+        }
+    }
+
+    function escapeHtmlAttr(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function renderAdminTable(posts) {
+        const thead = document.querySelector('.explorer-table thead');
+        const tbody = document.querySelector('.explorer-table tbody');
+        if (!tbody) return;
+
+        // Restore standard table headers
+        if (thead && initialTheadHTML) {
+            thead.innerHTML = initialTheadHTML;
+        }
+
+        if (!posts || posts.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; padding: 45px 20px; color: #94a3b8;">
+                        <i class="fas fa-search" style="font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
+                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #475569;">কোনো নিবন্ধ পাওয়া যায়নি</p>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">অন্য কোনো শব্দ বা বানান দিয়ে চেষ্টা করুন</p>
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        let rowsHtml = '';
+        posts.forEach(post => {
+            const isDraft = (post.status && post.status.toLowerCase() === 'draft');
+            const mainCat = post.main_category || '';
+            const otherCats = post.secondary_categories ? post.secondary_categories.split(', ').filter(c => c !== mainCat) : [];
+            const hasCategory = mainCat !== '' || otherCats.length > 0;
+            const dateStr = post.created_at ? post.created_at.substring(0, 10).replace(/-/g, '/') : '';
+
+            let matchBadgeHtml = '';
+            if (post.match_badge === 'Title Match') {
+                matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> Title Match</span>`;
+            } else if (post.match_badge === 'Keyword Match') {
+                matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> Keyword Match</span>`;
+            } else {
+                matchBadgeHtml = `<span style="font-size: 10px; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;">Match</span>`;
+            }
+
+            const titleDisplay = post.highlighted_title || escapeHtmlAttr(post.title);
+            const snippetDisplay = post.highlighted_snippet || (post.snippet ? escapeHtmlAttr(post.snippet) : '');
+
+            rowsHtml += `
+                <tr data-post-id="${post.id}">
+                    <td style="text-align: center;">
+                        <input type="checkbox" value="${post.id}" class="post-checkbox">
+                    </td>
+                    <td>
+                        <a href="#" onclick="openQuickView(event, ${post.id})" class="post-title-link">
+                            <i class="far fa-file-alt" style="color: #64748b;"></i>
+                            <span>${titleDisplay}</span>
+                        </a>
+                        <span class="post-badge post-badge-${isDraft ? 'draft' : 'published'}" id="post-badge-${post.id}">
+                            ${isDraft ? 'Draft' : 'Published'}
+                        </span>
+                        ${matchBadgeHtml}
+                        ${snippetDisplay ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.45;">${snippetDisplay}</div>` : ''}
+                    </td>
+                    <td style="text-align: center; vertical-align: middle; position: relative;">
+                        <button type="button" class="cat-trigger-icon ${hasCategory ? '' : 'is-empty'}" 
+                                title="ক্লিক করে ক্যাটাগরি যোগ/মুছুন"
+                                onclick="openManagePostCategoriesModal(${post.id}, ${JSON.stringify(post.title)})"
+                                style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: ${hasCategory ? '#eff6ff' : '#f8fafc'}; color: ${hasCategory ? '#2563eb' : '#94a3b8'}; cursor: pointer; border: 1px ${hasCategory ? 'solid #dbeafe' : 'dashed #cbd5e1'};">
+                            <i class="fas ${hasCategory ? 'fa-tags' : 'fa-plus'}" style="font-size: 13px;"></i>
+                        </button>
+                    </td>
+                    <td style="color: #64748b; font-size: 13px;">${dateStr}</td>
+                    <td class="desktop-actions-cell">
+                        <div class="row-actions-group" style="justify-content: flex-end; align-items: center; gap: 6px;">
+                             <button type="button" 
+                                     class="btn-row-action btn-row-action-status ${isDraft ? 'is-draft' : 'is-published'}" 
+                                     id="status-toggle-${post.id}"
+                                     onclick="togglePostStatus(${post.id}, event)"
+                                     title="${isDraft ? 'বর্তমানে আনপাবলিশড। ক্লিক করে পাবলিশ করুন।' : 'বর্তমানে পাবলিশড। ক্লিক করে আনপাবলিশ করুন।'}">
+                                 <span class="status-toggle-track">
+                                     <span class="status-toggle-thumb"></span>
+                                 </span>
+                             </button>
+                             <button type="button" class="btn-row-action" title="Copy Direct Link" onclick="copyPostLink('<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}', this)">
+                                 <i class="far fa-copy"></i>
+                             </button>
+                             <a href="<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}" target="_blank" class="btn-row-action" title="View on Live Site">
+                                 <i class="far fa-eye"></i>
+                             </a>
+                             <a href="<?= URLROOT ?>/admin/edit_post/${post.id}" class="btn-row-action" title="Edit Article">
+                                 <i class="far fa-edit"></i>
+                             </a>
+                             <button type="button" class="btn-row-action btn-row-action-delete" title="Move to Trash" onclick="deletePost(${post.id})">
+                                 <i class="far fa-trash-alt"></i>
+                             </button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+        tbody.innerHTML = rowsHtml;
+    }
+
     function filterPostsTable(query) {
-        const q = (query || '').trim().toLowerCase();
+        captureInitialExplorerState();
+
+        const q = (query || '').trim();
         const clearBtn = document.getElementById('postSearchClearBtn');
         const icon = document.getElementById('postSearchIcon');
         if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
 
-        const rows = document.querySelectorAll('.explorer-table tbody tr');
-        let visibleCount = 0;
+        clearTimeout(adminSearchTimer);
 
-        rows.forEach(row => {
-            // Ignore the special no-match row if already present
-            if (row.id === 'posts-table-no-results-row') return;
-
-            const titleEl = row.querySelector('.post-title-link span') || row.querySelector('.post-title-link');
-            const categoryEl = row.children[2]; // Category column
-            const titleText = titleEl ? titleEl.textContent.toLowerCase() : '';
-            const categoryText = categoryEl ? categoryEl.textContent.toLowerCase() : '';
-            const rowFullText = row.textContent.toLowerCase();
-
-            if (!q || titleText.includes(q) || categoryText.includes(q) || rowFullText.includes(q)) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+        if (q.length === 0) {
+            if (icon) icon.className = 'fas fa-search';
+            
+            // Restore initial table rows & headers
+            const tbody = document.querySelector('.explorer-table tbody');
+            const thead = document.querySelector('.explorer-table thead');
+            if (tbody && initialTbodyHTML !== null) {
+                tbody.innerHTML = initialTbodyHTML;
             }
-        });
-
-        // Show/hide empty state row if no articles match
-        let noMatchRow = document.getElementById('posts-table-no-results-row');
-        const tbody = document.querySelector('.explorer-table tbody');
-
-        if (tbody) {
-            if (q.length > 0 && visibleCount === 0) {
-                if (!noMatchRow) {
-                    noMatchRow = document.createElement('tr');
-                    noMatchRow.id = 'posts-table-no-results-row';
-                    noMatchRow.innerHTML = `
-                        <td colspan="5" style="text-align: center; padding: 40px 15px; color: #94a3b8;">
-                            <i class="fas fa-search" style="font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.5;"></i>
-                            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #475569;">কোনো নিবন্ধ পাওয়া যায়নি</p>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">অন্য কোনো শব্দ বা বানান দিয়ে চেষ্টা করুন</p>
-                        </td>`;
-                    tbody.appendChild(noMatchRow);
-                } else {
-                    noMatchRow.style.display = '';
-                }
-            } else if (noMatchRow) {
-                noMatchRow.style.display = 'none';
+            if (thead && initialTheadHTML !== null) {
+                thead.innerHTML = initialTheadHTML;
             }
+
+            // Restore subfolders section
+            const subFolders = document.querySelector('.folder-grid');
+            if (subFolders && subFolders.parentElement) {
+                subFolders.parentElement.style.display = initialSubFoldersDisplay;
+            }
+
+            // Hide banner
+            const banner = document.getElementById('admin-search-status-banner');
+            if (banner) banner.style.display = 'none';
+
+            // Show pagination if hidden
+            const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
+            paginations.forEach(p => p.style.display = '');
+
+            return;
         }
+
+        if (icon) icon.className = 'fas fa-circle-notch fa-spin';
+
+        adminSearchTimer = setTimeout(() => {
+            const url = '<?= URLROOT ?>/admin/ajax_search_posts?q=' + encodeURIComponent(q);
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (icon) icon.className = 'fas fa-search';
+
+                    const subFolders = document.querySelector('.folder-grid');
+                    if (subFolders && subFolders.parentElement) {
+                        subFolders.parentElement.style.display = 'none';
+                    }
+
+                    // Hide pagination during search
+                    const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
+                    paginations.forEach(p => p.style.display = 'none');
+
+                    // Setup banner
+                    let banner = document.getElementById('admin-search-status-banner');
+                    if (!banner) {
+                        banner = document.createElement('div');
+                        banner.id = 'admin-search-status-banner';
+                        banner.style.cssText = 'margin-bottom: 16px; padding: 10px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; color: #1e40af; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: inherit;';
+                        const filesSection = document.querySelector('.files-section');
+                        if (filesSection) filesSection.parentElement.insertBefore(banner, filesSection);
+                    }
+
+                    const posts = data.posts || [];
+
+                    if (!data.success || posts.length === 0) {
+                        banner.style.display = 'flex';
+                        banner.innerHTML = `
+                            <div>
+                                <i class="fas fa-info-circle" style="color: #3b82f6; margin-right: 6px;"></i>
+                                "<strong>${escapeHtmlAttr(q)}</strong>" দিয়ে কোনো পোস্ট পাওয়া যায়নি। (বাংলা বা ইংরেজিতে চেষ্টা করুন)
+                            </div>
+                            <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">Reset</button>`;
+                        
+                        renderAdminTable([]);
+                        return;
+                    }
+
+                    banner.style.display = 'flex';
+                    banner.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-weight: 600;">
+                                <i class="fas fa-check-circle" style="color: #059669; margin-right: 5px;"></i>
+                                ফলাফল: মোট ${posts.length}টি পোস্ট পাওয়া গেছে
+                            </span>
+                        </div>
+                        <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">
+                            <i class="fas fa-times"></i> Clear Search
+                        </button>`;
+
+                    renderAdminTable(posts);
+                })
+                .catch(err => {
+                    console.error('Admin post live search failed:', err);
+                    if (icon) icon.className = 'fas fa-search';
+                });
+        }, 220);
     }
 
     function clearAdminPostSearch() {
