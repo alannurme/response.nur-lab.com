@@ -2035,33 +2035,14 @@ if (!empty($data['breadcrumbs'])) {
                     </h1>
                 </div>
                 <div class="explorer-actions" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <!-- Compact Search Bar with Live AJAX & Dropdown -->
+                    <!-- Compact Search Bar with Live AJAX -->
                     <div style="position: relative; width: 280px; margin-bottom: 0;" id="admin-search-wrapper">
                         <i class="fas fa-search" id="postSearchIcon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; pointer-events: none; transition: 0.2s;"></i>
-                        <input type="text" id="postSearchInput" placeholder="Search posts (বাংলা / Banglish)..." oninput="filterPostsTable(this.value)" onfocus="handleAdminSearchFocus()" autocomplete="off"
+                        <input type="text" id="postSearchInput" placeholder="Search posts (বাংলা / Banglish)..." oninput="filterPostsTable(this.value)" autocomplete="off"
                             style="width: 100%; padding: 6px 30px 6px 32px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; background: #fff; outline: none; box-sizing: border-box; transition: all 0.2s; height: 34px;"
                             onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37,99,235,0.12)'"
                             onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
                         <button type="button" id="postSearchClearBtn" onclick="clearAdminPostSearch()" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 50%;" title="Clear search">&times;</button>
-
-                        <!-- Live Search Floating Dropdown -->
-                        <div id="admin-search-dropdown" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 560px; max-width: 90vw; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 20px 45px -10px rgba(15,23,42,0.22), 0 0 0 1px rgba(0,0,0,0.04); z-index: 999999; overflow: hidden; font-family: inherit; text-align: left;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                <div style="display: flex; gap: 6px;" id="admin-search-tabs">
-                                    <button type="button" class="admin-search-tab-btn active" data-tab="all" onclick="switchAdminDropdownTab('all')" style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; background: #2563eb; color: #fff; cursor: pointer;">সব</button>
-                                    <button type="button" class="admin-search-tab-btn" data-tab="posts" onclick="switchAdminDropdownTab('posts')" style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer;">পোস্ট (<span id="admin-dd-posts-count">0</span>)</button>
-                                    <button type="button" class="admin-search-tab-btn" data-tab="questions" onclick="switchAdminDropdownTab('questions')" style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer;">প্রশ্নোত্তর (<span id="admin-dd-qa-count">0</span>)</button>
-                                </div>
-                                <span style="font-size: 11px; color: #94a3b8;"><kbd style="background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 10px;">ESC</kbd> বন্ধ হবে</span>
-                            </div>
-                            <div id="admin-search-dropdown-body" style="max-height: 420px; overflow-y: auto; padding: 8px 12px;">
-                                <!-- Live items injected via JS -->
-                            </div>
-                            <div style="padding: 8px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #64748b;">
-                                <span id="admin-search-summary-text">টাইপ করে খুঁজুন...</span>
-                                <span style="font-size: 11px; color: #64748b;"><i class="fas fa-layer-group"></i> টেবিল ভিউও আপডেট হচ্ছে</span>
-                            </div>
-                        </div>
                     </div>
 
                     <button class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px;" onclick="openImportDocModal()">
@@ -4000,56 +3981,6 @@ body.organize-drag-active #organize-root-list {
         }
     }
 
-    function handleAdminSearchFocus() {
-        const input = document.getElementById('postSearchInput');
-        if (input && input.value.trim().length > 0 && lastSearchData) {
-            const dd = document.getElementById('admin-search-dropdown');
-            if (dd) dd.style.display = 'block';
-        }
-    }
-
-    function switchAdminDropdownTab(tab) {
-        activeDropdownTab = tab;
-        const tabBtns = document.querySelectorAll('#admin-search-tabs .admin-search-tab-btn');
-        tabBtns.forEach(btn => {
-            if (btn.getAttribute('data-tab') === tab) {
-                btn.style.background = '#2563eb';
-                btn.style.color = '#fff';
-                btn.style.borderColor = '#2563eb';
-            } else {
-                btn.style.background = '#fff';
-                btn.style.color = '#475569';
-                btn.style.borderColor = '#e2e8f0';
-            }
-        });
-        if (lastSearchData) {
-            renderAdminDropdown(lastSearchData);
-        }
-    }
-
-    function switchAdminTableTab(tab) {
-        activeTableTab = tab;
-        const bannerPostsBtn = document.getElementById('banner-tab-posts');
-        const bannerQaBtn = document.getElementById('banner-tab-qa');
-        if (bannerPostsBtn && bannerQaBtn) {
-            if (tab === 'posts') {
-                bannerPostsBtn.style.background = '#2563eb';
-                bannerPostsBtn.style.color = '#ffffff';
-                bannerQaBtn.style.background = '#ffffff';
-                bannerQaBtn.style.color = '#475569';
-            } else {
-                bannerQaBtn.style.background = '#2563eb';
-                bannerQaBtn.style.color = '#ffffff';
-                bannerPostsBtn.style.background = '#ffffff';
-                bannerPostsBtn.style.color = '#475569';
-            }
-        }
-
-        if (lastSearchData) {
-            renderAdminTable(lastSearchData);
-        }
-    }
-
     function clearAdminPostSearch() {
         const input = document.getElementById('postSearchInput');
         if (input) input.value = '';
@@ -4057,159 +3988,8 @@ body.organize-drag-active #organize-root-list {
         if (clearBtn) clearBtn.style.display = 'none';
         const icon = document.getElementById('postSearchIcon');
         if (icon) icon.className = 'fas fa-search';
-        const dd = document.getElementById('admin-search-dropdown');
-        if (dd) dd.style.display = 'none';
         lastSearchData = null;
         filterPostsTable('');
-    }
-
-    // Close dropdown on click outside or Escape
-    document.addEventListener('click', function(e) {
-        const wrapper = document.getElementById('admin-search-wrapper');
-        const dd = document.getElementById('admin-search-dropdown');
-        if (wrapper && dd && !wrapper.contains(e.target)) {
-            dd.style.display = 'none';
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const dd = document.getElementById('admin-search-dropdown');
-            if (dd) dd.style.display = 'none';
-        }
-    });
-
-    function escapeHtmlAttr(text) {
-        if (!text) return '';
-        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    }
-
-    function renderAdminDropdown(data) {
-        const dd = document.getElementById('admin-search-dropdown');
-        const body = document.getElementById('admin-search-dropdown-body');
-        const postsCountBadge = document.getElementById('admin-dd-posts-count');
-        const qaCountBadge = document.getElementById('admin-dd-qa-count');
-        const summaryText = document.getElementById('admin-search-summary-text');
-
-        if (!dd || !body) return;
-
-        const posts = data.posts || [];
-        const questions = data.questions || [];
-        
-        if (postsCountBadge) postsCountBadge.innerText = posts.length;
-        if (qaCountBadge) qaCountBadge.innerText = questions.length;
-        if (summaryText) summaryText.innerText = `মোট ${posts.length}টি পোস্ট ও ${questions.length}টি প্রশ্নোত্তর`;
-
-        let html = '';
-
-        if (posts.length === 0 && questions.length === 0) {
-            body.innerHTML = `
-                <div style="text-align: center; padding: 32px 15px; color: #94a3b8;">
-                    <i class="fas fa-search" style="font-size: 26px; margin-bottom: 8px; opacity: 0.5;"></i>
-                    <p style="margin: 0; font-weight: 600; color: #475569; font-size: 13px;">কোনো রেজাল্ট পাওয়া যায়নি</p>
-                    <p style="margin: 3px 0 0 0; font-size: 11px;">বানান ঠিক আছে কিনা বা বাংলিশে লিখে চেষ্টা করুন</p>
-                </div>`;
-            dd.style.display = 'block';
-            return;
-        }
-
-        const showPosts = (activeDropdownTab === 'all' || activeDropdownTab === 'posts') && posts.length > 0;
-        const showQa = (activeDropdownTab === 'all' || activeDropdownTab === 'questions') && questions.length > 0;
-
-        if (showPosts) {
-            html += `<div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 6px 4px 8px 4px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-file-alt" style="color: #2563eb;"></i> পোস্টসমূহ (${posts.length})
-            </div>`;
-
-            posts.slice(0, 10).forEach(post => {
-                const isDraft = (post.status && post.status.toLowerCase() === 'draft');
-                let badge = '';
-                if (post.match_badge === 'Title Match') {
-                    badge = `<span style="font-size: 9px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-star" style="font-size: 8px;"></i> Title</span>`;
-                } else if (post.match_badge === 'Keyword Match') {
-                    badge = `<span style="font-size: 9px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-tag" style="font-size: 8px;"></i> Tag</span>`;
-                } else if (post.match_badge === 'Content Match') {
-                    badge = `<span style="font-size: 9px; font-weight: 700; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 1px 5px; border-radius: 4px;"><i class="fas fa-file-alt" style="font-size: 8px;"></i> Body</span>`;
-                }
-                const title = post.highlighted_title || escapeHtmlAttr(post.title);
-                const snippet = post.highlighted_snippet || (post.snippet ? escapeHtmlAttr(post.snippet) : '');
-
-                html += `
-                    <div style="padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; background: #ffffff; margin-bottom: 8px; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#ffffff'">
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
-                            <div style="flex: 1;">
-                                <a href="<?= URLROOT ?>/admin/edit_post/${post.id}" style="font-weight: 700; font-size: 13px; color: #0f172a; text-decoration: none; display: inline-block; line-height: 1.4;">
-                                    ${title}
-                                </a>
-                                <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
-                                    <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: ${isDraft ? '#fef3c7' : '#ecfdf5'}; color: ${isDraft ? '#d97706' : '#059669'};">
-                                        ${isDraft ? 'Draft' : 'Published'}
-                                    </span>
-                                    <span style="font-size: 10px; color: #64748b; background: #f1f5f9; padding: 1px 6px; border-radius: 4px;">
-                                        ${escapeHtmlAttr(post.main_category || 'General')}
-                                    </span>
-                                    ${badge}
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                                <a href="#" onclick="openQuickView(event, ${post.id})" class="btn-explorer btn-explorer-secondary" style="padding: 3px 8px; font-size: 11px; text-decoration: none;" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </a>
-                                <a href="<?= URLROOT ?>/admin/edit_post/${post.id}" class="btn-explorer btn-explorer-secondary" style="padding: 3px 8px; font-size: 11px; color: #059669; text-decoration: none;" title="Edit">
-                                    <i class="far fa-edit"></i>
-                                </a>
-                                <a href="<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}" target="_blank" class="btn-explorer btn-explorer-secondary" style="padding: 3px 8px; font-size: 11px; color: #2563eb; text-decoration: none;" title="Live View">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            </div>
-                        </div>
-                        ${snippet ? `<div style="font-size: 11.5px; color: #64748b; margin-top: 5px; line-height: 1.45;">${snippet}</div>` : ''}
-                    </div>`;
-            });
-        }
-
-        if (showQa) {
-            html += `<div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 4px 8px 4px; display: flex; align-items: center; gap: 6px;">
-                <i class="fas fa-question-circle" style="color: #d97706;"></i> প্রশ্নোত্তর (${questions.length})
-            </div>`;
-
-            questions.slice(0, 10).forEach(q => {
-                const isAnswered = (q.status === 'answered');
-                const qText = q.highlighted_question || escapeHtmlAttr(q.question);
-                const ansText = q.highlighted_answer || (q.answer ? escapeHtmlAttr(q.answer) : '');
-
-                html += `
-                    <div style="padding: 10px; border-radius: 8px; border: 1px solid #fef3c7; background: #fffdf5; margin-bottom: 8px; transition: background 0.15s;" onmouseover="this.style.background='#fefce8'" onmouseout="this.style.background='#fffdf5'">
-                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
-                            <div style="flex: 1;">
-                                <a href="<?= URLROOT ?>/admin/answer_question/${q.id}" style="font-weight: 700; font-size: 13px; color: #78350f; text-decoration: none; display: inline-block; line-height: 1.4;">
-                                    <i class="fas fa-question" style="font-size: 11px; color: #d97706; margin-right: 4px;"></i>${qText}
-                                </a>
-                                <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
-                                    <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: ${isAnswered ? '#ecfdf5' : '#fee2e2'}; color: ${isAnswered ? '#059669' : '#dc2626'};">
-                                        ${isAnswered ? 'উত্তর দেওয়া হয়েছে' : 'পেন্ডিং / উত্তর বাকি'}
-                                    </span>
-                                    <span style="font-size: 10px; color: #64748b; background: #ffffff; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px;">
-                                        ${escapeHtmlAttr(q.category_name || 'সাধারণ')}
-                                    </span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                                <a href="<?= URLROOT ?>/admin/answer_question/${q.id}" class="btn-explorer btn-explorer-secondary" style="padding: 3px 8px; font-size: 11px; color: #d97706; text-decoration: none;" title="উত্তর লিখুন / সম্পাদনা">
-                                    <i class="fas fa-reply"></i>
-                                </a>
-                                <a href="<?= URLROOT ?>/admin/questions" target="_blank" class="btn-explorer btn-explorer-secondary" style="padding: 3px 8px; font-size: 11px; color: #64748b; text-decoration: none;" title="সকল প্রশ্ন দেখুন">
-                                    <i class="fas fa-list"></i>
-                                </a>
-                            </div>
-                        </div>
-                        ${ansText ? `<div style="font-size: 11.5px; color: #4b5563; margin-top: 5px; line-height: 1.45; background: #ffffff; padding: 6px 8px; border-radius: 6px; border: 1px dashed #e2e8f0;"><strong style="color: #059669;">উত্তর:</strong> ${ansText}</div>` : ''}
-                    </div>`;
-            });
-        }
-
-        body.innerHTML = html;
-        dd.style.display = 'block';
     }
 
     function renderAdminTable(data) {
@@ -4401,14 +4181,12 @@ body.organize-drag-active #organize-root-list {
         const q = (query || '').trim();
         const clearBtn = document.getElementById('postSearchClearBtn');
         const icon = document.getElementById('postSearchIcon');
-        const dd = document.getElementById('admin-search-dropdown');
         if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
 
         clearTimeout(adminSearchTimer);
 
         if (q.length === 0) {
             if (icon) icon.className = 'fas fa-search';
-            if (dd) dd.style.display = 'none';
             lastSearchData = null;
             
             // Restore initial table rows & headers
@@ -4477,7 +4255,6 @@ body.organize-drag-active #organize-root-list {
                             <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">Reset</button>`;
                         
                         lastSearchData = data;
-                        renderAdminDropdown(data);
                         renderAdminTable(data);
                         return;
                     }
@@ -4503,7 +4280,6 @@ body.organize-drag-active #organize-root-list {
                         </button>`;
 
                     lastSearchData = data;
-                    renderAdminDropdown(data);
                     renderAdminTable(data);
                 })
                 .catch(err => {
