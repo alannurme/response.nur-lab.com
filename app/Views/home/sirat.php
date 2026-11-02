@@ -50,7 +50,7 @@
             </div>
 
             <!-- Right Main Area: Google Drive PDF Reader & Book Profile -->
-            <div style="flex: 1; min-width: 300px; background: rgba(4, 47, 36, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 26px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);" id="pageSeerahContentCard">
+            <div style="flex: 1; min-width: 300px; background: rgba(4, 47, 36, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);" id="pageSeerahContentCard">
                 <!-- PDF & Content via JS -->
             </div>
 
@@ -88,10 +88,10 @@
 
     .pdf-viewer-frame {
         width: 100%;
-        height: 78vh;
-        min-height: 600px;
+        height: 88vh;
+        min-height: 820px;
         border: none;
-        border-radius: 14px;
+        border-radius: 0 0 14px 14px;
         background: #0f172a;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
@@ -113,13 +113,13 @@
             top: 0 !important;
         }
         #pageSeerahContentCard {
-            padding: 16px 12px !important;
+            padding: 14px 10px !important;
             border-radius: 14px !important;
             min-width: 100% !important;
         }
         .pdf-viewer-frame {
-            height: 60vh !important;
-            min-height: 440px !important;
+            height: 75vh !important;
+            min-height: 580px !important;
         }
     }
 </style>
