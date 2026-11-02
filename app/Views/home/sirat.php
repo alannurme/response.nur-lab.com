@@ -340,30 +340,46 @@
             </div>
 
             <!-- PDF Viewer Interactive Box -->
-            <div id="pdfViewerContainer" style="position: relative; background: #0b1513; border: 1px solid rgba(16,185,129,0.3); border-radius: 18px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+            <div id="pdfViewerContainer" style="position: relative; background: #071f18; border: 1.5px solid rgba(16,185,129,0.35); border-radius: 18px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
                 
                 ${hasDrive ? `
-                    <!-- Loader Spinner while iframe loads -->
-                    <div id="pdfFrameLoader" style="position: absolute; inset: 0; background: rgba(4, 47, 36, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; color: #a7f3d0;">
-                        <i class="fas fa-circle-notch fa-spin" style="font-size: 2.4rem; color: #10b981; margin-bottom: 14px;"></i>
-                        <div style="font-size: 1rem; font-weight: 700;">গুগল ড্রাইভ পিডিএফ লোড হচ্ছে...</div>
-                        <div style="font-size: 0.82rem; color: #6ee7b7; margin-top: 4px;">অনুগ্রহ করে অপেক্ষা করুন</div>
+                    <!-- PDF Viewer Header Bar -->
+                    <div style="background: rgba(2, 44, 34, 0.95); border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #a7f3d0; font-weight: 700;">
+                            <i class="fab fa-google-drive" style="color: #10b981; font-size: 1.05rem;"></i>
+                            <span>গুগল ড্রাইভ ইনবিল্ট পিডিএফ ভিউয়ার</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <a href="${directDriveLink}" target="_blank" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-external-link-alt"></i> নতুন ট্যাবে খুলুন
+                            </a>
+                            <button onclick="reloadSeerahIframe()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;" title="ভিউয়ার রিলোড করুন">
+                                <i class="fas fa-rotate-right"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <iframe id="seerahPdfIframe" class="pdf-viewer-frame" src="${embedUrl}" onload="document.getElementById('pdfFrameLoader').style.display='none';" allow="autoplay" allowfullscreen></iframe>
+                    <!-- Loader Spinner with auto-dismiss -->
+                    <div id="pdfFrameLoader" style="position: absolute; top: 45px; left: 0; right: 0; bottom: 0; background: rgba(4, 47, 36, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; color: #a7f3d0; transition: opacity 0.3s ease;">
+                        <i class="fas fa-circle-notch fa-spin" style="font-size: 2.2rem; color: #10b981; margin-bottom: 12px;"></i>
+                        <div style="font-size: 0.95rem; font-weight: 700;">গুগল ড্রাইভ পিডিএফ লোড হচ্ছে...</div>
+                        <div style="font-size: 0.78rem; color: #6ee7b7; margin-top: 4px;">অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন</div>
+                    </div>
+
+                    <iframe id="seerahPdfIframe" class="pdf-viewer-frame" src="${embedUrl}" onload="hidePdfLoader();" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
                 ` : `
                     <div style="text-align: center; padding: 70px 20px; color: #a7f3d0;">
                         <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px auto;">
                             <i class="fab fa-google-drive"></i>
                         </div>
                         <h3 style="color: #ffffff; font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">
-                            এই গ্রন্থটির গুগল ড্রাইভ পিডিএফ লিংক শীঘ্রই যুক্ত করা হবে
+                            এই গ্রন্থটির গুগল ড্রাইভ পিডিএফ লিংক এখনও যুক্ত করা হয়নি
                         </h3>
                         <p style="font-size: 0.92rem; color: #cbd5e1; max-width: 520px; margin: 0 auto 20px auto; line-height: 1.6;">
-                            অ্যাডমিন প্যানেল থেকে এই গ্রন্থের এডিট অপশনে গিয়ে গুগল ড্রাইভ পিডিএফ শেয়ার লিংক পেস্ট করলেই সাথে সাথে এখানে ফুলস্ক্রিন পিডিএফ ভিউয়ারে গ্রন্থটি প্রদর্শিত হবে।
+                            অ্যাডমিন প্যানেলে গিয়ে এই গ্রন্থের "সম্পাদনা" অপশনে গুগল ড্রাইভ পিডিএফ শেয়ার লিংক পেস্ট করলেই এখানে সরাসরি ইনবিল্ট রিডারে বই পড়া যাবে।
                         </p>
                         <a href="<?= URLROOT ?>/admin/edit_seerah_book/${book.id}" target="_blank" style="background: #10b981; color: white; border: none; padding: 10px 22px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-link"></i> অ্যাডমিন থেকে লিংক যুক্ত করুন
+                            <i class="fas fa-link"></i> অ্যাডমিন প্যানেল থেকে ড্রাইভ লিংক যোগ করুন
                         </a>
                     </div>
                 `}
@@ -372,6 +388,33 @@
             <!-- Related Articles from database -->
             ${renderRelatedArticlesSection()}
         `;
+
+        // Safety timeout: automatically fade out loader after 2.5s even if onload is delayed
+        setTimeout(() => {
+            hidePdfLoader();
+        }, 2500);
+    }
+
+    function hidePdfLoader() {
+        const loader = document.getElementById('pdfFrameLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
+        }
+    }
+
+    function reloadSeerahIframe() {
+        const iframe = document.getElementById('seerahPdfIframe');
+        const loader = document.getElementById('pdfFrameLoader');
+        if (iframe) {
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+            }
+            const currentSrc = iframe.src;
+            iframe.src = '';
+            setTimeout(() => { iframe.src = currentSrc; }, 100);
+        }
     }
 
     function togglePdfFullscreen() {
