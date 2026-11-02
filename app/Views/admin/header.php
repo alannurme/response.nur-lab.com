@@ -813,6 +813,22 @@ if (empty($current_page)) {
                     <i class="fas fa-comments"></i><span>Comments</span>
                 </a>
 
+                <?php $seerah_active = in_array($current_page, ['seerah_books', 'add_seerah_book', 'edit_seerah_book']); ?>
+                <div class="dropdown-wrapper">
+                    <div class="nav-item has-dropdown <?= $seerah_active ? 'active' : '' ?>">
+                        <i class="fas fa-book-journal-whills" style="color: #10b981;"></i><span>Seerah Books</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
+                    <div class="dropdown-content" <?= $seerah_active ? 'style="display: block;"' : '' ?>>
+                        <a href="<?= URLROOT ?>/admin/seerah_books" class="<?= $current_page == 'seerah_books' ? 'active-sub' : '' ?>">
+                            <i class="fas fa-list"></i> All Seerah Books
+                        </a>
+                        <a href="<?= URLROOT ?>/admin/add_seerah_book" class="<?= $current_page == 'add_seerah_book' ? 'active-sub' : '' ?>">
+                            <i class="fas fa-plus"></i> Add New Book
+                        </a>
+                    </div>
+                </div>
+
                 <?php $records_active = in_array($current_page, ['records', 'records_add', 'records_persons', 'records_person_view', 'records_categories', 'records_verification', 'open_database', 'open_database_add', 'open_database_records', 'open_database_categories', 'open_database_verification']); ?>
                 <div class="dropdown-wrapper">
                     <div class="nav-item has-dropdown <?= $records_active ? 'active' : '' ?>">

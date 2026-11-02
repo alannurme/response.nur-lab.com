@@ -1874,12 +1874,15 @@ class Home extends Controller {
         ");
         $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+        $books = $adminModel->getSeerahBooks(true);
+
         $data = [
-            'title' => 'সীরাতুন নবী ﷺ (Prophetic Biography)',
+            'title' => 'সীরাতুন নবী ﷺ (Prophetic Biography & Library)',
             'settings' => $adminModel->getSettings(),
             'menus' => $adminModel->getMenus(),
             'sub_menus' => $adminModel->getSubMenus(),
             'prayer_times' => $adminModel->getPrayerTimes(),
+            'books' => $books,
             'posts' => $posts
         ];
         $this->view('home/sirat', $data);

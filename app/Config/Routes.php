@@ -44,6 +44,12 @@ $routes->get('admin/login', 'Admin::login');
 $routes->post('admin/login', 'Admin::login');
 $routes->get('admin/logout', 'Admin::logout');
 $routes->get('admin/posts', 'Admin::posts');
+// Seerah Books Routes
+$routes->match(['get', 'post'], 'admin/seerah_books', 'Admin::seerah_books');
+$routes->match(['get', 'post'], 'admin/add_seerah_book', 'Admin::add_seerah_book');
+$routes->match(['get', 'post'], 'admin/edit_seerah_book/(:num)', 'Admin::edit_seerah_book/$1');
+$routes->match(['get', 'post'], 'admin/delete_seerah_book/(:num)', 'Admin::delete_seerah_book/$1');
+
 // Records Routes
 $routes->match(['get', 'post'], 'admin/records', 'Admin::records');
 $routes->get('admin/records_add', 'Admin::records_add');

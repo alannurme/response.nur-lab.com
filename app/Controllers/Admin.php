@@ -5965,6 +5965,126 @@ class Admin extends Controller {
         header('Location: ' . URLROOT . '/admin/pages?msg=deleted');
         exit;
     }
+
+    // ==========================================
+    // Seerah Books Management (সীরাত গ্রন্থসমূহ)
+    // ==========================================
+    public function seerah_books() {
+        $adminModel = $this->model('AdminModel');
+        $books = $adminModel->getSeerahBooks();
+        $this->view('admin/seerah_books', [
+            'books' => $books,
+            'current_page' => 'seerah_books',
+            'settings' => $this->siteSettings
+        ]);
+    }
+
+    public function add_seerah_book() {
+        $adminModel = $this->model('AdminModel');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title'] ?? '');
+            $author = trim($_POST['author'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $drive_link = trim($_POST['drive_link'] ?? '');
+            $cover_image = trim($_POST['cover_image'] ?? '');
+            $color = trim($_POST['color'] ?? '#10b981');
+            $sort_order = (int)($_POST['sort_order'] ?? 0);
+            $status = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
+
+            if (empty($title)) {
+                $_SESSION['seerah_error'] = 'গ্রন্থের নাম দেওয়া আবশ্যক।';
+                header('Location: ' . URLROOT . '/admin/seerah_books');
+                exit;
+            }
+
+            $data = [
+                'title' => $title,
+                'author' => $author,
+                'description' => $description,
+                'drive_link' => $drive_link,
+                'cover_image' => $cover_image,
+                'color' => $color,
+                'sort_order' => $sort_order,
+                'status' => $status
+            ];
+
+            if ($adminModel->addSeerahBook($data)) {
+                $_SESSION['seerah_success'] = 'সীরাত গ্রন্থটি সফলভাবে যুক্ত হয়েছে!';
+            } else {
+                $_SESSION['seerah_error'] = 'গ্রন্থটি যুক্ত করতে সমস্যা হয়েছে।';
+            }
+            header('Location: ' . URLROOT . '/admin/seerah_books');
+            exit;
+        }
+
+        $this->view('admin/add_seerah_book', [
+            'current_page' => 'seerah_books',
+            'settings' => $this->siteSettings
+        ]);
+    }
+
+    public function edit_seerah_book($id) {
+        $adminModel = $this->model('AdminModel');
+        $book = $adminModel->getSeerahBookById($id);
+        if (!$book) {
+            $_SESSION['seerah_error'] = 'গ্রন্থটি পাওয়া যায়নি।';
+            header('Location: ' . URLROOT . '/admin/seerah_books');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title'] ?? '');
+            $author = trim($_POST['author'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $drive_link = trim($_POST['drive_link'] ?? '');
+            $cover_image = trim($_POST['cover_image'] ?? '');
+            $color = trim($_POST['color'] ?? '#10b981');
+            $sort_order = (int)($_POST['sort_order'] ?? 0);
+            $status = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
+
+            if (empty($title)) {
+                $_SESSION['seerah_error'] = 'গ্রন্থের নাম ফাঁকা রাখা যাবে না।';
+                header('Location: ' . URLROOT . '/admin/edit_seerah_book/' . $id);
+                exit;
+            }
+
+            $data = [
+                'title' => $title,
+                'author' => $author,
+                'description' => $description,
+                'drive_link' => $drive_link,
+                'cover_image' => $cover_image,
+                'color' => $color,
+                'sort_order' => $sort_order,
+                'status' => $status
+            ];
+
+            if ($adminModel->updateSeerahBook($id, $data)) {
+                $_SESSION['seerah_success'] = 'সীরাত গ্রন্থের তথ্য সফলভাবে আপডেট হয়েছে!';
+                header('Location: ' . URLROOT . '/admin/seerah_books');
+                exit;
+            } else {
+                $_SESSION['seerah_error'] = 'আপডেট ব্যর্থ হয়েছে।';
+            }
+        }
+
+        $this->view('admin/edit_seerah_book', [
+            'book' => $book,
+            'current_page' => 'seerah_books',
+            'settings' => $this->siteSettings
+        ]);
+    }
+
+    public function delete_seerah_book($id) {
+        $adminModel = $this->model('AdminModel');
+        if ($adminModel->deleteSeerahBook($id)) {
+            $_SESSION['seerah_success'] = 'সীরাত গ্রন্থটি সফলভাবে ডিলিট করা হয়েছে!';
+        } else {
+            $_SESSION['seerah_error'] = 'ডিলিট করতে সমস্যা হয়েছে।';
+        }
+        header('Location: ' . URLROOT . '/admin/seerah_books');
+        exit;
+    }
 }
 
 

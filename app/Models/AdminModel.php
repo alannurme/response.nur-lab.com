@@ -2890,5 +2890,70 @@ class AdminModel extends Model {
             return false;
         }
     }
+
+    // ==========================================
+    // Seerah Books Management (সীরাত গ্রন্থসমূহ)
+    // ==========================================
+    public function getSeerahBooks($activeOnly = false) {
+        $sql = "SELECT * FROM seerah_books";
+        if ($activeOnly) {
+            $sql .= " WHERE status = 'active'";
+        }
+        $sql .= " ORDER BY sort_order ASC, id ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    public function getSeerahBookById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM seerah_books WHERE id = :id");
+        $stmt->execute(['id' => (int)$id]);
+        return $stmt->fetch();
+    }
+
+    public function addSeerahBook($data) {
+        $stmt = $this->db->prepare("INSERT INTO seerah_books (title, author, description, drive_link, cover_image, color, sort_order, status) VALUES (:title, :author, :description, :drive_link, :cover_image, :color, :sort_order, :status)");
+        $res = $stmt->execute([
+            'title' => $data['title'],
+            'author' => !empty($data['author']) ? $data['author'] : null,
+            'description' => !empty($data['description']) ? $data['description'] : null,
+            'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
+            'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
+            'color' => !empty($data['color']) ? $data['color'] : '#10b981',
+            'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
+            'status' => !empty($data['status']) ? $data['status'] : 'active'
+        ]);
+        if ($res) {
+            \App\Helpers\Cache::clear();
+        }
+        return $res;
+    }
+
+    public function updateSeerahBook($id, $data) {
+        $stmt = $this->db->prepare("UPDATE seerah_books SET title = :title, author = :author, description = :description, drive_link = :drive_link, cover_image = :cover_image, color = :color, sort_order = :sort_order, status = :status WHERE id = :id");
+        $res = $stmt->execute([
+            'id' => (int)$id,
+            'title' => $data['title'],
+            'author' => !empty($data['author']) ? $data['author'] : null,
+            'description' => !empty($data['description']) ? $data['description'] : null,
+            'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
+            'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
+            'color' => !empty($data['color']) ? $data['color'] : '#10b981',
+            'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
+            'status' => !empty($data['status']) ? $data['status'] : 'active'
+        ]);
+        if ($res) {
+            \App\Helpers\Cache::clear();
+        }
+        return $res;
+    }
+
+    public function deleteSeerahBook($id) {
+        $stmt = $this->db->prepare("DELETE FROM seerah_books WHERE id = :id");
+        $res = $stmt->execute(['id' => (int)$id]);
+        if ($res) {
+            \App\Helpers\Cache::clear();
+        }
+        return $res;
+    }
 }
 
