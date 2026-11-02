@@ -1,52 +1,38 @@
 <?php require APPROOT . '/Views/inc/header.php'; ?>
 
 <!-- Dedicated Seerah (সীরাতুন নবী ﷺ) Library with Google Drive PDF Reader -->
-<div style="position: relative; background: radial-gradient(circle at 50% 30%, #064e3b 0%, #043e2f 45%, #022c22 100%); min-height: 100vh; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; padding-bottom: 60px;">
+<div style="position: relative; background: radial-gradient(circle at 50% 30%, #064e3b 0%, #043e2f 45%, #022c22 100%); min-height: 100vh; color: #ffffff; font-family: 'Hind Siliguri', sans-serif; padding: 20px 0 60px 0;">
     <!-- Authentic Islamic Geometric Pattern Overlay -->
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><path d=\'M40 0 L80 40 L40 80 L0 40 Z M40 10 L70 40 L40 70 L10 40 Z M40 20 L60 40 L40 60 L20 40 Z\' fill=\'none\' stroke=\'rgba(245, 158, 11, 0.07)\' stroke-width=\'1.2\'/></svg>'); background-repeat: repeat; opacity: 0.85; pointer-events: none; z-index: 1;"></div>
     
-    <!-- Top Sub-Header Control Banner -->
-    <div class="seerah-top-sub-banner" style="position: sticky; top: 0; z-index: 100; background: rgba(4, 47, 36, 0.95); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding: 18px 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.3);">
-        <div style="width: 100%; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 0 10px; box-sizing: border-box;">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <a href="<?= URLROOT ?>" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.12)';">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>হোম পেজ</span>
-                </a>
-                <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 900; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                    <i class="fas fa-mosque"></i>
-                </div>
-                <div>
-                    <h1 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff;" id="pageSeerahTitle">সীরাতুন নবী ﷺ লাইব্রেরি (Seerah Books)</h1>
-                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #a7f3d0;">বিশ্বখ্যাত সীরাত গ্রন্থসমূহ পড়ুন ও গুগল ড্রাইভ পিডিএফ অনলাইনে ব্রাউজ করুন</p>
-                </div>
-            </div>
-
-            <div class="seerah-search-box-row" style="display: flex; align-items: center; gap: 12px;">
-                <div style="position: relative; width: 280px; max-width: 100%;">
-                    <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6ee7b7; font-size: 0.85rem;"></i>
-                    <input type="text" id="pageSeerahSearchInput" oninput="filterSeerahBooks(this.value)" placeholder="সীরাত গ্রন্থ খুঁজুন..." style="width: 100%; padding: 9px 14px 9px 36px; background: rgba(6, 78, 59, 0.8); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; color: #fff; font-size: 0.88rem; outline: none; font-family: 'Hind Siliguri', sans-serif; box-sizing: border-box;">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Workspace Layout Grid (Left Sidebar with Books + Right PDF Viewer) -->
-    <div class="seerah-workspace-container" style="position: relative; z-index: 2; width: 100%; margin: 24px auto 0 auto; padding: 0 25px; box-sizing: border-box;">
+    <div class="seerah-workspace-container" style="position: relative; z-index: 2; width: 100%; margin: 0 auto; padding: 0 25px; box-sizing: border-box;">
         <div class="seerah-workspace-flex" style="display: flex; flex-wrap: wrap; gap: 24px; min-height: 75vh;">
             
-            <!-- Left Sidebar: Seerah Books List (Exactly matching Hadith page sidebar) -->
-            <div class="seerah-sidebar-box" style="width: 320px; flex-shrink: 0; background: rgba(4, 47, 36, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; height: calc(100vh - 120px); position: sticky; top: 100px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); z-index: 20;">
+            <!-- Left Sidebar: Seerah Books List (with Home button & search) -->
+            <div class="seerah-sidebar-box" style="width: 320px; flex-shrink: 0; background: rgba(4, 47, 36, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; height: calc(100vh - 40px); position: sticky; top: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); z-index: 20;">
                 
-                <!-- Sidebar Top Label -->
-                <div style="padding: 14px 16px; background: rgba(2, 44, 34, 0.95); border-bottom: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: space-between;">
-                    <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-book-journal-whills" style="color: #10b981;"></i>
-                        <span>সীরাত গ্রন্থসমূহ</span>
+                <!-- Sidebar Header: Home Button & Book Count Badge -->
+                <div style="padding: 14px 16px; background: rgba(2, 44, 34, 0.98); border-bottom: 1px solid rgba(16, 185, 129, 0.25); display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <a href="<?= URLROOT ?>" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.35)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.12)';">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>হোম পেজ</span>
+                        </a>
+                        <span style="font-size: 0.78rem; background: rgba(16, 185, 129, 0.25); color: #34d399; padding: 4px 10px; border-radius: 10px; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3);" id="sidebarBookCountBadge">
+                            <?= count($data['books'] ?? []) ?>টি বই
+                        </span>
                     </div>
-                    <span style="font-size: 0.78rem; background: rgba(16, 185, 129, 0.25); color: #34d399; padding: 2px 8px; border-radius: 10px; font-weight: 700;" id="sidebarBookCountBadge">
-                        <?= count($data['books'] ?? []) ?>টি বই
-                    </span>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: 900; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+                            <i class="fas fa-mosque"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1.05rem; color: #ffffff; line-height: 1.2;">সীরাতুন নবী ﷺ</div>
+                            <div style="font-size: 0.76rem; color: #a7f3d0;">সীরাত গ্রন্থসমূহ ও ড্রাইভ লাইব্রেরি</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sidebar Search Input -->
@@ -102,8 +88,8 @@
 
     .pdf-viewer-frame {
         width: 100%;
-        height: 75vh;
-        min-height: 580px;
+        height: 78vh;
+        min-height: 600px;
         border: none;
         border-radius: 14px;
         background: #0f172a;
@@ -113,7 +99,7 @@
     @media (max-width: 991px) {
         .seerah-workspace-container {
             padding: 0 14px !important;
-            margin-top: 14px !important;
+            margin-top: 10px !important;
         }
         .seerah-workspace-flex {
             flex-direction: column !important;
@@ -122,7 +108,7 @@
         .seerah-sidebar-box {
             width: 100% !important;
             height: auto !important;
-            max-height: 340px !important;
+            max-height: 380px !important;
             position: relative !important;
             top: 0 !important;
         }
@@ -131,27 +117,9 @@
             border-radius: 14px !important;
             min-width: 100% !important;
         }
-        .seerah-top-sub-banner {
-            padding: 12px 16px !important;
-        }
         .pdf-viewer-frame {
             height: 60vh !important;
             min-height: 440px !important;
-        }
-    }
-
-    @media (max-width: 640px) {
-        #pageSeerahTitle {
-            font-size: 1.15rem !important;
-        }
-        .seerah-search-box-row {
-            width: 100% !important;
-            margin-top: 10px !important;
-            justify-content: flex-start !important;
-        }
-        .seerah-search-box-row input {
-            flex: 1 !important;
-            width: 100% !important;
         }
     }
 </style>
