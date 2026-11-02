@@ -251,6 +251,12 @@ document.addEventListener("click", function(e) {
                         <span>হাদীস শরীফ</span>
                     </a>
 
+                    <!-- 2.5 Sirat (সীরাত) -->
+                    <a href="<?= URLROOT ?>/sirat" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(10px); padding: 9px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.92rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.14)'; this.style.transform='none';">
+                        <i class="fas fa-mosque" style="color: #fbbf24; font-size: 1.05rem;"></i>
+                        <span>সীরাত</span>
+                    </a>
+
                     <!-- 3. Prayer Times -->
                     <a href="<?= URLROOT ?>/prayer_times" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(10px); padding: 9px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; font-size: 0.92rem; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; text-decoration: none; transition: all 0.25s ease;" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.14)'; this.style.transform='none';">
                         <i class="fas fa-clock" style="color: #6ee7b7; font-size: 1.05rem;"></i>

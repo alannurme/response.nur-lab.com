@@ -23,6 +23,8 @@ $routes->get('posts/(:any)', 'Home::redirectBlog/$1');
 
 $routes->get('home/module/(:any)', 'Home::module/$1');
 $routes->get('module/(:any)', 'Home::module/$1');
+$routes->get('sirat', 'Home::sirat');
+$routes->get('seerah', 'Home::sirat');
 $routes->get('prophets-tree', 'ProphetsTree::index');
 $routes->get('profet-tree', 'ProphetsTree::index');
 $routes->get('records', 'Home::records');

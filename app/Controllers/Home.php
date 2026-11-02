@@ -1858,8 +1858,30 @@ class Home extends Controller {
         header('Location: ' . $redirectUrl);
         exit;
     }
+
+    public function sirat() {
+        $adminModel = $this->model('AdminModel');
+        $postModel = $this->model('PostModel');
+        
+        $db = \Config\Database::pdoConnect();
+        $stmt = $db->query("
+            SELECT p.id, p.title, p.slug, p.excerpt, p.views, p.fake_views, p.created_at,
+                   COALESCE(c.name, 'সীরাত ও নবীর চরিত্র') as main_category
+            FROM posts p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'published' AND (p.title LIKE '%রাসূল%' OR p.title LIKE '%নবী%' OR p.title LIKE '%সীরাত%' OR p.category_id = 163)
+            ORDER BY p.id DESC
+        ");
+        $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $data = [
+            'title' => 'সীরাতুন নবী ﷺ (Prophetic Biography)',
+            'settings' => $adminModel->getSettings(),
+            'menus' => $adminModel->getMenus(),
+            'sub_menus' => $adminModel->getSubMenus(),
+            'prayer_times' => $adminModel->getPrayerTimes(),
+            'posts' => $posts
+        ];
+        $this->view('home/sirat', $data);
+    }
 }
-
-
-
-
