@@ -2894,66 +2894,163 @@ class AdminModel extends Model {
     // ==========================================
     // Seerah Books Management (সীরাত গ্রন্থসমূহ)
     // ==========================================
+    public function initSeerahBooksTable() {
+        try {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `seerah_books` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `title` VARCHAR(255) NOT NULL,
+                    `author` VARCHAR(255) DEFAULT NULL,
+                    `description` TEXT DEFAULT NULL,
+                    `drive_link` TEXT DEFAULT NULL,
+                    `cover_image` VARCHAR(500) DEFAULT NULL,
+                    `color` VARCHAR(50) DEFAULT '#10b981',
+                    `sort_order` INT DEFAULT 0,
+                    `status` ENUM('active', 'inactive') DEFAULT 'active',
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+
+            // Seed default classical books if empty
+            $count = (int)$this->db->query("SELECT COUNT(*) FROM `seerah_books`")->fetchColumn();
+            if ($count === 0) {
+                $initialBooks = [
+                    [
+                        'title' => 'আর-রাহীকুল মাখতূম (The Sealed Nectar)',
+                        'author' => 'আল্লামা সফিউর রহমান মুবারকপুরী (রহ.)',
+                        'description' => 'রাবেতা আল-আলম আল-ইসলামী আয়োজিত সীরাতুন্নবী ﷺ প্রতিযোগিতায় প্রথম স্থান অধিকারী বিশ্বখ্যাত ও সর্বাধিক প্রামাণ্য সীরাত গ্রন্থ।',
+                        'drive_link' => '',
+                        'color' => '#10b981',
+                        'sort_order' => 1
+                    ],
+                    [
+                        'title' => 'সীরাতে ইবনে হিশাম (Sirat Ibn Hisham)',
+                        'author' => 'ইমাম আবু মুহাম্মদ আব্দুল মালিক ইবনে হিশাম (রহ.)',
+                        'description' => 'ইসলামের ইতিহাসের সর্বপ্রাচীন ও সর্বাধিক প্রামাণ্য সীরাত গ্রন্থ। ইবনে ইসহাকের সীরাতের পূর্ণাঙ্গ পরিমার্জিত সংকলন।',
+                        'drive_link' => '',
+                        'color' => '#3b82f6',
+                        'sort_order' => 2
+                    ],
+                    [
+                        'title' => 'আল-বিদায়া ওয়ান নিহায়া (সীরাতুন্নবী খণ্ড)',
+                        'author' => 'ইমাম হাফিজ ইবনে কাসীর (রহ.)',
+                        'description' => 'ইতিহাসবিদ ইবনে কাসীর রচিত সুপ্রসিদ্ধ বিশ্বকোষীয় ইতিহাস গ্রন্থের রাসূলুল্লাহ ﷺ-এর জীবনচরিত সম্বলিত ঐতিহাসিক খণ্ড।',
+                        'drive_link' => '',
+                        'color' => '#f59e0b',
+                        'sort_order' => 3
+                    ],
+                    [
+                        'title' => 'শামায়েলে তিরমিযী (Ash-Shama\'il)',
+                        'author' => 'ইমাম আবু ঈসা আত-তিরমিজী (রহ.)',
+                        'description' => 'রাসূলুল্লাহ ﷺ-এর অনুপম শারীরিক রূপ-লাবণ্য, পবিত্র স্বভাব, পোশাক-পরিচ্ছদ, আহার ও দৈনন্দিন সুন্নাহর প্রামাণ্য হাদীস সংকলন।',
+                        'drive_link' => '',
+                        'color' => '#8b5cf6',
+                        'sort_order' => 4
+                    ],
+                    [
+                        'title' => 'যাদুল মা\'আদ (Zad al-Ma\'ad)',
+                        'author' => 'আল্লামা ইবনুল কাইয়্যিম আল-জাওযিয়্যাহ (রহ.)',
+                        'description' => 'রাসূলুল্লাহ ﷺ-এর সার্বিক জীবনাদর্শ, ইবাদত, মুআমালাত, বিচার ও যুদ্ধনীতির প্রামাণ্য ফিক্বহী ও আত্মশুদ্ধিমূলক বিশ্লেষণ।',
+                        'drive_link' => '',
+                        'color' => '#ec4899',
+                        'sort_order' => 5
+                    ]
+                ];
+
+                $stmt = $this->db->prepare("INSERT INTO `seerah_books` (`title`, `author`, `description`, `drive_link`, `color`, `sort_order`, `status`) VALUES (?, ?, ?, ?, ?, ?, 'active')");
+                foreach ($initialBooks as $b) {
+                    $stmt->execute([$b['title'], $b['author'], $b['description'], $b['drive_link'], $b['color'], $b['sort_order']]);
+                }
+            }
+        } catch (\Throwable $e) {}
+    }
+
     public function getSeerahBooks($activeOnly = false) {
-        $sql = "SELECT * FROM seerah_books";
-        if ($activeOnly) {
-            $sql .= " WHERE status = 'active'";
+        $this->initSeerahBooksTable();
+        try {
+            $sql = "SELECT * FROM seerah_books";
+            if ($activeOnly) {
+                $sql .= " WHERE status = 'active'";
+            }
+            $sql .= " ORDER BY sort_order ASC, id ASC";
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll();
+        } catch (\Throwable $e) {
+            return [];
         }
-        $sql .= " ORDER BY sort_order ASC, id ASC";
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll();
     }
 
     public function getSeerahBookById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM seerah_books WHERE id = :id");
-        $stmt->execute(['id' => (int)$id]);
-        return $stmt->fetch();
+        $this->initSeerahBooksTable();
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM seerah_books WHERE id = :id");
+            $stmt->execute(['id' => (int)$id]);
+            return $stmt->fetch();
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     public function addSeerahBook($data) {
-        $stmt = $this->db->prepare("INSERT INTO seerah_books (title, author, description, drive_link, cover_image, color, sort_order, status) VALUES (:title, :author, :description, :drive_link, :cover_image, :color, :sort_order, :status)");
-        $res = $stmt->execute([
-            'title' => $data['title'],
-            'author' => !empty($data['author']) ? $data['author'] : null,
-            'description' => !empty($data['description']) ? $data['description'] : null,
-            'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
-            'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
-            'color' => !empty($data['color']) ? $data['color'] : '#10b981',
-            'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
-            'status' => !empty($data['status']) ? $data['status'] : 'active'
-        ]);
-        if ($res) {
-            \App\Helpers\Cache::clear();
+        $this->initSeerahBooksTable();
+        try {
+            $stmt = $this->db->prepare("INSERT INTO seerah_books (title, author, description, drive_link, cover_image, color, sort_order, status) VALUES (:title, :author, :description, :drive_link, :cover_image, :color, :sort_order, :status)");
+            $res = $stmt->execute([
+                'title' => $data['title'],
+                'author' => !empty($data['author']) ? $data['author'] : null,
+                'description' => !empty($data['description']) ? $data['description'] : null,
+                'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
+                'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
+                'color' => !empty($data['color']) ? $data['color'] : '#10b981',
+                'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
+                'status' => !empty($data['status']) ? $data['status'] : 'active'
+            ]);
+            if ($res) {
+                \App\Helpers\Cache::clear();
+            }
+            return $res;
+        } catch (\Throwable $e) {
+            return false;
         }
-        return $res;
     }
 
     public function updateSeerahBook($id, $data) {
-        $stmt = $this->db->prepare("UPDATE seerah_books SET title = :title, author = :author, description = :description, drive_link = :drive_link, cover_image = :cover_image, color = :color, sort_order = :sort_order, status = :status WHERE id = :id");
-        $res = $stmt->execute([
-            'id' => (int)$id,
-            'title' => $data['title'],
-            'author' => !empty($data['author']) ? $data['author'] : null,
-            'description' => !empty($data['description']) ? $data['description'] : null,
-            'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
-            'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
-            'color' => !empty($data['color']) ? $data['color'] : '#10b981',
-            'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
-            'status' => !empty($data['status']) ? $data['status'] : 'active'
-        ]);
-        if ($res) {
-            \App\Helpers\Cache::clear();
+        $this->initSeerahBooksTable();
+        try {
+            $stmt = $this->db->prepare("UPDATE seerah_books SET title = :title, author = :author, description = :description, drive_link = :drive_link, cover_image = :cover_image, color = :color, sort_order = :sort_order, status = :status WHERE id = :id");
+            $res = $stmt->execute([
+                'id' => (int)$id,
+                'title' => $data['title'],
+                'author' => !empty($data['author']) ? $data['author'] : null,
+                'description' => !empty($data['description']) ? $data['description'] : null,
+                'drive_link' => !empty($data['drive_link']) ? trim($data['drive_link']) : null,
+                'cover_image' => !empty($data['cover_image']) ? $data['cover_image'] : null,
+                'color' => !empty($data['color']) ? $data['color'] : '#10b981',
+                'sort_order' => isset($data['sort_order']) ? (int)$data['sort_order'] : 0,
+                'status' => !empty($data['status']) ? $data['status'] : 'active'
+            ]);
+            if ($res) {
+                \App\Helpers\Cache::clear();
+            }
+            return $res;
+        } catch (\Throwable $e) {
+            return false;
         }
-        return $res;
     }
 
     public function deleteSeerahBook($id) {
-        $stmt = $this->db->prepare("DELETE FROM seerah_books WHERE id = :id");
-        $res = $stmt->execute(['id' => (int)$id]);
-        if ($res) {
-            \App\Helpers\Cache::clear();
+        $this->initSeerahBooksTable();
+        try {
+            $stmt = $this->db->prepare("DELETE FROM seerah_books WHERE id = :id");
+            $res = $stmt->execute(['id' => (int)$id]);
+            if ($res) {
+                \App\Helpers\Cache::clear();
+            }
+            return $res;
+        } catch (\Throwable $e) {
+            return false;
         }
-        return $res;
     }
 }
 

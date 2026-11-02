@@ -1,6 +1,6 @@
 <?php require APPROOT . '/Views/admin/header.php'; ?>
 
-<?php $book = $data['book'] ?? []; ?>
+<?php $book = $book ?? $data['book'] ?? []; ?>
 
 <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
     <div>

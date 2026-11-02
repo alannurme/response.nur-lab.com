@@ -38,7 +38,7 @@
 <!-- Quick Stat Cards -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px;">
     <?php 
-        $allBooks = $data['books'] ?? [];
+        $allBooks = $books ?? $data['books'] ?? [];
         $totalBooks = count($allBooks);
         $withDrive = count(array_filter($allBooks, function($b) { return !empty($b['drive_link']); }));
         $activeBooks = count(array_filter($allBooks, function($b) { return ($b['status'] ?? 'active') === 'active'; }));

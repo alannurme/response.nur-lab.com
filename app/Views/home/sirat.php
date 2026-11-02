@@ -164,9 +164,9 @@
     }
 
     // Books provided dynamically from Database via Controller
-    const dbBooks = <?= json_encode($data['books'] ?? []) ?>;
+    const dbBooks = <?= json_encode($books ?? $data['books'] ?? []) ?>;
     // Related articles
-    const siteSeerahArticles = <?= json_encode($data['posts'] ?? []) ?>;
+    const siteSeerahArticles = <?= json_encode($posts ?? $data['posts'] ?? []) ?>;
 
     let currentSelectedBookId = dbBooks.length > 0 ? dbBooks[0].id : null;
 
