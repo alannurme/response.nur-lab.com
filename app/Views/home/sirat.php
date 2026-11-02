@@ -262,66 +262,28 @@
         const directDriveLink = book.drive_link || '#';
 
         body.innerHTML = `
-            <!-- Book Top Detail Banner -->
-            <div style="background: rgba(2, 44, 34, 0.85); border: 1px solid rgba(16,185,129,0.3); padding: 22px 24px; border-radius: 18px; margin-bottom: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.35);">
-                <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                    
-                    <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 260px;">
-                        ${book.cover_image ? `
-                            <img src="${book.cover_image}" alt="Cover" style="width: 60px; height: 75px; border-radius: 10px; object-fit: cover; box-shadow: 0 4px 14px rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.2);">
-                        ` : `
-                            <div style="width: 60px; height: 75px; border-radius: 10px; background: ${book.color || '#10b981'}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.7rem; box-shadow: 0 4px 14px rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.2); flex-shrink: 0;">
-                                <i class="fas fa-book"></i>
-                            </div>
-                        `}
-                        <div>
-                            <div style="font-size: 1.4rem; font-weight: 900; color: #ffffff; line-height: 1.35; margin-bottom: 4px;">
-                                ${book.title}
-                            </div>
-                            <div style="font-size: 0.95rem; color: #fef08a; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                                <i class="fas fa-pen-nib" style="color: #10b981;"></i> ${book.author || 'সীরাতুন্নবী ﷺ'}
-                            </div>
-                            ${book.description ? `
-                                <div style="font-size: 0.85rem; color: #d1fae5; margin-top: 6px; line-height: 1.6; max-width: 650px;">
-                                    ${book.description}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    <!-- Quick Viewer Action Buttons -->
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                        ${hasDrive ? `
-                            <a href="${directDriveLink}" target="_blank" style="background: rgba(16, 185, 129, 0.22); border: 1px solid #10b981; color: #34d399; padding: 7px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff';" onmouseout="this.style.background='rgba(16, 185, 129, 0.22)'; this.style.color='#34d399';">
-                                <i class="fab fa-google-drive"></i> ড্রাইভে খুলুন
-                            </a>
-                            <button onclick="togglePdfFullscreen()" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); color: #ffffff; padding: 7px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.22)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.12)';">
-                                <i class="fas fa-expand"></i> ফুলস্ক্রিন
-                            </button>
-                        ` : ''}
-                        <button onclick="shareBookLink('${book.title.replace(/'/g, "\\'")}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #60a5fa; padding: 7px 14px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-share-nodes"></i> শেয়ার
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
             <!-- PDF Viewer Interactive Box -->
             <div id="pdfViewerContainer" style="position: relative; background: #071f18; border: 1.5px solid rgba(16,185,129,0.35); border-radius: 18px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
                 
                 ${hasDrive ? `
                     <!-- PDF Viewer Header Bar -->
-                    <div style="background: rgba(2, 44, 34, 0.95); border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #a7f3d0; font-weight: 700;">
-                            <i class="fab fa-google-drive" style="color: #10b981; font-size: 1.05rem;"></i>
-                            <span>গুগল ড্রাইভ ইনবিল্ট পিডিএফ ভিউয়ার</span>
+                    <div style="background: rgba(2, 44, 34, 0.95); border-bottom: 1px solid rgba(16, 185, 129, 0.25); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 1rem; color: #ffffff; font-weight: 800;">
+                            <i class="fas fa-book-open" style="color: #10b981; font-size: 1.15rem;"></i>
+                            <span>${book.title}</span>
+                            ${book.author ? `<span style="font-size: 0.82rem; color: #a7f3d0; font-weight: 600;">(${book.author})</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <a href="${directDriveLink}" target="_blank" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-external-link-alt"></i> নতুন ট্যাবে খুলুন
+                            <a href="${directDriveLink}" target="_blank" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff';" onmouseout="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.color='#34d399';">
+                                <i class="fab fa-google-drive"></i> ড্রাইভে খুলুন
                             </a>
-                            <button onclick="reloadSeerahIframe()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;" title="ভিউয়ার রিলোড করুন">
+                            <button onclick="togglePdfFullscreen()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="ফুলস্ক্রিন">
+                                <i class="fas fa-expand"></i> ফুলস্ক্রিন
+                            </button>
+                            <button onclick="shareBookLink('${book.title.replace(/'/g, "\\'")}')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #60a5fa; padding: 5px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="শেয়ার">
+                                <i class="fas fa-share-nodes"></i>
+                            </button>
+                            <button onclick="reloadSeerahIframe()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;" title="ভিউয়ার রিলোড করুন">
                                 <i class="fas fa-rotate-right"></i>
                             </button>
                         </div>
