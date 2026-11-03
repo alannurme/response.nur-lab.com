@@ -4018,6 +4018,8 @@ body.organize-drag-active #organize-root-list {
                 matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-star" style="font-size: 8px;"></i> Title Match</span>`;
             } else if (post.match_badge === 'Keyword Match') {
                 matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-tag" style="font-size: 8px;"></i> Keyword Match</span>`;
+            } else if (post.match_badge === 'Content Match') {
+                matchBadgeHtml = `<span style="font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;"><i class="fas fa-file-alt" style="font-size: 8px;"></i> Content Match</span>`;
             } else {
                 matchBadgeHtml = `<span style="font-size: 10px; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;">Match</span>`;
             }

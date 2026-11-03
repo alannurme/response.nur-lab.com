@@ -201,8 +201,10 @@ class PostModel extends Model {
     }
 
     /**
-     * Fast, lightweight direct SQL search across posts (title, seo_keywords, excerpt, category name).
-     * Bypasses slow fulltext content scans for instant responsive search.
+     * Intelligent ranked search across posts:
+     * - Searches Title, Content, Excerpt, SEO Keywords, and Categories.
+     * - Ranks exact same-to-same title and phrase matches at the very top (Priority 1).
+     * - Matches in body content are included with high-relevance snippet extraction.
      */
     public function searchPostsFast($query, $limit = 60, $include_drafts = false, $categoryId = null) {
         $q = trim($query);
@@ -211,10 +213,9 @@ class PostModel extends Model {
         $statusClause = $include_drafts ? "1=1" : "p.status = 'published'";
         $categoryClause = "";
         $params = [
-            'q1' => '%' . $q . '%',
-            'q2' => '%' . $q . '%',
-            'q3' => '%' . $q . '%',
-            'q4' => '%' . $q . '%'
+            'q_exact' => $q,
+            'q_start' => $q . '%',
+            'q_like'  => '%' . $q . '%'
         ];
 
         if ($categoryId !== null) {
@@ -222,24 +223,60 @@ class PostModel extends Model {
             $params['cat_id'] = (int)$categoryId;
         }
 
+        $words = preg_split('/\s+/u', $q, -1, PREG_SPLIT_NO_EMPTY);
+        $whereParts = [
+            "(p.title LIKE :q_like OR p.seo_keywords LIKE :q_like OR p.excerpt LIKE :q_like OR p.content LIKE :q_like OR c2.name LIKE :q_like OR c.name LIKE :q_like)"
+        ];
+
+        $titleWordConditions = [];
+        $contentWordConditions = [];
+
+        if (count($words) > 1 && count($words) <= 6) {
+            $wordConditions = [];
+            foreach ($words as $idx => $w) {
+                $paramName = 'w_' . $idx;
+                $params[$paramName] = '%' . $w . '%';
+                $wordConditions[] = "(p.title LIKE :$paramName OR p.content LIKE :$paramName OR p.seo_keywords LIKE :$paramName OR p.excerpt LIKE :$paramName)";
+                $titleWordConditions[] = "p.title LIKE :$paramName";
+                $contentWordConditions[] = "p.content LIKE :$paramName";
+            }
+            $whereParts[] = "(" . implode(" AND ", $wordConditions) . ")";
+        }
+
+        $whereSql = "(" . implode(" OR ", $whereParts) . ")";
+
+        $caseScoreExtra = "";
+        if (!empty($titleWordConditions)) {
+            $caseScoreExtra .= "WHEN (" . implode(" AND ", $titleWordConditions) . ") THEN 500\n";
+        }
+        if (!empty($contentWordConditions)) {
+            $caseScoreExtra .= "WHEN (" . implode(" AND ", $contentWordConditions) . ") THEN 200\n";
+        }
+
         $sql = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
                        p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
+                       p.content,
                        COALESCE(c2.name, c.name, 'ইসলাম') as main_category,
-                       GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') as secondary_categories
+                       GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') as secondary_categories,
+                       (CASE 
+                            WHEN LOWER(TRIM(p.title)) = LOWER(:q_exact) THEN 1000
+                            WHEN LOWER(p.title) LIKE LOWER(:q_start) THEN 800
+                            WHEN LOWER(p.title) LIKE LOWER(:q_like) THEN 600
+                            $caseScoreExtra
+                            WHEN LOWER(p.seo_keywords) LIKE LOWER(:q_like) THEN 450
+                            WHEN LOWER(p.excerpt) LIKE LOWER(:q_like) THEN 400
+                            WHEN LOWER(p.content) LIKE LOWER(:q_like) THEN 350
+                            ELSE 100 
+                        END) as relevance_score
                 FROM posts p
                 LEFT JOIN post_categories pc ON p.id = pc.post_id
                 LEFT JOIN categories c ON pc.category_id = c.id
                 LEFT JOIN categories c2 ON p.category_id = c2.id
-                WHERE $statusClause $categoryClause 
-                  AND (p.title LIKE :q1 OR p.seo_keywords LIKE :q2 OR p.excerpt LIKE :q3 OR c2.name LIKE :q4)
+                WHERE $statusClause $categoryClause AND $whereSql
                 GROUP BY p.id
                 ORDER BY 
-                    CASE 
-                        WHEN p.title = :q_exact THEN 1
-                        WHEN p.title LIKE :q_start THEN 2
-                        WHEN p.title LIKE :q_like THEN 3
-                        ELSE 4 
-                    END,
+                    relevance_score DESC,
+                    p.views DESC,
                     p.id DESC
                 LIMIT :limit";
 
@@ -247,12 +284,97 @@ class PostModel extends Model {
         foreach ($params as $k => $v) {
             $stmt->bindValue(':' . $k, $v);
         }
-        $stmt->bindValue(':q_exact', $q);
-        $stmt->bindValue(':q_start', $q . '%');
-        $stmt->bindValue(':q_like', '%' . $q . '%');
         $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
         $stmt->execute();
+        $posts = $stmt->fetchAll();
 
-        return $stmt->fetchAll();
+        // Process badges, snippets, and highlights
+        $qLower = mb_strtolower($q, 'UTF-8');
+        $highlightTerms = array_merge([$q], $words);
+        usort($highlightTerms, function($a, $b) {
+            return mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
+        });
+
+        foreach ($posts as &$post) {
+            $titleLower = mb_strtolower($post['title'], 'UTF-8');
+            $keywordsLower = mb_strtolower($post['seo_keywords'] ?? '', 'UTF-8');
+            $excerptLower = mb_strtolower($post['excerpt'] ?? '', 'UTF-8');
+            $rawContent = $post['content'] ?? '';
+            $cleanContent = trim(preg_replace('/\s+/u', ' ', strip_tags($rawContent)));
+            $contentLower = mb_strtolower($cleanContent, 'UTF-8');
+
+            $isExactTitle = ($titleLower === $qLower);
+            $isTitleMatch = (mb_strpos($titleLower, $qLower) !== false);
+            $isKeywordMatch = (mb_strpos($keywordsLower, $qLower) !== false || mb_strpos($excerptLower, $qLower) !== false);
+            $isContentMatch = (mb_strpos($contentLower, $qLower) !== false);
+
+            if (!$isTitleMatch && count($words) > 1) {
+                $allInTitle = true;
+                foreach ($words as $w) {
+                    if (mb_strpos($titleLower, mb_strtolower($w, 'UTF-8')) === false) {
+                        $allInTitle = false;
+                        break;
+                    }
+                }
+                if ($allInTitle) $isTitleMatch = true;
+            }
+
+            if ($isExactTitle || $isTitleMatch) {
+                $post['match_badge'] = 'Title Match';
+            } elseif ($isKeywordMatch) {
+                $post['match_badge'] = 'Keyword Match';
+            } else {
+                $post['match_badge'] = 'Content Match';
+            }
+
+            // Safe Title Highlighting
+            $highlightedTitle = htmlspecialchars($post['title']);
+            foreach ($highlightTerms as $term) {
+                if (mb_strlen($term, 'UTF-8') >= 2) {
+                    $highlightedTitle = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedTitle);
+                }
+            }
+            $post['highlighted_title'] = $highlightedTitle;
+
+            // Snippet extraction around the matched word
+            $snippetText = '';
+            $pos = mb_stripos($cleanContent, $q, 0, 'UTF-8');
+            if ($pos === false && !empty($words)) {
+                foreach ($words as $w) {
+                    $pos = mb_stripos($cleanContent, $w, 0, 'UTF-8');
+                    if ($pos !== false) break;
+                }
+            }
+
+            if ($pos !== false) {
+                $start = max(0, $pos - 45);
+                $length = mb_strlen($q, 'UTF-8') + 120;
+                $snippetPart = mb_substr($cleanContent, $start, $length, 'UTF-8');
+                $prefix = ($start > 0) ? '... ' : '';
+                $suffix = (mb_strlen($cleanContent, 'UTF-8') > ($start + $length)) ? ' ...' : '';
+                $snippetText = $prefix . $snippetPart . $suffix;
+            } elseif (!empty($post['excerpt'])) {
+                $snippetText = trim(strip_tags($post['excerpt']));
+            } else {
+                $snippetText = mb_substr($cleanContent, 0, 130, 'UTF-8') . (mb_strlen($cleanContent, 'UTF-8') > 130 ? '...' : '');
+            }
+
+            $post['snippet'] = $snippetText;
+
+            // Highlighted Snippet
+            $escapedSnippet = htmlspecialchars($snippetText);
+            $highlightedSnippet = $escapedSnippet;
+            foreach ($highlightTerms as $term) {
+                if (mb_strlen($term, 'UTF-8') >= 2) {
+                    $highlightedSnippet = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedSnippet);
+                }
+            }
+            $post['highlighted_snippet'] = $highlightedSnippet;
+
+            // Set content to short snippet so memory & JSON payload remain light
+            $post['content'] = $snippetText;
+        }
+
+        return $posts;
     }
 }
