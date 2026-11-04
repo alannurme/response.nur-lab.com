@@ -201,20 +201,17 @@
         min-height: 240px;
         overflow-y: auto;
         padding-right: 4px;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
     }
     #sidebar-posts-subcontent #sidebar-tree-card {
         overflow: visible !important;
         max-height: none !important;
     }
     #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar {
-        width: 4px;
-    }
-    #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-    }
-    #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
 
     /* Quick View TOC (সূচিপত্র) Popover Styles */
@@ -501,20 +498,15 @@
         transition: max-height 0.2s ease;
     }
 
-    /* Custom elegant scrollbar for the explorer sidebar cards */
+    /* Hide scrollbar for the explorer sidebar cards */
     .sidebar-card::-webkit-scrollbar {
-        width: 6px;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
-    .sidebar-card::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 4px;
-    }
-    .sidebar-card::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-    }
-    .sidebar-card::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+    .sidebar-card {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
     }
 
     /* Footnote Tooltip styles */

@@ -446,23 +446,15 @@ if (empty($current_page)) {
             flex-direction: column;
             overflow-y: auto;
             overflow-x: visible !important;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
             font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
             box-shadow: 1px 0 6px rgba(0, 0, 0, 0.02);
         }
         .sidebar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.25);
-            border-radius: 10px;
-        }
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 0.4);
-        }
-        .sidebar::-webkit-scrollbar-track {
-            background: transparent;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         .sidebar-logo {
