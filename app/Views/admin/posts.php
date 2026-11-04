@@ -226,6 +226,7 @@
         font-size: 14px;
         line-height: 1.5;
         padding-right: 4px;
+        scroll-behavior: smooth;
     }
     #quickViewTocContent::-webkit-scrollbar {
         width: 4px;
@@ -240,41 +241,69 @@
         margin: 0 !important;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
     }
     #quickViewTocContent .toc-item {
         list-style: none !important;
+        border-radius: 8px;
+        transition: all 0.2s ease;
     }
     #quickViewTocContent .toc-item a {
         text-decoration: none;
         color: #475569;
         font-weight: 600;
-        display: inline-flex;
+        display: flex;
         align-items: flex-start;
-        gap: 6px;
-        transition: color 0.2s ease;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        line-height: 1.45;
+        border-left: 3px solid transparent;
+        background: transparent;
     }
     #quickViewTocContent .toc-item a:hover {
         color: #059669;
+        background: #f0fdf4;
     }
     #quickViewTocContent .toc-number {
         color: #059669;
         font-weight: 700;
+        flex-shrink: 0;
+        transition: color 0.2s ease;
     }
     #quickViewTocContent .toc-h3 {
-        padding-left: 15px !important;
+        padding-left: 14px !important;
     }
     #quickViewTocContent .toc-h3 a {
         font-size: 13px;
         font-weight: 500;
     }
     #quickViewTocContent .toc-h4 {
-        padding-left: 30px !important;
+        padding-left: 28px !important;
     }
     #quickViewTocContent .toc-h4 a {
         font-size: 12px;
         font-weight: 400;
         color: #64748b;
+    }
+
+    /* Active Selected State in Table of Contents */
+    #quickViewTocContent .toc-item.active {
+        background: #ecfdf5;
+    }
+    #quickViewTocContent .toc-item.active > a,
+    #quickViewTocContent .toc-item a.active {
+        color: #065f46 !important;
+        background: #ecfdf5 !important;
+        border-left: 3px solid #059669 !important;
+        font-weight: 700 !important;
+        box-shadow: 0 1px 4px rgba(5, 150, 105, 0.15) !important;
+    }
+    #quickViewTocContent .toc-item.active .toc-number,
+    #quickViewTocContent .toc-item a.active .toc-number {
+        color: #047857 !important;
+        font-weight: 800 !important;
     }
 
     /* Heading Highlight on scroll click */
@@ -5417,7 +5446,7 @@ body.organize-drag-active #organize-root-list {
                 headings.forEach((heading, idx) => {
                     const headingId = 'admin-heading-sec-' + idx;
                     heading.id = headingId;
-                    heading.style.scrollMarginTop = '24px';
+                    heading.style.scrollMarginTop = '80px';
 
                     const level = heading.tagName.toLowerCase();
                     let numberPrefix = '';
@@ -5450,11 +5479,24 @@ body.organize-drag-active #organize-root-list {
 
                     link.addEventListener('click', function(clickEvent) {
                         clickEvent.preventDefault();
+
+                        // Immediately mark as active in TOC
+                        tocContent.querySelectorAll('.toc-item').forEach(el => {
+                            el.classList.remove('active');
+                            const a = el.querySelector('a');
+                            if (a) a.classList.remove('active');
+                        });
+                        listItem.classList.add('active');
+                        link.classList.add('active');
+
                         heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         heading.classList.add('highlight-heading');
                         setTimeout(() => heading.classList.remove('highlight-heading'), 2000);
-                        // Auto-close TOC popover after clicking heading
-                        toggleQuickViewTocMenu(false);
+
+                        // Only auto-close on very small mobile screens (< 768px)
+                        if (window.innerWidth < 768) {
+                            toggleQuickViewTocMenu(false);
+                        }
                     });
 
                     listItem.appendChild(link);
@@ -5462,6 +5504,7 @@ body.organize-drag-active #organize-root-list {
                 });
 
                 tocContent.appendChild(tocList);
+                setTimeout(updateQuickViewTocActiveItem, 150);
                 if (tocBtn) {
                     tocBtn.style.opacity = '1';
                     tocBtn.style.pointerEvents = 'auto';
@@ -6045,6 +6088,7 @@ body.organize-drag-active #organize-root-list {
             if (icon) icon.className = 'fas fa-times';
             if (label) label.textContent = 'CLOSE';
             if (btn) btn.style.background = 'linear-gradient(180deg, #ef4444, #dc2626)';
+            setTimeout(updateQuickViewTocActiveItem, 30);
         } else {
             menu.style.display = 'none';
             if (icon) icon.className = 'fas fa-list-ol';
@@ -6069,6 +6113,84 @@ body.organize-drag-active #organize-root-list {
         }
     });
 
+    // Auto Scrollspy: Highlight currently visible section in Table of Contents (সূচিপত্র)
+    function updateQuickViewTocActiveItem() {
+        const detailPanel = document.getElementById('explorerPostDetailView');
+        if (!detailPanel || detailPanel.style.display === 'none') return;
+
+        const tocContent = document.getElementById('quickViewTocContent');
+        if (!tocContent) return;
+
+        const bodyEl = document.getElementById('detailViewContent');
+        if (!bodyEl) return;
+
+        const headings = bodyEl.querySelectorAll('h2, h3, h4');
+        if (!headings || headings.length === 0) return;
+
+        // Viewport trigger threshold: heading is considered active if top <= 160px
+        const triggerOffset = 160;
+        let currentActiveId = null;
+
+        const isNearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 70);
+        if (isNearBottom) {
+            currentActiveId = headings[headings.length - 1].id;
+        } else {
+            for (let i = 0; i < headings.length; i++) {
+                const rect = headings[i].getBoundingClientRect();
+                if (rect.top <= triggerOffset) {
+                    currentActiveId = headings[i].id;
+                } else {
+                    break;
+                }
+            }
+            if (!currentActiveId && headings.length > 0) {
+                const firstRect = headings[0].getBoundingClientRect();
+                if (firstRect.top <= window.innerHeight * 0.75) {
+                    currentActiveId = headings[0].id;
+                }
+            }
+        }
+
+        if (!currentActiveId) return;
+
+        const tocItems = tocContent.querySelectorAll('.toc-item');
+        let activeItem = null;
+
+        tocItems.forEach(item => {
+            const link = item.querySelector('a');
+            if (link && link.getAttribute('href') === '#' + currentActiveId) {
+                if (!item.classList.contains('active')) {
+                    item.classList.add('active');
+                    link.classList.add('active');
+                }
+                activeItem = item;
+            } else {
+                item.classList.remove('active');
+                if (link) link.classList.remove('active');
+            }
+        });
+
+        // Ensure active item is smoothly scrolled into view inside the TOC container
+        if (activeItem) {
+            const tocMenu = document.getElementById('quickViewTocMenu');
+            if (tocMenu && tocMenu.style.display !== 'none') {
+                activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+    }
+
+    // Scroll listener with requestAnimationFrame throttling for smooth performance
+    let isTocScrollTicking = false;
+    window.addEventListener('scroll', function() {
+        if (!isTocScrollTicking) {
+            window.requestAnimationFrame(function() {
+                updateQuickViewTocActiveItem();
+                isTocScrollTicking = false;
+            });
+            isTocScrollTicking = true;
+        }
+    }, { passive: true });
+
     // Smooth scroll to top of Quick View post
     function scrollQuickViewToTop() {
         const detailView = document.getElementById('explorerPostDetailView');
@@ -6076,6 +6198,7 @@ body.organize-drag-active #organize-root-list {
             detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(updateQuickViewTocActiveItem, 350);
     }
 
     // Print / Save as PDF
