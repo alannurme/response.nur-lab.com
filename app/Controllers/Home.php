@@ -1502,31 +1502,90 @@ class Home extends Controller {
 
         $tafsirTitle = $tafsirNames[$tafsirId] ?? 'তাফসীর';
 
-        $apiUrl = "https://api.quran.com/api/v4/quran/tafsirs/{$tafsirId}?verse_key={$surahNum}:{$ayahNum}";
-        $ch = curl_init($apiUrl);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_USERAGENT      => 'Mozilla/5.0 IslamicApp/1.0',
-        ]);
-        $resp = curl_exec($ch);
-        curl_close($ch);
+        // Check Cache first (Quran tafsirs do not change, cache for 7 days)
+        $cacheKey = "quran_tafsir_{$tafsirId}_{$surahNum}_{$ayahNum}";
+        $cachedData = \App\Helpers\Cache::get($cacheKey);
+        if ($cachedData && !empty($cachedData['text'])) {
+            echo json_encode([
+                'success' => true,
+                'source'  => 'cache',
+                'tafsir'  => $cachedData
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
-        if ($resp) {
-            $json = json_decode($resp, true);
-            if (isset($json['tafsirs'][0]['text']) && !empty($json['tafsirs'][0]['text'])) {
-                echo json_encode([
-                    'success' => true,
-                    'source'  => 'live_api',
-                    'tafsir'  => [
-                        'resource_name' => $tafsirTitle,
-                        'text'          => $json['tafsirs'][0]['text']
-                    ]
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
+        $fetchJson = function($url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 8,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) IslamicApp/1.0',
+            ]);
+            $resp = curl_exec($ch);
+            curl_close($ch);
+            return $resp ? json_decode($resp, true) : null;
+        };
+
+        // 1. Primary: Official Quran.com endpoint for specific single tafsir by ayah
+        $primaryUrl = "https://api.quran.com/api/v4/tafsirs/{$tafsirId}/by_ayah/{$surahNum}:{$ayahNum}";
+        $json = $fetchJson($primaryUrl);
+
+        $tafsirText = '';
+        if (!empty($json['tafsir']['text'])) {
+            $tafsirText = $json['tafsir']['text'];
+        } elseif (isset($json['tafsirs']) && is_array($json['tafsirs'])) {
+            foreach ($json['tafsirs'] as $item) {
+                if (isset($item['resource_id']) && (string)$item['resource_id'] === (string)$tafsirId && !empty($item['text'])) {
+                    $tafsirText = $item['text'];
+                    break;
+                }
             }
+        }
+
+        // 2. If not found in primary endpoint, query bulk endpoint with verse_key and find matching resource_id
+        if (empty($tafsirText)) {
+            $bulkUrl = "https://api.quran.com/api/v4/quran/tafsirs?verse_key={$surahNum}:{$ayahNum}";
+            $bulkJson = $fetchJson($bulkUrl);
+            if (!empty($bulkJson['tafsirs']) && is_array($bulkJson['tafsirs'])) {
+                foreach ($bulkJson['tafsirs'] as $item) {
+                    if (isset($item['resource_id']) && (string)$item['resource_id'] === (string)$tafsirId && !empty($item['text'])) {
+                        $tafsirText = $item['text'];
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback: If requested Bengali tafsir is empty for this specific verse, try other Bengali tafsirs
+        if (empty($tafsirText) && in_array($tafsirId, ['164', '165', '166', '381'])) {
+            $fallbackIds = ['165', '166', '164', '381'];
+            foreach ($fallbackIds as $fbId) {
+                if ($fbId === $tafsirId) continue;
+                $fbUrl = "https://api.quran.com/api/v4/tafsirs/{$fbId}/by_ayah/{$surahNum}:{$ayahNum}";
+                $fbJson = $fetchJson($fbUrl);
+                if (!empty($fbJson['tafsir']['text'])) {
+                    $tafsirText = $fbJson['tafsir']['text'];
+                    $tafsirTitle = ($tafsirNames[$fbId] ?? 'তাফসীর') . ' (বিকল্প)';
+                    break;
+                }
+            }
+        }
+
+        if (!empty($tafsirText)) {
+            $tafsirResult = [
+                'resource_name' => $tafsirTitle,
+                'text'          => $tafsirText
+            ];
+            \App\Helpers\Cache::set($cacheKey, $tafsirResult, 604800);
+
+            echo json_encode([
+                'success' => true,
+                'source'  => 'live_api',
+                'tafsir'  => $tafsirResult
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
 
         echo json_encode(['success' => false, 'error' => 'not_found']);
