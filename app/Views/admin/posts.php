@@ -2429,10 +2429,10 @@ if (!empty($data['breadcrumbs'])) {
                 <div id="detailViewContent" class="post-body">
                     <!-- Content will load dynamically -->
                 </div>
-                <!-- Floating Master Action Button & Speed Dial Menu (Replaces obsolete audio reader) -->
-                <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 28px; right: 28px; z-index: 99999; flex-direction: column; align-items: flex-end; gap: 12px;">
+                <!-- Floating Master Action Button & Speed Dial Menu (Docked on Right Edge with 1:3 ratio) -->
+                <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 60px; right: 0; z-index: 99999; flex-direction: column; align-items: flex-end; gap: 10px;">
                     <!-- Expanded Master Menu Card -->
-                    <div id="quickViewMasterMenu" style="display: none; width: 310px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <div id="quickViewMasterMenu" style="display: none; width: 310px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-right: 12px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
                         
                         <!-- Header with Close & Title -->
                         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;">
@@ -2510,10 +2510,17 @@ if (!empty($data['breadcrumbs'])) {
                         </div>
                     </div>
 
-                    <!-- Master Trigger Button (Floating Round) -->
-                    <button id="quickViewMasterBtn" type="button" onclick="toggleQuickViewMasterMenu()" title="কুইক অ্যাকশন টুলস (Tools Menu)" style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 6px 20px rgba(37,99,235,0.45); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); outline: none;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">
-                        <i class="fas fa-sliders-h" id="quickViewMasterIcon"></i>
-                    </button>
+                    <!-- Right Dock Button Group (Width 1 : Height 3 Ratio - Allows stacking up to 3 buttons) -->
+                    <div id="quickViewDockButtons" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        <!-- Button Slot 1: Master Tools & Font Controller (Width: 36px, Height: 108px -> 1:3 ratio) -->
+                        <button id="quickViewMasterBtn" type="button" class="qv-dock-btn qv-dock-btn-primary" onclick="toggleQuickViewMasterMenu()" title="কুইক কন্ট্রোল ও ফন্ট সাইজ (Tools Menu)">
+                            <i class="fas fa-sliders-h" id="quickViewMasterIcon" style="font-size: 16px;"></i>
+                            <span id="quickViewMasterBtnLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">TOOLS</span>
+                        </button>
+
+                        <!-- Button Slot 2: (Available for 2nd button - same 1:3 ratio) -->
+                        <!-- Button Slot 3: (Available for 3rd button - same 1:3 ratio) -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -2964,6 +2971,37 @@ if (!function_exists('renderOrganizeCategoryTree')) {
 </div>
 
 <style>
+/* Right Edge Dock Buttons (1:3 Aspect Ratio) */
+.qv-dock-btn {
+    width: 36px;
+    height: 108px;
+    border-radius: 12px 0 0 12px;
+    border: none;
+    border-right: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    user-select: none;
+    padding: 0;
+    box-shadow: -4px 4px 16px rgba(0, 0, 0, 0.2);
+}
+.qv-dock-btn:hover {
+    width: 44px;
+    box-shadow: -6px 6px 22px rgba(0, 0, 0, 0.3);
+}
+.qv-dock-btn-primary {
+    background: linear-gradient(180deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    box-shadow: -4px 4px 18px rgba(37, 99, 235, 0.42);
+}
+.qv-dock-btn-primary:hover {
+    box-shadow: -6px 6px 24px rgba(37, 99, 235, 0.6);
+}
 @keyframes qvMenuSlideUp {
     from {
         opacity: 0;
@@ -5463,6 +5501,10 @@ body.organize-drag-active #organize-root-list {
         if (masterMenu) masterMenu.style.display = 'none';
         const masterIcon = document.getElementById('quickViewMasterIcon');
         if (masterIcon) masterIcon.className = 'fas fa-sliders-h';
+        const masterLabel = document.getElementById('quickViewMasterBtnLabel');
+        if (masterLabel) masterLabel.textContent = 'TOOLS';
+        const masterBtn = document.getElementById('quickViewMasterBtn');
+        if (masterBtn) masterBtn.style.background = 'linear-gradient(180deg, #2563eb, #1d4ed8)';
 
         const listPanel = document.getElementById('explorerListView');
         const detailPanel = document.getElementById('explorerPostDetailView');
@@ -5872,16 +5914,19 @@ body.organize-drag-active #organize-root-list {
         const menu = document.getElementById('quickViewMasterMenu');
         const icon = document.getElementById('quickViewMasterIcon');
         const btn = document.getElementById('quickViewMasterBtn');
+        const label = document.getElementById('quickViewMasterBtnLabel');
         if (!menu) return;
 
         if (menu.style.display === 'none' || menu.style.display === '') {
             menu.style.display = 'block';
             if (icon) icon.className = 'fas fa-times';
-            if (btn) btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            if (label) label.textContent = 'CLOSE';
+            if (btn) btn.style.background = 'linear-gradient(180deg, #ef4444, #dc2626)';
         } else {
             menu.style.display = 'none';
             if (icon) icon.className = 'fas fa-sliders-h';
-            if (btn) btn.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+            if (label) label.textContent = 'TOOLS';
+            if (btn) btn.style.background = 'linear-gradient(180deg, #2563eb, #1d4ed8)';
         }
     }
 
