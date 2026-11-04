@@ -2214,9 +2214,9 @@ if (!empty($data['breadcrumbs'])) {
                                              <button type="button" onclick="copyPostLink('<?= URLROOT ?>/p/<?= $post['id'] ?>', this)" style="color: #6366f1; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
                                                  <i class="far fa-copy"></i> Copy Link
                                              </button>
-                                             <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                                             <button type="button" onclick="openQuickView(event, <?= $post['id'] ?>)" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
                                                  <i class="far fa-eye"></i> View
-                                             </a>
+                                             </button>
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" style="color: #059669; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                                                  <i class="far fa-edit"></i> Edit
                                              </a>
@@ -2298,9 +2298,9 @@ if (!empty($data['breadcrumbs'])) {
                                              <button type="button" class="btn-row-action" title="Copy Direct Link (সরাসরি লিঙ্ক কপি করুন)" onclick="copyPostLink('<?= URLROOT ?>/p/<?= $post['id'] ?>', this)">
                                                  <i class="far fa-copy"></i>
                                              </button>
-                                             <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="btn-row-action" title="View on Live Site">
+                                             <button type="button" class="btn-row-action" title="Quick View (ইন-প্যানেল ভিউ দেখুন)" onclick="openQuickView(event, <?= $post['id'] ?>)">
                                                  <i class="far fa-eye"></i>
-                                             </a>
+                                             </button>
                                              <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>?page=<?= $data['currentPageNum'] ?? 1 ?>&category_id=<?= $data['categoryId'] ?? '' ?>" class="btn-row-action" title="Edit Article">
                                                  <i class="far fa-edit"></i>
                                              </a>
@@ -5223,8 +5223,6 @@ body.organize-drag-active #organize-root-list {
         const imgEl = document.getElementById('detailViewImage');
         const dateEl = document.getElementById('detailViewDate');
         const statusEl = document.getElementById('detailViewStatus');
-        const tocContainer = document.getElementById('quickViewTocContainer');
-        const tocContent = document.getElementById('quickViewTocContent');
         const fontDisplayEl = document.getElementById('fontSizeDisplay');
 
         if (titleEl) titleEl.textContent = data.title || '';
