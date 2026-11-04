@@ -205,7 +205,7 @@ class PostModel extends Model {
      */
     private function getBengaliStem($w) {
         $w = trim($w);
-        $suffixes = ['গুলো', 'গুলি', 'সমূহ', 'দের', 'য়ের', 'ের', 'কে', 'তে', 'র', 'ে', 'য়'];
+        $suffixes = ['গুলোর', 'গুলো', 'গুলির', 'গুলি', 'সমূহের', 'সমূহ', 'দের', 'য়ের', 'এর', 'ের', 'কে', 'তে', 'র', 'ে', 'য়'];
         foreach ($suffixes as $suf) {
             if (mb_strlen($w, 'UTF-8') > (mb_strlen($suf, 'UTF-8') + 2)) {
                 if (mb_substr($w, -mb_strlen($suf, 'UTF-8'), null, 'UTF-8') === $suf) {
@@ -217,48 +217,73 @@ class PostModel extends Model {
     }
 
     /**
-     * Generate common Bengali spelling / phonetic variants (e.g. দ <-> ধ, ু <-> ূ, স <-> শ, জ <-> য, ি <-> ী)
+     * Generate common Bengali spelling / phonetic variants (e.g. দ <-> ধ, ু <-> ূ, স <-> শ <-> ষ, জ <-> য, ি <-> ী)
      */
     private function getBengaliSearchVariants($w) {
         $vars = [$w];
         $stem = $this->getBengaliStem($w);
         if ($stem !== $w) $vars[] = $stem;
         
-        // Typo / phonetic swaps (Avro & spelling variations)
-        if (mb_strpos($w, 'দ') !== false) {
-            $vars[] = str_replace('দ', 'ধ', $w);
-            if ($stem !== $w) $vars[] = str_replace('দ', 'ধ', $stem);
-        }
-        if (mb_strpos($w, 'ধ') !== false) {
-            $vars[] = str_replace('ধ', 'দ', $w);
-            if ($stem !== $w) $vars[] = str_replace('ধ', 'দ', $stem);
-        }
-        if (mb_strpos($w, 'ু') !== false) {
-            $vars[] = str_replace('ু', 'ূ', $w);
-            if ($stem !== $w) $vars[] = str_replace('ু', 'ূ', $stem);
-        }
-        if (mb_strpos($w, 'ূ') !== false) {
-            $vars[] = str_replace('ূ', 'ু', $w);
-            if ($stem !== $w) $vars[] = str_replace('ূ', 'ু', $stem);
-        }
-        if (mb_strpos($w, 'স') !== false) {
-            $vars[] = str_replace('স', 'শ', $w);
-            if ($stem !== $w) $vars[] = str_replace('স', 'শ', $stem);
-        }
-        if (mb_strpos($w, 'শ') !== false) {
-            $vars[] = str_replace('শ', 'স', $w);
-            if ($stem !== $w) $vars[] = str_replace('শ', 'স', $stem);
-        }
-        if (mb_strpos($w, 'জ') !== false) {
-            $vars[] = str_replace('জ', 'য', $w);
-            if ($stem !== $w) $vars[] = str_replace('জ', 'য', $stem);
-        }
-        if (mb_strpos($w, 'য') !== false) {
-            $vars[] = str_replace('য', 'জ', $w);
-            if ($stem !== $w) $vars[] = str_replace('য', 'জ', $stem);
+        $swaps = [
+            ['দ', 'ধ'],
+            ['ু', 'ূ'],
+            ['স', 'শ'],
+            ['শ', 'ষ'],
+            ['স', 'ষ'],
+            ['জ', 'য'],
+            ['ি', 'ী'],
+            ['ত', 'থ'],
+            ['ব', 'ভ'],
+            ['ন', 'ণ'],
+            ['ড়', 'ঢ়'],
+            ['র', 'ড়']
+        ];
+
+        foreach ([$w, $stem] as $item) {
+            foreach ($swaps as [$from, $to]) {
+                if (mb_strpos($item, $from) !== false) {
+                    $vars[] = str_replace($from, $to, $item);
+                }
+                if (mb_strpos($item, $to) !== false) {
+                    $vars[] = str_replace($to, $from, $item);
+                }
+            }
         }
 
         return array_unique(array_filter($vars));
+    }
+
+    /**
+     * Get lightweight indexed catalogue of all posts for instant 0ms client-side live search.
+     * Cached in memory for high-performance instant filtering.
+     */
+    public function getAllPostsForSearchCatalog() {
+        return \App\Helpers\Cache::remember('all_posts_search_catalog', 1800, function() {
+            $stmt = $this->db->query("SELECT p.id, p.title, p.slug, p.status, p.created_at, p.views, p.excerpt, p.seo_keywords, p.category_id
+                                      FROM posts p
+                                      ORDER BY p.id DESC");
+            $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $catStmt = $this->db->query("SELECT pc.post_id, c.name FROM post_categories pc JOIN categories c ON pc.category_id = c.id");
+            $catMap = [];
+            while ($row = $catStmt->fetch(\PDO::FETCH_ASSOC)) {
+                $catMap[$row['post_id']][] = $row['name'];
+            }
+
+            $c2Stmt = $this->db->query("SELECT id, name FROM categories");
+            $directCatMap = [];
+            while ($row = $c2Stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $directCatMap[$row['id']] = $row['name'];
+            }
+
+            foreach ($posts as &$p) {
+                $main = $directCatMap[$p['category_id']] ?? ($catMap[$p['id']][0] ?? 'ইসলাম');
+                $p['main_category'] = $main;
+                $p['secondary_categories'] = isset($catMap[$p['id']]) ? implode(', ', $catMap[$p['id']]) : '';
+                unset($p['category_id']);
+            }
+            return $posts;
+        });
     }
 
     /**
@@ -352,8 +377,8 @@ class PostModel extends Model {
         $stmt->execute();
         $posts = $stmt->fetchAll();
 
-        // Tier 2: If Tier 1 has fewer than 15 results (e.g. content-only matches), search content
-        if (count($posts) < 15) {
+        // Tier 2: If Tier 1 has fewer than 25 results, search content body
+        if (count($posts) < 25) {
             $existingIds = !empty($posts) ? array_column($posts, 'id') : [];
             $notInClause = !empty($existingIds) ? ("AND p.id NOT IN (" . implode(',', array_map('intval', $existingIds)) . ")") : "";
             
@@ -363,14 +388,19 @@ class PostModel extends Model {
             if (!empty($words)) {
                 $cWordOr = [];
                 foreach ($words as $wIdx => $w) {
-                    $cKey = "cw_" . $wIdx;
-                    $contentParams[$cKey] = '%' . $this->getBengaliStem($w) . '%';
-                    $cWordOr[] = "p.content LIKE :$cKey";
+                    $variants = $this->getBengaliSearchVariants($w);
+                    $subOr = [];
+                    foreach ($variants as $vIdx => $v) {
+                        $cKey = "cw_{$wIdx}_{$vIdx}";
+                        $contentParams[$cKey] = '%' . $v . '%';
+                        $subOr[] = "p.content LIKE :$cKey";
+                    }
+                    $cWordOr[] = "(" . implode(" OR ", $subOr) . ")";
                 }
                 $contentWhere = "(p.content LIKE :qc_like OR (" . implode(" OR ", $cWordOr) . "))";
             }
 
-            $neededLimit = max(10, (int)$limit - count($posts));
+            $neededLimit = max(10, min(20, (int)$limit - count($posts)));
             $sqlTier2 = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
                                 p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
                                 (CASE 

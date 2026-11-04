@@ -87,6 +87,16 @@ class Cache {
         return $value;
     }
 
+    public static function remember($key, $ttl, $callback) {
+        $val = self::get($key);
+        if ($val !== null) {
+            return $val;
+        }
+        $val = call_user_func($callback);
+        self::set($key, $val, $ttl);
+        return $val;
+    }
+
     public static function delete($key) {
         $redis = self::getRedisInstance();
         if ($redis) {

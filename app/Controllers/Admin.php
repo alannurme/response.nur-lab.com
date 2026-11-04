@@ -309,9 +309,7 @@ class Admin extends Controller {
             echo json_encode([
                 'success' => true,
                 'total' => 0,
-                'posts' => [],
-                'questions_count' => 0,
-                'questions' => []
+                'posts' => []
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -321,16 +319,28 @@ class Admin extends Controller {
         $postModel = $this->model('PostModel');
         $posts = $postModel->searchPostsFast($query, 60, true, $categoryId);
 
-        $adminModel = $this->model('AdminModel');
-        $questions = $adminModel->getFilteredUserQuestions(20, 0, null, null, $query, null, false);
-
         echo json_encode([
             'success' => true,
             'query' => $query,
             'total' => count($posts),
-            'posts' => $posts,
-            'questions_count' => count($questions),
-            'questions' => $questions
+            'posts' => $posts
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    public function ajax_all_posts_index() {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, max-age=300');
+        if (empty($_SESSION['admin_id']) && empty($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'error' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $postModel = $this->model('PostModel');
+        $catalog = $postModel->getAllPostsForSearchCatalog();
+        echo json_encode([
+            'success' => true,
+            'total' => count($catalog),
+            'posts' => $catalog
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -668,6 +678,8 @@ class Admin extends Controller {
         ");
         $catsWithPosts = $stmt_cats_with_posts->fetchAll(\PDO::FETCH_COLUMN);
 
+        $allPostsSearchIndex = $postModel->getAllPostsForSearchCatalog();
+
         $this->view('admin/posts', [
             'title' => $currentCategory ? htmlspecialchars($currentCategory['name']) : 'All Posts (Root)',
             'posts' => $posts,
@@ -677,6 +689,7 @@ class Admin extends Controller {
             'currentCategory' => $currentCategory,
             'allCategories' => $allCategories,
             'allPosts' => $allPosts,
+            'allPostsSearchIndex' => $allPostsSearchIndex,
             'catsWithPosts' => $catsWithPosts,
             'postCountMap' => $postCountMap,
             'current_page' => 'posts',

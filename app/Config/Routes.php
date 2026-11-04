@@ -86,6 +86,7 @@ $routes->get('ajax_search', 'Home::ajax_search');
 $routes->post('ajax_search', 'Home::ajax_search');
 $routes->get('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->post('admin/ajax_search_posts', 'Admin::ajax_search_posts');
+$routes->get('admin/ajax_all_posts_index', 'Admin::ajax_all_posts_index');
 $routes->match(['get', 'post'], 'admin/create_category_ajax', 'Admin::create_category_ajax');
 
 $routes->add('admin/(:segment)/(:segment)/(:any)', 'Admin::$1/$2/$3');

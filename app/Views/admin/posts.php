@@ -3956,14 +3956,69 @@ body.organize-drag-active #organize-root-list {
     }
 
     // -------------------------------------------------------------
-    // Live AJAX Search for Admin Posts (Direct Table Replacement)
+    // Ultra-Fast Live Search for Admin Posts (Instant 0ms Client + Deep Server Merge)
     // -------------------------------------------------------------
+    window.allAdminPosts = <?= json_encode($allPostsSearchIndex ?? [], JSON_UNESCAPED_UNICODE) ?>;
+    if (!window.allAdminPosts || window.allAdminPosts.length === 0) {
+        fetch('<?= URLROOT ?>/admin/ajax_all_posts_index')
+            .then(res => res.json())
+            .then(d => { if (d && d.success && Array.isArray(d.posts)) window.allAdminPosts = d.posts; })
+            .catch(() => {});
+    }
+
     let adminSearchTimer = null;
     let adminSearchAbortController = null;
     const adminSearchCache = {};
     let initialTbodyHTML = null;
     let initialTheadHTML = null;
     let initialSubFoldersDisplay = null;
+
+    const BENGALI_SUFFIXES = ['গুলোর', 'গুলো', 'গুলির', 'গুলি', 'সমূহের', 'সমূহ', 'দের', 'য়ের', 'এর', 'ের', 'কে', 'তে', 'র', 'ে', 'য়'];
+
+    function getBengaliStemJS(w) {
+        if (!w) return '';
+        w = w.trim();
+        for (let i = 0; i < BENGALI_SUFFIXES.length; i++) {
+            const suf = BENGALI_SUFFIXES[i];
+            if (w.length > suf.length + 2 && w.endsWith(suf)) {
+                return w.slice(0, -suf.length);
+            }
+        }
+        return w;
+    }
+
+    const PHONETIC_SWAP_PAIRS = [
+        ['দ', 'ধ'],
+        ['ু', 'ূ'],
+        ['স', 'শ'],
+        ['শ', 'ষ'],
+        ['স', 'ষ'],
+        ['জ', 'য'],
+        ['ি', 'ী'],
+        ['ত', 'থ'],
+        ['ব', 'ভ'],
+        ['ন', 'ণ'],
+        ['ড়', 'ঢ়'],
+        ['র', 'ড়']
+    ];
+
+    function getBengaliSearchVariantsJS(w) {
+        const variants = new Set();
+        variants.add(w);
+        const stem = getBengaliStemJS(w);
+        if (stem && stem !== w) variants.add(stem);
+
+        const items = [w, stem].filter(Boolean);
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            for (let j = 0; j < PHONETIC_SWAP_PAIRS.length; j++) {
+                const [from, to] = PHONETIC_SWAP_PAIRS[j];
+                if (item.includes(from)) variants.add(item.replaceAll(from, to));
+                if (item.includes(to)) variants.add(item.replaceAll(to, from));
+            }
+        }
+        return Array.from(variants);
+    }
 
     function captureInitialExplorerState() {
         if (initialTbodyHTML === null) {
@@ -3983,6 +4038,130 @@ body.organize-drag-active #organize-root-list {
     function escapeHtmlAttr(text) {
         if (!text) return '';
         return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function highlightSearchTerms(text, terms) {
+        if (!text) return '';
+        let escaped = escapeHtmlAttr(text);
+        if (!terms || terms.length === 0) return escaped;
+        const validTerms = Array.from(new Set(terms)).filter(t => t && t.length >= 2)
+            .sort((a, b) => b.length - a.length);
+        for (let i = 0; i < validTerms.length; i++) {
+            const term = validTerms[i];
+            const regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'giu');
+            escaped = escaped.replace(regex, '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
+        }
+        return escaped;
+    }
+
+    function searchAdminPostsLocally(query) {
+        const q = query.trim().toLowerCase();
+        if (!q || !window.allAdminPosts || window.allAdminPosts.length === 0) return [];
+
+        const words = q.split(/\s+/).filter(Boolean);
+        const wordVariants = words.map(w => getBengaliSearchVariantsJS(w).map(v => v.toLowerCase()));
+        const allHighlightTerms = [];
+        wordVariants.forEach(vars => vars.forEach(v => allHighlightTerms.push(v)));
+        allHighlightTerms.push(q);
+
+        const scored = [];
+
+        for (let i = 0; i < window.allAdminPosts.length; i++) {
+            const p = window.allAdminPosts[i];
+            const title = (p.title || '').toLowerCase();
+            const keywords = (p.seo_keywords || '').toLowerCase();
+            const excerpt = (p.excerpt || '').toLowerCase();
+            const cat = (p.main_category || '').toLowerCase();
+
+            let score = 0;
+            let isExactMatch = false;
+            let isTitleMatch = false;
+            let matchedWordCount = 0;
+
+            // Exact full phrase matching
+            if (title === q) {
+                score += 1500;
+                isExactMatch = true;
+                isTitleMatch = true;
+            } else if (title.startsWith(q)) {
+                score += 1000;
+                isTitleMatch = true;
+            } else if (title.includes(q)) {
+                score += 800;
+                isTitleMatch = true;
+            } else if (keywords.includes(q)) {
+                score += 650;
+            } else if (excerpt.includes(q)) {
+                score += 550;
+            }
+
+            // Word-by-word matches (stemmed & phonetic variants)
+            for (let wIdx = 0; wIdx < wordVariants.length; wIdx++) {
+                const variants = wordVariants[wIdx];
+                let matchedInTitle = false;
+                let matchedInKeywords = false;
+                let matchedInExcerpt = false;
+                let matchedInCat = false;
+
+                for (let vIdx = 0; vIdx < variants.length; vIdx++) {
+                    const v = variants[vIdx];
+                    if (title.includes(v)) {
+                        matchedInTitle = true;
+                        isTitleMatch = true;
+                        break;
+                    } else if (keywords.includes(v)) {
+                        matchedInKeywords = true;
+                        break;
+                    } else if (excerpt.includes(v)) {
+                        matchedInExcerpt = true;
+                        break;
+                    } else if (cat.includes(v)) {
+                        matchedInCat = true;
+                        break;
+                    }
+                }
+
+                if (matchedInTitle) {
+                    score += 300;
+                    matchedWordCount++;
+                } else if (matchedInKeywords) {
+                    score += 180;
+                    matchedWordCount++;
+                } else if (matchedInExcerpt) {
+                    score += 150;
+                    matchedWordCount++;
+                } else if (matchedInCat) {
+                    score += 80;
+                    matchedWordCount++;
+                }
+            }
+
+            // High bonus when ALL words match
+            if (words.length > 1 && matchedWordCount === words.length) {
+                score += 600;
+            }
+
+            if (score > 0) {
+                let badge = 'Match';
+                if (isTitleMatch) badge = 'Title Match';
+                else if (keywords.includes(q) || excerpt.includes(q)) badge = 'Keyword Match';
+                else badge = 'Partial Match';
+
+                const rawSnippet = p.excerpt || (p.title ? p.title : '');
+                scored.push({
+                    ...p,
+                    relevance_score: score,
+                    match_badge: badge,
+                    highlighted_title: highlightSearchTerms(p.title, allHighlightTerms),
+                    highlighted_snippet: highlightSearchTerms(rawSnippet, allHighlightTerms),
+                    snippet: rawSnippet
+                });
+            }
+        }
+
+        // Sort by relevance_score DESC, views DESC
+        scored.sort((a, b) => b.relevance_score - a.relevance_score || (parseInt(b.views) || 0) - (parseInt(a.views) || 0));
+        return scored;
     }
 
     function renderAdminTable(posts) {
@@ -4128,12 +4307,11 @@ body.organize-drag-active #organize-root-list {
             return;
         }
 
-        // Instant Cache Hit check (0ms response)
-        if (adminSearchCache[q]) {
-            applyAdminSearchResults(adminSearchCache[q], q);
-            return;
-        }
+        // 1. INSTANT LOCAL SEARCH (0ms latency!)
+        const localMatches = searchAdminPostsLocally(q);
+        applyAdminSearchResults({ success: true, posts: localMatches }, q, false);
 
+        // 2. BACKGROUND ENHANCEMENT FOR DEEP CONTENT BODY (150ms debounce)
         if (icon) icon.className = 'fas fa-circle-notch fa-spin';
 
         adminSearchTimer = setTimeout(() => {
@@ -4144,20 +4322,43 @@ body.organize-drag-active #organize-root-list {
             fetch(url, { signal })
                 .then(res => res.json())
                 .then(data => {
-                    adminSearchCache[q] = data;
-                    applyAdminSearchResults(data, q);
+                    if (icon) icon.className = 'fas fa-search';
+                    if (data && data.success && Array.isArray(data.posts)) {
+                        mergeServerResultsWithLocal(data.posts, q);
+                    }
                 })
                 .catch(err => {
                     if (err.name === 'AbortError') return;
-                    console.error('Admin post live search failed:', err);
                     if (icon) icon.className = 'fas fa-search';
                 });
-        }, 90);
+        }, 150);
     }
 
-    function applyAdminSearchResults(data, q) {
+    function mergeServerResultsWithLocal(serverPosts, q) {
+        if (!serverPosts || serverPosts.length === 0) return;
+        
+        const currentLocal = searchAdminPostsLocally(q);
+        const existingIds = new Set(currentLocal.map(p => parseInt(p.id)));
+
+        let hasNewContentMatches = false;
+        const merged = [...currentLocal];
+
+        serverPosts.forEach(sp => {
+            const sid = parseInt(sp.id);
+            if (!existingIds.has(sid)) {
+                merged.push(sp);
+                hasNewContentMatches = true;
+            }
+        });
+
+        if (hasNewContentMatches || currentLocal.length === 0) {
+            applyAdminSearchResults({ success: true, posts: merged }, q, false);
+        }
+    }
+
+    function applyAdminSearchResults(data, q, isFinal = true) {
         const icon = document.getElementById('postSearchIcon');
-        if (icon) icon.className = 'fas fa-search';
+        if (isFinal && icon) icon.className = 'fas fa-search';
 
         const subFolders = document.querySelector('.folder-grid');
         if (subFolders && subFolders.parentElement) {
