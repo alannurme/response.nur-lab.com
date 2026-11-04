@@ -2455,7 +2455,7 @@ if (!empty($data['breadcrumbs'])) {
                         </div>
 
                         <!-- 2. Font Size Controls (12px up to 70px) -->
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <span style="font-size: 12px; font-weight: 700; color: #334155;">
                                     <i class="fas fa-text-height" style="color: #6366f1; margin-right: 5px;"></i> ফন্ট সাইজ (Font Size)
@@ -2465,43 +2465,27 @@ if (!empty($data['breadcrumbs'])) {
                             
                             <!-- Step Buttons -->
                             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
-                                <button type="button" onclick="changeFontSize(-2)" title="ফন্ট ছোট করুন (-2px)" style="flex: 1; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                <button type="button" onclick="changeFontSize(-2)" title="ফন্ট ছোট করুন (-2px)" style="flex: 1; height: 34px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
                                     <i class="fas fa-minus" style="font-size: 10px;"></i> A-
                                 </button>
-                                <button type="button" onclick="setExactFontSize(18)" title="ডিফল্ট সাইজ (18px)" style="height: 32px; padding: 0 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 11px; font-weight: 600; color: #64748b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                <button type="button" onclick="setExactFontSize(18)" title="ডিফল্ট সাইজ (18px)" style="height: 34px; padding: 0 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 11px; font-weight: 600; color: #64748b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
                                     Reset
                                 </button>
-                                <button type="button" onclick="changeFontSize(2)" title="ফন্ট বড় করুন (+2px up to 70px)" style="flex: 1; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                <button type="button" onclick="changeFontSize(2)" title="ফন্ট বড় করুন (+2px up to 70px)" style="flex: 1; height: 34px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
                                     <i class="fas fa-plus" style="font-size: 10px;"></i> A+
                                 </button>
                             </div>
 
                             <!-- Quick Preset Pills (up to 70px as requested!) -->
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
-                                <button type="button" onclick="setExactFontSize(18)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">18px</button>
-                                <button type="button" onclick="setExactFontSize(28)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">28px</button>
-                                <button type="button" onclick="setExactFontSize(45)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">45px</button>
-                                <button type="button" onclick="setExactFontSize(70)" style="font-size: 11px; font-weight: 700; padding: 4px 0; border: 1px solid #3b82f6; background: #eff6ff; border-radius: 6px; color: #1d4ed8; cursor: pointer;" title="সর্বোচ্চ সাইজ (70px)">70px</button>
+                                <button type="button" onclick="setExactFontSize(18)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">18px</button>
+                                <button type="button" onclick="setExactFontSize(28)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">28px</button>
+                                <button type="button" onclick="setExactFontSize(45)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">45px</button>
+                                <button type="button" onclick="setExactFontSize(70)" style="font-size: 11px; font-weight: 700; padding: 5px 0; border: 1px solid #3b82f6; background: #eff6ff; border-radius: 6px; color: #1d4ed8; cursor: pointer;" title="সর্বোচ্চ সাইজ (70px)">70px</button>
                             </div>
                         </div>
 
-                        <!-- 3. Reading Themes -->
-                        <div style="margin-bottom: 14px;">
-                            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">আই-কমফোর্ট থিম</div>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-                                <button type="button" onclick="setQuickViewReadingTheme('light')" title="স্বাভাবিক সাদা ব্যাকগ্রাউন্ড" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; cursor: pointer;">
-                                    <i class="fas fa-sun" style="color: #f59e0b;"></i> Light
-                                </button>
-                                <button type="button" onclick="setQuickViewReadingTheme('sepia')" title="চোখের জন্য আরামদায়ক সেপিয়া পেপার" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #fbf7ee; border: 1px solid #d4c5a9; border-radius: 8px; color: #382a17; cursor: pointer;">
-                                    <i class="fas fa-book-open" style="color: #b45309;"></i> Sepia
-                                </button>
-                                <button type="button" onclick="setQuickViewReadingTheme('dark')" title="ডার্ক নাইট মোড" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; cursor: pointer;">
-                                    <i class="fas fa-moon" style="color: #38bdf8;"></i> Dark
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 4. Quick Action Utilities List -->
+                        <!-- 3. Quick Action Utilities List -->
                         <div style="display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
                             <a id="fabActionViewLive" href="#" target="_blank" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; transition: 0.15s;" onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
                                 <i class="far fa-eye" style="color: #059669; width: 16px;"></i>
@@ -5907,28 +5891,6 @@ body.organize-drag-active #organize-root-list {
             toggleQuickViewMasterMenu();
         }
     });
-
-    // Theme switching for Quick View post reading
-    function setQuickViewReadingTheme(theme) {
-        const contentWrap = document.querySelector('.explorer-post-detail');
-        const contentEl = document.getElementById('detailViewContent');
-        if (!contentWrap) return;
-
-        if (theme === 'sepia') {
-            contentWrap.style.background = '#fefae0';
-            contentWrap.style.color = '#3b2f15';
-            if (contentEl) contentEl.style.color = '#3b2f15';
-        } else if (theme === 'dark') {
-            contentWrap.style.background = '#0f172a';
-            contentWrap.style.color = '#e2e8f0';
-            if (contentEl) contentEl.style.color = '#cbd5e1';
-        } else {
-            // Default / Light
-            contentWrap.style.background = '#ffffff';
-            contentWrap.style.color = '#1e293b';
-            if (contentEl) contentEl.style.color = '';
-        }
-    }
 
     // Smooth scroll to top of Quick View post
     function scrollQuickViewToTop() {
