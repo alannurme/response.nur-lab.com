@@ -139,40 +139,49 @@ if (empty($current_page)) {
             margin-right: 0 !important;
             font-size: 1.25rem;
         }
+        body.sidebar-collapsed #sidebar-collapse-btn {
+            left: 67px !important;
+        }
         body.sidebar-collapsed #sidebar-collapse-btn i {
             transform: rotate(180deg);
         }
 
-        /* Floating Circular Collapse Toggle on the Right Edge */
+        /* Floating Circular Collapse Toggle on the Right Edge (Fixed) */
         #sidebar-collapse-btn {
-            position: absolute;
+            position: fixed !important;
             top: 20px;
-            right: -13px;
+            left: 287px;
             width: 26px;
             height: 26px;
             background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 50% !important;
-            color: #64748b !important;
+            color: #475569 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
             z-index: 1050;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
             padding: 0 !important;
         }
         #sidebar-collapse-btn:hover {
             background: #f8fafc !important;
-            color: #0b7c4d !important;
-            border-color: #cbd5e1 !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-            transform: scale(1.08);
+            color: #2563eb !important;
+            border-color: #94a3b8 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+            transform: scale(1.1);
         }
         #sidebar-collapse-btn i {
             font-size: 11px !important;
             transition: transform 0.25s ease;
+        }
+
+        @media (max-width: 992px) {
+            #sidebar-collapse-btn {
+                display: none !important;
+            }
         }
         
         /* Collapsed Sidebar Hover Submenu CSS */
@@ -767,10 +776,12 @@ if (empty($current_page)) {
     <!-- Sidebar Overlay -->
     <div id="sidebar-overlay" style="position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 95; display: none;"></div>
 
+    <!-- Fixed Floating Collapse Toggle Button on the Right Edge -->
+    <button id="sidebar-collapse-btn" type="button" onclick="toggleSidebarCollapse(event)" title="সাইডবার ছোট/বড় করুন">
+        <i class="fas fa-angle-left"></i>
+    </button>
+
     <div class="sidebar">
-        <button id="sidebar-collapse-btn" onclick="toggleSidebarCollapse(event)" title="সাইডবার টগল করুন">
-            <i class="fas fa-angle-left"></i>
-        </button>
         <div class="sidebar-logo" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <a href="<?= URLROOT ?>/admin" style="text-decoration: none; display: flex; align-items: center; gap: 10px; overflow: hidden; white-space: nowrap; min-width: 0;">
                 <?php if (!empty($settings['site_logo'])): ?>
