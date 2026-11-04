@@ -2352,6 +2352,11 @@ if (!empty($data['breadcrumbs'])) {
                             <i class="fas fa-arrow-left"></i> Back to Folder
                         </button>
                         
+                        <!-- Top Edit Post Button -->
+                        <a id="detailViewTopEditBtn" href="#" class="btn-explorer btn-explorer-primary" style="display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13px; text-decoration: none; padding: 8px 16px; background: #2563eb; color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(37,99,235,0.25);" title="এই নিবন্ধটি সরাসরি এডিট করুন">
+                            <i class="far fa-edit"></i> Edit Post
+                        </a>
+                        
                         <!-- Share Options Action Group -->
                         <div id="detailShareGroup" style="display: none; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 8px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">Share:</span>
@@ -2424,12 +2429,108 @@ if (!empty($data['breadcrumbs'])) {
                 <div id="detailViewContent" class="post-body">
                     <!-- Content will load dynamically -->
                 </div>
-                <!-- Hidden Audio Player with no-referrer policy to allow Google TTS on localhost -->
-                <audio id="ttsAudioPlayer" referrerpolicy="no-referrer" style="display: none;"></audio>
-                <!-- Floating fixed button for Quick View scrolling TTS -->
-                <button id="quickViewFloatingAudioBtn" onmousedown="event.preventDefault();" onclick="toggleAudioReader()" title="আর্টিকেল শুনুন" style="position: fixed; bottom: 30px; right: 30px; width: 48px; height: 48px; border-radius: 50%; background: #2563eb; color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 4px 15px rgba(37,99,235,0.4); z-index: 9999; transition: all 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='none';">
-                    <i class="fas fa-headphones" id="quickViewFloatingAudioIcon"></i>
-                </button>
+                <!-- Floating Master Action Button & Speed Dial Menu (Replaces obsolete audio reader) -->
+                <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 28px; right: 28px; z-index: 99999; flex-direction: column; align-items: flex-end; gap: 12px;">
+                    <!-- Expanded Master Menu Card -->
+                    <div id="quickViewMasterMenu" style="display: none; width: 310px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                        
+                        <!-- Header with Close & Title -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;">
+                            <div style="font-weight: 700; font-size: 13px; color: #0f172a; display: flex; align-items: center; gap: 7px;">
+                                <span style="display: inline-flex; width: 24px; height: 24px; border-radius: 6px; background: #eff6ff; color: #2563eb; align-items: center; justify-content: center; font-size: 11px;">
+                                    <i class="fas fa-sliders-h"></i>
+                                </span>
+                                <span>রিডিং ও পোস্ট কন্ট্রোল</span>
+                            </div>
+                            <button type="button" onclick="toggleQuickViewMasterMenu()" style="background: none; border: none; color: #94a3b8; font-size: 15px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1;" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#94a3b8';">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <!-- 1. Primary Action: Edit Article -->
+                        <div style="margin-bottom: 14px;">
+                            <a id="fabActionEditPost" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 9px 14px; background: #2563eb; color: #ffffff; font-weight: 600; font-size: 13px; border-radius: 10px; text-decoration: none; box-shadow: 0 2px 8px rgba(37,99,235,0.25); transition: all 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';">
+                                <i class="far fa-edit"></i> <span>পোস্ট এডিট করুন (Edit Post)</span>
+                            </a>
+                        </div>
+
+                        <!-- 2. Font Size Controls (12px up to 70px) -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 12px; font-weight: 700; color: #334155;">
+                                    <i class="fas fa-text-height" style="color: #6366f1; margin-right: 5px;"></i> ফন্ট সাইজ (Font Size)
+                                </span>
+                                <span id="fabFontSizeDisplay" style="font-size: 13px; font-weight: 800; color: #2563eb; background: #dbeafe; padding: 2px 8px; border-radius: 6px;">18px</span>
+                            </div>
+                            
+                            <!-- Step Buttons -->
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <button type="button" onclick="changeFontSize(-2)" title="ফন্ট ছোট করুন (-2px)" style="flex: 1; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                    <i class="fas fa-minus" style="font-size: 10px;"></i> A-
+                                </button>
+                                <button type="button" onclick="setExactFontSize(18)" title="ডিফল্ট সাইজ (18px)" style="height: 32px; padding: 0 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 11px; font-weight: 600; color: #64748b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                    Reset
+                                </button>
+                                <button type="button" onclick="changeFontSize(2)" title="ফন্ট বড় করুন (+2px up to 70px)" style="flex: 1; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';">
+                                    <i class="fas fa-plus" style="font-size: 10px;"></i> A+
+                                </button>
+                            </div>
+
+                            <!-- Quick Preset Pills (up to 70px as requested!) -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <button type="button" onclick="setExactFontSize(18)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">18px</button>
+                                <button type="button" onclick="setExactFontSize(28)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">28px</button>
+                                <button type="button" onclick="setExactFontSize(45)" style="font-size: 11px; font-weight: 600; padding: 4px 0; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #475569; cursor: pointer;">45px</button>
+                                <button type="button" onclick="setExactFontSize(70)" style="font-size: 11px; font-weight: 700; padding: 4px 0; border: 1px solid #3b82f6; background: #eff6ff; border-radius: 6px; color: #1d4ed8; cursor: pointer;" title="সর্বোচ্চ সাইজ (70px)">70px</button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Reading Themes -->
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">আই-কমফোর্ট থিম</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                                <button type="button" onclick="setQuickViewReadingTheme('light')" title="স্বাভাবিক সাদা ব্যাকগ্রাউন্ড" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; cursor: pointer;">
+                                    <i class="fas fa-sun" style="color: #f59e0b;"></i> Light
+                                </button>
+                                <button type="button" onclick="setQuickViewReadingTheme('sepia')" title="চোখের জন্য আরামদায়ক সেপিয়া পেপার" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #fbf7ee; border: 1px solid #d4c5a9; border-radius: 8px; color: #382a17; cursor: pointer;">
+                                    <i class="fas fa-book-open" style="color: #b45309;"></i> Sepia
+                                </button>
+                                <button type="button" onclick="setQuickViewReadingTheme('dark')" title="ডার্ক নাইট মোড" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; font-size: 11px; font-weight: 600; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; cursor: pointer;">
+                                    <i class="fas fa-moon" style="color: #38bdf8;"></i> Dark
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4. Quick Action Utilities List -->
+                        <div style="display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                            <a id="fabActionViewLive" href="#" target="_blank" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; transition: 0.15s;" onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
+                                <i class="far fa-eye" style="color: #059669; width: 16px;"></i>
+                                <span>ওয়েবসাইটে লাইভ দেখুন (Live View)</span>
+                            </a>
+                            <button type="button" onclick="copyPostPublicLink()" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
+                                <i class="fas fa-link" style="color: #2563eb; width: 16px;"></i>
+                                <span id="fabCopyLinkText">পাবলিক লিংক কপি করুন</span>
+                            </button>
+                            <button type="button" onclick="copyFullPostForFacebook(this, 'smart')" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#f0fdf4'; this.style.color='#166534';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
+                                <i class="fab fa-facebook" style="color: #1877f2; width: 16px;"></i>
+                                <span>ফেসবুক পোস্ট কপি করুন</span>
+                            </button>
+                            <button type="button" onclick="printQuickViewPost()" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#fef3c7'; this.style.color='#b45309';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
+                                <i class="fas fa-print" style="color: #d97706; width: 16px;"></i>
+                                <span>প্রিন্ট / PDF সেভ করুন</span>
+                            </button>
+                            <button type="button" onclick="scrollQuickViewToTop()" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
+                                <i class="fas fa-arrow-up" style="color: #64748b; width: 16px;"></i>
+                                <span>একদম উপরে স্ক্রোল করুন</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Master Trigger Button (Floating Round) -->
+                    <button id="quickViewMasterBtn" type="button" onclick="toggleQuickViewMasterMenu()" title="কুইক অ্যাকশন টুলস (Tools Menu)" style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 6px 20px rgba(37,99,235,0.45); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); outline: none;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">
+                        <i class="fas fa-sliders-h" id="quickViewMasterIcon"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2879,6 +2980,16 @@ if (!function_exists('renderOrganizeCategoryTree')) {
 </div>
 
 <style>
+@keyframes qvMenuSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 /* Organize Folders Modal Styles */
 .folder-organize-modal-content {
     max-width: 840px !important;
@@ -5144,6 +5255,14 @@ body.organize-drag-active #organize-root-list {
         
         window.currentPostDetailData = data;
 
+        // Set Top & Floating Edit Post link and Live preview link
+        const topEditBtn = document.getElementById('detailViewTopEditBtn');
+        if (topEditBtn) topEditBtn.href = '<?= URLROOT ?>/admin/edit_post/' + data.id;
+        const fabEditBtn = document.getElementById('fabActionEditPost');
+        if (fabEditBtn) fabEditBtn.href = '<?= URLROOT ?>/admin/edit_post/' + data.id;
+        const fabLiveBtn = document.getElementById('fabActionViewLive');
+        if (fabLiveBtn) fabLiveBtn.href = publicLink;
+
         // Update small feature image thumbnail on the right and copy image button
         const headerThumbContainer = document.getElementById('detailHeaderThumbContainer');
         const headerThumbImg = document.getElementById('detailHeaderThumbImg');
@@ -5289,6 +5408,14 @@ body.organize-drag-active #organize-root-list {
             if (fontDisplayEl) {
                 fontDisplayEl.textContent = '18px';
             }
+            const fabFontDisplayEl = document.getElementById('fabFontSizeDisplay');
+            if (fabFontDisplayEl) {
+                fabFontDisplayEl.textContent = '18px';
+            }
+            
+            // Show Master Floating Action Button
+            const masterContainer = document.getElementById('quickViewMasterContainer');
+            if (masterContainer) masterContainer.style.display = 'flex';
             
             // Toggle view panels
             listPanel.style.display = 'none';
@@ -5344,7 +5471,14 @@ body.organize-drag-active #organize-root-list {
     }
 
     function closePostDetailView() {
-        stopAudioReader();
+        // Hide Master Floating button & menu
+        const masterContainer = document.getElementById('quickViewMasterContainer');
+        if (masterContainer) masterContainer.style.display = 'none';
+        const masterMenu = document.getElementById('quickViewMasterMenu');
+        if (masterMenu) masterMenu.style.display = 'none';
+        const masterIcon = document.getElementById('quickViewMasterIcon');
+        if (masterIcon) masterIcon.className = 'fas fa-sliders-h';
+
         const listPanel = document.getElementById('explorerListView');
         const detailPanel = document.getElementById('explorerPostDetailView');
         if (listPanel && detailPanel) {
@@ -5379,7 +5513,7 @@ body.organize-drag-active #organize-root-list {
     function changeFontSize(delta) {
         currentQuickViewFontSize += delta;
         if (currentQuickViewFontSize < 12) currentQuickViewFontSize = 12;
-        if (currentQuickViewFontSize > 28) currentQuickViewFontSize = 28;
+        if (currentQuickViewFontSize > 70) currentQuickViewFontSize = 70;
         
         const contentEl = document.getElementById('detailViewContent');
         if (contentEl) {
@@ -5389,6 +5523,29 @@ body.organize-drag-active #organize-root-list {
         const fontDisplayEl = document.getElementById('fontSizeDisplay');
         if (fontDisplayEl) {
             fontDisplayEl.textContent = currentQuickViewFontSize + 'px';
+        }
+        const fabFontDisplayEl = document.getElementById('fabFontSizeDisplay');
+        if (fabFontDisplayEl) {
+            fabFontDisplayEl.textContent = currentQuickViewFontSize + 'px';
+        }
+    }
+
+    function setExactFontSize(size) {
+        currentQuickViewFontSize = parseInt(size, 10) || 18;
+        if (currentQuickViewFontSize < 12) currentQuickViewFontSize = 12;
+        if (currentQuickViewFontSize > 70) currentQuickViewFontSize = 70;
+
+        const contentEl = document.getElementById('detailViewContent');
+        if (contentEl) {
+            contentEl.style.fontSize = currentQuickViewFontSize + 'px';
+        }
+        const fontDisplayEl = document.getElementById('fontSizeDisplay');
+        if (fontDisplayEl) {
+            fontDisplayEl.textContent = currentQuickViewFontSize + 'px';
+        }
+        const fabFontDisplayEl = document.getElementById('fabFontSizeDisplay');
+        if (fabFontDisplayEl) {
+            fabFontDisplayEl.textContent = currentQuickViewFontSize + 'px';
         }
     }
 
@@ -5402,6 +5559,13 @@ body.organize-drag-active #organize-root-list {
                     copyBtnSpan.textContent = 'Copied!';
                     setTimeout(() => {
                         copyBtnSpan.textContent = 'Copy Link';
+                    }, 2000);
+                }
+                const fabCopySpan = document.getElementById('fabCopyLinkText');
+                if (fabCopySpan) {
+                    fabCopySpan.textContent = 'কপি হয়েছে!';
+                    setTimeout(() => {
+                        fabCopySpan.textContent = 'পাবলিক লিংক কপি করুন';
                     }, 2000);
                 }
             })
@@ -5716,280 +5880,68 @@ body.organize-drag-active #organize-root-list {
         }
     }
 
-    let ttsQueue = [];
-    let ttsCurrentIndex = 0;
-    let isTtsPlaying = false;
-    let isTtsPaused = false;
+    // Quick View Master Menu & Speed Dial Controls
+    function toggleQuickViewMasterMenu() {
+        const menu = document.getElementById('quickViewMasterMenu');
+        const icon = document.getElementById('quickViewMasterIcon');
+        const btn = document.getElementById('quickViewMasterBtn');
+        if (!menu) return;
 
-    function detectLanguage(text) {
-        if (/[\u0600-\u06FF]/.test(text)) {
-            return 'ar';
+        if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.style.display = 'block';
+            if (icon) icon.className = 'fas fa-times';
+            if (btn) btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        } else {
+            menu.style.display = 'none';
+            if (icon) icon.className = 'fas fa-sliders-h';
+            if (btn) btn.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
         }
-        if (/[\u0980-\u09FF]/.test(text)) {
-            return 'bn';
-        }
-        return 'en';
     }
 
-    function toggleAudioReader() {
-        const playIcon = document.getElementById('audioPlayIcon');
-        const playText = document.getElementById('audioPlayText');
+    // Dismiss master menu when clicked outside
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('quickViewMasterContainer');
+        const menu = document.getElementById('quickViewMasterMenu');
+        if (!container || !menu || menu.style.display === 'none') return;
+        if (!container.contains(e.target)) {
+            toggleQuickViewMasterMenu();
+        }
+    });
+
+    // Theme switching for Quick View post reading
+    function setQuickViewReadingTheme(theme) {
+        const contentWrap = document.querySelector('.explorer-post-detail');
         const contentEl = document.getElementById('detailViewContent');
-        const titleEl = document.getElementById('detailViewTitle');
-        const player = document.getElementById('ttsAudioPlayer');
-        const floatIcon = document.getElementById('quickViewFloatingAudioIcon');
-        const floatBtn = document.getElementById('quickViewFloatingAudioBtn');
+        if (!contentWrap) return;
 
-        if (!player) {
-            alert("অডিও প্লেয়ার লোড হতে পারেনি।");
-            return;
-        }
-
-        if (isTtsPlaying) {
-            if (isTtsPaused) {
-                if (window.speechSynthesis && window.speechSynthesis.speaking) {
-                    window.speechSynthesis.resume();
-                } else {
-                    player.play().then(() => {
-                        player.playbackRate = 1.15;
-                    }).catch(err => console.error("Resume failed:", err));
-                }
-                isTtsPaused = false;
-                if (playIcon) playIcon.className = 'fas fa-pause';
-                if (playText) playText.textContent = 'Pause';
-                if (floatIcon) floatIcon.className = 'fas fa-pause';
-                if (floatBtn) {
-                    floatBtn.style.background = '#dc2626'; // Red when playing
-                    floatBtn.title = "পজ করুন";
-                }
-            } else {
-                if (window.speechSynthesis && window.speechSynthesis.speaking) {
-                    window.speechSynthesis.pause();
-                } else {
-                    player.pause();
-                }
-                isTtsPaused = true;
-                if (playIcon) playIcon.className = 'fas fa-play';
-                if (playText) playText.textContent = 'Resume';
-                if (floatIcon) floatIcon.className = 'fas fa-play';
-                if (floatBtn) {
-                    floatBtn.style.background = '#2563eb'; // Blue when paused
-                    floatBtn.title = "পুনরায় শুনুন";
-                }
-            }
+        if (theme === 'sepia') {
+            contentWrap.style.background = '#fefae0';
+            contentWrap.style.color = '#3b2f15';
+            if (contentEl) contentEl.style.color = '#3b2f15';
+        } else if (theme === 'dark') {
+            contentWrap.style.background = '#0f172a';
+            contentWrap.style.color = '#e2e8f0';
+            if (contentEl) contentEl.style.color = '#cbd5e1';
         } else {
-            // Get selected text if any
-            let textToRead = window.getSelection().toString().trim();
-            
-            // Fallback to structured title + headings/paragraphs if nothing is selected
-            if (!textToRead) {
-                let parts = [];
-                if (titleEl && titleEl.innerText.trim()) {
-                    parts.push(titleEl.innerText.trim() + " ।");
-                }
-                if (contentEl) {
-                    const blocks = contentEl.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
-                    if (blocks.length > 0) {
-                        blocks.forEach(block => {
-                            const txt = block.innerText.trim();
-                            if (txt) {
-                                // Add a Bengali full stop if it doesn't end with punctuation
-                                if (!/[।\?\!\.]/.test(txt.slice(-1))) {
-                                    parts.push(txt + " ।");
-                                } else {
-                                    parts.push(txt);
-                                }
-                            }
-                        });
-                    } else {
-                        parts.push(contentEl.innerText);
-                    }
-                }
-                textToRead = parts.join("\n");
-            }
-            
-            if (!textToRead.trim()) return;
-
-            textToRead = textToRead.replace(/[\uFDFA\uFDFB]/g, "").replace(/[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]/g, "");
-
-            // Split text strictly into chunks under 100 characters for Google TTS safety
-            let newQueue = [];
-            let words = textToRead.split(/\s+/);
-            let currentChunk = "";
-            
-            for (let word of words) {
-                if ((currentChunk + " " + word).length < 100) {
-                    currentChunk = currentChunk ? (currentChunk + " " + word) : word;
-                } else {
-                    if (currentChunk.trim()) {
-                        newQueue.push(currentChunk.trim());
-                    }
-                    currentChunk = word;
-                }
-            }
-            if (currentChunk.trim()) {
-                newQueue.push(currentChunk.trim());
-            }
-
-            if (newQueue.length === 0) return;
-
-            const wasSpeaking = window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending);
-
-            if (wasSpeaking) {
-                stopAudioReader(true);
-                setTimeout(() => {
-                    ttsQueue = newQueue;
-                    ttsCurrentIndex = 0;
-                    isTtsPlaying = true;
-                    isTtsPaused = false;
-                    
-                    if (playIcon) playIcon.className = 'fas fa-pause';
-                    if (playText) playText.textContent = 'Pause';
-                    if (floatIcon) floatIcon.className = 'fas fa-pause';
-                    if (floatBtn) {
-                        floatBtn.style.background = '#dc2626';
-                        floatBtn.title = "পজ করুন";
-                    }
-                    
-                    playNextTtsChunk();
-                }, 100);
-            } else {
-                stopAudioReader(false);
-                
-                ttsQueue = newQueue;
-                ttsCurrentIndex = 0;
-                isTtsPlaying = true;
-                isTtsPaused = false;
-                
-                if (playIcon) playIcon.className = 'fas fa-pause';
-                if (playText) playText.textContent = 'Pause';
-                if (floatIcon) floatIcon.className = 'fas fa-pause';
-                if (floatBtn) {
-                    floatBtn.style.background = '#dc2626';
-                    floatBtn.title = "পজ করুন";
-                }
-                
-                playNextTtsChunk();
-            }
+            // Default / Light
+            contentWrap.style.background = '#ffffff';
+            contentWrap.style.color = '#1e293b';
+            if (contentEl) contentEl.style.color = '';
         }
     }
 
-    function playNextTtsChunk() {
-        const player = document.getElementById('ttsAudioPlayer');
-        if (!player || !isTtsPlaying || ttsCurrentIndex >= ttsQueue.length) {
-            stopAudioReader(false);
-            return;
+    // Smooth scroll to top of Quick View post
+    function scrollQuickViewToTop() {
+        const detailView = document.getElementById('explorerPostDetailView');
+        if (detailView) {
+            detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
-        const chunkText = ttsQueue[ttsCurrentIndex] ? ttsQueue[ttsCurrentIndex].trim() : '';
-        if (!chunkText) {
-            ttsCurrentIndex++;
-            playNextTtsChunk();
-            return;
-        }
-
-        const lang = detectLanguage(chunkText);
-
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-        if (isLocalhost) {
-            // Fetch from local proxy as primary
-            const url = "<?= URLROOT ?>/proxy_tts?lang=" + lang + "&text=" + encodeURIComponent(chunkText);
-            player.src = url;
-            
-            player.onended = () => {
-                ttsCurrentIndex++;
-                playNextTtsChunk();
-            };
-
-            player.onerror = (e) => {
-                console.warn("Proxy Google TTS failed, falling back to browser SpeechSynthesis...", e);
-                playNativeSpeechFallback(chunkText, lang);
-            };
-
-            player.play().then(() => {
-                player.playbackRate = 1.15;
-            }).catch(err => {
-                console.warn("Proxy audio playback failed/blocked, falling back to browser SpeechSynthesis...", err);
-                playNativeSpeechFallback(chunkText, lang);
-            });
-        } else {
-            // On live server, use browser SpeechSynthesis directly to avoid VPS proxy blocks
-            // and keep speech calls inside the synchronous user gesture event flow.
-            playNativeSpeechFallback(chunkText, lang);
-        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function playNativeSpeechFallback(chunkText, lang) {
-        if (!window.speechSynthesis) {
-            ttsCurrentIndex++;
-            playNextTtsChunk();
-            return;
-        }
-        
-        const utterance = new SpeechSynthesisUtterance(chunkText);
-        let langTag = 'en-US';
-        if (lang === 'bn') {
-            langTag = 'bn-BD';
-        } else if (lang === 'ar') {
-            langTag = 'ar-SA';
-        }
-        utterance.lang = langTag;
-        utterance.rate = 1.05;
-
-        const voices = window.speechSynthesis.getVoices();
-        let selectedVoice = voices.find(v => v.lang.toLowerCase().startsWith(lang)) || 
-                            voices.find(v => v.lang.toLowerCase().includes(lang));
-        if (selectedVoice) {
-            utterance.voice = selectedVoice;
-        }
-
-        utterance.onend = () => {
-            ttsCurrentIndex++;
-            playNextTtsChunk();
-        };
-        utterance.onerror = (err) => {
-            console.warn("SpeechSynthesis fallback error:", err);
-            ttsCurrentIndex++;
-            playNextTtsChunk();
-        };
-
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function stopAudioReader(callCancel = true) {
-        isTtsPlaying = false;
-        isTtsPaused = false;
-        const player = document.getElementById('ttsAudioPlayer');
-        if (player) {
-            player.pause();
-            player.src = '';
-        }
-        if (callCancel && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-        }
-        ttsQueue = [];
-        ttsCurrentIndex = 0;
-        resetAudioState();
-    }
-
-    function resetAudioState() {
-        const playIcon = document.getElementById('audioPlayIcon');
-        const playText = document.getElementById('audioPlayText');
-        const floatIcon = document.getElementById('quickViewFloatingAudioIcon');
-        const floatBtn = document.getElementById('quickViewFloatingAudioBtn');
-
-        if (playIcon && playText) {
-            playIcon.className = 'fas fa-play';
-            playText.textContent = 'Listen';
-        }
-        if (floatIcon) {
-            floatIcon.className = 'fas fa-headphones';
-        }
-        if (floatBtn) {
-            floatBtn.style.background = '#2563eb';
-            floatBtn.title = "আর্টিকেল শুনুন";
-        }
+    // Print / Save as PDF
+    function printQuickViewPost() {
+        window.print();
     }
 </script>
 

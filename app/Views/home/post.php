@@ -755,6 +755,12 @@ if (!function_exists('resolve_blog_image')) {
                         <span><i class="fas fa-calendar-alt"></i> <?= date('d M, Y', strtotime($data['post']['created_at'])) ?></span>
 
                         <span><i class="fas fa-eye"></i> <?= number_format($data['post']['views']) ?> বার পঠিত</span>
+
+                        <?php if (!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember'])): ?>
+                            <a href="<?= URLROOT ?>/admin/edit_post/<?= $data['post']['id'] ?>" target="_blank" class="admin-edit-pill" style="display: inline-flex; align-items: center; gap: 5px; background: #2563eb; color: #ffffff !important; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-decoration: none; margin-left: 6px; box-shadow: 0 1px 3px rgba(37,99,235,0.3); transition: 0.2s;" onmouseover="this.style.background='#1d4ed8';" onmouseout="this.style.background='#2563eb';" title="অ্যাডমিন প্যানেলে এডিট করুন">
+                                <i class="fas fa-edit"></i> এডিট পোস্ট
+                            </a>
+                        <?php endif; ?>
                     </div>
                     <?php
                     $postSlugEncoded = rawurlencode($data['post']['slug']);
@@ -765,6 +771,11 @@ if (!function_exists('resolve_blog_image')) {
                     $waShareText = urlencode($shareTitle . ' ' . $shareFullUrl);
                     ?>
                     <div class="post-meta-share">
+                        <?php if (!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember'])): ?>
+                            <a href="<?= URLROOT ?>/admin/edit_post/<?= $data['post']['id'] ?>" target="_blank" class="share-btn" style="background: #2563eb; color: #ffffff !important; text-decoration: none;" title="এই পোস্টটি সরাসরি এডিট করুন">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        <?php endif; ?>
                         <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; font-family: 'Hind Siliguri', sans-serif;"><i class="fas fa-share-alt"></i> শেয়ার:</span>
                         <button onclick="copyPostLink('<?= $shareFullUrl ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
                             <i class="fas fa-link"></i>
