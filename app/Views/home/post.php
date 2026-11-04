@@ -765,10 +765,11 @@ if (!function_exists('resolve_blog_image')) {
                     <?php
                     $postSlugEncoded = rawurlencode($data['post']['slug']);
                     $shareFullUrl = URLROOT . '/' . $postSlugEncoded;
+                    $shortUrl = URLROOT . '/p/' . $data['post']['id'];
                     $shareTitle = $data['post']['title'];
-                    $shareEncodedUrl = urlencode($shareFullUrl);
+                    $shareEncodedUrl = urlencode($shortUrl);
                     $shareEncodedTitle = urlencode($shareTitle);
-                    $waShareText = urlencode($shareTitle . ' ' . $shareFullUrl);
+                    $waShareText = urlencode($shareTitle . ' ' . $shortUrl);
                     ?>
                     <div class="post-meta-share">
                         <?php if (!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember'])): ?>
@@ -777,7 +778,7 @@ if (!function_exists('resolve_blog_image')) {
                             </a>
                         <?php endif; ?>
                         <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; font-family: 'Hind Siliguri', sans-serif;"><i class="fas fa-share-alt"></i> শেয়ার:</span>
-                        <button onclick="copyPostLink('<?= $shareFullUrl ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
+                        <button onclick="copyPostLink('<?= $shortUrl ?>', this);" class="share-btn copy" title="শর্ট লিংক কপি করুন">
                             <i class="fas fa-link"></i>
                         </button>
                         <a href="https://api.whatsapp.com/send?text=<?= $waShareText ?>" target="_blank" rel="noopener" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
@@ -808,8 +809,8 @@ if (!function_exists('resolve_blog_image')) {
                     <span style="font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; font-family: 'Hind Siliguri', sans-serif;">
                         <i class="fas fa-share-alt"></i> শেয়ার করুন:
                     </span>
-                    <button onclick="copyPostLink('<?= $shareFullUrl ?>', this);" class="share-btn copy" title="লিংক কপি করুন">
-                        <i class="fas fa-link"></i> <span class="share-btn-text">লিংক কপি</span>
+                    <button onclick="copyPostLink('<?= $shortUrl ?>', this);" class="share-btn copy" title="শর্ট লিংক কপি করুন">
+                        <i class="fas fa-link"></i> <span class="share-btn-text">শর্ট লিংক কপি</span>
                     </button>
                     <a href="https://api.whatsapp.com/send?text=<?= $waShareText ?>" target="_blank" rel="noopener" class="share-btn wa" title="হোয়াটসঅ্যাপে শেয়ার">
                         <i class="fab fa-whatsapp"></i> <span class="share-btn-text">WhatsApp</span>

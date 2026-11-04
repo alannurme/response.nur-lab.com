@@ -2215,7 +2215,7 @@ if (!empty($data['breadcrumbs'])) {
                                                      <span class="status-toggle-thumb"></span>
                                                  </span>
                                              </button>
-                                             <button type="button" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)" style="color: #6366f1; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
+                                             <button type="button" onclick="copyPostLink('<?= URLROOT ?>/p/<?= $post['id'] ?>', this)" style="color: #6366f1; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; cursor: pointer;">
                                                  <i class="far fa-copy"></i> Copy Link
                                              </button>
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
@@ -2299,7 +2299,7 @@ if (!empty($data['breadcrumbs'])) {
                                                      <span class="status-toggle-thumb"></span>
                                                  </span>
                                              </button>
-                                             <button type="button" class="btn-row-action" title="Copy Direct Link (সরাসরি লিঙ্ক কপি করুন)" onclick="copyPostLink('<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>', this)">
+                                             <button type="button" class="btn-row-action" title="Copy Direct Link (সরাসরি লিঙ্ক কপি করুন)" onclick="copyPostLink('<?= URLROOT ?>/p/<?= $post['id'] ?>', this)">
                                                  <i class="far fa-copy"></i>
                                              </button>
                                              <a href="<?= URLROOT ?>/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="btn-row-action" title="View on Live Site">
@@ -2360,8 +2360,8 @@ if (!empty($data['breadcrumbs'])) {
                         <!-- Share Options Action Group -->
                         <div id="detailShareGroup" style="display: none; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 8px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">Share:</span>
-                            <button type="button" id="btnCopyLink" onclick="copyPostPublicLink()" title="Copy Public Link" class="btn-explorer btn-explorer-secondary" style="padding: 4px 8px; font-size: 12px; height: auto; gap: 4px;">
-                                <i class="fas fa-link"></i> <span id="copyLinkText">Copy Link</span>
+                            <button type="button" id="btnCopyLink" onclick="copyPostPublicLink()" title="Copy Short Link (/p/{id})" class="btn-explorer btn-explorer-secondary" style="padding: 4px 8px; font-size: 12px; height: auto; gap: 4px;">
+                                <i class="fas fa-link"></i> <span id="copyLinkText">Copy Short Link</span>
                             </button>
                             <a id="shareFB" href="#" target="_blank" title="Share on Facebook" class="btn-explorer" style="padding: 4px 8px; font-size: 12px; background: #1877f2; color: white; border: none; height: auto;">
                                 <i class="fab fa-facebook-f"></i>
@@ -2493,7 +2493,7 @@ if (!empty($data['breadcrumbs'])) {
                             </a>
                             <button type="button" onclick="copyPostPublicLink()" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
                                 <i class="fas fa-link" style="color: #2563eb; width: 16px;"></i>
-                                <span id="fabCopyLinkText">পাবলিক লিংক কপি করুন</span>
+                                <span id="fabCopyLinkText">শর্ট লিংক কপি করুন (Short Link)</span>
                             </button>
                             <button type="button" onclick="copyFullPostForFacebook(this, 'smart')" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; border: none; cursor: pointer; text-align: left; transition: 0.15s;" onmouseover="this.style.background='#f0fdf4'; this.style.color='#166534';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
                                 <i class="fab fa-facebook" style="color: #1877f2; width: 16px;"></i>
@@ -4339,7 +4339,7 @@ body.organize-drag-active #organize-root-list {
                                      <span class="status-toggle-thumb"></span>
                                  </span>
                              </button>
-                             <button type="button" class="btn-row-action" title="Copy Direct Link" onclick="copyPostLink('<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}', this)">
+                             <button type="button" class="btn-row-action" title="Copy Direct Link" onclick="copyPostLink('<?= URLROOT ?>/p/${post.id}', this)">
                                  <i class="far fa-copy"></i>
                              </button>
                              <a href="<?= URLROOT ?>/${escapeHtmlAttr(post.slug)}" target="_blank" class="btn-row-action" title="View on Live Site">
@@ -5225,14 +5225,15 @@ body.organize-drag-active #organize-root-list {
         const publicLink = publicBase + '/' + canonicalSlug;
         const shortLink = publicBase + '/p/' + data.id;
         window.currentPostPublicLink = publicLink;
+        window.currentPostShortLink = shortLink;
         
-        // Set social media links safely
+        // Set social media links safely (using short link for clean, compact sharing)
         const shareFB = document.getElementById('shareFB');
-        if (shareFB) shareFB.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(publicLink);
+        if (shareFB) shareFB.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shortLink);
         const shareWA = document.getElementById('shareWA');
-        if (shareWA) shareWA.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + '\n' + publicLink);
+        if (shareWA) shareWA.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(data.title + '\n' + shortLink);
         const shareTwitter = document.getElementById('shareTwitter');
-        if (shareTwitter) shareTwitter.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(publicLink) + '&text=' + encodeURIComponent(data.title);
+        if (shareTwitter) shareTwitter.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(shortLink) + '&text=' + encodeURIComponent(data.title);
         
         const detailShareGroup = document.getElementById('detailShareGroup');
         if (detailShareGroup) detailShareGroup.style.display = 'flex';
@@ -5534,22 +5535,24 @@ body.organize-drag-active #organize-root-list {
     }
 
     function copyPostPublicLink() {
-        if (!window.currentPostPublicLink) return;
+        const linkToCopy = window.currentPostShortLink || window.currentPostPublicLink;
+        if (!linkToCopy) return;
         
-        navigator.clipboard.writeText(window.currentPostPublicLink)
+        navigator.clipboard.writeText(linkToCopy)
             .then(() => {
+                showToast('📋 শর্ট লিঙ্ক কপি হয়েছে: ' + linkToCopy);
                 const copyBtnSpan = document.getElementById('copyLinkText');
                 if (copyBtnSpan) {
                     copyBtnSpan.textContent = 'Copied!';
                     setTimeout(() => {
-                        copyBtnSpan.textContent = 'Copy Link';
+                        copyBtnSpan.textContent = 'Copy Short Link';
                     }, 2000);
                 }
                 const fabCopySpan = document.getElementById('fabCopyLinkText');
                 if (fabCopySpan) {
-                    fabCopySpan.textContent = 'কপি হয়েছে!';
+                    fabCopySpan.textContent = 'শর্ট লিংক কপি হয়েছে!';
                     setTimeout(() => {
-                        fabCopySpan.textContent = 'পাবলিক লিংক কপি করুন';
+                        fabCopySpan.textContent = 'শর্ট লিংক কপি করুন (Short Link)';
                     }, 2000);
                 }
             })
@@ -5655,7 +5658,7 @@ body.organize-drag-active #organize-root-list {
         
         const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const publicBase = isLocalHost ? 'https://response.nur-lab.com' : '<?= URLROOT ?>';
-        const postLink = data.slug ? (publicBase + '/' + encodeURI(data.slug)) : (data.id ? (publicBase + '/p/' + data.id) : '');
+        const postLink = data.id ? (publicBase + '/p/' + data.id) : (data.slug ? (publicBase + '/' + encodeURI(data.slug)) : '');
         const isSmart = (mode === 'smart');
         const MAX_SMART_CHARS = 1350; // Facebook optimal character threshold
 
@@ -5758,7 +5761,7 @@ body.organize-drag-active #organize-root-list {
         const data = window.currentPostDetailData;
         const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const publicBase = isLocalHost ? 'https://response.nur-lab.com' : '<?= URLROOT ?>';
-        const postLink = data.slug ? (publicBase + '/' + encodeURI(data.slug)) : (data.id ? (publicBase + '/p/' + data.id) : '');
+        const postLink = data.id ? (publicBase + '/p/' + data.id) : (data.slug ? (publicBase + '/' + encodeURI(data.slug)) : '');
 
         if (!postLink) {
             alert('পোস্টের লিংক পাওয়া যায়নি!');
