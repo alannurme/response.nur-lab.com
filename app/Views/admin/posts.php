@@ -195,12 +195,16 @@
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     }
 
-    /* Sidebar Tree & TOC Independent Scroll Limits */
+    /* Sidebar Tree Independent Scroll Limits (Expanded to Full Available Height) */
     #sidebar-tree-card > .folder-tree-list {
-        max-height: calc(100vh - 420px);
+        max-height: calc(100vh - 130px);
         min-height: 240px;
         overflow-y: auto;
         padding-right: 4px;
+    }
+    #sidebar-posts-subcontent #sidebar-tree-card {
+        overflow: visible !important;
+        max-height: none !important;
     }
     #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar {
         width: 4px;
@@ -209,19 +213,28 @@
         background: #cbd5e1;
         border-radius: 4px;
     }
-    #quickViewTocContainer .post-toc-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px 16px;
-        max-height: calc(100vh - 500px);
-        min-height: 180px;
+    #sidebar-tree-card > .folder-tree-list::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Quick View TOC (সূচিপত্র) Popover Styles */
+    #quickViewTocContent {
+        max-height: calc(100vh - 280px);
+        min-height: 80px;
         overflow-y: auto;
         font-family: 'Noto Serif Bengali', serif !important;
         font-size: 14px;
         line-height: 1.5;
+        padding-right: 4px;
     }
-    #quickViewTocContainer .toc-list {
+    #quickViewTocContent::-webkit-scrollbar {
+        width: 4px;
+    }
+    #quickViewTocContent::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    #quickViewTocContent .toc-list {
         list-style: none !important;
         padding-left: 0 !important;
         margin: 0 !important;
@@ -229,10 +242,10 @@
         flex-direction: column;
         gap: 6px;
     }
-    #quickViewTocContainer .toc-item {
+    #quickViewTocContent .toc-item {
         list-style: none !important;
     }
-    #quickViewTocContainer .toc-item a {
+    #quickViewTocContent .toc-item a {
         text-decoration: none;
         color: #475569;
         font-weight: 600;
@@ -241,24 +254,24 @@
         gap: 6px;
         transition: color 0.2s ease;
     }
-    #quickViewTocContainer .toc-item a:hover {
-        color: #2563eb;
+    #quickViewTocContent .toc-item a:hover {
+        color: #059669;
     }
-    #quickViewTocContainer .toc-number {
-        color: #64748b;
+    #quickViewTocContent .toc-number {
+        color: #059669;
         font-weight: 700;
     }
-    #quickViewTocContainer .toc-h3 {
+    #quickViewTocContent .toc-h3 {
         padding-left: 15px !important;
     }
-    #quickViewTocContainer .toc-h3 a {
+    #quickViewTocContent .toc-h3 a {
         font-size: 13px;
         font-weight: 500;
     }
-    #quickViewTocContainer .toc-h4 {
+    #quickViewTocContent .toc-h4 {
         padding-left: 30px !important;
     }
-    #quickViewTocContainer .toc-h4 a {
+    #quickViewTocContent .toc-h4 a {
         font-size: 12px;
         font-weight: 400;
         color: #64748b;
@@ -457,13 +470,6 @@
         min-height: 0;
         flex-shrink: 1;
         transition: max-height 0.2s ease;
-    }
-
-    .explorer-sidebar.has-toc > .sidebar-card {
-        flex: 1 1 50% !important;
-        height: calc(50% - 8px) !important;
-        max-height: calc(50% - 8px) !important;
-        min-height: 0 !important;
     }
 
     /* Custom elegant scrollbar for the explorer sidebar cards */
@@ -6460,7 +6466,6 @@ body.organize-drag-active #organize-root-list {
     document.addEventListener('DOMContentLoaded', function() {
         const targetContainer = document.getElementById('sidebar-posts-subcontent');
         const sidebarTreeCard = document.getElementById('sidebar-tree-card');
-        const tocContainer = document.getElementById('quickViewTocContainer');
         
         if (targetContainer && sidebarTreeCard) {
             sidebarTreeCard.style.border = 'none';
@@ -6468,14 +6473,6 @@ body.organize-drag-active #organize-root-list {
             sidebarTreeCard.style.background = 'transparent';
             sidebarTreeCard.style.boxShadow = 'none';
             targetContainer.appendChild(sidebarTreeCard);
-            
-            if (tocContainer) {
-                tocContainer.style.border = 'none';
-                tocContainer.style.padding = '5px 0';
-                tocContainer.style.background = 'transparent';
-                tocContainer.style.boxShadow = 'none';
-                targetContainer.appendChild(tocContainer);
-            }
 
             // Auto scroll sidebar navigation to top so All Posts is visible at top
             setTimeout(function() {
