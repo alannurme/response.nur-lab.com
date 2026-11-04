@@ -3959,6 +3959,8 @@ body.organize-drag-active #organize-root-list {
     // Live AJAX Search for Admin Posts (Direct Table Replacement)
     // -------------------------------------------------------------
     let adminSearchTimer = null;
+    let adminSearchAbortController = null;
+    const adminSearchCache = {};
     let initialTbodyHTML = null;
     let initialTheadHTML = null;
     let initialSubFoldersDisplay = null;
@@ -4091,6 +4093,10 @@ body.organize-drag-active #organize-root-list {
         if (clearBtn) clearBtn.style.display = q.length > 0 ? 'block' : 'none';
 
         clearTimeout(adminSearchTimer);
+        if (adminSearchAbortController) {
+            adminSearchAbortController.abort();
+            adminSearchAbortController = null;
+        }
 
         if (q.length === 0) {
             if (icon) icon.className = 'fas fa-search';
@@ -4122,71 +4128,91 @@ body.organize-drag-active #organize-root-list {
             return;
         }
 
+        // Instant Cache Hit check (0ms response)
+        if (adminSearchCache[q]) {
+            applyAdminSearchResults(adminSearchCache[q], q);
+            return;
+        }
+
         if (icon) icon.className = 'fas fa-circle-notch fa-spin';
 
         adminSearchTimer = setTimeout(() => {
+            adminSearchAbortController = new AbortController();
+            const signal = adminSearchAbortController.signal;
             const url = '<?= URLROOT ?>/admin/ajax_search_posts?q=' + encodeURIComponent(q);
-            fetch(url)
+
+            fetch(url, { signal })
                 .then(res => res.json())
                 .then(data => {
-                    if (icon) icon.className = 'fas fa-search';
-
-                    const subFolders = document.querySelector('.folder-grid');
-                    if (subFolders && subFolders.parentElement) {
-                        subFolders.parentElement.style.display = 'none';
-                    }
-
-                    // Hide pagination during search
-                    const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
-                    paginations.forEach(p => p.style.display = 'none');
-
-                    // Setup banner
-                    let banner = document.getElementById('admin-search-status-banner');
-                    if (!banner) {
-                        banner = document.createElement('div');
-                        banner.id = 'admin-search-status-banner';
-                        banner.style.cssText = 'margin-bottom: 16px; padding: 10px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; color: #1e40af; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: inherit;';
-                        const filesSection = document.querySelector('.files-section');
-                        if (filesSection) filesSection.parentElement.insertBefore(banner, filesSection);
-                    }
-
-                    const posts = data.posts || [];
-
-                    if (!data.success || posts.length === 0) {
-                        banner.style.display = 'flex';
-                        banner.innerHTML = `
-                            <div>
-                                <i class="fas fa-info-circle" style="color: #3b82f6; margin-right: 6px;"></i>
-                                "<strong>${escapeHtmlAttr(q)}</strong>" দিয়ে কোনো পোস্ট পাওয়া যায়নি। (বাংলা বা ইংরেজিতে চেষ্টা করুন)
-                            </div>
-                            <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">Reset</button>`;
-                        
-                        renderAdminTable([]);
-                        return;
-                    }
-
-                    banner.style.display = 'flex';
-                    banner.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <span style="font-weight: 600;">
-                                <i class="fas fa-check-circle" style="color: #059669; margin-right: 5px;"></i>
-                                ফলাফল: মোট ${posts.length}টি পোস্ট পাওয়া গেছে
-                            </span>
-                        </div>
-                        <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">
-                            <i class="fas fa-times"></i> Clear Search
-                        </button>`;
-
-                    renderAdminTable(posts);
+                    adminSearchCache[q] = data;
+                    applyAdminSearchResults(data, q);
                 })
                 .catch(err => {
+                    if (err.name === 'AbortError') return;
                     console.error('Admin post live search failed:', err);
                     if (icon) icon.className = 'fas fa-search';
                 });
-        }, 220);
+        }, 90);
+    }
+
+    function applyAdminSearchResults(data, q) {
+        const icon = document.getElementById('postSearchIcon');
+        if (icon) icon.className = 'fas fa-search';
+
+        const subFolders = document.querySelector('.folder-grid');
+        if (subFolders && subFolders.parentElement) {
+            subFolders.parentElement.style.display = 'none';
+        }
+
+        // Hide pagination during search
+        const paginations = document.querySelectorAll('.pagination, .explorer-pagination');
+        paginations.forEach(p => p.style.display = 'none');
+
+        // Setup banner
+        let banner = document.getElementById('admin-search-status-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'admin-search-status-banner';
+            banner.style.cssText = 'margin-bottom: 16px; padding: 10px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; color: #1e40af; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: inherit;';
+            const filesSection = document.querySelector('.files-section');
+            if (filesSection) filesSection.parentElement.insertBefore(banner, filesSection);
+        }
+
+        const posts = data.posts || [];
+
+        if (!data.success || posts.length === 0) {
+            banner.style.display = 'flex';
+            banner.innerHTML = `
+                <div>
+                    <i class="fas fa-info-circle" style="color: #3b82f6; margin-right: 6px;"></i>
+                    "<strong>${escapeHtmlAttr(q)}</strong>" দিয়ে কোনো পোস্ট পাওয়া যায়নি। (বাংলা বা ইংরেজিতে চেষ্টা করুন)
+                </div>
+                <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">Reset</button>`;
+            
+            renderAdminTable([]);
+            return;
+        }
+
+        banner.style.display = 'flex';
+        banner.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-weight: 600;">
+                    <i class="fas fa-check-circle" style="color: #059669; margin-right: 5px;"></i>
+                    ফলাফল: মোট ${posts.length}টি পোস্ট পাওয়া গেছে
+                </span>
+            </div>
+            <button type="button" class="btn-explorer btn-explorer-secondary" style="padding: 3px 10px; font-size: 11px;" onclick="clearAdminPostSearch()">
+                <i class="fas fa-times"></i> Clear Search
+            </button>`;
+
+        renderAdminTable(posts);
     }
 
     function clearAdminPostSearch() {
+        if (adminSearchAbortController) {
+            adminSearchAbortController.abort();
+            adminSearchAbortController = null;
+        }
         const input = document.getElementById('postSearchInput');
         if (input) input.value = '';
         const clearBtn = document.getElementById('postSearchClearBtn');

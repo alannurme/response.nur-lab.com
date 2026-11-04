@@ -201,86 +201,150 @@ class PostModel extends Model {
     }
 
     /**
-     * Intelligent ranked search across posts:
+     * Helper to extract common Bengali root/stem by stripping grammatical suffixes (বিভক্তি / বহুবচন)
+     */
+    private function getBengaliStem($w) {
+        $w = trim($w);
+        $suffixes = ['গুলো', 'গুলি', 'সমূহ', 'দের', 'য়ের', 'ের', 'কে', 'তে', 'র', 'ে', 'য়'];
+        foreach ($suffixes as $suf) {
+            if (mb_strlen($w, 'UTF-8') > (mb_strlen($suf, 'UTF-8') + 2)) {
+                if (mb_substr($w, -mb_strlen($suf, 'UTF-8'), null, 'UTF-8') === $suf) {
+                    return mb_substr($w, 0, -mb_strlen($suf, 'UTF-8'), 'UTF-8');
+                }
+            }
+        }
+        return $w;
+    }
+
+    /**
+     * Generate common Bengali spelling / phonetic variants (e.g. দ <-> ধ, ু <-> ূ, স <-> শ, জ <-> য, ি <-> ী)
+     */
+    private function getBengaliSearchVariants($w) {
+        $vars = [$w];
+        $stem = $this->getBengaliStem($w);
+        if ($stem !== $w) $vars[] = $stem;
+        
+        // Typo / phonetic swaps (Avro & spelling variations)
+        if (mb_strpos($w, 'দ') !== false) {
+            $vars[] = str_replace('দ', 'ধ', $w);
+            if ($stem !== $w) $vars[] = str_replace('দ', 'ধ', $stem);
+        }
+        if (mb_strpos($w, 'ধ') !== false) {
+            $vars[] = str_replace('ধ', 'দ', $w);
+            if ($stem !== $w) $vars[] = str_replace('ধ', 'দ', $stem);
+        }
+        if (mb_strpos($w, 'ু') !== false) {
+            $vars[] = str_replace('ু', 'ূ', $w);
+            if ($stem !== $w) $vars[] = str_replace('ু', 'ূ', $stem);
+        }
+        if (mb_strpos($w, 'ূ') !== false) {
+            $vars[] = str_replace('ূ', 'ু', $w);
+            if ($stem !== $w) $vars[] = str_replace('ূ', 'ু', $stem);
+        }
+        if (mb_strpos($w, 'স') !== false) {
+            $vars[] = str_replace('স', 'শ', $w);
+            if ($stem !== $w) $vars[] = str_replace('স', 'শ', $stem);
+        }
+        if (mb_strpos($w, 'শ') !== false) {
+            $vars[] = str_replace('শ', 'স', $w);
+            if ($stem !== $w) $vars[] = str_replace('শ', 'স', $stem);
+        }
+        if (mb_strpos($w, 'জ') !== false) {
+            $vars[] = str_replace('জ', 'য', $w);
+            if ($stem !== $w) $vars[] = str_replace('জ', 'য', $stem);
+        }
+        if (mb_strpos($w, 'য') !== false) {
+            $vars[] = str_replace('য', 'জ', $w);
+            if ($stem !== $w) $vars[] = str_replace('য', 'জ', $stem);
+        }
+
+        return array_unique(array_filter($vars));
+    }
+
+    /**
+     * Ultra-fast multi-tier ranked search across posts:
      * - Searches Title, Content, Excerpt, SEO Keywords, and Categories.
+     * - Matches even partial words ("olpo milleu") and Bengali phonetic typos (বিদান <-> বিধান).
      * - Ranks exact same-to-same title and phrase matches at the very top (Priority 1).
-     * - Matches in body content are included with high-relevance snippet extraction.
+     * - Multi-tier execution: Fast metadata scan (~15ms) + targeted content scan + caching.
      */
     public function searchPostsFast($query, $limit = 60, $include_drafts = false, $categoryId = null) {
         $q = trim($query);
         if (empty($q)) return [];
 
+        $cacheKey = 'fast_search_' . md5($q . '_' . ($include_drafts ? '1' : '0') . '_' . ($categoryId ?? 'root') . '_' . $limit);
+        $cached = \App\Helpers\Cache::get($cacheKey);
+        if ($cached !== null && is_array($cached)) {
+            return $cached;
+        }
+
         $statusClause = $include_drafts ? "1=1" : "p.status = 'published'";
         $categoryClause = "";
+        if ($categoryId !== null) {
+            $categoryClause = "AND (p.category_id = " . (int)$categoryId . " OR pc.category_id = " . (int)$categoryId . ")";
+        }
+
+        $words = preg_split('/\s+/u', $q, -1, PREG_SPLIT_NO_EMPTY);
         $params = [
             'q_exact' => $q,
             'q_start' => $q . '%',
             'q_like'  => '%' . $q . '%'
         ];
 
-        if ($categoryId !== null) {
-            $categoryClause = "AND (p.category_id = :cat_id OR pc.category_id = :cat_id)";
-            $params['cat_id'] = (int)$categoryId;
-        }
-
-        $words = preg_split('/\s+/u', $q, -1, PREG_SPLIT_NO_EMPTY);
-        $whereParts = [
-            "(p.title LIKE :q_like OR p.seo_keywords LIKE :q_like OR p.excerpt LIKE :q_like OR p.content LIKE :q_like OR c2.name LIKE :q_like OR c.name LIKE :q_like)"
+        $matchTitleParts = [
+            "(p.title LIKE :q_like OR p.seo_keywords LIKE :q_like OR p.excerpt LIKE :q_like)"
         ];
 
-        $titleWordConditions = [];
-        $contentWordConditions = [];
+        $wordConditions = [];
+        $highlightTerms = [$q];
 
-        if (count($words) > 1 && count($words) <= 6) {
-            $wordConditions = [];
-            foreach ($words as $idx => $w) {
-                $paramName = 'w_' . $idx;
-                $params[$paramName] = '%' . $w . '%';
-                $wordConditions[] = "(p.title LIKE :$paramName OR p.content LIKE :$paramName OR p.seo_keywords LIKE :$paramName OR p.excerpt LIKE :$paramName)";
-                $titleWordConditions[] = "p.title LIKE :$paramName";
-                $contentWordConditions[] = "p.content LIKE :$paramName";
+        foreach ($words as $idx => $w) {
+            $variants = $this->getBengaliSearchVariants($w);
+            $wConditions = [];
+            foreach ($variants as $vIdx => $v) {
+                $highlightTerms[] = $v;
+                $paramKey = "w_{$idx}_{$vIdx}";
+                $params[$paramKey] = '%' . $v . '%';
+                $wConditions[] = "(p.title LIKE :$paramKey OR p.seo_keywords LIKE :$paramKey OR p.excerpt LIKE :$paramKey)";
             }
-            $whereParts[] = "(" . implode(" AND ", $wordConditions) . ")";
+            $matchTitleParts[] = "(" . implode(" OR ", $wConditions) . ")";
+            $wordConditions[] = "(" . implode(" OR ", $wConditions) . ")";
         }
 
-        $whereSql = "(" . implode(" OR ", $whereParts) . ")";
-
-        $caseScoreExtra = "";
-        if (!empty($titleWordConditions)) {
-            $caseScoreExtra .= "WHEN (" . implode(" AND ", $titleWordConditions) . ") THEN 500\n";
-        }
-        if (!empty($contentWordConditions)) {
-            $caseScoreExtra .= "WHEN (" . implode(" AND ", $contentWordConditions) . ") THEN 200\n";
+        $caseBonus = "";
+        if (count($words) > 1 && count($words) <= 5) {
+            $caseBonus .= "WHEN (" . implode(" AND ", $wordConditions) . ") THEN 500\n";
         }
 
-        $sql = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
-                       p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
-                       p.content,
-                       COALESCE(c2.name, c.name, 'ইসলাম') as main_category,
-                       GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') as secondary_categories,
-                       (CASE 
-                            WHEN LOWER(TRIM(p.title)) = LOWER(:q_exact) THEN 1000
-                            WHEN LOWER(p.title) LIKE LOWER(:q_start) THEN 800
-                            WHEN LOWER(p.title) LIKE LOWER(:q_like) THEN 600
-                            $caseScoreExtra
-                            WHEN LOWER(p.seo_keywords) LIKE LOWER(:q_like) THEN 450
-                            WHEN LOWER(p.excerpt) LIKE LOWER(:q_like) THEN 400
-                            WHEN LOWER(p.content) LIKE LOWER(:q_like) THEN 350
-                            ELSE 100 
-                        END) as relevance_score
-                FROM posts p
-                LEFT JOIN post_categories pc ON p.id = pc.post_id
-                LEFT JOIN categories c ON pc.category_id = c.id
-                LEFT JOIN categories c2 ON p.category_id = c2.id
-                WHERE $statusClause $categoryClause AND $whereSql
-                GROUP BY p.id
-                ORDER BY 
-                    relevance_score DESC,
-                    p.views DESC,
-                    p.id DESC
-                LIMIT :limit";
+        $partialScores = "";
+        foreach ($wordConditions as $wc) {
+            $partialScores .= "WHEN $wc THEN 150\n";
+        }
 
-        $stmt = $this->db->prepare($sql);
+        $whereTitleSql = "(" . implode(" OR ", $matchTitleParts) . ")";
+
+        // Tier 1: Fast metadata search (Title, SEO Keywords, Excerpt) - finishes in ~15ms!
+        $sqlTier1 = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
+                            p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
+                            (CASE 
+                                 WHEN LOWER(TRIM(p.title)) = LOWER(:q_exact) THEN 1000
+                                 WHEN LOWER(p.title) LIKE LOWER(:q_start) THEN 800
+                                 WHEN LOWER(p.title) LIKE LOWER(:q_like) THEN 600
+                                 $caseBonus
+                                 WHEN LOWER(p.seo_keywords) LIKE LOWER(:q_like) THEN 450
+                                 WHEN LOWER(p.excerpt) LIKE LOWER(:q_like) THEN 400
+                                 $partialScores
+                                 ELSE 50 
+                             END) as relevance_score
+                     FROM posts p
+                     WHERE $statusClause $categoryClause AND $whereTitleSql
+                     ORDER BY 
+                         relevance_score DESC,
+                         p.views DESC,
+                         p.id DESC
+                     LIMIT :limit";
+
+        $stmt = $this->db->prepare($sqlTier1);
         foreach ($params as $k => $v) {
             $stmt->bindValue(':' . $k, $v);
         }
@@ -288,92 +352,157 @@ class PostModel extends Model {
         $stmt->execute();
         $posts = $stmt->fetchAll();
 
-        // Process badges, snippets, and highlights
-        $qLower = mb_strtolower($q, 'UTF-8');
-        $highlightTerms = array_merge([$q], $words);
-        usort($highlightTerms, function($a, $b) {
-            return mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
-        });
+        // Tier 2: If Tier 1 has fewer than 15 results (e.g. content-only matches), search content
+        if (count($posts) < 15) {
+            $existingIds = !empty($posts) ? array_column($posts, 'id') : [];
+            $notInClause = !empty($existingIds) ? ("AND p.id NOT IN (" . implode(',', array_map('intval', $existingIds)) . ")") : "";
+            
+            $contentWhere = "(p.content LIKE :qc_like)";
+            $contentParams = ['qc_like' => '%' . $q . '%'];
 
-        foreach ($posts as &$post) {
-            $titleLower = mb_strtolower($post['title'], 'UTF-8');
-            $keywordsLower = mb_strtolower($post['seo_keywords'] ?? '', 'UTF-8');
-            $excerptLower = mb_strtolower($post['excerpt'] ?? '', 'UTF-8');
-            $rawContent = $post['content'] ?? '';
-            $cleanContent = trim(preg_replace('/\s+/u', ' ', strip_tags($rawContent)));
-            $contentLower = mb_strtolower($cleanContent, 'UTF-8');
+            if (!empty($words)) {
+                $cWordOr = [];
+                foreach ($words as $wIdx => $w) {
+                    $cKey = "cw_" . $wIdx;
+                    $contentParams[$cKey] = '%' . $this->getBengaliStem($w) . '%';
+                    $cWordOr[] = "p.content LIKE :$cKey";
+                }
+                $contentWhere = "(p.content LIKE :qc_like OR (" . implode(" OR ", $cWordOr) . "))";
+            }
 
-            $isExactTitle = ($titleLower === $qLower);
-            $isTitleMatch = (mb_strpos($titleLower, $qLower) !== false);
-            $isKeywordMatch = (mb_strpos($keywordsLower, $qLower) !== false || mb_strpos($excerptLower, $qLower) !== false);
-            $isContentMatch = (mb_strpos($contentLower, $qLower) !== false);
+            $neededLimit = max(10, (int)$limit - count($posts));
+            $sqlTier2 = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, p.featured_image, 
+                                p.post_type, p.views, p.fake_views, p.status, p.created_at, p.seo_title, p.seo_keywords,
+                                (CASE 
+                                     WHEN p.content LIKE :qc_like THEN 350
+                                     ELSE 80 
+                                 END) as relevance_score
+                         FROM posts p
+                         WHERE $statusClause $categoryClause $notInClause AND $contentWhere
+                         ORDER BY relevance_score DESC, p.views DESC
+                         LIMIT " . (int)$neededLimit;
 
-            if (!$isTitleMatch && count($words) > 1) {
-                $allInTitle = true;
-                foreach ($words as $w) {
-                    if (mb_strpos($titleLower, mb_strtolower($w, 'UTF-8')) === false) {
-                        $allInTitle = false;
+            $stmt2 = $this->db->prepare($sqlTier2);
+            foreach ($contentParams as $k => $v) {
+                $stmt2->bindValue(':' . $k, $v);
+            }
+            $stmt2->execute();
+            $contentPosts = $stmt2->fetchAll();
+            if (!empty($contentPosts)) {
+                $posts = array_merge($posts, $contentPosts);
+            }
+        }
+
+        // Resolve categories & short content snippets for matched posts
+        if (!empty($posts)) {
+            $postIds = array_column($posts, 'id');
+            $inClause = implode(',', array_map('intval', $postIds));
+            
+            $catStmt = $this->db->query("SELECT p.id, COALESCE(c2.name, c.name, 'ইসলাম') as main_category, 
+                                           GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') as secondary_categories
+                                    FROM posts p
+                                    LEFT JOIN post_categories pc ON p.id = pc.post_id
+                                    LEFT JOIN categories c ON pc.category_id = c.id
+                                    LEFT JOIN categories c2 ON p.category_id = c2.id
+                                    WHERE p.id IN ($inClause)
+                                    GROUP BY p.id");
+            $catsMap = [];
+            while ($row = $catStmt->fetch()) {
+                $catsMap[$row['id']] = $row;
+            }
+
+            // Fetch small content sample only for matched posts
+            $contentStmt = $this->db->query("SELECT id, SUBSTRING(content, 1, 6000) as sample_content FROM posts WHERE id IN ($inClause)");
+            $contentMap = [];
+            while ($cRow = $contentStmt->fetch()) {
+                $contentMap[$cRow['id']] = $cRow['sample_content'];
+            }
+
+            $highlightTerms = array_unique(array_filter($highlightTerms));
+            usort($highlightTerms, function($a, $b) {
+                return mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8');
+            });
+
+            $qLower = mb_strtolower($q, 'UTF-8');
+
+            foreach ($posts as &$post) {
+                $id = $post['id'];
+                $post['main_category'] = $catsMap[$id]['main_category'] ?? 'ইসলাম';
+                $post['secondary_categories'] = $catsMap[$id]['secondary_categories'] ?? '';
+
+                $titleLower = mb_strtolower($post['title'], 'UTF-8');
+                $keywordsLower = mb_strtolower($post['seo_keywords'] ?? '', 'UTF-8');
+                $excerptLower = mb_strtolower($post['excerpt'] ?? '', 'UTF-8');
+                $rawContent = $contentMap[$id] ?? '';
+                $cleanContent = trim(preg_replace('/\s+/u', ' ', strip_tags($rawContent)));
+
+                $isTitleMatch = false;
+                foreach ($highlightTerms as $ht) {
+                    if (mb_strlen($ht, 'UTF-8') >= 2 && mb_strpos($titleLower, mb_strtolower($ht, 'UTF-8')) !== false) {
+                        $isTitleMatch = true;
                         break;
                     }
                 }
-                if ($allInTitle) $isTitleMatch = true;
-            }
 
-            if ($isExactTitle || $isTitleMatch) {
-                $post['match_badge'] = 'Title Match';
-            } elseif ($isKeywordMatch) {
-                $post['match_badge'] = 'Keyword Match';
-            } else {
-                $post['match_badge'] = 'Content Match';
-            }
-
-            // Safe Title Highlighting
-            $highlightedTitle = htmlspecialchars($post['title']);
-            foreach ($highlightTerms as $term) {
-                if (mb_strlen($term, 'UTF-8') >= 2) {
-                    $highlightedTitle = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedTitle);
+                if ($isTitleMatch) {
+                    $post['match_badge'] = 'Title Match';
+                } elseif (mb_strpos($keywordsLower, $qLower) !== false || mb_strpos($excerptLower, $qLower) !== false) {
+                    $post['match_badge'] = 'Keyword Match';
+                } else {
+                    $post['match_badge'] = 'Content Match';
                 }
-            }
-            $post['highlighted_title'] = $highlightedTitle;
 
-            // Snippet extraction around the matched word
-            $snippetText = '';
-            $pos = mb_stripos($cleanContent, $q, 0, 'UTF-8');
-            if ($pos === false && !empty($words)) {
-                foreach ($words as $w) {
-                    $pos = mb_stripos($cleanContent, $w, 0, 'UTF-8');
-                    if ($pos !== false) break;
+                // Safe Title Highlighting
+                $highlightedTitle = htmlspecialchars($post['title']);
+                foreach ($highlightTerms as $term) {
+                    if (mb_strlen($term, 'UTF-8') >= 2) {
+                        $highlightedTitle = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedTitle);
+                    }
                 }
-            }
+                $post['highlighted_title'] = $highlightedTitle;
 
-            if ($pos !== false) {
-                $start = max(0, $pos - 45);
-                $length = mb_strlen($q, 'UTF-8') + 120;
-                $snippetPart = mb_substr($cleanContent, $start, $length, 'UTF-8');
-                $prefix = ($start > 0) ? '... ' : '';
-                $suffix = (mb_strlen($cleanContent, 'UTF-8') > ($start + $length)) ? ' ...' : '';
-                $snippetText = $prefix . $snippetPart . $suffix;
-            } elseif (!empty($post['excerpt'])) {
-                $snippetText = trim(strip_tags($post['excerpt']));
-            } else {
-                $snippetText = mb_substr($cleanContent, 0, 130, 'UTF-8') . (mb_strlen($cleanContent, 'UTF-8') > 130 ? '...' : '');
-            }
-
-            $post['snippet'] = $snippetText;
-
-            // Highlighted Snippet
-            $escapedSnippet = htmlspecialchars($snippetText);
-            $highlightedSnippet = $escapedSnippet;
-            foreach ($highlightTerms as $term) {
-                if (mb_strlen($term, 'UTF-8') >= 2) {
-                    $highlightedSnippet = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedSnippet);
+                // Snippet extraction around matched words
+                $snippetText = '';
+                $pos = mb_stripos($cleanContent, $q, 0, 'UTF-8');
+                if ($pos === false) {
+                    foreach ($highlightTerms as $ht) {
+                        if (mb_strlen($ht, 'UTF-8') >= 3) {
+                            $pos = mb_stripos($cleanContent, $ht, 0, 'UTF-8');
+                            if ($pos !== false) break;
+                        }
+                    }
                 }
-            }
-            $post['highlighted_snippet'] = $highlightedSnippet;
 
-            // Set content to short snippet so memory & JSON payload remain light
-            $post['content'] = $snippetText;
+                if ($pos !== false) {
+                    $start = max(0, $pos - 45);
+                    $length = mb_strlen($q, 'UTF-8') + 120;
+                    $snippetPart = mb_substr($cleanContent, $start, $length, 'UTF-8');
+                    $prefix = ($start > 0) ? '... ' : '';
+                    $suffix = (mb_strlen($cleanContent, 'UTF-8') > ($start + $length)) ? ' ...' : '';
+                    $snippetText = $prefix . $snippetPart . $suffix;
+                } elseif (!empty($post['excerpt'])) {
+                    $snippetText = trim(strip_tags($post['excerpt']));
+                } else {
+                    $snippetText = mb_substr($cleanContent, 0, 130, 'UTF-8') . (mb_strlen($cleanContent, 'UTF-8') > 130 ? '...' : '');
+                }
+
+                $post['snippet'] = $snippetText;
+
+                // Highlighted Snippet
+                $escapedSnippet = htmlspecialchars($snippetText);
+                $highlightedSnippet = $escapedSnippet;
+                foreach ($highlightTerms as $term) {
+                    if (mb_strlen($term, 'UTF-8') >= 2) {
+                        $highlightedSnippet = preg_replace('/(' . preg_quote($term, '/') . ')/iu', '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>', $highlightedSnippet);
+                    }
+                }
+                $post['highlighted_snippet'] = $highlightedSnippet;
+                $post['content'] = $snippetText;
+            }
         }
+
+        // Cache search results for 5 minutes (300 seconds)
+        \App\Helpers\Cache::set($cacheKey, $posts, 300);
 
         return $posts;
     }

@@ -3530,12 +3530,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
 
-        // Input listener with debounce
+        // Input listener with fast debounce (120ms)
         input.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 performSearch(this.value);
-            }, 220);
+            }, 120);
         });
 
         // Focus listener to reopen if text exists
