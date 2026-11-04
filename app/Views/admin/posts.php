@@ -1999,16 +1999,6 @@ if (!empty($data['breadcrumbs'])) {
                     </li>
                 </ul>
             </div>
-
-            <!-- Quick View Table of Contents Container -->
-            <div id="quickViewTocContainer" class="sidebar-card" style="display: none;">
-                <h4 class="sidebar-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-list-ol" style="color: #475569;"></i> সূচিপত্র (TOC)
-                </h4>
-                <div id="quickViewTocContent" class="post-toc-box">
-                    <!-- TOC links will load here dynamically -->
-                </div>
-            </div>
         </div>
 
         <!-- Main Explorer view -->
@@ -2431,6 +2421,27 @@ if (!empty($data['breadcrumbs'])) {
                 </div>
                 <!-- Floating Master Action Button & Speed Dial Menu (Docked on Right Edge with 1:3 ratio) -->
                 <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 60px; right: 0; z-index: 99999; flex-direction: column; align-items: flex-end; gap: 10px;">
+                    <!-- TOC Popup Card -->
+                    <div id="quickViewTocMenu" style="display: none; width: 320px; max-width: calc(100vw - 60px); background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.22), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-right: 12px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                        <!-- Header with Close & Title -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;">
+                            <div style="font-weight: 700; font-size: 13.5px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-flex; width: 26px; height: 26px; border-radius: 6px; background: #ecfdf5; color: #059669; align-items: center; justify-content: center; font-size: 13px;">
+                                    <i class="fas fa-list-ol"></i>
+                                </span>
+                                <span>সূচিপত্র (Table of Contents)</span>
+                            </div>
+                            <button type="button" onclick="toggleQuickViewTocMenu()" style="background: none; border: none; color: #94a3b8; font-size: 15px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1;" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#94a3b8';">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <!-- TOC Dynamic Content -->
+                        <div id="quickViewTocContent">
+                            <!-- TOC links will load dynamically -->
+                        </div>
+                    </div>
+
                     <!-- Expanded Master Menu Card -->
                     <div id="quickViewMasterMenu" style="display: none; width: 310px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-right: 12px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
                         
@@ -2512,13 +2523,18 @@ if (!empty($data['breadcrumbs'])) {
 
                     <!-- Right Dock Button Group (Width 1 : Height 3 Ratio - Allows stacking up to 3 buttons) -->
                     <div id="quickViewDockButtons" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-                        <!-- Button Slot 1: Master Tools & Font Controller (Width: 36px, Height: 108px -> 1:3 ratio) -->
+                        <!-- Button 1: সূচিপত্র (TOC) - Width 36px, Height 108px (1:3 ratio) -->
+                        <button id="quickViewTocBtn" type="button" class="qv-dock-btn qv-dock-btn-toc" onclick="toggleQuickViewTocMenu()" title="সূচিপত্র দেখুন (Table of Contents)">
+                            <i class="fas fa-list-ol" id="quickViewTocBtnIcon" style="font-size: 16px;"></i>
+                            <span id="quickViewTocBtnLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">সূচিপত্র</span>
+                        </button>
+
+                        <!-- Button 2: Master Tools & Font Controller (Width: 36px, Height: 108px -> 1:3 ratio) -->
                         <button id="quickViewMasterBtn" type="button" class="qv-dock-btn qv-dock-btn-primary" onclick="toggleQuickViewMasterMenu()" title="কুইক কন্ট্রোল ও ফন্ট সাইজ (Tools Menu)">
                             <i class="fas fa-sliders-h" id="quickViewMasterIcon" style="font-size: 16px;"></i>
                             <span id="quickViewMasterBtnLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">TOOLS</span>
                         </button>
 
-                        <!-- Button Slot 2: (Available for 2nd button - same 1:3 ratio) -->
                         <!-- Button Slot 3: (Available for 3rd button - same 1:3 ratio) -->
                     </div>
                 </div>
@@ -3001,6 +3017,79 @@ if (!function_exists('renderOrganizeCategoryTree')) {
 }
 .qv-dock-btn-primary:hover {
     box-shadow: -6px 6px 24px rgba(37, 99, 235, 0.6);
+}
+.qv-dock-btn-toc {
+    background: linear-gradient(180deg, #059669, #047857);
+    color: #ffffff;
+    box-shadow: -4px 4px 18px rgba(5, 150, 105, 0.42);
+}
+.qv-dock-btn-toc:hover {
+    box-shadow: -6px 6px 24px rgba(5, 150, 105, 0.6);
+}
+#quickViewTocContent {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-height: 380px;
+    overflow-y: auto;
+    font-family: 'Hind Siliguri', 'Noto Serif Bengali', sans-serif !important;
+    font-size: 13px;
+    line-height: 1.6;
+}
+#quickViewTocContent::-webkit-scrollbar {
+    width: 5px;
+}
+#quickViewTocContent::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+#quickViewTocContent .toc-list {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#quickViewTocContent .toc-item {
+    list-style: none !important;
+}
+#quickViewTocContent .toc-item a {
+    text-decoration: none;
+    color: #334155;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    transition: all 0.15s ease;
+    padding: 5px 8px;
+    border-radius: 6px;
+    width: 100%;
+}
+#quickViewTocContent .toc-item a:hover {
+    color: #059669;
+    background: #ecfdf5;
+}
+#quickViewTocContent .toc-number {
+    color: #059669;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+#quickViewTocContent .toc-h3 {
+    padding-left: 14px !important;
+}
+#quickViewTocContent .toc-h3 a {
+    font-size: 12.5px;
+    font-weight: 500;
+}
+#quickViewTocContent .toc-h4 {
+    padding-left: 26px !important;
+}
+#quickViewTocContent .toc-h4 a {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: #64748b;
 }
 @keyframes qvMenuSlideUp {
     from {
@@ -5302,10 +5391,12 @@ body.organize-drag-active #organize-root-list {
             if (btnCopyFeatureImg) btnCopyFeatureImg.style.display = 'none';
         }
 
-        // Generate TOC for the sidebar
-        if (tocContainer && tocContent) {
+        // Generate TOC for the right-side TOC button & popup
+        const tocContent = document.getElementById('quickViewTocContent');
+        const tocBtn = document.getElementById('quickViewTocBtn');
+        if (tocContent) {
             tocContent.innerHTML = '';
-            const headings = bodyEl.querySelectorAll('h2, h3, h4');
+            const headings = bodyEl ? bodyEl.querySelectorAll('h2, h3, h4') : [];
             if (headings.length >= 1) {
                 const tocList = document.createElement('ol');
                 tocList.className = 'toc-list';
@@ -5358,6 +5449,8 @@ body.organize-drag-active #organize-root-list {
                         heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         heading.classList.add('highlight-heading');
                         setTimeout(() => heading.classList.remove('highlight-heading'), 2000);
+                        // Auto-close TOC popover after clicking heading
+                        toggleQuickViewTocMenu(false);
                     });
 
                     listItem.appendChild(link);
@@ -5365,18 +5458,16 @@ body.organize-drag-active #organize-root-list {
                 });
 
                 tocContent.appendChild(tocList);
-                tocContainer.style.display = 'block';
-                const sidebarEl = document.querySelector('.explorer-sidebar');
-                if (sidebarEl) {
-                    sidebarEl.classList.add('has-toc');
-                    adjustSidebarFixedPosition();
+                if (tocBtn) {
+                    tocBtn.style.opacity = '1';
+                    tocBtn.style.pointerEvents = 'auto';
+                    tocBtn.title = 'সূচিপত্র দেখুন (' + headings.length + 'টি হেডিং)';
                 }
             } else {
-                tocContainer.style.display = 'none';
-                const sidebarEl = document.querySelector('.explorer-sidebar');
-                if (sidebarEl) {
-                    sidebarEl.classList.remove('has-toc');
-                    adjustSidebarFixedPosition();
+                tocContent.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 13px; padding: 24px 12px;"><i class="fas fa-info-circle" style="font-size: 18px; margin-bottom: 6px; display: block; color: #cbd5e1;"></i>এই নিবন্ধে কোনো সূচিপত্র (হেডিং) নেই।</div>';
+                if (tocBtn) {
+                    tocBtn.style.opacity = '0.75';
+                    tocBtn.title = 'এই নিবন্ধে কোনো সূচিপত্র নেই';
                 }
             }
         }
@@ -5456,11 +5547,6 @@ body.organize-drag-active #organize-root-list {
                     statusEl.textContent = '';
                     statusEl.className = '';
                 }
-                
-                const tocContainer = document.getElementById('quickViewTocContainer');
-                if (tocContainer) {
-                    tocContainer.style.display = 'none';
-                }
 
                 const fetchUrl = '<?= URLROOT ?>/admin/get_post_ajax/' + id;
                 fetch(fetchUrl)
@@ -5506,6 +5592,16 @@ body.organize-drag-active #organize-root-list {
         const masterBtn = document.getElementById('quickViewMasterBtn');
         if (masterBtn) masterBtn.style.background = 'linear-gradient(180deg, #2563eb, #1d4ed8)';
 
+        // Hide TOC menu & reset TOC button state
+        const tocMenu = document.getElementById('quickViewTocMenu');
+        if (tocMenu) tocMenu.style.display = 'none';
+        const tocIcon = document.getElementById('quickViewTocBtnIcon');
+        if (tocIcon) tocIcon.className = 'fas fa-list-ol';
+        const tocLabel = document.getElementById('quickViewTocBtnLabel');
+        if (tocLabel) tocLabel.textContent = 'সূচিপত্র';
+        const tocBtn = document.getElementById('quickViewTocBtn');
+        if (tocBtn) tocBtn.style.background = 'linear-gradient(180deg, #059669, #047857)';
+
         const listPanel = document.getElementById('explorerListView');
         const detailPanel = document.getElementById('explorerPostDetailView');
         if (listPanel && detailPanel) {
@@ -5516,17 +5612,6 @@ body.organize-drag-active #organize-root-list {
             document.querySelectorAll('.post-node, tr[data-post-id]').forEach(el => {
                 el.classList.remove('active-post');
             });
-
-            // Hide the sidebar TOC container
-            const tocContainer = document.getElementById('quickViewTocContainer');
-            if (tocContainer) {
-                tocContainer.style.display = 'none';
-            }
-            const sidebarEl = document.querySelector('.explorer-sidebar');
-            if (sidebarEl) {
-                sidebarEl.classList.remove('has-toc');
-                adjustSidebarFixedPosition();
-            }
 
             // Reset header thumbnail and copy image button
             window.currentPostDetailData = null;
@@ -5917,6 +6002,12 @@ body.organize-drag-active #organize-root-list {
         const label = document.getElementById('quickViewMasterBtnLabel');
         if (!menu) return;
 
+        // If TOC menu is open, close it first
+        const tocMenu = document.getElementById('quickViewTocMenu');
+        if (tocMenu && tocMenu.style.display === 'block') {
+            toggleQuickViewTocMenu(false);
+        }
+
         if (menu.style.display === 'none' || menu.style.display === '') {
             menu.style.display = 'block';
             if (icon) icon.className = 'fas fa-times';
@@ -5930,13 +6021,47 @@ body.organize-drag-active #organize-root-list {
         }
     }
 
-    // Dismiss master menu when clicked outside
+    // Quick View TOC (সূচিপত্র) Drawer / Menu Controls
+    function toggleQuickViewTocMenu(forceState = null) {
+        const menu = document.getElementById('quickViewTocMenu');
+        const icon = document.getElementById('quickViewTocBtnIcon');
+        const btn = document.getElementById('quickViewTocBtn');
+        const label = document.getElementById('quickViewTocBtnLabel');
+        if (!menu) return;
+
+        // If Tools menu is open, close it first
+        const masterMenu = document.getElementById('quickViewMasterMenu');
+        if (masterMenu && masterMenu.style.display === 'block') {
+            toggleQuickViewMasterMenu();
+        }
+
+        const willOpen = (forceState !== null) ? forceState : (menu.style.display === 'none' || menu.style.display === '');
+        if (willOpen) {
+            menu.style.display = 'block';
+            if (icon) icon.className = 'fas fa-times';
+            if (label) label.textContent = 'CLOSE';
+            if (btn) btn.style.background = 'linear-gradient(180deg, #ef4444, #dc2626)';
+        } else {
+            menu.style.display = 'none';
+            if (icon) icon.className = 'fas fa-list-ol';
+            if (label) label.textContent = 'সূচিপত্র';
+            if (btn) btn.style.background = 'linear-gradient(180deg, #059669, #047857)';
+        }
+    }
+
+    // Dismiss popups when clicked outside
     document.addEventListener('click', function(e) {
         const container = document.getElementById('quickViewMasterContainer');
-        const menu = document.getElementById('quickViewMasterMenu');
-        if (!container || !menu || menu.style.display === 'none') return;
+        if (!container) return;
         if (!container.contains(e.target)) {
-            toggleQuickViewMasterMenu();
+            const masterMenu = document.getElementById('quickViewMasterMenu');
+            if (masterMenu && masterMenu.style.display === 'block') {
+                toggleQuickViewMasterMenu();
+            }
+            const tocMenu = document.getElementById('quickViewTocMenu');
+            if (tocMenu && tocMenu.style.display === 'block') {
+                toggleQuickViewTocMenu(false);
+            }
         }
     });
 
