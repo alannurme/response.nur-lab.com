@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_team_member" method="POST">
+                        <?= csrf_field() ?>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
             <div class="form-group mb-4">
                 <label>Full Name</label>

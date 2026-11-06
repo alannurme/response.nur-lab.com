@@ -143,6 +143,7 @@
 
         <!-- Form -->
         <form action="<?= URLROOT ?>/admin/records_categories_save" method="POST" id="categoryForm">
+                        <?= csrf_field() ?>
             <input type="hidden" name="id" id="cat_id" value="">
 
             <div style="padding: 25px;">
@@ -190,6 +191,7 @@
 
 <!-- Delete Confirmation Form (Hidden) -->
 <form id="deleteCategoryForm" action="<?= URLROOT ?>/admin/records_categories_delete" method="POST" style="display: none;">
+                        <?= csrf_field() ?>
     <input type="hidden" name="id" id="delete_cat_id" value="">
 </form>
 

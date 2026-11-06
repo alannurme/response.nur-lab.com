@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_slide/<?= $data['slide']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <input type="hidden" name="title" value="<?= $data['slide']['title'] ?>">
         <input type="hidden" name="subtitle" value="<?= $data['slide']['subtitle'] ?>">
         <input type="hidden" name="link" value="<?= $data['slide']['link'] ?>">

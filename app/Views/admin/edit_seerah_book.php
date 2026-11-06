@@ -28,6 +28,7 @@
 
 <div class="admin-card" style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); max-width: 900px;">
     <form action="<?= URLROOT ?>/admin/edit_seerah_book/<?= $book['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px;">
             
             <!-- Book Title -->

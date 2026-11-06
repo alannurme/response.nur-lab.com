@@ -503,6 +503,7 @@
             <?php endif; ?>
 
             <form action="<?= base_url('admin/login') ?>" method="POST">
+                        <?= csrf_field() ?>
                 <div class="form-field">
                     <div class="input-group">
                         <i class="fas fa-envelope field-icon"></i>

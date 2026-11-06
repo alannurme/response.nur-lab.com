@@ -9,6 +9,7 @@
 
 <div class="admin-card">
     <form action="<?= URLROOT ?>/admin/add_page" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group">
             <label class="form-label">Page Title</label>
             <input type="text" name="title" class="form-control" placeholder="e.g. About Us" required>

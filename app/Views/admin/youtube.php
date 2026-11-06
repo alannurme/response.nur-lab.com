@@ -13,6 +13,7 @@
     <?php endif; ?>
 
     <form action="<?= URLROOT ?>/admin/youtube" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-grid">
             <div class="form-group full-width">
                 <label>Notification Status</label>

@@ -13,6 +13,7 @@
 
 <div class="settings-container" style="background: #ffffff; color: var(--text-main); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
     <form action="<?= URLROOT ?>/admin/facebook_pixel" method="POST">
+                        <?= csrf_field() ?>
         <!-- Section: Pixel Configuration -->
         <div style="border-bottom: 1px solid #f1f5f9; margin-bottom: 25px; padding-bottom: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="fab fa-facebook" style="color: #1877f2; font-size: 1.4rem;"></i>

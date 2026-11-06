@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_scope" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Title (শিরোনাম)</label>
             <input type="text" name="title" class="form-control" placeholder="e.g. ইসলাম" required>

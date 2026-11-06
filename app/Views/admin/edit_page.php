@@ -12,6 +12,7 @@
 
 <div class="admin-card">
     <form action="<?= URLROOT ?>/admin/edit_page/<?= $data['page']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group">
             <label class="form-label">Page Title</label>
             <input type="text" name="title" value="<?= htmlspecialchars($data['page']['title']) ?>" class="form-control" required>

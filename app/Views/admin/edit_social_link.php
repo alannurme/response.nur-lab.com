@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_social_link/<?= $data['link']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4" style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">Social Media Name</label>
             <input type="text" name="name" value="<?= htmlspecialchars($data['link']['name']) ?>" class="form-control" placeholder="e.g. Facebook, Twitter, TikTok" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">

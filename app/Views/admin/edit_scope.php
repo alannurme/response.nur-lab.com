@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_scope/<?= $data['scope']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Title (শিরোনাম)</label>
             <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($data['scope']['title']) ?>" required>

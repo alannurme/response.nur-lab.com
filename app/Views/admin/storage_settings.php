@@ -24,6 +24,7 @@
 <?php endif; ?>
 
 <form action="<?= URLROOT ?>/admin/storage_settings" method="POST" id="storageSettingsForm">
+                        <?= csrf_field() ?>
 
     <!-- 1-Click Auto Connect Banner Card -->
     <div style="background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%); border: 2px solid #86efac; border-radius: 18px; padding: 28px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(15, 157, 88, 0.08);">

@@ -862,6 +862,7 @@ if (!function_exists('resolve_blog_image')) {
                 <?php endif; ?>
 
                 <form action="<?= URLROOT ?>/comment/<?= $data['post']['id'] ?>" method="POST" style="display: grid; gap: 20px;">
+                        <?= csrf_field() ?>
                     <!-- Honeypot anti-spam field -->
                     <input type="text" name="website_hp" style="display:none !important; tab-index: -1;" tabindex="-1" autocomplete="off">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">

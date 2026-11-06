@@ -19,6 +19,7 @@
     <!-- Left Column: Controls -->
     <div class="settings-container">
         <form action="<?= URLROOT ?>/admin/theme" method="POST">
+                        <?= csrf_field() ?>
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">Choose Home Page Theme</label>

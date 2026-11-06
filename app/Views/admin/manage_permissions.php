@@ -14,6 +14,7 @@ $userPermissions = !empty($data['user']['permissions']) ? json_decode($data['use
     </div>
 
     <form action="<?= URLROOT ?>/admin/permissions/<?= $data['user']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <!-- Hidden Username to keep it unchanged -->
         <input type="hidden" name="username" value="<?= $data['user']['username'] ?>">
 

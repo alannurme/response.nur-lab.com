@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_slide" method="POST">
+                        <?= csrf_field() ?>
         <input type="hidden" name="title" value="Slide">
         <input type="hidden" name="subtitle" value="">
         <input type="hidden" name="link" value="">

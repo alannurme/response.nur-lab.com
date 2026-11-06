@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_author/<?= $data['author']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label class="form-label">Author Name <span style="color:red">*</span></label>
             <input type="text" name="name" value="<?= htmlspecialchars($data['author']['name']) ?>" class="form-control" required>

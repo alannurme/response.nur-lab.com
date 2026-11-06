@@ -1,5 +1,6 @@
 <?php require_once APPROOT . '/Views/admin/header.php'; ?>
 <form action="<?= URLROOT ?>/admin/edit_post/<?= $data['post']['id'] ?>?page=<?= isset($_GET['page']) ? intval($_GET['page']) : 1 ?><?= (isset($_GET['category_id']) && $_GET['category_id'] !== '') ? '&category_id=' . intval($_GET['category_id']) : '' ?>" method="POST" onsubmit="return validateForm()">
+                        <?= csrf_field() ?>
 
 <style>
     :root {

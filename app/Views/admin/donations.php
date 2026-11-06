@@ -105,6 +105,7 @@ if (!empty($data['donations'])) {
                         </td>
                         <td>
                             <form action="<?= URLROOT ?>/admin/update_donation_status/<?= $donation['id'] ?>" method="POST" style="margin: 0; display: inline-flex; align-items: center; gap: 5px;">
+                        <?= csrf_field() ?>
                                 <select name="status" onchange="this.form.submit()" class="form-control" style="padding: 5px 10px; font-size: 0.85rem; border-radius: 8px; font-weight: 600; width: auto; cursor: pointer;
                                     <?php 
                                     if ($donation['status'] === 'completed') echo 'background: rgba(22, 163, 74, 0.1); color: #16a34a; border-color: rgba(22, 163, 74, 0.2);';
@@ -120,6 +121,7 @@ if (!empty($data['donations'])) {
                         <td style="text-align: center;">
                             <div class="action-buttons" style="justify-content: center; gap: 8px;">
                                 <form action="<?= URLROOT ?>/admin/delete_donation/<?= $donation['id'] ?>" method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Are you sure you want to delete this donation log?')">
+                        <?= csrf_field() ?>
                                     <button type="submit" class="action-btn delete" title="Delete Log" style="background: none; border: none; padding: 0; cursor: pointer;">
                                         <i class="fas fa-trash"></i>
                                     </button>

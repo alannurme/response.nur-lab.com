@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_sub_menu" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Menu Title (Bangla or English)</label>
             <input type="text" name="title" class="form-control" placeholder="e.g. যোগাযোগ / Contact" required>

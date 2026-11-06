@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_sub_menu/<?= $data['menu']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Menu Title</label>
             <input type="text" name="title" value="<?= $data['menu']['title'] ?>" class="form-control" required>

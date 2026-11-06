@@ -20,6 +20,7 @@ $favicon_url = !empty($data['settings']['site_favicon']) ? resolve_setting_image
 
 <div class="settings-container">
     <form action="<?= URLROOT ?>/admin/settings" method="POST" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
         <!-- Tabs Navigation -->
         <div class="settings-tabs">
             <button type="button" class="tab-btn active" data-tab="general"><i class="fas fa-info-circle"></i> General</button>

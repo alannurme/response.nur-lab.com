@@ -2579,6 +2579,7 @@ if (!empty($data['breadcrumbs'])) {
 <div class="modal-overlay" id="importDocModal">
     <div class="modal-content">
         <form action="<?= URLROOT ?>/admin/import_doc" method="POST" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
             <input type="hidden" name="category_id" value="<?= $data['categoryId'] ?>">
             <div class="modal-header">
                 <h3 class="modal-title"><i class="fas fa-file-word" style="color: #2b6cb0;"></i> Import Post from DOC File</h3>
@@ -2611,6 +2612,7 @@ if (!empty($data['breadcrumbs'])) {
 <div class="modal-overlay" id="newFolderModal">
     <div class="modal-content">
         <form action="<?= URLROOT ?>/admin/add_folder" method="POST">
+                        <?= csrf_field() ?>
             <input type="hidden" name="parent_id" value="<?= $data['categoryId'] ?>">
             <div class="modal-header">
                 <h3 class="modal-title">Create New Folder</h3>
@@ -2636,6 +2638,7 @@ if (!empty($data['breadcrumbs'])) {
 <div class="modal-overlay" id="renameFolderModal">
     <div class="modal-content">
         <form action="<?= URLROOT ?>/admin/rename_folder" method="POST">
+                        <?= csrf_field() ?>
             <input type="hidden" name="parent_id" value="<?= $data['currentCategory']['parent_id'] ?? '' ?>" id="rename_parent_id">
             <input type="hidden" name="id" id="rename_folder_id">
             <div class="modal-header">
@@ -2697,6 +2700,7 @@ if (!function_exists('renderCategoryDropdownOptions')) {
 <div class="modal-overlay" id="moveFolderModal">
     <div class="modal-content">
         <form action="<?= URLROOT ?>/admin/move_folder" method="POST">
+                        <?= csrf_field() ?>
             <input type="hidden" name="id" id="move_folder_id" value="<?= $data['categoryId'] ?? '' ?>">
             <div class="modal-header">
                 <h3 class="modal-title">Move Folder</h3>
@@ -2731,6 +2735,7 @@ if (!function_exists('renderCategoryDropdownOptions')) {
 <div class="modal-overlay" id="selectPostsModal">
     <div class="modal-content" style="max-width: 600px; width: 90%;">
         <form action="<?= URLROOT ?>/admin/add_posts_to_folder" method="POST">
+                        <?= csrf_field() ?>
             <input type="hidden" name="folder_id" id="select_posts_folder_id">
             <div class="modal-header">
                 <h3 class="modal-title">Select Posts to Add to Folder</h3>

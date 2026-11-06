@@ -15,6 +15,7 @@
 </div>
 
 <form action="<?= URLROOT ?>/admin/blog_manager" method="POST">
+                        <?= csrf_field() ?>
     <input type="hidden" name="save_dont_miss_settings" value="1">
     
     <style>

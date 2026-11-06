@@ -384,6 +384,7 @@
                     </h2>
                     
                     <form action="<?= URLROOT ?>/ask" method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+                        <?= csrf_field() ?>
                         <!-- Honeypot anti-spam field -->
                         <div style="display:none !important;" aria-hidden="true">
                             <input type="text" name="website_hp" tabindex="-1" autocomplete="off">

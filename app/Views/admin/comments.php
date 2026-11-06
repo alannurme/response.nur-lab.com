@@ -8,6 +8,7 @@
 </div>
 
 <form action="<?= URLROOT ?>/admin/bulk_comments" method="POST" id="bulk-comments-form">
+                        <?= csrf_field() ?>
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; width: fit-content;">
         <select name="action" id="bulk-comments-select" class="form-control" style="width: auto; padding: 8px 15px; border-radius: 8px; border: 1.5px solid #eee; background: #fff; color: var(--text-main); font-weight: 600; outline: none; transition: 0.3s;">
             <option value="">Bulk Actions</option>

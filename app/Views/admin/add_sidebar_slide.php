@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_sidebar_slide" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Sidebar Image (1:1 Aspect Ratio Recommended - e.g. 600x600px)</label>
             <div style="display: flex; gap: 15px; align-items: flex-start;">

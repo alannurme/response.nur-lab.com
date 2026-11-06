@@ -114,6 +114,7 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Supports JPG, PNG, WEBP, GIF, SVG, PDF up to maximum upload size.</p>
         
         <form id="uploadForm" action="<?= URLROOT ?>/admin/media?tab=<?= $activeTab ?><?= $driveQuery ?>" method="POST" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
             <input type="hidden" name="upload_destination" value="<?= $activeTab === 'google_drive' ? 'google_drive' : 'local' ?>">
             <?php if ($activeTab === 'google_drive' && !empty($selectedDriveId)): ?>
                 <input type="hidden" name="target_drive_id" value="<?= htmlspecialchars($selectedDriveId) ?>">
@@ -172,6 +173,7 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                         
                         <?php if ($isGdrive): ?>
                             <form action="<?= URLROOT ?>/admin/delete_media" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to permanently delete this file from Google Drive?')">
+                        <?= csrf_field() ?>
                                 <input type="hidden" name="storage" value="google_drive">
                                 <input type="hidden" name="file_id" value="<?= htmlspecialchars($file['id'] ?? '') ?>">
                                 <input type="hidden" name="drive_id" value="<?= htmlspecialchars($file['drive_id'] ?? $selectedDriveId) ?>">
@@ -179,6 +181,7 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                             </form>
                         <?php else: ?>
                             <form action="<?= URLROOT ?>/admin/delete_media" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this media file from local server?')">
+                        <?= csrf_field() ?>
                                 <input type="hidden" name="storage" value="local">
                                 <input type="hidden" name="file_path" value="<?= htmlspecialchars($file['path'] ?? '') ?>">
                                 <button type="submit" class="btn-icon delete" title="Delete from Local Server"><i class="fas fa-trash"></i></button>

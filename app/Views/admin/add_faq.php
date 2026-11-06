@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_faq" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Question (প্রশ্ন)</label>
             <input type="text" name="question" class="form-control" placeholder="e.g. আপনাদের সম্পর্কে জানতে চাই।" required>

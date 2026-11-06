@@ -26,6 +26,7 @@
     <div class="admin-card">
         <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Add New Author</h3>
         <form action="<?= URLROOT ?>/admin/add_author" method="POST">
+                        <?= csrf_field() ?>
             <div class="form-group mb-4">
                 <label class="form-label">Author Name <span style="color:red">*</span></label>
                 <input type="text" name="name" class="form-control" placeholder="e.g. Dr. Zakir Naik" required>

@@ -20,6 +20,7 @@
         </div>
 
         <form action="<?= URLROOT ?>/admin/edit_answer/<?= $data['answer']['id'] ?>" method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+                        <?= csrf_field() ?>
             <div class="form-group">
                 <label style="display: block; margin-bottom: 10px; font-weight: 700; color: #1e293b; font-size: 1.1rem;">Answer Text</label>
                 <textarea name="answer" rows="10" class="form-control" style="width: 100%; padding: 15px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 1rem; outline: none; line-height: 1.6; font-family: 'Noto Serif Bengali', serif; resize: vertical;"><?= htmlspecialchars($data['answer']['answer']) ?></textarea>

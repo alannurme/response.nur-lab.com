@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_user" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Username</label>
             <input type="text" name="username" class="form-control" placeholder="Enter username" required>

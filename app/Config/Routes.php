@@ -45,20 +45,20 @@ $routes->post('admin/login', 'Admin::login');
 $routes->get('admin/logout', 'Admin::logout');
 $routes->get('admin/posts', 'Admin::posts');
 // Seerah Books Routes
-$routes->match(['get', 'post'], 'admin/seerah_books', 'Admin::seerah_books');
-$routes->match(['get', 'post'], 'admin/add_seerah_book', 'Admin::add_seerah_book');
-$routes->match(['get', 'post'], 'admin/edit_seerah_book/(:num)', 'Admin::edit_seerah_book/$1');
-$routes->match(['get', 'post'], 'admin/delete_seerah_book/(:num)', 'Admin::delete_seerah_book/$1');
+$routes->match(['GET', 'POST'], 'admin/seerah_books', 'Admin::seerah_books');
+$routes->match(['GET', 'POST'], 'admin/add_seerah_book', 'Admin::add_seerah_book');
+$routes->match(['GET', 'POST'], 'admin/edit_seerah_book/(:num)', 'Admin::edit_seerah_book/$1');
+$routes->match(['GET', 'POST'], 'admin/delete_seerah_book/(:num)', 'Admin::delete_seerah_book/$1');
 
 // Records Routes
-$routes->match(['get', 'post'], 'admin/records', 'Admin::records');
+$routes->match(['GET', 'POST'], 'admin/records', 'Admin::records');
 $routes->get('admin/records_add', 'Admin::records_add');
-$routes->match(['get', 'post'], 'admin/records_edit/(:num)', 'Admin::records_edit/$1');
-$routes->match(['get', 'post'], 'admin/records_delete/(:num)', 'Admin::records_delete/$1');
-$routes->match(['get', 'post'], 'admin/records_delete', 'Admin::records_delete');
+$routes->match(['GET', 'POST'], 'admin/records_edit/(:num)', 'Admin::records_edit/$1');
+$routes->match(['GET', 'POST'], 'admin/records_delete/(:num)', 'Admin::records_delete/$1');
+$routes->match(['GET', 'POST'], 'admin/records_delete', 'Admin::records_delete');
 $routes->get('admin/records_persons', 'Admin::records_persons');
 $routes->get('admin/records_person_view/(:num)', 'Admin::records_person_view/$1');
-$routes->match(['get', 'post'], 'admin/records_person_delete/(:num)', 'Admin::records_person_delete/$1');
+$routes->match(['GET', 'POST'], 'admin/records_person_delete/(:num)', 'Admin::records_person_delete/$1');
 $routes->get('admin/records_categories', 'Admin::records_categories');
 $routes->post('admin/records_categories_save', 'Admin::records_categories_save');
 $routes->get('admin/records_categories_delete/(:num)', 'Admin::records_categories_delete/$1');
@@ -87,7 +87,7 @@ $routes->post('ajax_search', 'Home::ajax_search');
 $routes->get('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->post('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->get('admin/ajax_all_posts_index', 'Admin::ajax_all_posts_index');
-$routes->match(['get', 'post'], 'admin/create_category_ajax', 'Admin::create_category_ajax');
+$routes->match(['GET', 'POST'], 'admin/create_category_ajax', 'Admin::create_category_ajax');
 
 $routes->add('admin/(:segment)/(:segment)/(:any)', 'Admin::$1/$2/$3');
 $routes->add('admin/(:segment)/(:any)', 'Admin::$1/$2');

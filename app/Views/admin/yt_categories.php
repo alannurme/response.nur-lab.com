@@ -10,6 +10,7 @@
     <div class="admin-card">
         <h4 class="mb-4">Add New Category</h4>
         <form action="<?= URLROOT ?>/admin/yt_categories" method="POST">
+                        <?= csrf_field() ?>
             <div class="form-group mb-4">
                 <label>Category Name</label>
                 <input type="text" name="name" class="form-control" placeholder="e.g. Quran Tilawat" required>

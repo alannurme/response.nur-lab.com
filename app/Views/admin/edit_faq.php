@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_faq/<?= $data['faq']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Question (প্রশ্ন)</label>
             <input type="text" name="question" class="form-control" value="<?= htmlspecialchars($data['faq']['question']) ?>" required>

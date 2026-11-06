@@ -99,6 +99,7 @@
                 </h3>
 
                 <form action="<?= URLROOT ?>/submit_contact" method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+                        <?= csrf_field() ?>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">

@@ -21,6 +21,7 @@
 
 <div class="settings-container" style="background: #ffffff; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
     <form action="<?= URLROOT ?>/admin/hero_section" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
             
             <div class="form-group full-width" style="grid-column: 1 / -1;">

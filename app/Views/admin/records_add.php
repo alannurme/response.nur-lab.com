@@ -301,6 +301,7 @@
         </h1>
 
         <form action="<?= URLROOT ?>/admin/records" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
             
             <!-- Person Mode Selector: Choose existing person or Add new person -->
             <?php 

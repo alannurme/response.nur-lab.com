@@ -312,6 +312,7 @@
         </h1>
 
         <form action="<?= URLROOT ?>/admin/records_edit/<?= $r['id'] ?>" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
             
             <!-- Person Mode Selector -->
             <?php 

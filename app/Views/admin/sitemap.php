@@ -60,6 +60,7 @@
             </div>
 
             <form action="<?php echo URLROOT; ?>/admin/sitemap" method="POST" style="margin: 0;">
+                        <?= csrf_field() ?>
                 <input type="hidden" name="generate" value="1">
                 <button type="submit" class="btn btn-save" style="background: var(--primary); color: white; padding: 15px 40px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.15); display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-family: 'Inter', sans-serif !important; text-transform: none !important;">
                     <i class="fas fa-sync-alt"></i> Regenerate sitemap.xml

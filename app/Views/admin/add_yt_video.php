@@ -14,6 +14,7 @@
 
 <div class="settings-container" style="max-width: 800px;">
     <form action="<?= URLROOT ?>/admin/add_yt_video" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-grid">
             <div class="form-group full-width">
                 <label>Video Title</label>

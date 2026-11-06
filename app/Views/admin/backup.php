@@ -48,6 +48,7 @@
         </p>
         
         <form action="<?= URLROOT ?>/admin/restore_db" method="POST" enctype="multipart/form-data" id="restoreForm" style="width: 100%; max-width: 400px;">
+                        <?= csrf_field() ?>
             <div style="margin-bottom: 1.5rem; position: relative;">
                 <input type="file" name="backup_file" id="backup_file" accept=".sql" required style="display: none;" onchange="updateFileName(this)">
                 <label for="backup_file" style="display: flex; align-items: center; justify-content: center; gap: 10px; border: 2px dashed #cbd5e1; padding: 1rem; border-radius: 12px; cursor: pointer; transition: 0.3s; color: var(--text-secondary); background: rgba(0,0,0,0.02);" id="fileLabel">

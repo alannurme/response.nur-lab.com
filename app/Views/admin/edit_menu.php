@@ -36,6 +36,7 @@ $is_post_mega = ($data['menu']['menu_type'] ?? '') === 'post_mega';
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_menu/<?= $data['menu']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <input type="hidden" name="menu_type" value="<?= $is_post_mega ? 'post_mega' : 'custom' ?>">
 
         <div class="form-group mb-4">

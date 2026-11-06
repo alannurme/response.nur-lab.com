@@ -11,6 +11,7 @@
     <div class="admin-card">
         <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Edit Category Details</h3>
         <form action="<?= URLROOT ?>/admin/edit_question_category/<?= $data['category']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
             <div class="form-group mb-4">
                 <label class="form-label">Category Name</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($data['category']['name']) ?>" required>

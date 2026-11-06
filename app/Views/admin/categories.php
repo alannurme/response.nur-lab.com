@@ -12,6 +12,7 @@
     <div class="admin-card">
         <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Add New Category</h3>
         <form action="<?= URLROOT ?>/admin/categories" method="POST">
+                        <?= csrf_field() ?>
             <div class="form-group mb-4">
                 <label class="form-label">Category Name</label>
                 <input type="text" name="name" class="form-control" placeholder="e.g. Islamic History" required>

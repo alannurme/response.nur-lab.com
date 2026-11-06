@@ -34,6 +34,7 @@ $is_piprapay_enabled = (($current_settings['piprapay_status'] ?? '') === 'enable
         <!-- Donation Form Box -->
         <div class="donate-card">
             <form action="<?= URLROOT ?>/submit_donation" method="POST">
+                        <?= csrf_field() ?>
                 <!-- Honeypot anti-spam field -->
                 <div style="display:none !important;" aria-hidden="true">
                     <input type="text" name="website_hp" tabindex="-1" autocomplete="off">

@@ -1,5 +1,6 @@
 <?php require_once APPROOT . '/Views/admin/header.php'; ?>
 <form action="<?= URLROOT ?>/admin/add_post" method="POST" onsubmit="return validateForm()">
+                        <?= csrf_field() ?>
 <style>
     :root {
         --primary: #2563eb;

@@ -21,6 +21,7 @@
 
 <div class="admin-card" style="background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
     <form id="systemUpdateForm" action="<?= URLROOT ?>/admin/system_update" method="POST" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
         <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 25px; background: #fafafa;">
             <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 10px; font-size: 1.15rem;">
                 <i class="fas fa-cloud-upload-alt" style="color: var(--primary); font-size: 1.3rem;"></i> Upload Update ZIP File

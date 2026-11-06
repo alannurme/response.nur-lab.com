@@ -73,12 +73,18 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            // 'csrf',
-            // 'invalidchars',
+            'csrf' => ['except' => [
+                'ajax_search',
+                'admin/ajax_search_posts',
+                'admin/create_category_ajax',
+                'admin/get_available_posts_ajax',
+                'api/*'
+            ]],
+            'invalidchars',
         ],
         'after' => [
             // 'honeypot',
-            // 'secureheaders',
+            'secureheaders',
         ],
     ];
 

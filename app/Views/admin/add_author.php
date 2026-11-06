@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/add_author" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label class="form-label">Author Name</label>
             <input type="text" name="name" class="form-control" placeholder="e.g. Dr. Zakir Naik" required>

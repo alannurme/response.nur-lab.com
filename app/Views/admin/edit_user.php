@@ -7,6 +7,7 @@
     </div>
 
     <form action="<?= URLROOT ?>/admin/edit_user/<?= $data['user']['id'] ?>" method="POST">
+                        <?= csrf_field() ?>
         <div class="form-group mb-4">
             <label>Username</label>
             <input type="text" name="username" value="<?= $data['user']['username'] ?>" class="form-control" required>

@@ -56,6 +56,7 @@
             </div>
 
             <form action="<?= URLROOT ?>/admin/payment_settings" method="POST">
+                        <?= csrf_field() ?>
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     
                     <!-- Status -->
