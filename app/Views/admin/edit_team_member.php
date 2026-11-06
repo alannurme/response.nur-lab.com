@@ -161,17 +161,30 @@ async function saveCroppedImage() {
             
             const formData = new FormData();
             formData.append('media_file', blob, 'cropped_profile_' + Date.now() + '.jpg');
+            const tokenName = '<?= csrf_token() ?>';
+            const tokenHash = '<?= csrf_hash() ?>';
+            if (tokenName && tokenHash) {
+                formData.append(tokenName, tokenHash);
+            }
             
             // Upload to server using the media handler
             const response = await fetch('<?= URLROOT ?>/admin/media?ajax=1', {
                 method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    '<?= config('Security')->headerName ?>': tokenHash
                 },
                 body: formData
             });
             
-            const result = await response.json();
+            let result = null;
+            const text = await response.text();
+            try {
+                result = JSON.parse(text);
+            } catch (_) {
+                throw new Error('Upload failed with status ' + response.status);
+            }
             
             if (result.success) {
                 // Update input field and preview

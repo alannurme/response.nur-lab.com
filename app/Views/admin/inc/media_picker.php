@@ -188,6 +188,11 @@ async function handlePickerUpload(file) {
     
     const formData = new FormData();
     formData.append('media_file', file);
+    const tokenName = '<?= csrf_token() ?>';
+    const tokenHash = '<?= csrf_hash() ?>';
+    if (tokenName && tokenHash) {
+        formData.append(tokenName, tokenHash);
+    }
     
     // Show loading
     const dropzone = document.getElementById('pickerDropzone');
@@ -197,17 +202,32 @@ async function handlePickerUpload(file) {
     try {
         const res = await fetch('<?= URLROOT ?>/admin/media?ajax=1', {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                '<?= config('Security')->headerName ?>': tokenHash
+            },
             body: formData
         });
         
-        const result = await res.json();
-        if (result.success) {
+        let result = null;
+        const text = await res.text();
+        try {
+            result = JSON.parse(text);
+        } catch (_) {
+            if (!res.ok) {
+                throw new Error('Upload failed with status ' + res.status);
+            }
+            throw new Error('Server returned an unexpected non-JSON response.');
+        }
+
+        if (result && result.success) {
             // After upload, switch to library and reload
             switchPickerTab('library');
             loadMediaLibrary();
             dropzone.innerHTML = originalHTML;
         } else {
-            throw new Error(result.error || 'Upload failed');
+            throw new Error((result && result.error) ? result.error : 'Upload failed');
         }
     } catch (err) {
         alert(err.message || 'Upload failed');

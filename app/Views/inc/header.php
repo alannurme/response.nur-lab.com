@@ -2508,6 +2508,79 @@ if (!function_exists('getBengaliDate')) {
             }
         }
     </style>
+    <!-- CSRF Meta Tags & Universal AJAX Interceptor -->
+    <meta name="csrf-token-name" content="<?= csrf_token() ?>">
+    <meta name="csrf-hash" content="<?= csrf_hash() ?>">
+    <meta name="csrf-header" content="<?= config('Security')->headerName ?>">
+    <script>
+    (function() {
+        const tokenName = '<?= csrf_token() ?>';
+        const tokenHash = '<?= csrf_hash() ?>';
+        const headerName = '<?= config('Security')->headerName ?>';
+        
+        window.CSRF_TOKEN_NAME = tokenName;
+        window.CSRF_HASH = tokenHash;
+        window.CSRF_HEADER = headerName;
+
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+            options = options || {};
+            const method = (options.method || 'GET').toUpperCase();
+            const isRelative = typeof url === 'string' && !url.match(/^(?:[a-z]+:)?\/\//i);
+            const isSameOrigin = typeof url === 'string' && (isRelative || url.startsWith(window.location.origin));
+            
+            if (isSameOrigin) {
+                if (!options.headers) {
+                    options.headers = {};
+                }
+                
+                if (options.headers instanceof Headers) {
+                    if (!options.headers.has('X-Requested-With')) {
+                        options.headers.set('X-Requested-With', 'XMLHttpRequest');
+                    }
+                    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && tokenHash) {
+                        if (!options.headers.has(headerName)) {
+                            options.headers.set(headerName, tokenHash);
+                        }
+                    }
+                } else if (Array.isArray(options.headers)) {
+                    const hasReqWith = options.headers.some(h => h[0].toLowerCase() === 'x-requested-with');
+                    if (!hasReqWith) options.headers.push(['X-Requested-With', 'XMLHttpRequest']);
+                    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && tokenHash) {
+                        const hasCsrf = options.headers.some(h => h[0].toLowerCase() === headerName.toLowerCase());
+                        if (!hasCsrf) options.headers.push([headerName, tokenHash]);
+                    }
+                } else {
+                    if (!options.headers['X-Requested-With']) {
+                        options.headers['X-Requested-With'] = 'XMLHttpRequest';
+                    }
+                    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && tokenHash) {
+                        if (!options.headers[headerName]) {
+                            options.headers[headerName] = tokenHash;
+                        }
+                    }
+                }
+                
+                if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && options.body instanceof FormData && tokenName && tokenHash) {
+                    if (!options.body.has(tokenName)) {
+                        options.body.append(tokenName, tokenHash);
+                    }
+                }
+            }
+            
+            return originalFetch.call(this, url, options);
+        };
+        
+        if (window.jQuery) {
+            window.jQuery.ajaxSetup({
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    [headerName]: tokenHash
+                }
+            });
+        }
+    })();
+    </script>
 </head>
 <?php 
 $raw_req_uri = $_SERVER['REQUEST_URI'] ?? '';
