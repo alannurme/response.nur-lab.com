@@ -1096,16 +1096,21 @@ class AdminModel extends Model {
     }
 
     public function deleteCategory($id) {
-        // Set children's parent_id to NULL so they become top-level categories instead of being hidden/orphaned
-        $stmt_sub = $this->db->prepare("UPDATE categories SET parent_id = NULL WHERE parent_id = :id");
-        $stmt_sub->execute(['id' => $id]);
+        try {
+            // Set children's parent_id to NULL so they become top-level categories instead of being hidden/orphaned
+            $stmt_sub = $this->db->prepare("UPDATE categories SET parent_id = NULL WHERE parent_id = :id");
+            $stmt_sub->execute(['id' => $id]);
 
-        $stmt = $this->db->prepare("DELETE FROM categories WHERE id = :id");
-        $res = $stmt->execute(['id' => $id]);
-        if ($res) {
-            \App\Helpers\Cache::clear();
+            $stmt = $this->db->prepare("DELETE FROM categories WHERE id = :id");
+            $res = $stmt->execute(['id' => $id]);
+            if ($res) {
+                \App\Helpers\Cache::clear();
+            }
+            return $res;
+        } catch (\Throwable $e) {
+            log_message('error', 'Error in deleteCategory: ' . $e->getMessage());
+            return false;
         }
-        return $res;
     }
 
     public function updateCategoriesOrder($ids) {

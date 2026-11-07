@@ -4710,6 +4710,12 @@ body.organize-drag-active #organize-root-list {
             form.method = 'POST';
             form.action = '<?= URLROOT ?>/admin/delete_post/' + id;
             
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '<?= csrf_token() ?>';
+            csrfInput.value = '<?= csrf_hash() ?>';
+            form.appendChild(csrfInput);
+
             const redirectInput = document.createElement('input');
             redirectInput.type = 'hidden';
             redirectInput.name = 'redirect_url';
@@ -4844,6 +4850,13 @@ body.organize-drag-active #organize-root-list {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '<?= URLROOT ?>/admin/delete_folder/' + id + (parentId ? '?parent_id=' + parentId : '');
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '<?= csrf_token() ?>';
+            csrfInput.value = '<?= csrf_hash() ?>';
+            form.appendChild(csrfInput);
+
             document.body.appendChild(form);
             form.submit();
         }
@@ -4960,6 +4973,12 @@ body.organize-drag-active #organize-root-list {
                 form.method = 'POST';
                 form.action = '<?= URLROOT ?>/admin/delete_post/' + ids.join(',');
                 
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '<?= csrf_token() ?>';
+                csrfInput.value = '<?= csrf_hash() ?>';
+                form.appendChild(csrfInput);
+
                 const redirectInput = document.createElement('input');
                 redirectInput.type = 'hidden';
                 redirectInput.name = 'redirect_url';
@@ -4976,6 +4995,12 @@ body.organize-drag-active #organize-root-list {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '<?= URLROOT ?>/admin/bulk_post_status';
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '<?= csrf_token() ?>';
+                csrfInput.value = '<?= csrf_hash() ?>';
+                form.appendChild(csrfInput);
 
                 const statusInput = document.createElement('input');
                 statusInput.type = 'hidden';

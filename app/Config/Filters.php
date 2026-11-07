@@ -87,6 +87,10 @@ class Filters extends BaseFilters
                 'admin/test_gdrive',
                 'admin/save_gdrive',
                 'admin/delete_gdrive',
+                'admin/delete_folder*',
+                'admin/delete_post*',
+                'admin/delete_category*',
+                'admin/bulk_post_status*',
                 'toggle_bookmark/*',
                 'api/*'
             ]],
