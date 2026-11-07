@@ -790,42 +790,12 @@ class Admin extends Controller {
         }
 
         $db = \Config\Database::pdoConnect();
+        $createdParentObj = null;
 
-        // 1. If parent_id not provided, try resolving from parent_name if supplied
-        if (empty($parent_id) && $parent_name !== '') {
-            $pStmt = $db->prepare("SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:pname) LIMIT 1");
-            $pStmt->execute(['pname' => $parent_name]);
-            $foundParent = $pStmt->fetchColumn();
-            if ($foundParent) {
-                $parent_id = (int)$foundParent;
-            }
-        }
-
-        // 2. Comprehensive taxonomy fallback map for automatic parenting
+        // 1. Comprehensive taxonomy fallback map for automatic parenting
         $knownMap = [
-            // খ্রিষ্টান ধর্ম
-            'বাইবেলের স্ববিরোধিতা' => 'খ্রিষ্টান ধর্ম',
-            'যিশুর চরিত্র ও ঐতিহাসিকতা' => 'খ্রিষ্টান ধর্ম',
-            'ত্রিত্ববাদ ও ঈশ্বরতত্ত্ব' => 'খ্রিষ্টান ধর্ম',
-            'আদি পাপ ও প্রায়শ্চিত্ত মতবাদ' => 'খ্রিষ্টান ধর্ম',
-            'চার্চের ইতিহাস ও কাউন্সিলসমূহ' => 'খ্রিষ্টান ধর্ম',
-            'বাইবেল সংকলন ও টেক্সচুয়াল ক্রিটিসিজম' => 'খ্রিষ্টান ধর্ম',
-            'পুরাতন নিয়ম ও তোরাহ বিধান' => 'খ্রিষ্টান ধর্ম',
-            'বাইবেল' => 'খ্রিষ্টান ধর্ম',
-            'যিশু' => 'খ্রিষ্টান ধর্ম',
-            'খ্রিষ্টধর্ম' => 'ধর্মতত্ব',
-            'খ্রিষ্টান ধর্ম' => 'ধর্মতত্ব',
-
-            // বৌদ্ধ ধর্ম
-            'তিপিটক ও বৌদ্ধ শাস্ত্র' => 'বৌদ্ধ ধর্ম',
-            'গৌতম বুদ্ধের জীবন ও ঐতিহাসিকতা' => 'বৌদ্ধ ধর্ম',
-            'অনাত্মদৃষ্টি ও বৌদ্ধ দর্শন' => 'বৌদ্ধ ধর্ম',
-            'কর্মফল ও পুনর্জন্ম' => 'বৌদ্ধ ধর্ম',
-            'তিপিটক' => 'বৌদ্ধ ধর্ম',
-            'বুদ্ধ' => 'বৌদ্ধ ধর্ম',
-            'বৌদ্ধ ধর্ম' => 'ধর্মতত্ব',
-
-            // হিন্দু ধর্ম
+            // সনাতন ও হিন্দু ধর্ম
+            'হিন্দু ধর্মের স্ববিরোধিতা' => 'হিন্দু ধর্ম',
             'উৎসব ও পার্বণ' => 'হিন্দু ধর্ম',
             'ঋষি' => 'হিন্দু ধর্ম',
             'কৃষ্ণ' => 'হিন্দু ধর্ম',
@@ -840,17 +810,43 @@ class Admin extends Controller {
             'শিব' => 'হিন্দু ধর্ম',
             'হিন্দু ধর্ম' => 'ধর্মতত্ব',
 
-            // ধর্মতত্ব
-            'তুলনামূলক ধর্মতত্ত্ব' => 'ধর্মতত্ব',
-            'নাস্তিক্যবাদ' => 'ধর্মতত্ব',
-            'নারীবাদ' => 'ধর্মতত্ব',
+            // খ্রিষ্টান ধর্ম
+            'বাইবেলের স্ববিরোধিতা' => 'খ্রিষ্টান ধর্ম',
+            'যিশুর চরিত্র ও ঐতিহাসিকতা' => 'খ্রিষ্টান ধর্ম',
+            'ত্রিত্ববাদ ও ঈশ্বরতত্ত্ব' => 'খ্রিষ্টান ধর্ম',
+            'আদি পাপ ও প্রায়শ্চিত্ত মতবাদ' => 'খ্রিষ্টান ধর্ম',
+            'চার্চের ইতিহাস ও কাউন্সিলসমূহ' => 'খ্রিষ্টান ধর্ম',
+            'বাইবেল সংকলন ও টেক্সচুয়াল ক্রিটিসিজম' => 'খ্রিষ্টান ধর্ম',
+            'পুরাতন নিয়ম ও তোরাহ বিধান' => 'খ্রিষ্টান ধর্ম',
+            'বাইবেল' => 'খ্রিষ্টান ধর্ম',
+            'যিশু' => 'খ্রিষ্টান ধর্ম',
+            'খ্রিষ্টধর্ম' => 'ধর্মতত্ব',
+            'খ্রিষ্টান ধর্ম' => 'ধর্মতত্ব',
+
+            // বৌদ্ধ ধর্ম
+            'বৌদ্ধ ধর্মের স্ববিরোধিতা' => 'বৌদ্ধ ধর্ম',
+            'তিপিটক ও বৌদ্ধ শাস্ত্র' => 'বৌদ্ধ ধর্ম',
+            'গৌতম বুদ্ধের জীবন ও ঐতিহাসিকতা' => 'বৌদ্ধ ধর্ম',
+            'অনাত্মদৃষ্টি ও বৌদ্ধ দর্শন' => 'বৌদ্ধ ধর্ম',
+            'কর্মফল ও পুনর্জন্ম' => 'বৌদ্ধ ধর্ম',
+            'তিপিটক' => 'বৌদ্ধ ধর্ম',
+            'বুদ্ধ' => 'বৌদ্ধ ধর্ম',
+            'বৌদ্ধ ধর্ম' => 'ধর্মতত্ব',
 
             // বিজ্ঞান ও দর্শন
+            'বিজ্ঞান ও দর্শন' => 'ধর্মতত্ব',
             'দর্শন ও যুক্তি' => 'বিজ্ঞান ও দর্শন',
+            'বিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
+            'যুক্তিবিদ্যা' => 'বিজ্ঞান ও দর্শন',
             'জীববিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
             'পদার্থবিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
             'সমাজবিজ্ঞান' => 'বিজ্ঞান ও দর্শন',
             'বিবর্তনবাদ' => 'বিজ্ঞান ও দর্শন',
+
+            // ধর্মতত্ব
+            'তুলনামূলক ধর্মতত্ত্ব' => 'ধর্মতত্ব',
+            'নাস্তিক্যবাদ' => 'ধর্মতত্ব',
+            'নারীবাদ' => 'ধর্মতত্ব',
 
             // স্রষ্টা ও সৃষ্টি
             'স্রষ্টা' => 'স্রষ্টা ও সৃষ্টি',
@@ -911,6 +907,39 @@ class Admin extends Controller {
             'ইসলামিক ইতিহাস' => 'ইতিহাস',
         ];
 
+        // 2. If parent_id not provided, try resolving from parent_name if supplied
+        if (empty($parent_id) && $parent_name !== '') {
+            $pStmt = $db->prepare("SELECT id, name FROM categories WHERE LOWER(TRIM(name)) = LOWER(:pname) LIMIT 1");
+            $pStmt->execute(['pname' => $parent_name]);
+            $foundParent = $pStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($foundParent) {
+                $parent_id = (int)$foundParent['id'];
+            } else {
+                // Parent does not exist in DB yet! Auto-create the parent category too!
+                $grandParentId = null;
+                $grandParentName = $knownMap[$parent_name] ?? null;
+                if ($grandParentName) {
+                    $gpStmt = $db->prepare("SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:gpname) LIMIT 1");
+                    $gpStmt->execute(['gpname' => $grandParentName]);
+                    $foundGrandParent = $gpStmt->fetchColumn();
+                    if ($foundGrandParent) {
+                        $grandParentId = (int)$foundGrandParent;
+                    }
+                }
+                
+                $adminModel = $this->model('AdminModel');
+                $newParentId = $adminModel->addCategory($parent_name, $grandParentId);
+                if ($newParentId) {
+                    $parent_id = (int)$newParentId;
+                    $createdParentObj = [
+                        'id' => $parent_id,
+                        'name' => $parent_name,
+                        'parent_id' => $grandParentId
+                    ];
+                }
+            }
+        }
+
         // If parent_id still empty, resolve from known taxonomy map
         if (empty($parent_id)) {
             $matchedParentName = $knownMap[$name] ?? null;
@@ -929,6 +958,28 @@ class Admin extends Controller {
                 $foundParent = $pStmt->fetchColumn();
                 if ($foundParent) {
                     $parent_id = (int)$foundParent;
+                } else {
+                    // Auto-create that parent too under its grandParent if possible
+                    $grandParentId = null;
+                    $grandParentName = $knownMap[$matchedParentName] ?? null;
+                    if ($grandParentName) {
+                        $gpStmt = $db->prepare("SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER(:gpname) LIMIT 1");
+                        $gpStmt->execute(['gpname' => $grandParentName]);
+                        $foundGrandParent = $gpStmt->fetchColumn();
+                        if ($foundGrandParent) {
+                            $grandParentId = (int)$foundGrandParent;
+                        }
+                    }
+                    $adminModel = $this->model('AdminModel');
+                    $newParentId = $adminModel->addCategory($matchedParentName, $grandParentId);
+                    if ($newParentId) {
+                        $parent_id = (int)$newParentId;
+                        $createdParentObj = [
+                            'id' => $parent_id,
+                            'name' => $matchedParentName,
+                            'parent_id' => $grandParentId
+                        ];
+                    }
                 }
             }
         }
@@ -953,7 +1004,7 @@ class Admin extends Controller {
                 $parentName = $pStmt->fetchColumn() ?: null;
             }
 
-            echo json_encode([
+            $resp = [
                 'success' => true,
                 'is_new' => false,
                 'category' => [
@@ -962,7 +1013,11 @@ class Admin extends Controller {
                     'parent_id' => $existing['parent_id'] !== null ? (int)$existing['parent_id'] : null,
                     'parent_name' => $parentName
                 ]
-            ]);
+            ];
+            if ($createdParentObj) {
+                $resp['created_parent'] = $createdParentObj;
+            }
+            echo json_encode($resp);
             exit;
         }
 
@@ -985,7 +1040,7 @@ class Admin extends Controller {
                 $resolvedParentName = $pStmt->fetchColumn() ?: null;
             }
 
-            echo json_encode([
+            $resp = [
                 'success' => true,
                 'is_new' => true,
                 'category' => [
@@ -994,7 +1049,11 @@ class Admin extends Controller {
                     'parent_id' => $parent_id,
                     'parent_name' => $resolvedParentName
                 ]
-            ]);
+            ];
+            if ($createdParentObj) {
+                $resp['created_parent'] = $createdParentObj;
+            }
+            echo json_encode($resp);
             exit;
         }
 
@@ -1982,6 +2041,7 @@ class Admin extends Controller {
             $slug = !empty($_POST['slug']) ? $_POST['slug'] : $_POST['title'];
             $data = [
                 'category_ids' => $_POST['category_ids'] ?? [],
+                'category_id' => !empty($_POST['main_category_id']) ? (int)$_POST['main_category_id'] : null,
                 'author_ids' => $_POST['author_ids'] ?? [],
                 'title' => $_POST['title'] ?? '',
                 'slug' => trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-'),

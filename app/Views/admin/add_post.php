@@ -1320,10 +1320,11 @@
     async function handleAutoCategorySelection(targetCategory, parentCategory) {
         if (!targetCategory || !targetCategory.trim()) return;
 
-        const cleanTarget = targetCategory.trim();
+        const cleanTarget = targetCategory.trim().replace(/^["'“”‘’]|["'“”‘’]$/g, '').trim();
         const targetLower = cleanTarget.toLowerCase();
-        const cleanParent = parentCategory ? parentCategory.trim() : '';
+        const cleanParent = parentCategory ? parentCategory.trim().replace(/^["'“”‘’]|["'“”‘’]$/g, '').trim() : '';
         const parentLower = cleanParent.toLowerCase();
+        const normTarget = targetLower.replace(/[\s\-_,।]/g, '');
 
         // 1. Reset all previously checked categories and radio buttons
         document.querySelectorAll('input[name="category_ids[]"]').forEach(cb => {
@@ -1358,8 +1359,10 @@
                 }
 
                 domCategories.push({
+                    id: checkbox.value,
                     name: cleanName,
                     nameLower: cleanName.toLowerCase(),
+                    nameNorm: cleanName.toLowerCase().replace(/[\s\-_,।]/g, ''),
                     parentName: domParentName,
                     parentNameLower: domParentName.toLowerCase(),
                     parentId: domParentId,
@@ -1370,30 +1373,19 @@
             }
         });
 
-        // 3. Find match: If parentCategory is provided, prioritize match with matching parent
+        // 3. Find EXACT match in DOM
         let matched = null;
         if (cleanParent) {
-            matched = domCategories.find(c => c.nameLower === targetLower && c.parentNameLower === parentLower);
-            if (!matched) {
-                matched = domCategories.find(c => c.nameLower === targetLower && (c.parentNameLower.includes(parentLower) || parentLower.includes(c.parentNameLower)));
-            }
+            matched = domCategories.find(c => (c.nameLower === targetLower || c.nameNorm === normTarget) && (c.parentNameLower === parentLower || c.parentNameLower.includes(parentLower) || parentLower.includes(c.parentNameLower)));
         }
 
-        // If not matched by parent, find by name
         if (!matched) {
-            matched = domCategories.find(c => c.nameLower === targetLower);
-        }
-        if (!matched) {
-            const normTarget = targetLower.replace(/[\s\-_,।]/g, '');
-            matched = domCategories.find(c => c.nameLower.replace(/[\s\-_,।]/g, '') === normTarget);
-        }
-        if (!matched) {
-            matched = domCategories.find(c => targetLower.includes(c.nameLower) || c.nameLower.includes(targetLower));
+            matched = domCategories.find(c => c.nameLower === targetLower || c.nameNorm === normTarget);
         }
 
-        // Check if matched category's parent needs correction in DB/DOM (if parentCategory specified and doesn't match)
+        // Check if matched category exists in DOM and does NOT need parent relocation
         let needsParentUpdate = false;
-        if (matched && cleanParent && matched.parentNameLower && matched.parentNameLower !== parentLower) {
+        if (matched && cleanParent && matched.parentNameLower && matched.parentNameLower !== parentLower && !matched.parentNameLower.includes(parentLower) && !parentLower.includes(matched.parentNameLower)) {
             needsParentUpdate = true;
         }
 
@@ -1411,98 +1403,133 @@
 
             // Smooth scroll into view
             matched.wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            // Either category doesn't exist, OR it exists under wrong parent and needs auto-healing
-            try {
-                let ajaxUrl = '<?= rtrim(URLROOT, '/') ?>/admin/create_category_ajax';
-                try {
-                    const parsedUrl = new URL(ajaxUrl, window.location.origin);
-                    if (parsedUrl.origin !== window.location.origin) {
-                        ajaxUrl = window.location.pathname.replace(/\/admin\/[^\/]*$/, '/admin/create_category_ajax');
-                    }
-                } catch(e) {}
+            return;
+        }
 
-                const formData = new FormData();
-                formData.append('name', cleanTarget);
-                if (cleanParent) {
-                    formData.append('parent_name', cleanParent);
+        // Either category doesn't exist in DOM, OR it exists under wrong parent and needs auto-healing
+        try {
+            let ajaxUrl = '<?= rtrim(URLROOT, '/') ?>/admin/create_category_ajax';
+            try {
+                const parsedUrl = new URL(ajaxUrl, window.location.origin);
+                if (parsedUrl.origin !== window.location.origin) {
+                    ajaxUrl = window.location.pathname.replace(/\/admin\/[^\/]*$/, '/admin/create_category_ajax');
+                }
+            } catch(e) {}
+
+            const formData = new FormData();
+            formData.append('name', cleanTarget);
+            if (cleanParent) {
+                formData.append('parent_name', cleanParent);
+            }
+
+            const res = await fetch(ajaxUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const resData = await res.json();
+
+            if (resData.success && resData.category) {
+                const newCat = resData.category;
+                const checklist = document.querySelector('.categories-checklist');
+                if (!checklist) return;
+
+                // If backend also created a parent category, ensure parent exists in DOM first
+                if (resData.created_parent) {
+                    const pCat = resData.created_parent;
+                    let existingParentLi = checklist.querySelector(`input[name="category_ids[]"][value="${pCat.id}"]`);
+                    if (!existingParentLi) {
+                        let rootUl = checklist.querySelector(':scope > ul');
+                        if (!rootUl) {
+                            rootUl = document.createElement('ul');
+                            checklist.appendChild(rootUl);
+                        }
+                        const pLi = document.createElement('li');
+                        pLi.innerHTML = `
+                            <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                                <input type="checkbox" name="category_ids[]" value="${pCat.id}" id="cat_${pCat.id}" onchange="handleCategoryCheckboxChange(this)">
+                                <i class="fas fa-folder" style="color: #f59e0b; font-size: 13px; flex-shrink: 0;"></i>
+                                <label for="cat_${pCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1;">${pCat.name}</label>
+                                <span class="main-cat-badge-container" style="display: none; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
+                                    <input type="radio" name="main_category_id" value="${pCat.id}" id="main_cat_${pCat.id}" style="margin: 0 !important; width: 13px !important; height: 13px !important;">
+                                    <label for="main_cat_${pCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
+                                </span>
+                            </div>
+                            <ul></ul>
+                        `;
+                        rootUl.appendChild(pLi);
+                    }
                 }
 
-                const res = await fetch(ajaxUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const resData = await res.json();
-
-                if (resData.success && resData.category) {
-                    const newCat = resData.category;
-                    const checklist = document.querySelector('.categories-checklist');
-                    if (checklist) {
-                        // Find parent container in DOM if parent_id exists
-                        let targetUl = null;
-                        if (newCat.parent_id) {
-                            const parentCb = checklist.querySelector(`input[name="category_ids[]"][value="${newCat.parent_id}"]`);
-                            if (parentCb) {
-                                const parentLi = parentCb.closest('li');
-                                if (parentLi) {
-                                    targetUl = parentLi.querySelector(':scope > ul');
-                                    if (!targetUl) {
-                                        targetUl = document.createElement('ul');
-                                        parentLi.appendChild(targetUl);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!targetUl) {
-                            targetUl = checklist.querySelector(':scope > ul');
+                // Find parent container in DOM if parent_id exists
+                let targetUl = null;
+                if (newCat.parent_id) {
+                    const parentCb = checklist.querySelector(`input[name="category_ids[]"][value="${newCat.parent_id}"]`);
+                    if (parentCb) {
+                        const parentLi = parentCb.closest('li');
+                        if (parentLi) {
+                            targetUl = parentLi.querySelector(':scope > ul');
                             if (!targetUl) {
                                 targetUl = document.createElement('ul');
-                                checklist.appendChild(targetUl);
+                                parentLi.appendChild(targetUl);
                             }
                         }
+                    }
+                }
 
-                        let li = null;
-                        if (matched && matched.li) {
-                            // Move existing li to correct parent ul in DOM
-                            li = matched.li;
-                            targetUl.appendChild(li);
-                        } else {
-                            // Create new li element
-                            li = document.createElement('li');
-                            li.innerHTML = `
-                                <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5; box-shadow: 0 0 0 2px #10b981;">
-                                    <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
-                                    <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
-                                    <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
-                                    <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
-                                        <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" checked style="margin: 0 !important; width: 13px !important; height: 13px !important;">
-                                        <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
-                                    </span>
-                                </div>
-                            `;
-                            targetUl.appendChild(li);
-                        }
+                if (!targetUl) {
+                    targetUl = checklist.querySelector(':scope > ul');
+                    if (!targetUl) {
+                        targetUl = document.createElement('ul');
+                        checklist.appendChild(targetUl);
+                    }
+                }
 
-                        const targetCheckbox = li.querySelector(`input[name="category_ids[]"]`);
-                        if (targetCheckbox) {
-                            targetCheckbox.checked = true;
-                            handleCategoryCheckboxChange(targetCheckbox);
-                        }
+                // Check if an li for THIS EXACT category id already exists in DOM
+                let existingLi = checklist.querySelector(`input[name="category_ids[]"][value="${newCat.id}"]`)?.closest('li');
+                let li = null;
 
-                        li.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        const pName = newCat.parent_name || cleanParent || 'সঠিক প্যারেন্ট';
-                        showToast(`✨ ক্যাটাগরি '${newCat.name}' সফলভাবে '${pName}' এর অধীনে সেট করা হয়েছে!`, 'success');
+                if (existingLi) {
+                    // Category already exists in DOM, relocate to targetUl if not already there
+                    li = existingLi;
+                    if (li.parentElement !== targetUl && !li.contains(targetUl)) {
+                        targetUl.appendChild(li);
                     }
                 } else {
-                    console.error('Category creation failed:', resData.error);
+                    // Create brand new li element
+                    li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="category-tree-item-wrapper" style="display: flex; align-items: center; gap: 8px; width: 100%; background-color: #ecfdf5; box-shadow: 0 0 0 2px #10b981;">
+                            <input type="checkbox" name="category_ids[]" value="${newCat.id}" id="cat_${newCat.id}" checked onchange="handleCategoryCheckboxChange(this)">
+                            <i class="fas fa-folder" style="color: #10b981; font-size: 13px; flex-shrink: 0;"></i>
+                            <label for="cat_${newCat.id}" style="margin: 0; cursor: pointer; flex-grow: 1; font-weight: 600; color: #047857;">${newCat.name} (নতুন)</label>
+                            <span class="main-cat-badge-container" style="display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; padding-left: 8px;">
+                                <input type="radio" name="main_category_id" value="${newCat.id}" id="main_cat_${newCat.id}" checked style="margin: 0 !important; width: 13px !important; height: 13px !important;">
+                                <label for="main_cat_${newCat.id}" style="font-size: 11px !important; color: #3b82f6 !important; font-weight: 600 !important; margin: 0 !important; cursor: pointer; user-select: none;">Main</label>
+                            </span>
+                        </div>
+                    `;
+                    targetUl.appendChild(li);
                 }
-            } catch (err) {
-                console.error('Error auto-creating category:', err);
+
+                const targetCheckbox = li.querySelector(`input[name="category_ids[]"]`);
+                if (targetCheckbox) {
+                    targetCheckbox.checked = true;
+                    handleCategoryCheckboxChange(targetCheckbox);
+                }
+
+                li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const pName = newCat.parent_name || cleanParent || 'সঠিক প্যারেন্ট';
+                showToast(`✨ ক্যাটাগরি '${newCat.name}' সফলভাবে '${pName}' এর অধীনে তৈরি ও নির্বাচন করা হয়েছে!`, 'success');
+            } else {
+                console.error('Category creation failed:', resData.error);
+                showToast('❌ ক্যাটাগরি তৈরিতে সমস্যা: ' + (resData.error || 'অজানা ত্রুটি'), 'error');
             }
+        } catch (err) {
+            console.error('Error auto-creating category:', err);
+            showToast('❌ ক্যাটাগরি যোগাযোগ ত্রুটি: ' + err.message, 'error');
         }
     }
 
@@ -1635,7 +1662,17 @@
         const pasteInput = document.getElementById('smart-paste-input');
         if (pasteInput) {
             pasteInput.addEventListener('paste', function(e) {
-                setTimeout(processSmartPaste, 150);
+                const pastedText = (e.clipboardData || window.clipboardData)?.getData('text');
+                if (pastedText) {
+                    setTimeout(() => {
+                        if (!pasteInput.value || pasteInput.value.length < pastedText.length) {
+                            pasteInput.value = pastedText;
+                        }
+                        processSmartPaste();
+                    }, 50);
+                } else {
+                    setTimeout(processSmartPaste, 150);
+                }
             });
         }
     });

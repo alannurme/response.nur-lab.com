@@ -364,7 +364,9 @@ class AdminModel extends Model {
 
     public function createPost($data) {
         $category_ids = $data['category_ids'] ?? [];
-        $data['category_id'] = !empty($category_ids) ? $category_ids[0] : null;
+        if (empty($data['category_id'])) {
+            $data['category_id'] = !empty($category_ids) ? $category_ids[0] : null;
+        }
         if (empty($data['category_id'])) {
             $first_cat = $this->db->query("SELECT id FROM categories ORDER BY id ASC LIMIT 1")->fetchColumn();
             if ($first_cat) {
