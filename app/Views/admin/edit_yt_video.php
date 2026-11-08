@@ -140,3 +140,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>
+
