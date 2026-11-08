@@ -51,8 +51,8 @@
             </div>
         </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-save w-100"><i class="fas fa-cloud-upload-alt"></i> Save YouTube Video</button>
+        <div class="form-actions mt-4">
+            <button type="submit" class="btn btn-primary w-100" style="background: #dc2626; border-color: #dc2626; font-weight: 700; padding: 13px; border-radius: 10px; box-shadow: 0 4px 12px rgba(220,38,38,0.25); font-size: 1rem;"><i class="fas fa-cloud-upload-alt me-1"></i> Save YouTube Video</button>
         </div>
     </form>
 </div>

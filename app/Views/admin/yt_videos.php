@@ -62,6 +62,40 @@
 </div>
 
 <style>
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0;
+    }
+    .admin-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px 18px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .admin-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+    .admin-table tr:hover td {
+        background-color: #f8fafc;
+    }
+    .btn-save {
+        background: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+    }
     .video-thumb-container {
         position: relative;
         width: 100px;
@@ -94,6 +128,23 @@
         font-weight: 600;
         padding: 5px 12px;
         border-radius: 6px;
+    }
+    .btn-action.btn-delete {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fef2f2;
+        color: #dc2626;
+        text-decoration: none;
+        transition: 0.2s all;
+    }
+    .btn-action.btn-delete:hover {
+        background: #dc2626;
+        color: #ffffff;
+        transform: translateY(-2px);
     }
 </style>
 

@@ -4783,10 +4783,15 @@ class Admin extends Controller {
     public function yt_categories() {
         $adminModel = $this->model('AdminModel');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = ['name' => $_POST['name']];
-            if ($adminModel->addYTCategory($data)) {
-                header('Location: ' . URLROOT . '/admin/yt_categories');
-                exit;
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            if (!empty($name)) {
+                $data = ['name' => $name, 'slug' => $slug];
+                if ($adminModel->addYTCategory($data)) {
+                    \App\Helpers\Cache::clear();
+                    header('Location: ' . URLROOT . '/admin/yt_categories?msg=added');
+                    exit;
+                }
             }
         }
         $categories = $adminModel->getYTSubCategories();
@@ -4797,10 +4802,37 @@ class Admin extends Controller {
         ]);
     }
 
+    public function edit_yt_category($id) {
+        $adminModel = $this->model('AdminModel');
+        $category = $adminModel->getYTCategoryById($id);
+        if (!$category) {
+            header('Location: ' . URLROOT . '/admin/yt_categories');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            if (!empty($name)) {
+                $adminModel->updateYTCategory($id, $name, $slug);
+                \App\Helpers\Cache::clear();
+                header('Location: ' . URLROOT . '/admin/yt_categories?msg=updated');
+                exit;
+            }
+        }
+
+        $this->view('admin/edit_yt_category', [
+            'category' => $category,
+            'current_page' => 'yt_categories',
+            'settings' => $this->siteSettings
+        ]);
+    }
+
     public function delete_yt_category($id) {
         $adminModel = $this->model('AdminModel');
         if ($adminModel->deleteYTCategory($id)) {
-            header('Location: ' . URLROOT . '/admin/yt_categories');
+            \App\Helpers\Cache::clear();
+            header('Location: ' . URLROOT . '/admin/yt_categories?msg=deleted');
             exit;
         }
     }

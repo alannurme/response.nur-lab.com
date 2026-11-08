@@ -1664,14 +1664,41 @@ class AdminModel extends Model {
 
     // YouTube Video Management
     public function getYTSubCategories() {
-        $stmt = $this->db->query("SELECT * FROM yt_categories ORDER BY name ASC");
+        $stmt = $this->db->query("SELECT c.*, COUNT(v.id) as video_count 
+                                  FROM yt_categories c 
+                                  LEFT JOIN yt_videos v ON c.id = v.category_id 
+                                  GROUP BY c.id 
+                                  ORDER BY c.name ASC");
         return $stmt->fetchAll();
     }
 
+    public function getYTCategoryById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM yt_categories WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
+
     public function addYTCategory($data) {
-        $data['slug'] = strtolower(str_replace(' ', '-', $data['name']));
+        if (empty($data['slug'])) {
+            $data['slug'] = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($data['name'], 'UTF-8')), '-');
+        } else {
+            $data['slug'] = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($data['slug'], 'UTF-8')), '-');
+        }
         $stmt = $this->db->prepare("INSERT INTO yt_categories (name, slug) VALUES (:name, :slug)");
-        return $stmt->execute($data);
+        return $stmt->execute([
+            'name' => $data['name'],
+            'slug' => $data['slug']
+        ]);
+    }
+
+    public function updateYTCategory($id, $name, $slug = null) {
+        if (empty($slug)) {
+            $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($name, 'UTF-8')), '-');
+        } else {
+            $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-');
+        }
+        $stmt = $this->db->prepare("UPDATE yt_categories SET name = :name, slug = :slug WHERE id = :id");
+        return $stmt->execute(['id' => $id, 'name' => $name, 'slug' => $slug]);
     }
 
     public function deleteYTCategory($id) {
