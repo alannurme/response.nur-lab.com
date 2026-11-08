@@ -51,7 +51,7 @@
                     <span id="detected-vid-badge" style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; color: #cbd5e1; font-family: monospace;">ID: <?= htmlspecialchars($data['video']['video_id']) ?></span>
                 </div>
                 <div id="yt-preview" style="position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000;">
-                    <iframe src="https://www.youtube.com/embed/<?= htmlspecialchars($data['video']['video_id']) ?>?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/<?= htmlspecialchars($data['video']['video_id']) ?>?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                 </div>
             </div>
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             statusIcon.style.display = 'block';
             vidBadge.textContent = 'ID: ' + videoId;
             previewContainer.style.display = 'block';
-            previewDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            previewDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
         } else {
             statusIcon.style.display = 'none';
             previewContainer.style.display = 'none';

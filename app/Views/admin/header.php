@@ -66,6 +66,7 @@ if (empty($current_page)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title><?= $data['settings']['site_title'] ?? 'Admin Panel' ?> - Dashboard</title>
     
     <!-- Favicon -->

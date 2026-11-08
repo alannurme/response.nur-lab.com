@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             statusIcon.style.display = 'block';
             vidBadge.textContent = 'ID: ' + videoId;
             previewContainer.style.display = 'block';
-            previewDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            previewDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
             // If title is empty, auto-fetch from YouTube oEmbed API (free, zero API key required)
             if (!titleInput.value.trim()) {
