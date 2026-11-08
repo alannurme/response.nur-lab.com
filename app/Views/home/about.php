@@ -154,7 +154,7 @@
 
                     <!-- Video Title and Info Below Thumbnail (নামগুলো নিচে) -->
                     <div class="yt-card-body" style="padding: 16px 18px 18px 18px; display: flex; flex-direction: column; flex-grow: 1;">
-                        <h3 style="font-size: 1.05rem; line-height: 1.45; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 12px 0; height: 3rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        <h3 style="font-size: 0.95rem; line-height: 1.4; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 10px 0; height: 2.7rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                             <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" style="color: #1e293b; text-decoration: none; transition: 0.2s color;">
                                 <?= htmlspecialchars($video['title']) ?>
                             </a>

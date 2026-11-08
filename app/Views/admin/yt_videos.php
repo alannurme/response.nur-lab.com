@@ -127,6 +127,23 @@
     color: #ffffff;
     transform: translateY(-2px);
 }
+.video-title-text {
+    font-weight: 600;
+    color: #1e293b;
+    text-decoration: none;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 480px;
+    transition: 0.2s color;
+}
+.video-title-text:hover {
+    color: #ff0000;
+}
 </style>
 
 <div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -226,7 +243,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="<?= $video['video_url'] ?>" target="_blank" class="video-title-text" style="font-weight: 700; color: #1e293b; text-decoration: none; font-family: 'Hind Siliguri', sans-serif; font-size: 1.05rem; line-height: 1.4; display: block; max-width: 380px;">
+                            <a href="<?= $video['video_url'] ?>" target="_blank" class="video-title-text" title="<?= htmlspecialchars($video['title']) ?>">
                                 <?= htmlspecialchars($video['title']) ?>
                             </a>
                         </td>
