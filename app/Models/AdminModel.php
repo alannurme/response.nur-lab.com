@@ -2553,7 +2553,11 @@ class AdminModel extends Model {
 
     // Question Categories CRUD
     public function getQuestionCategories() {
-        $stmt = $this->db->query("SELECT * FROM question_categories ORDER BY name ASC");
+        $stmt = $this->db->query("SELECT c.*, COUNT(q.id) as question_count 
+                                  FROM question_categories c 
+                                  LEFT JOIN user_questions q ON c.id = q.category_id 
+                                  GROUP BY c.id 
+                                  ORDER BY c.name ASC");
         return $stmt->fetchAll();
     }
 

@@ -5440,10 +5440,16 @@ class Admin extends Controller {
     public function question_categories() {
         $adminModel = $this->model('AdminModel');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = trim($_POST['name']);
-            $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($name, 'UTF-8')), '-');
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            if (empty($slug)) {
+                $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($name, 'UTF-8')), '-');
+            } else {
+                $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-');
+            }
             if (!empty($name)) {
                 $adminModel->addQuestionCategory($name, $slug);
+                \App\Helpers\Cache::clear();
                 header('Location: ' . URLROOT . '/admin/question_categories?msg=added');
                 exit;
             }
@@ -5465,10 +5471,16 @@ class Admin extends Controller {
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = trim($_POST['name']);
-            $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($name, 'UTF-8')), '-');
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            if (empty($slug)) {
+                $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($name, 'UTF-8')), '-');
+            } else {
+                $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($slug, 'UTF-8')), '-');
+            }
             if (!empty($name)) {
                 $adminModel->updateQuestionCategory($id, $name, $slug);
+                \App\Helpers\Cache::clear();
                 header('Location: ' . URLROOT . '/admin/question_categories?msg=updated');
                 exit;
             }
@@ -5484,6 +5496,7 @@ class Admin extends Controller {
     public function delete_question_category($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->deleteQuestionCategory($id);
+        \App\Helpers\Cache::clear();
         header('Location: ' . URLROOT . '/admin/question_categories?msg=deleted');
         exit;
     }
