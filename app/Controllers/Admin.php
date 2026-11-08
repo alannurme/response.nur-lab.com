@@ -1253,22 +1253,26 @@ class Admin extends Controller {
         $adminModel = $this->model('AdminModel');
         $comments = $adminModel->getComments();
         $this->view('admin/comments', [
-            'comments' => $comments,
-            'settings' => $this->siteSettings
+            'title'        => 'মন্তব্য পরিচালনা (Comments)',
+            'comments'     => $comments,
+            'current_page' => 'comments',
+            'settings'     => $this->siteSettings
         ]);
     }
 
     public function approve_comment($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->approveComment($id);
-        header('Location: ' . URLROOT . '/admin/comments');
+        \App\Helpers\Cache::clear();
+        header('Location: ' . URLROOT . '/admin/comments?msg=approved');
         exit;
     }
 
     public function delete_comment($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->deleteComment($id);
-        header('Location: ' . URLROOT . '/admin/comments');
+        \App\Helpers\Cache::clear();
+        header('Location: ' . URLROOT . '/admin/comments?msg=deleted');
         exit;
     }
 
@@ -1281,8 +1285,14 @@ class Admin extends Controller {
                 $adminModel = $this->model('AdminModel');
                 if ($action === 'delete') {
                     $adminModel->bulkDeleteComments($ids);
+                    \App\Helpers\Cache::clear();
+                    header('Location: ' . URLROOT . '/admin/comments?msg=bulk_deleted');
+                    exit;
                 } elseif ($action === 'approve') {
                     $adminModel->bulkApproveComments($ids);
+                    \App\Helpers\Cache::clear();
+                    header('Location: ' . URLROOT . '/admin/comments?msg=bulk_approved');
+                    exit;
                 }
             }
         }

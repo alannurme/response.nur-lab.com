@@ -1338,7 +1338,7 @@ class AdminModel extends Model {
 
     // Comment Management
     public function getComments() {
-        $stmt = $this->db->query("SELECT c.*, p.title as post_title, p.slug as post_slug FROM comments c JOIN posts p ON c.post_id = p.id ORDER BY c.created_at DESC");
+        $stmt = $this->db->query("SELECT c.*, p.title as post_title, p.slug as post_slug FROM comments c LEFT JOIN posts p ON c.post_id = p.id ORDER BY c.created_at DESC");
         return $stmt->fetchAll();
     }
 
