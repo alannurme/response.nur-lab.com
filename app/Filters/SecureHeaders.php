@@ -35,3 +35,4 @@ class SecureHeaders extends BaseSecureHeaders
         'Referrer-Policy' => 'strict-origin-when-cross-origin',
     ];
 }
+
