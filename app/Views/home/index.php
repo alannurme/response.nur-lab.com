@@ -849,26 +849,49 @@ $recentBg = ($numCatSections % 2 === 0)
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
             <?php if (!empty($data['yt_videos'])): ?>
                 <?php foreach (array_slice($data['yt_videos'], 0, 8) as $video): ?>
-                <div class="yt-video-card video-card-animate" style="position: relative; border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); aspect-ratio: 16/9; transition: 0.4s;">
-                    <img src="https://img.youtube.com/vi/<?= $video['video_id'] ?>/maxresdefault.jpg" alt="<?= $video['title'] ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.5s;">
-                    
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 25px; transition: 0.3s;">
-                        <span style="color: #ff0000; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;"><?= $video['category_name'] ?? 'ভিডিও' ?></span>
-                        <h3 style="color: white; font-size: 1.1rem; line-height: 1.4; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; margin-bottom: 0;"><?= $video['title'] ?></h3>
-                    </div>
+                <div class="yt-video-card video-card-animate" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <!-- Thumbnail with Play Button -->
+                    <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" class="yt-thumb-wrap" style="position: relative; display: block; aspect-ratio: 16/9; overflow: hidden; background: #000;">
+                        <img src="https://img.youtube.com/vi/<?= $video['video_id'] ?>/hqdefault.jpg" alt="<?= htmlspecialchars($video['title']) ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: 0.5s transform, 0.3s opacity;">
+                        
+                        <!-- Category Badge on Thumbnail -->
+                        <span style="position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 3px 10px; border-radius: 6px; z-index: 2;">
+                            <?= htmlspecialchars($video['category_name'] ?? 'ভিডিও') ?>
+                        </span>
 
-                    <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: rgba(255,0,0,0.9); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.5rem; text-decoration: none; box-shadow: 0 0 0 0 rgba(255,0,0,0.4); animation: pulse 2s infinite; opacity: 0.9; transition: 0.3s;">
-                        <i class="fas fa-play"></i>
+                        <!-- Red Play Button -->
+                        <div class="yt-play-icon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: rgba(255, 0, 0, 0.9); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.25rem; box-shadow: 0 4px 15px rgba(255,0,0,0.5); transition: 0.3s all; z-index: 2;">
+                            <i class="fas fa-play" style="margin-left: 3px;"></i>
+                        </div>
                     </a>
+
+                    <!-- Video Title and Info Below Thumbnail (নামগুলো নিচে) -->
+                    <div class="yt-card-body" style="padding: 16px 18px 18px 18px; display: flex; flex-direction: column; flex-grow: 1;">
+                        <h3 style="font-size: 1.05rem; line-height: 1.45; font-weight: 700; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 12px 0; height: 3rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none; transition: 0.2s color;">
+                                <?= htmlspecialchars($video['title']) ?>
+                            </a>
+                        </h3>
+
+                        <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 10px;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fab fa-youtube" style="color: #ff0000; font-size: 0.95rem;"></i>
+                                <?= !empty($video['created_at']) ? date('d M, Y', strtotime($video['created_at'])) : 'YouTube' ?>
+                            </span>
+                            <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" style="color: #ff4d4d; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem;">
+                                দেখুন <i class="fas fa-arrow-right" style="font-size: 0.72rem;"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div style="grid-column: 1/-1; text-align: center; padding: 50px; background: #f8fafc; border-radius: 20px; border: 2px dashed #e2e8f0;">
-                    <i class="fab fa-youtube fa-4x mb-3 text-muted"></i>
-                    <p class="text-muted">এখনো কোনো ইউটিউব ভিডিও যুক্ত করা হয়নি।</p>
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 2px dashed rgba(255,255,255,0.15);">
+                    <i class="fab fa-youtube fa-4x mb-3 text-muted" style="color: #64748b;"></i>
+                    <p class="text-muted" style="color: #94a3b8; margin: 0;">এখনো কোনো ইউটিউব ভিডিও যুক্ত করা হয়নি।</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -876,9 +899,23 @@ $recentBg = ($numCatSections % 2 === 0)
 </section>
 
 <style>
-    .yt-video-card:hover { transform: scale(1.03); }
-    .yt-video-card:hover img { transform: scale(1.1); opacity: 0.6; }
-    .yt-video-card:hover a { transform: translate(-50%, -50%) scale(1.1); background: #ff0000; opacity: 1; }
+    .yt-video-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+        border-color: rgba(255, 77, 77, 0.35);
+    }
+    .yt-video-card:hover .yt-thumb-wrap img {
+        transform: scale(1.06);
+        opacity: 0.8;
+    }
+    .yt-video-card:hover .yt-play-icon {
+        transform: translate(-50%, -50%) scale(1.15);
+        background: #ff0000;
+        box-shadow: 0 6px 20px rgba(255,0,0,0.7);
+    }
+    .yt-video-card:hover h3 a {
+        color: #ff4d4d;
+    }
     
     @keyframes pulse {
         0% { box-shadow: 0 0 0 0 rgba(255,0,0,0.7); }
@@ -1211,22 +1248,24 @@ $recentBg = ($numCatSections % 2 === 0)
 
         .yt-video-card {
             border-radius: 14px !important;
-            aspect-ratio: 16/10 !important;
+            aspect-ratio: auto !important;
+        }
+
+        .yt-video-card .yt-card-body {
+            padding: 10px 12px 12px 12px !important;
         }
 
         .yt-video-card h3 {
             font-size: 0.82rem !important;
-            line-height: 1.3 !important;
+            line-height: 1.35 !important;
+            height: 2.3rem !important;
+            margin-bottom: 6px !important;
         }
 
-        .yt-video-card div[style*="position: absolute"] {
-            padding: 12px !important;
-        }
-
-        .yt-video-card a[href*="youtube.com"] {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 1rem !important;
+        .yt-video-card .yt-play-icon {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 0.9rem !important;
         }
 
         /* Scopes: 2-column compact grid */
