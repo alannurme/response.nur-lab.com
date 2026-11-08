@@ -24,6 +24,7 @@ if (!function_exists('getBengaliDate')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <?php
     // Determine SEO values
     $site_name = $data['settings']['site_title'] ?? 'RESPONSE WITH NUR-LAB';
