@@ -679,7 +679,7 @@ document.addEventListener("click", function(e) {
                                 </span>
                                 <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
                                     <i class="fas fa-user" style="color: #0b7c4d;"></i>
-                                    এডমিন
+                                    <?= htmlspecialchars($post['author_name'] ?? 'এডমিন') ?>
                                 </span>
                             </div>
                             <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; color: #64748b;">
@@ -716,6 +716,105 @@ document.addEventListener("click", function(e) {
         </div>
     </div>
 </section>
+
+<?php if (!empty($data['category_sections'])): ?>
+    <?php foreach ($data['category_sections'] as $secIndex => $catSection): 
+        $cat = $catSection['category'];
+        $catPosts = $catSection['posts'];
+        if (empty($catPosts)) continue;
+
+        // Title split for two-tone color highlight
+        $words = preg_split('/\s+/u', trim($cat['name']));
+        if (count($words) > 1) {
+            $lastWord = array_pop($words);
+            $firstPart = implode(' ', $words);
+            $catTitleHtml = htmlspecialchars($firstPart) . ' <span style="color: #0b7c4d;">' . htmlspecialchars($lastWord) . '</span>';
+        } else {
+            $catTitleHtml = htmlspecialchars($cat['name']) . ' <span style="color: #0b7c4d;">বিভাগ</span>';
+        }
+        
+        $catBg = ($secIndex % 2 === 0) 
+            ? 'background: #ffffff; border-bottom: 1px solid #e2e8f0;' 
+            : 'background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;';
+    ?>
+    <!-- Category Section: <?= htmlspecialchars($cat['name']) ?> -->
+    <section class="posts-section category-posts-section category-section-<?= $cat['id'] ?>" style="padding: 100px 0; <?= $catBg ?>">
+        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
+            <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px;">
+                <div>
+                    <h2 style="font-size: 2.8rem; font-weight: 900; color: #1e293b; font-family: 'Hind Siliguri', sans-serif; position: relative; display: inline-block;">
+                        <?= $catTitleHtml ?>
+                        <div style="position: absolute; bottom: -15px; left: 0; width: 80px; height: 6px; background: #0b7c4d; border-radius: 10px;"></div>
+                    </h2>
+                    <p style="color: #64748b; margin-top: 25px; font-size: 1.1rem;">
+                        <?= !empty($cat['description']) ? htmlspecialchars($cat['description']) : htmlspecialchars($cat['name']) . ' ও সমসাময়িক বিষয় নিয়ে গবেষণাধর্মী রচনাবলী' ?>
+                    </p>
+                </div>
+                <a href="<?= URLROOT ?>/blog/<?= urlencode($cat['slug']) ?>" style="color: #0b7c4d; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; padding: 12px 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s;" onmouseover="this.style.transform='translateX(5px)'; this.style.background='#0b7c4d'; this.style.color='#fff';" onmouseout="this.style.transform='translateX(0)'; this.style.background='#fff'; this.style.color='#0b7c4d';">
+                    সবগুলো দেখুন <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="recent-posts-grid">
+                <?php foreach ($catPosts as $post): ?>
+                <div class="premium-post-card post-card-animate" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+                    <!-- Image Wrapper -->
+                    <div style="width: 100%; aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        <?php if (!empty($post['featured_image'])): ?>
+                            <?php 
+                            $index_img = resolve_blog_image($post['featured_image']);
+                            ?>
+                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="display: block; width: 100%; height: 100%;">
+                                <img src="<?= $index_img ?>" alt="<?= htmlspecialchars($post['title']) ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: 0.8s transform;">
+                            </a>
+                        <?php else: ?>
+                            <i class="fa-regular fa-image" style="font-size: 2.5rem; opacity: 0.4;"></i>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Content Wrapper -->
+                    <div style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; color: #64748b; font-size: 0.78rem; font-weight: 500; line-height: 1; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; border-right: 1px solid #e2e8f0; padding-right: 8px;">
+                                    <i class="fas fa-calendar-alt" style="color: #0b7c4d;"></i>
+                                    <?= date('d M', strtotime($post['created_at'])) ?>
+                                </span>
+                                <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-user" style="color: #0b7c4d;"></i>
+                                    <?= htmlspecialchars($post['author_name'] ?? 'এডমিন') ?>
+                                </span>
+                            </div>
+                            <span style="white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; color: #64748b;">
+                                <i class="fas fa-eye" style="color: #0b7c4d;"></i>
+                                <?= number_format($post['views'] ?? 0) ?> বার
+                            </span>
+                        </div>
+
+                        <h3 style="font-size: 1.05rem; margin-bottom: 12px; color: #000000; line-height: 1.4; font-family: 'Hind Siliguri', sans-serif; font-weight: 800; height: 2.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; transition: 0.3s;">
+                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" style="text-decoration: none; color: inherit;"><?= htmlspecialchars($post['title']) ?></a>
+                        </h3>
+ 
+                        <p style="font-size: 0.85rem; color: #334155; line-height: 1.5; margin-bottom: 15px; height: 2.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <?= strip_tags(!empty($post['excerpt']) ? $post['excerpt'] : $post['content']) ?>
+                        </p>
+                        
+                        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9;">
+                            <a href="<?= URLROOT ?>/<?= $post['slug'] ?>" class="premium-read-btn" style="color: #0b7c4d; text-decoration: none; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;">
+                                বিস্তারিত পড়ুন 
+                                <div style="width: 30px; height: 30px; background: #e6f4ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+                                    <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endforeach; ?>
+<?php endif; ?>
 
 <!-- YouTube Video Gallery Section -->
 <section class="yt-videos-section" style="padding: 80px 0; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-top: 1px solid #334155; border-bottom: 1px solid #334155;">

@@ -80,6 +80,10 @@ class Home extends Controller {
             \App\Helpers\Cache::set('home_page', $data, 300);
         }
 
+        // Fetch dynamic randomized posts for each main category on every page reload
+        $postModel = $this->model('PostModel');
+        $data['category_sections'] = $postModel->getRandomPostsForMainCategories(12);
+
         $this->view('home/index', $data);
     }
 

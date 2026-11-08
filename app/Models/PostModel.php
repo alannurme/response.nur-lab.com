@@ -86,6 +86,108 @@ class PostModel extends Model {
         return $stmt->fetchAll();
     }
 
+    public function getRandomPostsForMainCategories($limitPerCategory = 12) {
+        // 1. Get all categories and build hierarchy
+        $allCategories = $this->db->query("SELECT id, name, slug, description, parent_id, order_index FROM categories ORDER BY order_index ASC, id ASC")->fetchAll();
+        if (empty($allCategories)) {
+            return [];
+        }
+
+        $subCatMap = [];
+        $mainCats = [];
+        foreach ($allCategories as $cat) {
+            if (empty($cat['parent_id'])) {
+                $mainCats[] = $cat;
+            } else {
+                $subCatMap[$cat['parent_id']][] = (int)$cat['id'];
+            }
+        }
+
+        $getDescendants = function($parentId) use (&$getDescendants, $subCatMap) {
+            $ids = [$parentId];
+            if (!empty($subCatMap[$parentId])) {
+                foreach ($subCatMap[$parentId] as $childId) {
+                    $ids = array_merge($ids, $getDescendants($childId));
+                }
+            }
+            return $ids;
+        };
+
+        // 2. Fetch published post-to-category associations
+        $postCatRows = $this->db->query("SELECT DISTINCT p.id as post_id, pc.category_id 
+                                         FROM posts p 
+                                         JOIN post_categories pc ON p.id = pc.post_id 
+                                         WHERE p.status = 'published'")->fetchAll();
+
+        $catToPostMap = [];
+        foreach ($postCatRows as $row) {
+            $catToPostMap[$row['category_id']][] = (int)$row['post_id'];
+        }
+
+        // Direct posts mapped by p.category_id
+        $directPosts = $this->db->query("SELECT id, category_id FROM posts WHERE status = 'published' AND category_id IS NOT NULL")->fetchAll();
+        foreach ($directPosts as $row) {
+            $catToPostMap[$row['category_id']][] = (int)$row['id'];
+        }
+
+        $selectedIdsByCat = [];
+        $allSelectedIds = [];
+        foreach ($mainCats as $mainCat) {
+            $catIds = $getDescendants((int)$mainCat['id']);
+            $postIds = [];
+            foreach ($catIds as $cid) {
+                if (!empty($catToPostMap[$cid])) {
+                    $postIds = array_merge($postIds, $catToPostMap[$cid]);
+                }
+            }
+            $postIds = array_unique($postIds);
+            if (!empty($postIds)) {
+                shuffle($postIds);
+                $picked = array_slice($postIds, 0, (int)$limitPerCategory);
+                $selectedIdsByCat[$mainCat['id']] = $picked;
+                $allSelectedIds = array_merge($allSelectedIds, $picked);
+            }
+        }
+
+        $allSelectedIds = array_unique($allSelectedIds);
+        $postsById = [];
+        if (!empty($allSelectedIds)) {
+            $inList = implode(',', array_map('intval', $allSelectedIds));
+            $sql = "SELECT p.id, p.category_id, p.title, p.slug, p.excerpt, SUBSTRING(p.content, 1, 300) AS content, 
+                           p.featured_image, p.post_type, p.views, p.fake_views, p.status, p.created_at,
+                           COALESCE(GROUP_CONCAT(DISTINCT a.name SEPARATOR ', '), p.author, 'এডমিন') as author_name
+                    FROM posts p
+                    LEFT JOIN post_authors pa ON p.id = pa.post_id
+                    LEFT JOIN authors a ON pa.author_id = a.id
+                    WHERE p.id IN ($inList)
+                    GROUP BY p.id";
+            $stmt = $this->db->query($sql);
+            while ($row = $stmt->fetch()) {
+                $postsById[$row['id']] = $row;
+            }
+        }
+
+        $categorySections = [];
+        foreach ($mainCats as $mainCat) {
+            if (isset($selectedIdsByCat[$mainCat['id']])) {
+                $secPosts = [];
+                foreach ($selectedIdsByCat[$mainCat['id']] as $pid) {
+                    if (isset($postsById[$pid])) {
+                        $secPosts[] = $postsById[$pid];
+                    }
+                }
+                if (!empty($secPosts)) {
+                    $categorySections[] = [
+                        'category' => $mainCat,
+                        'posts'    => $secPosts
+                    ];
+                }
+            }
+        }
+
+        return $categorySections;
+    }
+
     public function getSlides() {
         $stmt = $this->db->query("SELECT * FROM slides ORDER BY order_index ASC");
         return $stmt->fetchAll();
