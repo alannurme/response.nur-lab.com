@@ -1757,9 +1757,10 @@ class Admin extends Controller {
         $adminModel = $this->model('AdminModel');
         $subscribers = $adminModel->getSubscribers();
         $this->view('admin/subscribers', [
-            'subscribers' => $subscribers,
+            'title'        => 'নিউজলেটার সাবস্ক্রাইবার (Subscribers)',
+            'subscribers'  => $subscribers,
             'current_page' => 'subscribers',
-            'settings' => $this->siteSettings
+            'settings'     => $this->siteSettings
         ]);
     }
 
@@ -1789,7 +1790,7 @@ class Admin extends Controller {
     public function delete_subscriber($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->deleteSubscriber($id);
-        header('Location: ' . URLROOT . '/admin/subscribers');
+        header('Location: ' . URLROOT . '/admin/subscribers?msg=deleted');
         exit;
     }
 
@@ -1800,6 +1801,8 @@ class Admin extends Controller {
                 $ids = array_map('intval', $ids);
                 $adminModel = $this->model('AdminModel');
                 $adminModel->bulkDeleteSubscribers($ids);
+                header('Location: ' . URLROOT . '/admin/subscribers?msg=bulk_deleted');
+                exit;
             }
         }
         header('Location: ' . URLROOT . '/admin/subscribers');
@@ -1810,8 +1813,10 @@ class Admin extends Controller {
         $adminModel = $this->model('AdminModel');
         $messages = $adminModel->getMessages();
         $this->view('admin/messages', [
-            'messages' => $messages,
-            'settings' => $this->siteSettings
+            'title'        => 'ইনবক্স মেসেজ (Inbox Messages)',
+            'messages'     => $messages,
+            'current_page' => 'messages',
+            'settings'     => $this->siteSettings
         ]);
     }
 
@@ -1824,8 +1829,12 @@ class Admin extends Controller {
                 $adminModel = $this->model('AdminModel');
                 if ($action === 'delete') {
                     $adminModel->bulkDeleteMessages($ids);
+                    header('Location: ' . URLROOT . '/admin/messages?msg=bulk_deleted');
+                    exit;
                 } elseif ($action === 'read') {
                     $adminModel->bulkMarkMessagesRead($ids);
+                    header('Location: ' . URLROOT . '/admin/messages?msg=bulk_read');
+                    exit;
                 }
             }
         }
@@ -1836,14 +1845,14 @@ class Admin extends Controller {
     public function mark_read($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->markMessageRead($id);
-        header('Location: ' . URLROOT . '/admin/messages');
+        header('Location: ' . URLROOT . '/admin/messages?msg=read');
         exit;
     }
 
     public function delete_message($id) {
         $adminModel = $this->model('AdminModel');
         $adminModel->deleteMessage($id);
-        header('Location: ' . URLROOT . '/admin/messages');
+        header('Location: ' . URLROOT . '/admin/messages?msg=deleted');
         exit;
     }
 
