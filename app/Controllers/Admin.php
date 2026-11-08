@@ -4771,6 +4771,37 @@ class Admin extends Controller {
         ]);
     }
 
+    public function edit_yt_video($id) {
+        $adminModel = $this->model('AdminModel');
+        $video = $adminModel->getYTVideoById($id);
+        if (!$video) {
+            header('Location: ' . URLROOT . '/admin/yt_videos');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'category_id' => !empty($_POST['category_id']) ? $_POST['category_id'] : null,
+                'title'       => $_POST['title'] ?? '',
+                'video_url'   => $_POST['video_url'] ?? '',
+                'description' => $_POST['description'] ?? ''
+            ];
+            if ($adminModel->updateYTVideo($id, $data)) {
+                \App\Helpers\Cache::clear();
+                header('Location: ' . URLROOT . '/admin/yt_videos?msg=updated');
+                exit;
+            }
+        }
+
+        $categories = $adminModel->getYTSubCategories();
+        $this->view('admin/edit_yt_video', [
+            'video'        => $video,
+            'categories'   => $categories,
+            'current_page' => 'yt_videos',
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
     public function delete_yt_video($id) {
         $adminModel = $this->model('AdminModel');
         if ($adminModel->deleteYTVideo($id)) {

@@ -45,3 +45,4 @@
 </div>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>
+

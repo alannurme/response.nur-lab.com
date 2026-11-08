@@ -1721,6 +1721,27 @@ class AdminModel extends Model {
         return $stmt->execute($data);
     }
 
+    public function getYTVideoById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM yt_videos WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
+
+    public function updateYTVideo($id, $data) {
+        preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $data['video_url'], $match);
+        $videoId = $match[1] ?? ($data['video_id'] ?? '');
+
+        $stmt = $this->db->prepare("UPDATE yt_videos SET category_id = :category_id, title = :title, video_url = :video_url, video_id = :video_id, description = :description WHERE id = :id");
+        return $stmt->execute([
+            'id'          => $id,
+            'category_id' => !empty($data['category_id']) ? $data['category_id'] : null,
+            'title'       => $data['title'],
+            'video_url'   => $data['video_url'],
+            'video_id'    => $videoId,
+            'description' => $data['description'] ?? null
+        ]);
+    }
+
     public function deleteYTVideo($id) {
         $stmt = $this->db->prepare("DELETE FROM yt_videos WHERE id = :id");
         return $stmt->execute(['id' => $id]);
