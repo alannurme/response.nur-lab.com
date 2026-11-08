@@ -2187,66 +2187,111 @@ class Admin extends Controller {
     }
 
     public function youtube() {
+        if (!class_exists(\App\Helpers\YouTubeService::class)) {
+            require_once APPPATH . 'Helpers/YouTubeService.php';
+        }
         $adminModel = $this->model('AdminModel');
+        $success = null;
+        $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $settings = $_POST['settings'];
-            $adminModel->updateSettings($settings);
-            \App\Helpers\Cache::clear();
-            $data['success'] = 'YouTube settings updated successfully';
+            try {
+                if (!empty($_POST['settings']) && is_array($_POST['settings'])) {
+                    $postSettings = $_POST['settings'];
+
+                    // Auto mode defaults for 100% automation
+                    $postSettings['youtube_status'] = 'auto';
+                    $postSettings['youtube_auto_live'] = 'yes';
+                    $postSettings['youtube_auto_sync'] = 'yes';
+
+                    $adminModel->updateSettings($postSettings);
+                    \App\Helpers\Cache::clear();
+                    $this->siteSettings = $adminModel->getSettings();
+                    $success = 'YouTube সেটিংস সফলভাবে সংরক্ষিত হয়েছে!';
+                }
+            } catch (\Throwable $e) {
+                $error = 'সেটিংস সংরক্ষণে ত্রুটি: ' . $e->getMessage();
+            }
         }
 
-        $data['settings'] = $adminModel->getSettings();
-        $data['current_page'] = 'youtube';
-        $this->view('admin/youtube', $data);
+        $settings = $this->siteSettings ?? $adminModel->getSettings();
+
+        $this->view('admin/youtube', [
+            'settings'     => $settings,
+            'current_page' => 'youtube',
+            'success'      => $success,
+            'error'        => $error
+        ]);
     }
 
     public function sync_yt_videos_ajax() {
         header('Content-Type: application/json; charset=utf-8');
-        $adminModel = $this->model('AdminModel');
-        $settings = $adminModel->getSettings();
+        try {
+            if (!class_exists(\App\Helpers\YouTubeService::class)) {
+                require_once APPPATH . 'Helpers/YouTubeService.php';
+            }
+            $adminModel = $this->model('AdminModel');
+            $settings = $adminModel->getSettings();
 
-        $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
-        $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
+            $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
+            $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
 
-        if (empty($apiKey) || empty($channelId)) {
+            if (empty($apiKey) || empty($channelId)) {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন। অনুগ্রহ করে আগে সেটিংস ফর্মে এগুলো সংরক্ষণ করুন।'
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $res = \App\Helpers\YouTubeService::syncVideosToDatabase($apiKey, $channelId);
+            echo json_encode($res, JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (\Throwable $e) {
             echo json_encode([
                 'success' => false,
-                'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন। অনুগ্রহ করে আগে সেটিংস ফর্মে এগুলো সংরক্ষণ করুন।'
+                'error'   => 'সার্ভার ত্রুটি: ' . $e->getMessage()
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
-
-        $res = \App\Helpers\YouTubeService::syncVideosToDatabase($apiKey, $channelId);
-        echo json_encode($res, JSON_UNESCAPED_UNICODE);
-        exit;
     }
 
     public function test_yt_live_ajax() {
         header('Content-Type: application/json; charset=utf-8');
-        $adminModel = $this->model('AdminModel');
-        $settings = $adminModel->getSettings();
+        try {
+            if (!class_exists(\App\Helpers\YouTubeService::class)) {
+                require_once APPPATH . 'Helpers/YouTubeService.php';
+            }
+            $adminModel = $this->model('AdminModel');
+            $settings = $adminModel->getSettings();
 
-        $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
-        $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
+            $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
+            $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
 
-        if (empty($apiKey) || empty($channelId)) {
+            if (empty($apiKey) || empty($channelId)) {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন।'
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $live = \App\Helpers\YouTubeService::checkLiveStream($apiKey, $channelId, true);
+            echo json_encode([
+                'success'   => true,
+                'is_live'   => !empty($live['is_live']),
+                'video_id'  => $live['video_id'] ?? null,
+                'title'     => $live['title'] ?? null,
+                'checked_at'=> $live['checked_at'] ?? date('Y-m-d H:i:s')
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (\Throwable $e) {
             echo json_encode([
                 'success' => false,
-                'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন।'
+                'error'   => 'সার্ভার ত্রুটি: ' . $e->getMessage()
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
-
-        $live = \App\Helpers\YouTubeService::checkLiveStream($apiKey, $channelId, true);
-        echo json_encode([
-            'success'   => true,
-            'is_live'   => !empty($live['is_live']),
-            'video_id'  => $live['video_id'] ?? null,
-            'title'     => $live['title'] ?? null,
-            'checked_at'=> $live['checked_at'] ?? date('Y-m-d H:i:s')
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
     }
 
     public function settings() {

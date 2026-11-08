@@ -312,19 +312,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultBox = document.getElementById('sync-result-box');
 
     if (syncBtn) {
-        syncBtn.addEventListener('click', function() {
+        syncBtn.addEventListener('click', async function() {
             syncBtn.disabled = true;
             const origHtml = syncBtn.innerHTML;
             syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সিঙ্ক হচ্ছে...';
 
-            fetch('<?= URLROOT ?>/admin/sync_yt_videos_ajax', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+            try {
+                const res = await fetch('<?= URLROOT ?>/admin/sync_yt_videos_ajax', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Non-JSON server response:', text);
+                    data = { success: false, error: 'সার্ভার থেকে সঠিক ফরম্যাটে রেসপন্স আসেনি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।' };
                 }
-            })
-            .then(res => res.json())
-            .then(data => {
+
                 syncBtn.disabled = false;
                 syncBtn.innerHTML = origHtml;
 
@@ -340,8 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     resultBox.style.color = '#991b1b';
                     resultBox.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> ${data.error || 'সিঙ্ক ব্যর্থ হয়েছে। অনুগ্রহ করে YouTube Settings-এ API Key ও Channel ID চেক করুন।'}`;
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 syncBtn.disabled = false;
                 syncBtn.innerHTML = origHtml;
                 resultBox.style.display = 'block';
@@ -349,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultBox.style.borderLeft = '5px solid #dc2626';
                 resultBox.style.color = '#991b1b';
                 resultBox.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> রিকোয়েস্ট ত্রুটি: ${err.message}`;
-            });
+            }
         });
     }
 });

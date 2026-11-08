@@ -85,6 +85,9 @@ class Home extends Controller {
         $data['category_sections'] = $postModel->getRandomPostsForMainCategories(12);
 
         // YouTube Auto Live & Auto Sync Handling
+        if (!class_exists(\App\Helpers\YouTubeService::class)) {
+            require_once APPPATH . 'Helpers/YouTubeService.php';
+        }
         $ytSettings = $data['settings'] ?? [];
         $ytApiKey = !empty($ytSettings['youtube_api_key']) ? trim($ytSettings['youtube_api_key']) : '';
         $ytChannelId = !empty($ytSettings['youtube_channel_id']) ? trim($ytSettings['youtube_channel_id']) : '';

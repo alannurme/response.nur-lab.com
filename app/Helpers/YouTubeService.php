@@ -1,6 +1,10 @@
 <?php
 namespace App\Helpers;
 
+if (!class_exists(\App\Helpers\Cache::class)) {
+    require_once APPPATH . 'Helpers/Cache.php';
+}
+
 class YouTubeService {
 
     /**
@@ -96,52 +100,59 @@ class YouTubeService {
      * Sync latest videos into `yt_videos` table.
      */
     public static function syncVideosToDatabase(string $apiKey, string $channelIdOrHandle, ?int $categoryId = null): array {
-        $result = self::fetchLatestVideos($apiKey, $channelIdOrHandle, 30);
-        if (!$result['success']) {
-            return $result;
-        }
-
-        $videos = $result['videos'];
-        if (empty($videos)) {
-            return ['success' => true, 'added' => 0, 'total' => 0, 'message' => 'চ্যানেলে কোনো পাবলিক ভিডিও পাওয়া যায়নি।'];
-        }
-
-        $pdo = \Config\Database::pdoConnect();
-        
-        // Fetch existing video IDs
-        $existing = $pdo->query("SELECT video_id FROM yt_videos WHERE video_id IS NOT NULL")->fetchAll(\PDO::FETCH_COLUMN);
-        $existingMap = array_flip($existing);
-
-        $insertedCount = 0;
-        $insertStmt = $pdo->prepare("INSERT INTO yt_videos (category_id, title, video_url, video_id, description, created_at) VALUES (:cat_id, :title, :url, :vid, :desc, :created)");
-
-        foreach ($videos as $v) {
-            if (isset($existingMap[$v['video_id']])) {
-                continue; // Already in database
+        try {
+            $result = self::fetchLatestVideos($apiKey, $channelIdOrHandle, 30);
+            if (!$result['success']) {
+                return $result;
             }
 
-            $insertStmt->execute([
-                'cat_id'  => $categoryId,
-                'title'   => $v['title'],
-                'url'     => $v['video_url'],
-                'vid'     => $v['video_id'],
-                'desc'    => $v['description'],
-                'created' => $v['published_at']
-            ]);
-            $insertedCount++;
+            $videos = $result['videos'];
+            if (empty($videos)) {
+                return ['success' => true, 'added' => 0, 'total' => 0, 'message' => 'চ্যানেলে কোনো পাবলিক ভিডিও পাওয়া যায়নি।'];
+            }
+
+            $pdo = \Config\Database::pdoConnect();
+            
+            // Fetch existing video IDs
+            $existing = $pdo->query("SELECT video_id FROM yt_videos WHERE video_id IS NOT NULL")->fetchAll(\PDO::FETCH_COLUMN);
+            $existingMap = array_flip($existing);
+
+            $insertedCount = 0;
+            $insertStmt = $pdo->prepare("INSERT INTO yt_videos (category_id, title, video_url, video_id, description, created_at) VALUES (:cat_id, :title, :url, :vid, :desc, :created)");
+
+            foreach ($videos as $v) {
+                if (isset($existingMap[$v['video_id']])) {
+                    continue; // Already in database
+                }
+
+                $insertStmt->execute([
+                    'cat_id'  => $categoryId,
+                    'title'   => $v['title'],
+                    'url'     => $v['video_url'],
+                    'vid'     => $v['video_id'],
+                    'desc'    => $v['description'],
+                    'created' => $v['published_at']
+                ]);
+                $insertedCount++;
+            }
+
+            // Update last sync time
+            $adminModel = new \App\Models\AdminModel();
+            $adminModel->updateSetting('youtube_last_sync', date('Y-m-d H:i:s'));
+            \App\Helpers\Cache::clear();
+
+            return [
+                'success' => true,
+                'added'   => $insertedCount,
+                'total'   => count($videos),
+                'message' => "সফলভাবে সিঙ্ক সম্পন্ন হয়েছে! {$insertedCount}টি নতুন ভিডিও ডাটাবেসে যুক্ত হয়েছে।"
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'error'   => 'সিঙ্ক প্রক্রিয়ায় ত্রুটি: ' . $e->getMessage()
+            ];
         }
-
-        // Update last sync time
-        $adminModel = new \App\Models\AdminModel();
-        $adminModel->updateSetting('youtube_last_sync', date('Y-m-d H:i:s'));
-        \App\Helpers\Cache::clear();
-
-        return [
-            'success' => true,
-            'added'   => $insertedCount,
-            'total'   => count($videos),
-            'message' => "সফলভাবে সিঙ্ক সম্পন্ন হয়েছে! {$insertedCount}টি নতুন ভিডিও ডাটাবেসে যুক্ত হয়েছে।"
-        ];
     }
 
     /**
