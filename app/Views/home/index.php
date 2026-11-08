@@ -853,8 +853,8 @@ $recentBg = ($numCatSections % 2 === 0)
             <?php if (!empty($data['yt_videos'])): ?>
                 <?php foreach (array_slice($data['yt_videos'], 0, 8) as $video): ?>
                 <div class="yt-video-card video-card-animate" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-                    <!-- Thumbnail with Play Button -->
-                    <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" class="yt-thumb-wrap" style="position: relative; display: block; aspect-ratio: 16/9; overflow: hidden; background: #000;">
+                    <!-- Thumbnail with Play Button (Plays Inline in-place) -->
+                    <div class="yt-thumb-wrap" id="home-player-<?= $video['id'] ?>" style="position: relative; display: block; aspect-ratio: 16/9; overflow: hidden; background: #000; cursor: pointer;" onclick="playHomeYtInline('<?= $video['id'] ?>', '<?= $video['video_id'] ?>', '<?= addslashes(htmlspecialchars($video['title'])) ?>')">
                         <img src="https://img.youtube.com/vi/<?= $video['video_id'] ?>/hqdefault.jpg" alt="<?= htmlspecialchars($video['title']) ?>" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: 0.5s transform, 0.3s opacity;">
                         
                         <!-- Category Badge on Thumbnail -->
@@ -866,14 +866,14 @@ $recentBg = ($numCatSections % 2 === 0)
                         <div class="yt-play-icon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: rgba(255, 0, 0, 0.9); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.25rem; box-shadow: 0 4px 15px rgba(255,0,0,0.5); transition: 0.3s all; z-index: 2;">
                             <i class="fas fa-play" style="margin-left: 3px;"></i>
                         </div>
-                    </a>
+                    </div>
 
                     <!-- Video Title and Info Below Thumbnail (নামগুলো নিচে) -->
                     <div class="yt-card-body" style="padding: 16px 18px 18px 18px; display: flex; flex-direction: column; flex-grow: 1;">
-                        <h3 style="font-size: 0.95rem; line-height: 1.4; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 10px 0; height: 2.7rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                            <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none; transition: 0.2s color;">
+                        <h3 style="font-size: 0.95rem; line-height: 1.4; font-weight: 600; font-family: 'Hind Siliguri', sans-serif; margin: 0 0 10px 0; height: 2.7rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; cursor: pointer;" onclick="playHomeYtInline('<?= $video['id'] ?>', '<?= $video['video_id'] ?>', '<?= addslashes(htmlspecialchars($video['title'])) ?>')">
+                            <span style="color: #ffffff; transition: 0.2s color;">
                                 <?= htmlspecialchars($video['title']) ?>
-                            </a>
+                            </span>
                         </h3>
 
                         <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 10px;">
@@ -881,9 +881,9 @@ $recentBg = ($numCatSections % 2 === 0)
                                 <i class="fab fa-youtube" style="color: #ff0000; font-size: 0.95rem;"></i>
                                 <?= !empty($video['created_at']) ? date('d M, Y', strtotime($video['created_at'])) : 'YouTube' ?>
                             </span>
-                            <a href="https://www.youtube.com/watch?v=<?= $video['video_id'] ?>" target="_blank" rel="noopener noreferrer" style="color: #ff4d4d; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem;">
-                                দেখুন <i class="fas fa-arrow-right" style="font-size: 0.72rem;"></i>
-                            </a>
+                            <button type="button" onclick="playHomeYtInline('<?= $video['id'] ?>', '<?= $video['video_id'] ?>', '<?= addslashes(htmlspecialchars($video['title'])) ?>')" style="background: none; border: none; padding: 0; color: #ff4d4d; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem;">
+                                চালান <i class="fas fa-play-circle" style="font-size: 0.85rem;"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -923,6 +923,28 @@ $recentBg = ($numCatSections % 2 === 0)
         100% { box-shadow: 0 0 0 0 rgba(255,0,0,0); }
     }
 </style>
+
+<script>
+let activeHomeYtId = null;
+let savedHomeYtHtml = {};
+
+function playHomeYtInline(dbId, videoId, title) {
+    const frame = document.getElementById('home-player-' + dbId);
+    if (!frame) return;
+
+    if (activeHomeYtId && activeHomeYtId !== dbId && savedHomeYtHtml[activeHomeYtId]) {
+        const prevFrame = document.getElementById('home-player-' + activeHomeYtId);
+        if (prevFrame) prevFrame.innerHTML = savedHomeYtHtml[activeHomeYtId];
+    }
+
+    if (!savedHomeYtHtml[dbId]) {
+        savedHomeYtHtml[dbId] = frame.innerHTML;
+    }
+
+    activeHomeYtId = dbId;
+    frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0&playsinline=1" title="' + title + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>';
+}
+</script>
 
 <style>
     .premium-post-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.08) !important; border-color: #2563eb !important; }

@@ -179,6 +179,7 @@ class Home extends Controller {
             $data = [
                 'title' => 'সবগুলো ভিডিও',
                 'yt_videos' => $adminModel->getYTVideos(),
+                'yt_categories' => $adminModel->getYTSubCategories(),
                 'breaking_news' => $adminModel->getBreakingNews(),
                 'slides' => $adminModel->getSlides(),
                 'settings' => $adminModel->getSettings(),
