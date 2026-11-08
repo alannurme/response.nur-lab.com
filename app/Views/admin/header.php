@@ -17,6 +17,7 @@ if (empty($current_page)) {
             'edit_author'            => 'authors',
             'edit_category'          => 'categories',
             'answer_question'        => 'questions',
+            'add_question'           => 'questions',
             'add_page'               => 'pages',
             'edit_page'              => 'pages',
             'add_menu'               => 'menus',

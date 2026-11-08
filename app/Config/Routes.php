@@ -44,6 +44,8 @@ $routes->get('admin/login', 'Admin::login');
 $routes->post('admin/login', 'Admin::login');
 $routes->get('admin/logout', 'Admin::logout');
 $routes->get('admin/posts', 'Admin::posts');
+$routes->match(['GET', 'POST'], 'admin/questions', 'Admin::questions');
+$routes->match(['GET', 'POST'], 'admin/add_question', 'Admin::add_question');
 // Seerah Books Routes
 $routes->match(['GET', 'POST'], 'admin/seerah_books', 'Admin::seerah_books');
 $routes->match(['GET', 'POST'], 'admin/add_seerah_book', 'Admin::add_seerah_book');

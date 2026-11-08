@@ -5327,12 +5327,54 @@ class Admin extends Controller {
         foreach ($questions as &$q) {
             $q['pending_answers'] = $this->adminModel->getQuestionAnswers($q['id'], 'pending');
         }
+
+        $categories = $this->adminModel->getQuestionCategories();
         
         $this->view('admin/questions', [
-            'title' => 'User Questions',
-            'questions' => $questions,
+            'title'        => 'User Questions',
+            'questions'    => $questions,
+            'categories'   => $categories,
             'current_page' => 'questions',
-            'settings' => $this->siteSettings
+            'settings'     => $this->siteSettings
+        ]);
+    }
+
+    public function add_question() {
+        $adminModel = $this->model('AdminModel');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name'] ?? 'এডমিন');
+            $email = trim($_POST['email'] ?? ($this->siteSettings['site_email'] ?? 'admin@nur-lab.com'));
+            $question = trim($_POST['question'] ?? '');
+            $category_id = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
+            $answer = trim($_POST['answer'] ?? '');
+            $status = !empty($answer) ? 'answered' : ((isset($_POST['status']) && $_POST['status'] === 'answered') ? 'answered' : 'pending');
+            $answered_at = ($status === 'answered') ? date('Y-m-d H:i:s') : null;
+
+            if (!empty($question)) {
+                $pdo = \Config\Database::pdoConnect();
+                $stmt = $pdo->prepare("INSERT INTO user_questions (name, email, question, answer, category_id, status, answered_at, created_at) VALUES (:name, :email, :question, :answer, :category_id, :status, :answered_at, NOW())");
+                $stmt->execute([
+                    'name'        => !empty($name) ? $name : 'এডমিন',
+                    'email'       => !empty($email) ? $email : 'admin@nur-lab.com',
+                    'question'    => $question,
+                    'answer'      => !empty($answer) ? $answer : null,
+                    'category_id' => $category_id,
+                    'status'      => $status,
+                    'answered_at' => $answered_at
+                ]);
+                \App\Helpers\Cache::clear();
+                header('Location: ' . URLROOT . '/admin/questions?msg=added');
+                exit;
+            }
+        }
+
+        $categories = $adminModel->getQuestionCategories();
+        $this->view('admin/add_question', [
+            'title'        => 'নতুন প্রশ্ন যোগ করুন',
+            'categories'   => $categories,
+            'current_page' => 'questions',
+            'settings'     => $this->siteSettings
         ]);
     }
 
