@@ -169,20 +169,18 @@ class PostModel extends Model {
 
         $categorySections = [];
         foreach ($mainCats as $mainCat) {
+            $secPosts = [];
             if (isset($selectedIdsByCat[$mainCat['id']])) {
-                $secPosts = [];
                 foreach ($selectedIdsByCat[$mainCat['id']] as $pid) {
                     if (isset($postsById[$pid])) {
                         $secPosts[] = $postsById[$pid];
                     }
                 }
-                if (!empty($secPosts)) {
-                    $categorySections[] = [
-                        'category' => $mainCat,
-                        'posts'    => $secPosts
-                    ];
-                }
             }
+            $categorySections[] = [
+                'category' => $mainCat,
+                'posts'    => $secPosts
+            ];
         }
 
         return $categorySections;

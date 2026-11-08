@@ -639,7 +639,6 @@ document.addEventListener("click", function(e) {
     <?php foreach ($data['category_sections'] as $secIndex => $catSection): 
         $cat = $catSection['category'];
         $catPosts = $catSection['posts'];
-        if (empty($catPosts)) continue;
 
         // Title split for two-tone color highlight
         $words = preg_split('/\s+/u', trim($cat['name']));
@@ -674,6 +673,7 @@ document.addEventListener("click", function(e) {
             </div>
             
             <div class="recent-posts-grid">
+                <?php if (!empty($catPosts)): ?>
                 <?php foreach ($catPosts as $post): ?>
                 <div class="premium-post-card post-card-animate" style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; border: 1px solid #f1f5f9; display: flex; flex-direction: column;">
                     <!-- Image Wrapper -->
@@ -728,14 +728,26 @@ document.addEventListener("click", function(e) {
                     </div>
                 </div>
                 <?php endforeach; ?>
+                <?php else: ?>
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 2px dashed #e2e8f0;">
+                        <i class="fas fa-folder-open fa-3x mb-3 text-muted" style="color: #94a3b8;"></i>
+                        <p style="color: #64748b; margin: 0; font-family: 'Hind Siliguri', sans-serif; font-size: 1.1rem;">এই বিভাগে এখনো কোনো লেখা প্রকাশ করা হয়নি।</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
     <?php endforeach; ?>
 <?php endif; ?>
 
+<?php
+$numCatSections = !empty($data['category_sections']) ? count($data['category_sections']) : 0;
+$recentBg = ($numCatSections % 2 === 0)
+    ? 'background: #ffffff; border-bottom: 1px solid #e2e8f0;'
+    : 'background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;';
+?>
 <!-- Recent Posts Section -->
-<section class="posts-section" style="padding: 100px 0; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;">
+<section class="posts-section" style="padding: 100px 0; <?= $recentBg ?>">
     <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; width: 100%;">
         <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px;">
             <div>
