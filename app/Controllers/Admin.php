@@ -2201,6 +2201,54 @@ class Admin extends Controller {
         $this->view('admin/youtube', $data);
     }
 
+    public function sync_yt_videos_ajax() {
+        header('Content-Type: application/json; charset=utf-8');
+        $adminModel = $this->model('AdminModel');
+        $settings = $adminModel->getSettings();
+
+        $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
+        $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
+
+        if (empty($apiKey) || empty($channelId)) {
+            echo json_encode([
+                'success' => false,
+                'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন। অনুগ্রহ করে আগে সেটিংস ফর্মে এগুলো সংরক্ষণ করুন।'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $res = \App\Helpers\YouTubeService::syncVideosToDatabase($apiKey, $channelId);
+        echo json_encode($res, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    public function test_yt_live_ajax() {
+        header('Content-Type: application/json; charset=utf-8');
+        $adminModel = $this->model('AdminModel');
+        $settings = $adminModel->getSettings();
+
+        $apiKey = !empty($_POST['api_key']) ? trim($_POST['api_key']) : ($settings['youtube_api_key'] ?? '');
+        $channelId = !empty($_POST['channel_id']) ? trim($_POST['channel_id']) : ($settings['youtube_channel_id'] ?? '');
+
+        if (empty($apiKey) || empty($channelId)) {
+            echo json_encode([
+                'success' => false,
+                'error'   => 'YouTube API Key এবং Channel ID উভয়টি প্রয়োজন।'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $live = \App\Helpers\YouTubeService::checkLiveStream($apiKey, $channelId, true);
+        echo json_encode([
+            'success'   => true,
+            'is_live'   => !empty($live['is_live']),
+            'video_id'  => $live['video_id'] ?? null,
+            'title'     => $live['title'] ?? null,
+            'checked_at'=> $live['checked_at'] ?? date('Y-m-d H:i:s')
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     public function settings() {
         $adminModel = $this->model('AdminModel');
         $data = [];

@@ -84,6 +84,35 @@ class Home extends Controller {
         $postModel = $this->model('PostModel');
         $data['category_sections'] = $postModel->getRandomPostsForMainCategories(12);
 
+        // YouTube Auto Live & Auto Sync Handling
+        $ytSettings = $data['settings'] ?? [];
+        $ytApiKey = !empty($ytSettings['youtube_api_key']) ? trim($ytSettings['youtube_api_key']) : '';
+        $ytChannelId = !empty($ytSettings['youtube_channel_id']) ? trim($ytSettings['youtube_channel_id']) : '';
+
+        if (!empty($ytApiKey) && !empty($ytChannelId)) {
+            // Check Auto Live Stream
+            if (($ytSettings['youtube_status'] ?? '') === 'auto' || ($ytSettings['youtube_auto_live'] ?? '') === 'yes') {
+                $liveStatus = \App\Helpers\YouTubeService::checkLiveStream($ytApiKey, $ytChannelId);
+                if (!empty($liveStatus['is_live'])) {
+                    $data['settings']['youtube_status'] = 'active';
+                    $data['settings']['youtube_video_id'] = $liveStatus['video_id'];
+                    if (!empty($liveStatus['title'])) {
+                        $data['settings']['youtube_title'] = $liveStatus['title'];
+                    }
+                } else if (($ytSettings['youtube_status'] ?? '') === 'auto') {
+                    $data['settings']['youtube_status'] = 'inactive';
+                }
+            }
+
+            // Periodic Auto Sync of Videos (Runs in background every 6 hours if enabled)
+            if (($ytSettings['youtube_auto_sync'] ?? '') === 'yes') {
+                $lastSync = $ytSettings['youtube_last_sync'] ?? null;
+                if (empty($lastSync) || (time() - strtotime($lastSync) > 21600)) {
+                    \App\Helpers\YouTubeService::syncVideosToDatabase($ytApiKey, $ytChannelId);
+                }
+            }
+        }
+
         $this->view('home/index', $data);
     }
 

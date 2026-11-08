@@ -1379,7 +1379,12 @@ document.addEventListener('DOMContentLoaded', function() {
         </iframe>
     </div>
     <div style="padding: 10px; text-align: center; background: #f8fafc;">
-        <a href="https://www.youtube.com/channel/<?= $data['settings']['youtube_channel_id'] ?? '' ?>" target="_blank" style="color: #ff0000; text-decoration: none; font-weight: 700; font-size: 0.8rem;">চ্যানেল সাবস্ক্রাইব করুন <i class="fas fa-external-link-alt"></i></a>
+        <?php 
+        $chanUrl = !empty($data['settings']['youtube_channel_url']) 
+            ? $data['settings']['youtube_channel_url'] 
+            : (!empty($data['settings']['youtube_channel_id']) ? 'https://www.youtube.com/channel/' . $data['settings']['youtube_channel_id'] : 'https://www.youtube.com');
+        ?>
+        <a href="<?= $chanUrl ?>" target="_blank" style="color: #ff0000; text-decoration: none; font-weight: 700; font-size: 0.8rem;">চ্যানেল সাবস্ক্রাইব করুন <i class="fas fa-external-link-alt"></i></a>
     </div>
 </div>
 
