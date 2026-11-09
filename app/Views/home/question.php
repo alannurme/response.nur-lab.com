@@ -22,10 +22,12 @@
     /* Layout Grid */
     .layout-grid {
         display: grid;
-        grid-template-columns: 260px 1fr 340px;
+        grid-template-columns: 290px 1fr;
         gap: 30px;
         margin-top: 30px;
         padding-bottom: 50px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* Left Sidebar */
@@ -33,6 +35,22 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
+        position: sticky;
+        top: 100px;
+        align-self: start;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(11, 124, 77, 0.2) transparent;
+    }
+
+    .left-sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .left-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(11, 124, 77, 0.2);
+        border-radius: 10px;
     }
 
     /* Sidebar Nav List */
@@ -44,9 +62,6 @@
         display: flex;
         flex-direction: column;
         gap: 5px;
-        position: sticky;
-        top: 110px;
-        z-index: 80;
     }
 
     .menu-link {
@@ -159,35 +174,24 @@
         background: var(--primary-hover);
     }
 
-    /* Right Sidebar Column */
-    .right-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .right-sidebar .widget-card {
-        position: sticky;
-        top: 110px;
-        z-index: 80;
-    }
-
+    /* Widget Card for Left Sidebar */
     .widget-card {
         background: var(--card-bg);
-        border-radius: 24px;
+        border-radius: 20px;
         border: 1px solid var(--border-color);
-        padding: 25px;
+        padding: 20px;
     }
 
     .widget-title {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-weight: 800;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         border-bottom: 1.5px solid var(--border-color);
         padding-bottom: 10px;
+        color: var(--text-main);
     }
 
     .widget-title i {
@@ -197,25 +201,30 @@
     .category-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .category-item {
         background: #f8fafc;
         border: 1px solid var(--border-color);
-        border-radius: 15px;
-        padding: 12px 15px;
+        border-radius: 12px;
+        padding: 10px 14px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         text-decoration: none;
         color: inherit;
-        transition: 0.3s;
+        transition: 0.25s;
     }
 
-    .category-item:hover {
+    .category-item:hover, .category-item.active {
         border-color: var(--primary-green);
-        background: rgba(11, 124, 77, 0.02);
+        background: rgba(11, 124, 77, 0.05);
+        color: var(--primary-green);
+    }
+
+    .category-item.active .category-name,
+    .category-item:hover .category-name {
         color: var(--primary-green);
     }
 
@@ -345,28 +354,19 @@
     }
 
     /* Responsive */
-    @media (max-width: 1200px) {
-        .layout-grid {
-            grid-template-columns: 220px 1fr;
-        }
-        .right-sidebar {
-            grid-column: span 2;
-            margin-top: 20px;
-            position: static;
-            align-self: auto;
-        }
-    }
-
     @media (max-width: 992px) {
         .layout-grid {
             grid-template-columns: 1fr;
+            gap: 25px;
         }
         .left-sidebar {
-            display: none;
+            position: static;
+            max-height: none;
+            overflow-y: visible;
+            order: 2;
         }
-        .right-sidebar {
-            grid-column: span 1;
-            margin-top: 20px;
+        .main-content {
+            order: 1;
         }
         .search-container {
             display: none;
@@ -430,12 +430,37 @@
             <aside class="left-sidebar">
                 <!-- Navigation Menu -->
                 <div class="sidebar-menu">
-                    <a href="<?= URLROOT ?>/q&amp;a" class="menu-link active">
+                    <a href="<?= URLROOT ?>/q&amp;a" class="menu-link">
                         <i class="fas fa-file-alt"></i> নতুন প্রশ্নোত্তর
                     </a>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="<?= URLROOT ?>/q&amp;a?bookmarks=1" class="menu-link">
+                            <i class="fas fa-bookmark"></i> পছন্দের প্রশ্নসমূহ
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= URLROOT ?>/ask" class="menu-link">
                         <i class="fas fa-envelope"></i> প্রশ্ন পাঠান
                     </a>
+                </div>
+
+                <!-- Categories Widget -->
+                <div class="widget-card" id="categories-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-th-large"></i> ক্যাটাগরি
+                    </h3>
+                    <div class="category-list">
+                        <?php if (!empty($data['categories'])): ?>
+                            <?php foreach ($data['categories'] as $cat): ?>
+                                <?php $isCatActive = (!empty($data['question']['category_slug']) && $data['question']['category_slug'] === $cat['slug']); ?>
+                                <a href="<?= URLROOT ?>/q&amp;a?category=<?= $cat['slug'] ?>" class="category-item <?= $isCatActive ? 'active' : '' ?>">
+                                    <span class="category-name"><?= htmlspecialchars($cat['name']) ?></span>
+                                    <i class="fas fa-chevron-right" style="font-size: 0.8rem; color: <?= $isCatActive ? 'var(--primary-green)' : 'var(--text-muted)' ?>;"></i>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div style="font-size: 0.9rem; color: var(--text-muted); font-style: italic; text-align: center;">কোনো ক্যাটাগরি পাওয়া যায়নি।</div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </aside>
 
@@ -629,27 +654,7 @@
                 </div>
             </main>
 
-            <!-- Right Sidebar Column -->
-            <aside class="right-sidebar">
-                <!-- Categories Widget -->
-                <div class="widget-card" id="categories-widget">
-                    <h3 class="widget-title">
-                        <i class="fas fa-th-large"></i> ক্যাটাগরি
-                    </h3>
-                    <div class="category-list">
-                        <?php if (!empty($data['categories'])): ?>
-                            <?php foreach ($data['categories'] as $cat): ?>
-                                <a href="<?= URLROOT ?>/q&amp;a?category=<?= $cat['slug'] ?>" class="category-item">
-                                    <span class="category-name"><?= htmlspecialchars($cat['name']) ?></span>
-                                    <i class="fas fa-chevron-right" style="font-size: 0.8rem; color: var(--text-muted);"></i>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div style="font-size: 0.9rem; color: var(--text-muted); font-style: italic; text-align: center;">কোনো ক্যাটাগরি পাওয়া যায়নি।</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </aside>
+
 
         </div>
     </div>
