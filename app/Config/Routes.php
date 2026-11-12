@@ -37,6 +37,8 @@ $routes->get('api/quran/tafsir', 'Home::api_quran_tafsir');
 $routes->get('api/hadith/books', 'Home::api_hadith_books');
 $routes->get('api/hadith/chapters', 'Home::api_hadith_chapters');
 $routes->get('api/hadith/list', 'Home::api_hadith_list');
+$routes->get('home/check_yt_live_ajax', 'Home::check_yt_live_ajax');
+$routes->get('api/check_yt_live', 'Home::check_yt_live_ajax');
 
 // Admin Routes
 $routes->get('admin', 'Admin::index');

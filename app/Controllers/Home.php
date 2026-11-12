@@ -94,16 +94,27 @@ class Home extends Controller {
 
         if (!empty($ytApiKey) && !empty($ytChannelId)) {
             // Check Auto Live Stream
-            if (($ytSettings['youtube_status'] ?? '') === 'auto' || ($ytSettings['youtube_auto_live'] ?? '') === 'yes') {
+            $currentStatus = $ytSettings['youtube_status'] ?? '';
+            if ($currentStatus !== 'disabled') {
                 $liveStatus = \App\Helpers\YouTubeService::checkLiveStream($ytApiKey, $ytChannelId);
-                if (!empty($liveStatus['is_live'])) {
+                if (!empty($liveStatus['is_live']) && !empty($liveStatus['video_id'])) {
                     $data['settings']['youtube_status'] = 'active';
                     $data['settings']['youtube_video_id'] = $liveStatus['video_id'];
                     if (!empty($liveStatus['title'])) {
                         $data['settings']['youtube_title'] = $liveStatus['title'];
                     }
-                } else if (($ytSettings['youtube_status'] ?? '') === 'auto') {
+                    if ($currentStatus !== 'active' || ($ytSettings['youtube_video_id'] ?? '') !== $liveStatus['video_id']) {
+                        $adminModel->updateSetting('youtube_status', 'active');
+                        $adminModel->updateSetting('youtube_video_id', $liveStatus['video_id']);
+                        if (!empty($liveStatus['title'])) {
+                            $adminModel->updateSetting('youtube_title', $liveStatus['title']);
+                        }
+                    }
+                } else if ($currentStatus === 'auto' || $currentStatus === 'active') {
                     $data['settings']['youtube_status'] = 'inactive';
+                    if ($currentStatus === 'active') {
+                        $adminModel->updateSetting('youtube_status', 'auto');
+                    }
                 }
             }
 
@@ -117,6 +128,58 @@ class Home extends Controller {
         }
 
         $this->view('home/index', $data);
+    }
+
+    public function check_yt_live_ajax() {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            if (!class_exists(\App\Helpers\YouTubeService::class)) {
+                require_once APPPATH . 'Helpers/YouTubeService.php';
+            }
+            $adminModel = $this->model('AdminModel');
+            $settings = $adminModel->getSettings();
+
+            $apiKey = !empty($settings['youtube_api_key']) ? trim($settings['youtube_api_key']) : '';
+            $channelId = !empty($settings['youtube_channel_id']) ? trim($settings['youtube_channel_id']) : '';
+
+            if (empty($apiKey) || empty($channelId)) {
+                echo json_encode(['is_live' => false, 'error' => 'API credentials not configured']);
+                exit;
+            }
+
+            $live = \App\Helpers\YouTubeService::checkLiveStream($apiKey, $channelId, false);
+
+            if (!empty($live['is_live']) && !empty($live['video_id'])) {
+                if (($settings['youtube_status'] ?? '') !== 'active' || ($settings['youtube_video_id'] ?? '') !== $live['video_id']) {
+                    $adminModel->updateSetting('youtube_status', 'active');
+                    $adminModel->updateSetting('youtube_video_id', $live['video_id']);
+                    if (!empty($live['title'])) {
+                        $adminModel->updateSetting('youtube_title', $live['title']);
+                    }
+                    \App\Helpers\Cache::clear();
+                }
+            } else {
+                if (($settings['youtube_status'] ?? '') === 'active') {
+                    $adminModel->updateSetting('youtube_status', 'auto');
+                    \App\Helpers\Cache::clear();
+                }
+            }
+
+            $chanUrl = !empty($settings['youtube_channel_url']) 
+                ? $settings['youtube_channel_url'] 
+                : (!empty($channelId) ? 'https://www.youtube.com/channel/' . $channelId : 'https://www.youtube.com');
+
+            echo json_encode([
+                'is_live'     => !empty($live['is_live']),
+                'video_id'    => $live['video_id'] ?? null,
+                'title'       => $live['title'] ?? ($settings['youtube_title'] ?? 'আমরা এখন লাইভে আছি!'),
+                'channel_url' => $chanUrl
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (\Throwable $e) {
+            echo json_encode(['is_live' => false, 'error' => $e->getMessage()]);
+            exit;
+        }
     }
 
     public function post($slug) {

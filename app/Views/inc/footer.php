@@ -565,5 +565,7 @@
 })();
 </script>
 
+<?php require_once APPROOT . '/Views/inc/live_player.php'; ?>
+
 </body>
 </html>

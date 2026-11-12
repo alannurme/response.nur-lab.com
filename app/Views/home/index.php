@@ -1422,41 +1422,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showSlide(0);
 });
 </script>
-<!-- YouTube Floating Notification Widget -->
-<?php if (($data['settings']['youtube_status'] ?? '') == 'active' && !empty($data['settings']['youtube_video_id'])): ?>
-<div id="youtube-notification" style="position: fixed; bottom: 30px; right: 30px; width: 320px; background: #fff; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); z-index: 9999; overflow: hidden; animation: slideInUp 1s ease-out; border: 1px solid #eee;">
-    <div style="background: #2563eb; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 700; font-size: 0.9rem;"><i class="fab fa-youtube"></i> <?= $data['settings']['youtube_title'] ?? 'আমরা এখন লাইভে আছি!' ?></span>
-        <button onclick="document.getElementById('youtube-notification').style.display='none'" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
-    </div>
-    <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-        <iframe 
-            src="https://www.youtube.com/embed/<?= $data['settings']['youtube_video_id'] ?>?autoplay=0&mute=0&rel=0" 
-            loading="lazy"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen>
-        </iframe>
-    </div>
-    <div style="padding: 10px; text-align: center; background: #f8fafc;">
-        <?php 
-        $chanUrl = !empty($data['settings']['youtube_channel_url']) 
-            ? $data['settings']['youtube_channel_url'] 
-            : (!empty($data['settings']['youtube_channel_id']) ? 'https://www.youtube.com/channel/' . $data['settings']['youtube_channel_id'] : 'https://www.youtube.com');
-        ?>
-        <a href="<?= $chanUrl ?>" target="_blank" style="color: #ff0000; text-decoration: none; font-weight: 700; font-size: 0.8rem;">চ্যানেল সাবস্ক্রাইব করুন <i class="fas fa-external-link-alt"></i></a>
-    </div>
-</div>
-
-<style>
-@keyframes slideInUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-</style>
-<?php endif; ?>
 
     <!-- Team Members Section -->
     <?php if (!empty($data['team'])): ?>

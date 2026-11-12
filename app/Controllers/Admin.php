@@ -2311,6 +2311,23 @@ class Admin extends Controller {
             }
 
             $live = \App\Helpers\YouTubeService::checkLiveStream($apiKey, $channelId, true);
+
+            // Persist detected live status into DB settings so frontend immediately mirrors it
+            if (!empty($live['is_live']) && !empty($live['video_id'])) {
+                $adminModel->updateSetting('youtube_status', 'active');
+                $adminModel->updateSetting('youtube_video_id', $live['video_id']);
+                if (!empty($live['title'])) {
+                    $adminModel->updateSetting('youtube_title', $live['title']);
+                }
+                $adminModel->updateSetting('youtube_auto_live', 'yes');
+                \App\Helpers\Cache::clear();
+            } else {
+                if (($settings['youtube_status'] ?? '') === 'active') {
+                    $adminModel->updateSetting('youtube_status', 'auto');
+                    \App\Helpers\Cache::clear();
+                }
+            }
+
             echo json_encode([
                 'success'   => true,
                 'is_live'   => !empty($live['is_live']),
