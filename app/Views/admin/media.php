@@ -31,6 +31,9 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                 <a href="<?= URLROOT ?>/admin/media?tab=<?= $activeTab ?><?= $driveQuery ?>" class="btn btn-light" style="padding: 8px 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center;">Reset</a>
             <?php endif; ?>
         </form>
+        <button type="button" class="btn" onclick="openMigrateModal()" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; font-weight: 700; background: #0f9d58; color: white; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(15,157,88,0.25);">
+            <i class="fab fa-google-drive"></i> ১-ক্লিকে সব ফাইল Google Drive-এ সরান
+        </button>
         <button class="btn btn-primary" onclick="toggleUploadZone()" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; font-weight: 700;">
             <i class="fas fa-upload"></i> Upload Asset
         </button>
@@ -107,17 +110,29 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
 <!-- Drag & Drop Upload Zone (Supports both Local and Google Drive upload) -->
 <div id="dropzoneContainer" style="display: none; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 25px; border: 2px dashed <?= $activeTab === 'google_drive' ? '#0f9d58' : 'var(--primary, #0284c7)' ?>;">
     <div style="text-align: center;">
-        <i class="<?= $activeTab === 'google_drive' ? 'fab fa-google-drive' : 'fas fa-cloud-upload-alt' ?>" style="font-size: 48px; color: <?= $activeTab === 'google_drive' ? '#0f9d58' : 'var(--primary, #0284c7)' ?>; margin-bottom: 15px;"></i>
-        <h4 style="margin: 0 0 10px 0; color: #1e293b;">
+        <!-- Destination Toggle -->
+        <div style="display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 16px; gap: 4px; border: 1px solid #e2e8f0;">
+            <label id="mediaDestGdriveLabel" style="cursor: pointer; padding: 8px 18px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; <?= $activeTab === 'google_drive' ? 'background: #0f9d58; color: white;' : 'color: #475569;' ?>">
+                <input type="radio" name="media_upload_dest" value="google_drive" <?= $activeTab === 'google_drive' ? 'checked' : '' ?> onchange="onMediaUploadDestChange('google_drive')" style="display: none;">
+                <i class="fab fa-google-drive"></i> Google Drive
+            </label>
+            <label id="mediaDestLocalLabel" style="cursor: pointer; padding: 8px 18px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; <?= $activeTab !== 'google_drive' ? 'background: #0284c7; color: white;' : 'color: #475569;' ?>">
+                <input type="radio" name="media_upload_dest" value="local" <?= $activeTab !== 'google_drive' ? 'checked' : '' ?> onchange="onMediaUploadDestChange('local')" style="display: none;">
+                <i class="fas fa-server"></i> Local Server
+            </label>
+        </div>
+
+        <i id="dropzoneIcon" class="<?= $activeTab === 'google_drive' ? 'fab fa-google-drive' : 'fas fa-cloud-upload-alt' ?>" style="font-size: 48px; color: <?= $activeTab === 'google_drive' ? '#0f9d58' : 'var(--primary, #0284c7)' ?>; margin-bottom: 15px; display: block;"></i>
+        <h4 id="dropzoneHeading" style="margin: 0 0 10px 0; color: #1e293b;">
             Drag & Drop File Here to Upload (<?= $activeTab === 'google_drive' ? 'Upload to Google Drive' : 'Upload to Local Host' ?>)
         </h4>
         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Supports JPG, PNG, WEBP, GIF, SVG, PDF up to maximum upload size.</p>
         
         <form id="uploadForm" action="<?= URLROOT ?>/admin/media?tab=<?= $activeTab ?><?= $driveQuery ?>" method="POST" enctype="multipart/form-data">
-                        <?= csrf_field() ?>
-            <input type="hidden" name="upload_destination" value="<?= $activeTab === 'google_drive' ? 'google_drive' : 'local' ?>">
+            <?= csrf_field() ?>
+            <input type="hidden" name="upload_destination" id="formUploadDest" value="<?= $activeTab === 'google_drive' ? 'google_drive' : 'local' ?>">
             <?php if ($activeTab === 'google_drive' && !empty($selectedDriveId)): ?>
-                <input type="hidden" name="target_drive_id" value="<?= htmlspecialchars($selectedDriveId) ?>">
+                <input type="hidden" name="target_drive_id" id="formTargetDriveId" value="<?= htmlspecialchars($selectedDriveId) ?>">
             <?php endif; ?>
 
             <input type="file" name="media_file" id="uploadInput" style="display: none;" onchange="previewFile(this)">
@@ -129,13 +144,88 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                 <img id="previewImg" src="" style="max-height: 120px; border-radius: 10px; border: 1px solid #e2e8f0; object-fit: contain;">
                 <span id="previewName" style="font-weight: 600; color: #334155;"></span>
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn btn-primary" style="padding: 8px 24px; background: <?= $activeTab === 'google_drive' ? '#0f9d58' : 'var(--primary)' ?>;">
-                        <i class="fas fa-cloud-upload-alt"></i> Confirm & Upload to <?= $activeTab === 'google_drive' ? 'Google Drive' : 'Local Host' ?>
+                    <button type="submit" id="confirmUploadBtn" class="btn btn-primary" style="padding: 8px 24px; background: <?= $activeTab === 'google_drive' ? '#0f9d58' : 'var(--primary)' ?>;">
+                        <i class="fas fa-cloud-upload-alt"></i> Confirm & Upload to <span id="confirmUploadTargetText"><?= $activeTab === 'google_drive' ? 'Google Drive' : 'Local Host' ?></span>
                     </button>
                     <button type="button" class="btn btn-light" onclick="cancelUpload()">Cancel</button>
                 </div>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Google Drive 1-Click Migration Modal -->
+<div id="migrateModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
+    <div style="width: 92%; max-width: 620px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="padding: 18px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <h3 style="margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                <i class="fab fa-google-drive" style="color: #0f9d58; font-size: 1.35rem;"></i> ১-ক্লিকে সব লোকাল ফাইল Google Drive-এ সরান
+            </h3>
+            <button onclick="closeMigrateModal()" style="border: none; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: #94a3b8;">&times;</button>
+        </div>
+        <div style="padding: 24px;" id="migrateModalBody">
+            <div id="migrateLoading" style="text-align: center; padding: 30px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; color: #0f9d58;"></i>
+                <p style="margin-top: 14px; color: #64748b; font-weight: 600;">লোকাল ফাইল ও গুগল ড্রাইভ অ্যাকাউন্ট স্ক্যান করা হচ্ছে...</p>
+            </div>
+            
+            <div id="migrateContent" style="display: none;">
+                <!-- Drive Status Card -->
+                <div id="migrateDriveInfo" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 700; color: #166534; font-size: 0.95rem;" id="migrateDriveName">Google Drive</div>
+                        <div style="font-size: 0.82rem; color: #15803d;" id="migrateDriveEmail"></div>
+                    </div>
+                    <span style="background: #0f9d58; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">সংযুক্ত</span>
+                </div>
+
+                <div id="migrateNoDriveWarning" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 18px; color: #b45309;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem; margin-bottom: 8px;"></i>
+                    <p style="margin: 0 0 10px; font-weight: 600;">কোনো সক্রিয় Google Drive পাওয়া যায়নি!</p>
+                    <a href="<?= URLROOT ?>/admin/storage_settings" class="btn" style="background: #0f9d58; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-plus"></i> সেটিংস থেকে ড্রাইভ যুক্ত করুন
+                    </a>
+                </div>
+
+                <!-- Stats summary -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                    <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">মোট লোকাল ফাইল</div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-top: 4px;" id="migrateLocalCount">0</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">খালি হবে এমন স্টোরেজ</div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0284c7; margin-top: 4px;" id="migrateLocalSize">0 MB</div>
+                    </div>
+                </div>
+
+                <!-- Zero breakage guarantee notice -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.85rem; color: #1e40af; line-height: 1.5;">
+                    <i class="fas fa-shield-alt" style="color: #2563eb; margin-right: 6px;"></i>
+                    <strong>পোস্টের লিঙ্ক ১০০% সুরক্ষিত:</strong> লোকাল ফাইলগুলো ড্রাইভে আপলোড করে লোকাল স্টোরেজ সম্পূর্ণ খালি করা হবে। ব্যাকএন্ডের স্মার্ট প্রক্সি ম্যাপিং সক্রিয় থাকায় আপনার সাইটের কোনো পোস্ট বা আর্টিকেলে থাকা ছবির <strong>কোনো লিঙ্ক ভাঙবে না</strong>।
+                </div>
+
+                <!-- Progress container (initially hidden) -->
+                <div id="migrateProgressWrapper" style="display: none; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">
+                        <span id="migrateProgressLabel" style="color: #0f172a;">মাইগ্রেশন চলছে...</span>
+                        <span id="migrateProgressPercent" style="color: #0f9d58;">0%</span>
+                    </div>
+                    <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+                        <div id="migrateProgressBar" style="width: 0%; height: 100%; background: #0f9d58; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="migrateLog" style="margin-top: 12px; max-height: 130px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.78rem; color: #334155; line-height: 1.4;">
+                    </div>
+                </div>
+
+                <div id="migrateActionButtons" style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeMigrateModal()">বন্ধ করুন</button>
+                    <button type="button" class="btn" id="startMigrateBtn" onclick="runMigrationProcess()" style="background: #0f9d58; color: white; padding: 10px 22px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-play"></i> মাইগ্রেশন শুরু করুন
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -437,6 +527,196 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
 </style>
 
 <script>
+function onMediaUploadDestChange(dest) {
+    const isGdrive = (dest === 'google_drive');
+    document.getElementById('formUploadDest').value = dest;
+    
+    const gdriveLabel = document.getElementById('mediaDestGdriveLabel');
+    const localLabel = document.getElementById('mediaDestLocalLabel');
+    if (gdriveLabel) {
+        gdriveLabel.style.background = isGdrive ? '#0f9d58' : 'transparent';
+        gdriveLabel.style.color = isGdrive ? 'white' : '#475569';
+    }
+    if (localLabel) {
+        localLabel.style.background = !isGdrive ? '#0284c7' : 'transparent';
+        localLabel.style.color = !isGdrive ? 'white' : '#475569';
+    }
+
+    const icon = document.getElementById('dropzoneIcon');
+    if (icon) {
+        icon.className = isGdrive ? 'fab fa-google-drive' : 'fas fa-cloud-upload-alt';
+        icon.style.color = isGdrive ? '#0f9d58' : '#0284c7';
+    }
+
+    const heading = document.getElementById('dropzoneHeading');
+    if (heading) {
+        heading.innerText = 'Drag & Drop File Here to Upload (' + (isGdrive ? 'Upload to Google Drive' : 'Upload to Local Host') + ')';
+    }
+
+    const confirmBtn = document.getElementById('confirmUploadBtn');
+    const confirmText = document.getElementById('confirmUploadTargetText');
+    if (confirmBtn) {
+        confirmBtn.style.background = isGdrive ? '#0f9d58' : 'var(--primary, #0284c7)';
+    }
+    if (confirmText) {
+        confirmText.innerText = isGdrive ? 'Google Drive' : 'Local Host';
+    }
+}
+
+function openMigrateModal() {
+    const modal = document.getElementById('migrateModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        fetchMigrateStatus();
+    }
+}
+
+function closeMigrateModal() {
+    const modal = document.getElementById('migrateModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+let totalMigrateCount = 0;
+let completedMigrateCount = 0;
+
+async function fetchMigrateStatus() {
+    document.getElementById('migrateLoading').style.display = 'block';
+    document.getElementById('migrateContent').style.display = 'none';
+    document.getElementById('migrateProgressWrapper').style.display = 'none';
+    document.getElementById('migrateProgressBar').style.width = '0%';
+    document.getElementById('migrateLog').innerHTML = '';
+
+    try {
+        const res = await fetch('<?= URLROOT ?>/admin/api_migrate_to_gdrive?action=status');
+        const data = await res.json();
+        
+        document.getElementById('migrateLoading').style.display = 'none';
+        document.getElementById('migrateContent').style.display = 'block';
+
+        if (!data.success) {
+            alert(data.error || 'স্ট্যাটাস চেক ব্যর্থ হয়েছে।');
+            return;
+        }
+
+        totalMigrateCount = data.local_count || 0;
+        completedMigrateCount = 0;
+        document.getElementById('migrateLocalCount').innerText = data.local_count;
+        document.getElementById('migrateLocalSize').innerText = data.local_size_formatted;
+
+        const driveInfo = document.getElementById('migrateDriveInfo');
+        const noDriveWarn = document.getElementById('migrateNoDriveWarning');
+        const startBtn = document.getElementById('startMigrateBtn');
+
+        if (data.has_active_drive && data.active_drive) {
+            driveInfo.style.display = 'flex';
+            noDriveWarn.style.display = 'none';
+            document.getElementById('migrateDriveName').innerText = data.active_drive.name || 'Google Drive';
+            document.getElementById('migrateDriveEmail').innerText = data.active_drive.email || 'সক্রিয় ড্রাইভ';
+            if (data.local_count > 0) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<i class="fas fa-play"></i> মাইগ্রেশন শুরু করুন';
+            } else {
+                startBtn.disabled = true;
+                startBtn.innerHTML = '<i class="fas fa-check"></i> সব ফাইল ইতিমধ্যে ড্রাইভে আছে';
+            }
+        } else {
+            driveInfo.style.display = 'none';
+            noDriveWarn.style.display = 'block';
+            startBtn.disabled = true;
+        }
+    } catch (err) {
+        document.getElementById('migrateLoading').innerHTML = '<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> তথ্য লোড করা যায়নি: ' + err.message + '</p>';
+    }
+}
+
+async function runMigrationProcess() {
+    const startBtn = document.getElementById('startMigrateBtn');
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> মাইগ্রেশন চলছে...';
+
+    const progressWrapper = document.getElementById('migrateProgressWrapper');
+    progressWrapper.style.display = 'block';
+    
+    const progressBar = document.getElementById('migrateProgressBar');
+    const progressLabel = document.getElementById('migrateProgressLabel');
+    const progressPercent = document.getElementById('migrateProgressPercent');
+    const logBox = document.getElementById('migrateLog');
+
+    let isDone = false;
+    let csrfToken = '<?= csrf_token() ?>';
+    let csrfHash = '<?= csrf_hash() ?>';
+
+    while (!isDone) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'migrate_batch');
+            formData.append('batch_size', '4');
+            if (csrfToken && csrfHash) {
+                formData.append(csrfToken, csrfHash);
+            }
+
+            const res = await fetch('<?= URLROOT ?>/admin/api_migrate_to_gdrive', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                logBox.innerHTML += `<div style="color: #dc2626;">[Error] ${data.error || 'মাইগ্রেশন ব্যর্থ হয়েছে'}</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<i class="fas fa-redo"></i> আবার চেষ্টা করুন';
+                return;
+            }
+
+            if (data.migrated && data.migrated.length > 0) {
+                data.migrated.forEach(item => {
+                    completedMigrateCount++;
+                    logBox.innerHTML += `<div style="color: #166534;"><i class="fas fa-check-circle"></i> ${item.name} &rarr; Google Drive (লোকাল ফাইল মুছে জায়গা খালি করা হয়েছে)</div>`;
+                });
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+
+            if (data.errors && data.errors.length > 0) {
+                data.errors.forEach(err => {
+                    logBox.innerHTML += `<div style="color: #ea580c;"><i class="fas fa-exclamation-triangle"></i> ${err}</div>`;
+                });
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+
+            const remaining = data.remaining;
+            const pct = (totalMigrateCount > 0) ? Math.min(100, Math.round((completedMigrateCount / totalMigrateCount) * 100)) : 100;
+            progressBar.style.width = pct + '%';
+            progressPercent.innerText = pct + '%';
+            progressLabel.innerText = `মাইগ্রেশন চলছে (${completedMigrateCount}/${totalMigrateCount})...`;
+
+            if (data.is_finished || remaining === 0) {
+                isDone = true;
+                progressBar.style.width = '100%';
+                progressPercent.innerText = '100%';
+                progressLabel.innerText = 'অভিনন্দন! সব ফাইল সফলভাবে Google Drive-এ মাইগ্রেট হয়েছে।';
+                logBox.innerHTML += `<div style="color: #0f9d58; font-weight: 700; margin-top: 8px;">🎉 মাইগ্রেশন সম্পন্ন! লোকাল সার্ভারের সমস্ত ফাইল ড্রাইভে সরিয়ে স্টোরেজ খালি করা হয়েছে। পোস্টের লিঙ্কগুলো স্বয়ংক্রিয়ভাবে চালু থাকবে।</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                
+                startBtn.innerHTML = '<i class="fas fa-sync-alt"></i> রিফ্রেশ করুন';
+                startBtn.disabled = false;
+                startBtn.onclick = () => location.reload();
+            }
+        } catch (err) {
+            logBox.innerHTML += `<div style="color: #dc2626;">[Exception] ${err.message}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-redo"></i> আবার চেষ্টা করুন';
+            return;
+        }
+    }
+}
+
 function toggleUploadZone() {
     const zone = document.getElementById('dropzoneContainer');
     zone.style.display = (zone.style.display === 'none' || zone.style.display === '') ? 'block' : 'none';

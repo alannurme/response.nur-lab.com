@@ -1745,6 +1745,204 @@ class Admin extends Controller {
         exit;
     }
 
+    /**
+     * API to migrate local files to Google Drive in batches
+     * Safely updates GoogleDriveMapping and frees local disk space
+     */
+    public function api_migrate_to_gdrive() {
+        header('Content-Type: application/json');
+        
+        if (empty($_SESSION['admin_id'])) {
+            echo json_encode(['success' => false, 'error' => 'অনুমতি নেই। অনুগ্রহ করে লগইন করুন।']);
+            exit;
+        }
+
+        require_once APPPATH . 'Helpers/GoogleDrive.php';
+        require_once APPPATH . 'Helpers/GoogleDriveMapping.php';
+
+        $action = $_GET['action'] ?? ($_POST['action'] ?? 'status');
+        $currentSettings = $this->siteSettings;
+        $drivesJson = $currentSettings['google_drives'] ?? '[]';
+        $googleDrives = json_decode($drivesJson, true) ?: [];
+        $activeDrive = null;
+        
+        $targetDriveId = trim($_POST['drive_id'] ?? ($_GET['drive_id'] ?? ''));
+        if (!empty($googleDrives)) {
+            if (!empty($targetDriveId)) {
+                foreach ($googleDrives as $d) {
+                    if (($d['id'] ?? '') === $targetDriveId && ($d['status'] ?? 'active') === 'active') {
+                        $activeDrive = $d;
+                        break;
+                    }
+                }
+            }
+            if (!$activeDrive) {
+                foreach ($googleDrives as $d) {
+                    if (!empty($d['is_default']) && ($d['status'] ?? 'active') === 'active') {
+                        $activeDrive = $d;
+                        break;
+                    }
+                }
+            }
+            if (!$activeDrive && !empty($googleDrives[0]) && ($googleDrives[0]['status'] ?? 'active') === 'active') {
+                $activeDrive = $googleDrives[0];
+            }
+        }
+
+        $dirs_to_scan = [
+            \PUBROOT . '/img',
+            \PUBROOT . '/uploads/settings',
+            \PUBROOT . '/uploads/products',
+            \PUBROOT . '/uploads/pdf',
+            \PUBROOT . '/uploads'
+        ];
+
+        $ignored_files = [
+            '.htaccess', 'index.html', 'robots.txt', 'manifest.php', 'manifest.json', 'sw.js'
+        ];
+
+        $getLocalFiles = function() use ($dirs_to_scan, $ignored_files) {
+            $files = [];
+            $seen = [];
+            foreach ($dirs_to_scan as $dir) {
+                if (is_dir($dir)) {
+                    $items = array_diff(scandir($dir), array('..', '.'));
+                    foreach ($items as $item) {
+                        $fullPath = $dir . '/' . $item;
+                        if (is_file($fullPath) && !in_array(strtolower($item), $ignored_files, true)) {
+                            $real = realpath($fullPath);
+                            if ($real && !isset($seen[$real])) {
+                                $seen[$real] = true;
+                                $relPath = str_replace('\\', '/', substr($real, strlen(realpath(\PUBROOT))));
+                                $relPath = ltrim($relPath, '/');
+                                $files[] = [
+                                    'path'      => $real,
+                                    'name'      => $item,
+                                    'rel_path'  => $relPath,
+                                    'size'      => filesize($real),
+                                    'mtime'     => filemtime($real)
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+            return $files;
+        };
+
+        if ($action === 'status') {
+            $localFiles = $getLocalFiles();
+            $totalBytes = 0;
+            foreach ($localFiles as $lf) {
+                $totalBytes += $lf['size'];
+            }
+            $mappings = \App\Helpers\GoogleDriveMapping::getAll();
+            $uniqueMapped = [];
+            foreach ($mappings as $k => $v) {
+                if (isset($v['file_id'])) {
+                    $uniqueMapped[$v['file_id']] = true;
+                }
+            }
+
+            echo json_encode([
+                'success'           => true,
+                'has_active_drive'  => !empty($activeDrive),
+                'active_drive'      => $activeDrive ? [
+                    'id'    => $activeDrive['id'] ?? '',
+                    'name'  => $activeDrive['name'] ?? 'Google Drive',
+                    'email' => $activeDrive['user_email'] ?? ($activeDrive['client_email'] ?? '')
+                ] : null,
+                'local_count'       => count($localFiles),
+                'local_bytes'       => $totalBytes,
+                'local_size_formatted' => $totalBytes >= 1048576 ? round($totalBytes / 1048576, 2) . ' MB' : round($totalBytes / 1024, 2) . ' KB',
+                'migrated_count'    => count($uniqueMapped)
+            ]);
+            exit;
+        }
+
+        if ($action === 'migrate_batch') {
+            if (!$activeDrive) {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'কোনো সক্রিয় Google Drive পাওয়া যায়নি। অনুগ্রহ করে Settings থেকে একটি গুগল ড্রাইভ যুক্ত করুন।'
+                ]);
+                exit;
+            }
+
+            $batchSize = max(1, min(15, (int)($_POST['batch_size'] ?? 3)));
+            $localFiles = $getLocalFiles();
+            $totalLocal = count($localFiles);
+
+            if ($totalLocal === 0) {
+                echo json_encode([
+                    'success'     => true,
+                    'processed'   => 0,
+                    'remaining'   => 0,
+                    'is_finished' => true,
+                    'message'     => 'স্থানান্তর করার মতো কোনো লোকাল ফাইল অবশিষ্ট নেই।'
+                ]);
+                exit;
+            }
+
+            $batch = array_slice($localFiles, 0, $batchSize);
+            $processedCount = 0;
+            $migratedItems = [];
+            $errors = [];
+
+            foreach ($batch as $fileInfo) {
+                $filePath = $fileInfo['path'];
+                $fileName = $fileInfo['name'];
+                $relPath  = $fileInfo['rel_path'];
+
+                try {
+                    $mime = mime_content_type($filePath) ?: 'application/octet-stream';
+                    $driveResult = \App\Helpers\GoogleDrive::uploadFile($filePath, $fileName, $mime, $activeDrive);
+
+                    if (!empty($driveResult['url'])) {
+                        \App\Helpers\GoogleDriveMapping::set($relPath, [
+                            'file_id'     => $driveResult['file_id'],
+                            'url'         => $driveResult['url'],
+                            'export_url'  => $driveResult['export_url'] ?? '',
+                            'file_name'   => $fileName,
+                            'migrated_at' => date('Y-m-d H:i:s')
+                        ]);
+
+                        @unlink($filePath);
+
+                        $processedCount++;
+                        $migratedItems[] = [
+                            'name' => $fileName,
+                            'url'  => $driveResult['url'],
+                            'size' => $fileInfo['size']
+                        ];
+                    } else {
+                        $errors[] = "ফাইল {$fileName} ড্রাইভে আপলোড ব্যর্থ হয়েছে।";
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "ফাইল {$fileName}: " . $e->getMessage();
+                    error_log("Migration error for {$fileName}: " . $e->getMessage());
+                }
+            }
+
+            $remainingFiles = $getLocalFiles();
+            $remainingCount = count($remainingFiles);
+
+            echo json_encode([
+                'success'      => true,
+                'processed'    => $processedCount,
+                'remaining'    => $remainingCount,
+                'is_finished'  => ($remainingCount === 0),
+                'migrated'     => $migratedItems,
+                'errors'       => $errors,
+                'message'      => "{$processedCount} টি ফাইল ড্রাইভে সফলভাবে সরানো হয়েছে।"
+            ]);
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'error' => 'অজ্ঞাত অ্যাকশন।']);
+        exit;
+    }
+
     public function prayer_times() {
         $adminModel = $this->model('AdminModel');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -2376,6 +2574,19 @@ class Admin extends Controller {
                             $target_file = $upload_dir . $file_name;
                             if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_file)) {
                                 $settings[$file_key] = 'public/uploads/settings/' . $file_name;
+                                if (($settings['storage_provider'] ?? 'local') === 'google_drive') {
+                                    try {
+                                        require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                        $mime = mime_content_type($target_file) ?: 'image/png';
+                                        $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($target_file, $file_name, $mime, $this->siteSettings);
+                                        if (!empty($driveRes['url'])) {
+                                            $settings[$file_key] = $driveRes['url'];
+                                            @unlink($target_file);
+                                        }
+                                    } catch (\Exception $e) {
+                                        error_log("Settings Google Drive upload failed: " . $e->getMessage());
+                                    }
+                                }
                             }
                         }
                     }
@@ -4994,6 +5205,17 @@ class Admin extends Controller {
                     $target_file = $upload_dir . $file_name;
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                         $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+                        if (($this->siteSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                            try {
+                                require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                $mime = mime_content_type($target_file) ?: 'image/jpeg';
+                                $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($target_file, $file_name, $mime, $this->siteSettings);
+                                if (!empty($driveRes['url'])) {
+                                    $image_url = $driveRes['url'];
+                                    @unlink($target_file);
+                                }
+                            } catch (\Exception $e) {}
+                        }
                     }
                 }
             }
@@ -5013,6 +5235,17 @@ class Admin extends Controller {
                     $target_file = $upload_dir . $file_name;
                     if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
                         $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+                        if (($this->siteSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                            try {
+                                require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                $mime = 'application/pdf';
+                                $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($target_file, $file_name, $mime, $this->siteSettings);
+                                if (!empty($driveRes['url'])) {
+                                    $pdf_preview = $driveRes['url'];
+                                    @unlink($target_file);
+                                }
+                            } catch (\Exception $e) {}
+                        }
                     }
                 }
             }
@@ -5068,6 +5301,17 @@ class Admin extends Controller {
                     $target_file = $upload_dir . $file_name;
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                         $image_url = URLROOT . '/public/uploads/products/' . $file_name;
+                        if (($this->siteSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                            try {
+                                require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                $mime = mime_content_type($target_file) ?: 'image/jpeg';
+                                $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($target_file, $file_name, $mime, $this->siteSettings);
+                                if (!empty($driveRes['url'])) {
+                                    $image_url = $driveRes['url'];
+                                    @unlink($target_file);
+                                }
+                            } catch (\Exception $e) {}
+                        }
                     }
                 }
             }
@@ -5087,6 +5331,17 @@ class Admin extends Controller {
                     $target_file = $upload_dir . $file_name;
                     if (move_uploaded_file($_FILES['pdf_preview']['tmp_name'], $target_file)) {
                         $pdf_preview = URLROOT . '/public/uploads/pdf/' . $file_name;
+                        if (($this->siteSettings['storage_provider'] ?? 'local') === 'google_drive') {
+                            try {
+                                require_once APPPATH . 'Helpers/GoogleDrive.php';
+                                $mime = 'application/pdf';
+                                $driveRes = \App\Helpers\GoogleDrive::uploadWithFallback($target_file, $file_name, $mime, $this->siteSettings);
+                                if (!empty($driveRes['url'])) {
+                                    $pdf_preview = $driveRes['url'];
+                                    @unlink($target_file);
+                                }
+                            } catch (\Exception $e) {}
+                        }
                     }
                 }
             }

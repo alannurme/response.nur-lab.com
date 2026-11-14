@@ -2046,4 +2046,83 @@ class Home extends Controller {
         ];
         $this->view('home/sirat', $data);
     }
+
+    /**
+     * Fallback proxy / redirect for media files migrated to Google Drive
+     * Ensures all existing links in posts, pages, and themes remain 100% functional.
+     */
+    public function mediaFallback(...$params) {
+        $path = implode('/', $params);
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+        
+        // Strip duplicate 'public/' prefix if present
+        if (strpos($path, 'public/') === 0) {
+            $path = substr($path, 7);
+        }
+
+        // 1. If physical file exists locally on server, serve it directly
+        $localCandidates = [
+            \PUBROOT . '/' . $path,
+            FCPATH . $path,
+            FCPATH . 'public/' . $path
+        ];
+        foreach ($localCandidates as $lp) {
+            if (is_file($lp)) {
+                $mime = mime_content_type($lp) ?: 'application/octet-stream';
+                header('Content-Type: ' . $mime);
+                header('Content-Length: ' . filesize($lp));
+                header('Cache-Control: public, max-age=31536000, immutable');
+                readfile($lp);
+                exit;
+            }
+        }
+
+        // 2. Check GoogleDriveMapping for mapped Google Drive URL
+        require_once APPPATH . 'Helpers/GoogleDriveMapping.php';
+        $mapping = \App\Helpers\GoogleDriveMapping::get($path);
+        
+        if (!empty($mapping['url'])) {
+            header('Location: ' . $mapping['url'], true, 302);
+            header('Cache-Control: public, max-age=86400');
+            exit;
+        }
+
+        // 3. Fallback: Search on configured Google Drives by filename if not mapped yet
+        $filename = basename($path);
+        if (!empty($filename)) {
+            try {
+                $adminModel = $this->model('AdminModel');
+                $settings = $adminModel->getSettings();
+                $drivesJson = $settings['google_drives'] ?? '[]';
+                $drives = json_decode($drivesJson, true) ?: [];
+                if (!empty($drives)) {
+                    require_once APPPATH . 'Helpers/GoogleDrive.php';
+                    foreach ($drives as $drive) {
+                        if (($drive['status'] ?? 'active') === 'active') {
+                            $searchRes = \App\Helpers\GoogleDrive::listFiles($drive, 5, null, $filename);
+                            foreach ($searchRes['files'] ?? [] as $f) {
+                                if (strcasecmp($f['name'], $filename) === 0) {
+                                    \App\Helpers\GoogleDriveMapping::set($path, [
+                                        'file_id'   => $f['id'],
+                                        'url'       => $f['url'],
+                                        'file_name' => $f['name']
+                                    ]);
+                                    header('Location: ' . $f['url'], true, 302);
+                                    header('Cache-Control: public, max-age=86400');
+                                    exit;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                error_log("mediaFallback Google Drive lookup error: " . $e->getMessage());
+            }
+        }
+
+        // 4. If neither local nor Google Drive has the file, return 404
+        header("HTTP/1.0 404 Not Found");
+        echo "404 File Not Found";
+        exit;
+    }
 }

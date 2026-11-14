@@ -93,6 +93,15 @@ $routes->post('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->get('admin/ajax_all_posts_index', 'Admin::ajax_all_posts_index');
 $routes->match(['GET', 'POST'], 'admin/create_category_ajax', 'Admin::create_category_ajax');
 
+// Media Fallback & Proxy for Google Drive (preserves legacy links in posts)
+$routes->get('img/(:any)', 'Home::mediaFallback/img/$1');
+$routes->get('public/img/(:any)', 'Home::mediaFallback/public/img/$1');
+$routes->get('uploads/(:any)', 'Home::mediaFallback/uploads/$1');
+$routes->get('public/uploads/(:any)', 'Home::mediaFallback/public/uploads/$1');
+
+// Admin Media Migration Route
+$routes->match(['GET', 'POST'], 'admin/api_migrate_to_gdrive', 'Admin::api_migrate_to_gdrive');
+
 $routes->add('admin/(:segment)/(:segment)/(:any)', 'Admin::$1/$2/$3');
 $routes->add('admin/(:segment)/(:any)', 'Admin::$1/$2');
 $routes->add('admin/(:any)', 'Admin::$1');
