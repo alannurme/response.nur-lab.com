@@ -1943,6 +1943,183 @@ class Admin extends Controller {
         exit;
     }
 
+    /**
+     * API to migrate files BACK from Google Drive to Localhost
+     * Downloads files to local storage, clears mapping, and frees Google Drive quota
+     */
+    public function api_migrate_from_gdrive() {
+        header('Content-Type: application/json');
+        
+        if (empty($_SESSION['admin_id'])) {
+            echo json_encode(['success' => false, 'error' => 'অনুমতি নেই। অনুগ্রহ করে লগইন করুন।']);
+            exit;
+        }
+
+        require_once APPPATH . 'Helpers/GoogleDrive.php';
+        require_once APPPATH . 'Helpers/GoogleDriveMapping.php';
+
+        $action = $_GET['action'] ?? ($_POST['action'] ?? 'status');
+        $currentSettings = $this->siteSettings;
+        $drivesJson = $currentSettings['google_drives'] ?? '[]';
+        $googleDrives = json_decode($drivesJson, true) ?: [];
+        $activeDrive = null;
+        
+        $targetDriveId = trim($_POST['drive_id'] ?? ($_GET['drive_id'] ?? ''));
+        if (!empty($googleDrives)) {
+            if (!empty($targetDriveId)) {
+                foreach ($googleDrives as $d) {
+                    if (($d['id'] ?? '') === $targetDriveId && ($d['status'] ?? 'active') === 'active') {
+                        $activeDrive = $d;
+                        break;
+                    }
+                }
+            }
+            if (!$activeDrive) {
+                foreach ($googleDrives as $d) {
+                    if (!empty($d['is_default']) && ($d['status'] ?? 'active') === 'active') {
+                        $activeDrive = $d;
+                        break;
+                    }
+                }
+            }
+            if (!$activeDrive && !empty($googleDrives[0]) && ($googleDrives[0]['status'] ?? 'active') === 'active') {
+                $activeDrive = $googleDrives[0];
+            }
+        }
+
+        if ($action === 'status') {
+            if (!$activeDrive) {
+                echo json_encode([
+                    'success'          => true,
+                    'has_active_drive' => false,
+                    'active_drive'     => null,
+                    'gdrive_count'     => 0,
+                    'gdrive_bytes'     => 0,
+                    'gdrive_size_formatted' => '0 B'
+                ]);
+                exit;
+            }
+
+            try {
+                $driveRes = \App\Helpers\GoogleDrive::listFiles($activeDrive, 100);
+                $files = $driveRes['files'] ?? [];
+                $totalBytes = 0;
+                foreach ($files as $f) {
+                    $totalBytes += ($f['size_bytes'] ?? 0);
+                }
+
+                echo json_encode([
+                    'success'          => true,
+                    'has_active_drive' => true,
+                    'active_drive'     => [
+                        'id'    => $activeDrive['id'] ?? '',
+                        'name'  => $activeDrive['name'] ?? 'Google Drive',
+                        'email' => $activeDrive['user_email'] ?? ($activeDrive['client_email'] ?? '')
+                    ],
+                    'gdrive_count'     => count($files),
+                    'gdrive_bytes'     => $totalBytes,
+                    'gdrive_size_formatted' => $totalBytes >= 1048576 ? round($totalBytes / 1048576, 2) . ' MB' : round($totalBytes / 1024, 2) . ' KB'
+                ]);
+            } catch (\Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'গুগল ড্রাইভ ফাইল চেক করতে সমস্যা: ' . $e->getMessage()
+                ]);
+            }
+            exit;
+        }
+
+        if ($action === 'migrate_batch') {
+            if (!$activeDrive) {
+                echo json_encode([
+                    'success' => false,
+                    'error'   => 'কোনো সক্রিয় Google Drive পাওয়া যায়নি।'
+                ]);
+                exit;
+            }
+
+            $batchSize = max(1, min(10, (int)($_POST['batch_size'] ?? 3)));
+            
+            try {
+                $driveRes = \App\Helpers\GoogleDrive::listFiles($activeDrive, $batchSize);
+                $files = $driveRes['files'] ?? [];
+
+                if (empty($files)) {
+                    echo json_encode([
+                        'success'     => true,
+                        'processed'   => 0,
+                        'remaining'   => 0,
+                        'is_finished' => true,
+                        'message'     => 'গুগল ড্রাইভে কোনো ফাইল অবশিষ্ট নেই।'
+                    ]);
+                    exit;
+                }
+
+                $processedCount = 0;
+                $migratedItems = [];
+                $errors = [];
+
+                foreach ($files as $f) {
+                    $fileId = $f['id'];
+                    $fileName = $f['name'];
+                    
+                    // Check mapping to find original folder
+                    $mapping = \App\Helpers\GoogleDriveMapping::get($fileName);
+                    $relPath = !empty($mapping['rel_path']) ? $mapping['rel_path'] : ('img/' . $fileName);
+                    $targetLocalPath = \PUBROOT . '/' . ltrim($relPath, '/');
+
+                    try {
+                        \App\Helpers\GoogleDrive::downloadFile($fileId, $targetLocalPath, $activeDrive);
+                        
+                        // Successfully downloaded to local disk; remove from mapping
+                        \App\Helpers\GoogleDriveMapping::remove($fileName);
+                        if (!empty($mapping['rel_path'])) {
+                            \App\Helpers\GoogleDriveMapping::remove($mapping['rel_path']);
+                        }
+
+                        // Remove from Google Drive to free cloud space
+                        try {
+                            \App\Helpers\GoogleDrive::deleteFile($fileId, $activeDrive);
+                        } catch (\Exception $delEx) {
+                            error_log("Could not delete from Google Drive after download: " . $delEx->getMessage());
+                        }
+
+                        $processedCount++;
+                        $migratedItems[] = [
+                            'name' => $fileName,
+                            'path' => $relPath,
+                            'size' => $f['size'] ?? ''
+                        ];
+                    } catch (\Exception $e) {
+                        $errors[] = "ফাইল {$fileName}: " . $e->getMessage();
+                        error_log("Error restoring {$fileName} from Google Drive: " . $e->getMessage());
+                    }
+                }
+
+                // Check remaining
+                $remainingCheck = \App\Helpers\GoogleDrive::listFiles($activeDrive, 10);
+                $remainingFiles = $remainingCheck['files'] ?? [];
+                $remainingCount = count($remainingFiles);
+
+                echo json_encode([
+                    'success'      => true,
+                    'processed'    => $processedCount,
+                    'remaining'    => $remainingCount,
+                    'is_finished'  => ($remainingCount === 0),
+                    'migrated'     => $migratedItems,
+                    'errors'       => $errors,
+                    'message'      => "{$processedCount} টি ফাইল গুগল ড্রাইভ থেকে লোকালহোস্টে সফলভাবে ফিরিয়ে আনা হয়েছে।"
+                ]);
+            } catch (\Exception $e) {
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'error' => 'অজ্ঞাত অ্যাকশন।']);
+        exit;
+    }
+
     public function prayer_times() {
         $adminModel = $this->model('AdminModel');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -31,11 +31,15 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                 <a href="<?= URLROOT ?>/admin/media?tab=<?= $activeTab ?><?= $driveQuery ?>" class="btn btn-light" style="padding: 8px 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center;">Reset</a>
             <?php endif; ?>
         </form>
-        <button type="button" class="btn" onclick="openMigrateModal()" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; font-weight: 700; background: #0f9d58; color: white; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(15,157,88,0.25);">
-            <i class="fab fa-google-drive"></i> ১-ক্লিকে সব ফাইল Google Drive-এ সরান
+        <!-- Compact Action Buttons -->
+        <button type="button" class="btn btn-sm" onclick="openMigrateModal()" title="লোকালহোস্ট থেকে সব ফাইল Google Drive-এ সরান" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; background: #0f9d58; color: white; border: none; cursor: pointer; transition: all 0.2s ease;">
+            <i class="fab fa-google-drive"></i> ড্রাইভে সরান
         </button>
-        <button class="btn btn-primary" onclick="toggleUploadZone()" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; font-weight: 700;">
-            <i class="fas fa-upload"></i> Upload Asset
+        <button type="button" class="btn btn-sm" onclick="openRestoreModal()" title="Google Drive থেকে সব ফাইল লোকালহোস্টে ফিরিয়ে আনুন" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; background: #0284c7; color: white; border: none; cursor: pointer; transition: all 0.2s ease;">
+            <i class="fas fa-server"></i> লোকালহোস্টে আনুন
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="toggleUploadZone()" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.82rem;">
+            <i class="fas fa-upload"></i> আপলোড
         </button>
     </div>
 </div>
@@ -219,9 +223,81 @@ $driveQuery = ($activeTab === 'google_drive' && !empty($selectedDriveId)) ? '&dr
                 </div>
 
                 <div id="migrateActionButtons" style="display: flex; justify-content: flex-end; gap: 10px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeMigrateModal()">বন্ধ করুন</button>
-                    <button type="button" class="btn" id="startMigrateBtn" onclick="runMigrationProcess()" style="background: #0f9d58; color: white; padding: 10px 22px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeMigrateModal()">বন্ধ করুন</button>
+                    <button type="button" class="btn btn-sm" id="startMigrateBtn" onclick="runMigrationProcess()" style="background: #0f9d58; color: white; padding: 8px 18px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fas fa-play"></i> মাইগ্রেশন শুরু করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Drive to Localhost 1-Click Restore Modal -->
+<div id="restoreModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9999999; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
+    <div style="width: 92%; max-width: 620px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="padding: 18px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <h3 style="margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-server" style="color: #0284c7; font-size: 1.35rem;"></i> Google Drive থেকে ফাইল লোকালহোস্টে ফিরিয়ে আনা
+            </h3>
+            <button onclick="closeRestoreModal()" style="border: none; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: #94a3b8;">&times;</button>
+        </div>
+        <div style="padding: 24px;" id="restoreModalBody">
+            <div id="restoreLoading" style="text-align: center; padding: 30px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; color: #0284c7;"></i>
+                <p style="margin-top: 14px; color: #64748b; font-weight: 600;">Google Drive ক্লাউড ফাইল চেক করা হচ্ছে...</p>
+            </div>
+            
+            <div id="restoreContent" style="display: none;">
+                <!-- Drive Info Card -->
+                <div id="restoreDriveInfo" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 700; color: #166534; font-size: 0.95rem;" id="restoreDriveName">Google Drive</div>
+                        <div style="font-size: 0.82rem; color: #15803d;" id="restoreDriveEmail"></div>
+                    </div>
+                    <span style="background: #0f9d58; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">সংযুক্ত</span>
+                </div>
+
+                <div id="restoreNoDriveWarning" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 18px; color: #b45309;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem; margin-bottom: 8px;"></i>
+                    <p style="margin: 0 0 10px; font-weight: 600;">কোনো সক্রিয় Google Drive পাওয়া যায়নি!</p>
+                </div>
+
+                <!-- Stats summary -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">ড্রাইভে থাকা মোট ফাইল</div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-top: 4px;" id="restoreDriveCount">0</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">ডাউনলোড সাইজ</div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0284c7; margin-top: 4px;" id="restoreDriveSize">0 MB</div>
+                    </div>
+                </div>
+
+                <!-- Safe notice -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.85rem; color: #1e40af; line-height: 1.5;">
+                    <i class="fas fa-info-circle" style="color: #2563eb; margin-right: 6px;"></i>
+                    ফাইলগুলো Google Drive থেকে সরাসরি লোকাল সার্ভারে ডাউনলোড করে সংরক্ষণ করা হবে এবং ড্রাইভের কোটা খালি করা হবে। সমস্ত পোস্টের ছবি তখন স্বাভাবিকভাবে লোকাল সার্ভার থেকে লোড হবে।
+                </div>
+
+                <!-- Progress container -->
+                <div id="restoreProgressWrapper" style="display: none; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">
+                        <span id="restoreProgressLabel" style="color: #0f172a;">ডাউনলোড ও রিস্টোর চলছে...</span>
+                        <span id="restoreProgressPercent" style="color: #0284c7;">0%</span>
+                    </div>
+                    <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+                        <div id="restoreProgressBar" style="width: 0%; height: 100%; background: #0284c7; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="restoreLog" style="margin-top: 12px; max-height: 130px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.78rem; color: #334155; line-height: 1.4;">
+                    </div>
+                </div>
+
+                <div id="restoreActionButtons" style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeRestoreModal()">বন্ধ করুন</button>
+                    <button type="button" class="btn btn-sm" id="startRestoreBtn" onclick="runRestoreProcess()" style="background: #0284c7; color: white; padding: 8px 18px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-download"></i> লোকালহোস্টে ফিরিয়ে আনুন
                     </button>
                 </div>
             </div>
@@ -701,6 +777,160 @@ async function runMigrationProcess() {
                 progressPercent.innerText = '100%';
                 progressLabel.innerText = 'অভিনন্দন! সব ফাইল সফলভাবে Google Drive-এ মাইগ্রেট হয়েছে।';
                 logBox.innerHTML += `<div style="color: #0f9d58; font-weight: 700; margin-top: 8px;">🎉 মাইগ্রেশন সম্পন্ন! লোকাল সার্ভারের সমস্ত ফাইল ড্রাইভে সরিয়ে স্টোরেজ খালি করা হয়েছে। পোস্টের লিঙ্কগুলো স্বয়ংক্রিয়ভাবে চালু থাকবে।</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                
+                startBtn.innerHTML = '<i class="fas fa-sync-alt"></i> রিফ্রেশ করুন';
+                startBtn.disabled = false;
+                startBtn.onclick = () => location.reload();
+            }
+        } catch (err) {
+            logBox.innerHTML += `<div style="color: #dc2626;">[Exception] ${err.message}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-redo"></i> আবার চেষ্টা করুন';
+            return;
+        }
+    }
+}
+
+function openRestoreModal() {
+    const modal = document.getElementById('restoreModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        fetchRestoreStatus();
+    }
+}
+
+function closeRestoreModal() {
+    const modal = document.getElementById('restoreModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+let totalRestoreCount = 0;
+let completedRestoreCount = 0;
+
+async function fetchRestoreStatus() {
+    document.getElementById('restoreLoading').style.display = 'block';
+    document.getElementById('restoreContent').style.display = 'none';
+    document.getElementById('restoreProgressWrapper').style.display = 'none';
+    document.getElementById('restoreProgressBar').style.width = '0%';
+    document.getElementById('restoreLog').innerHTML = '';
+
+    try {
+        const res = await fetch('<?= URLROOT ?>/admin/api_migrate_from_gdrive?action=status');
+        const data = await res.json();
+        
+        document.getElementById('restoreLoading').style.display = 'none';
+        document.getElementById('restoreContent').style.display = 'block';
+
+        if (!data.success) {
+            alert(data.error || 'স্ট্যাটাস চেক ব্যর্থ হয়েছে।');
+            return;
+        }
+
+        totalRestoreCount = data.gdrive_count || 0;
+        completedRestoreCount = 0;
+        document.getElementById('restoreDriveCount').innerText = data.gdrive_count;
+        document.getElementById('restoreDriveSize').innerText = data.gdrive_size_formatted;
+
+        const driveInfo = document.getElementById('restoreDriveInfo');
+        const noDriveWarn = document.getElementById('restoreNoDriveWarning');
+        const startBtn = document.getElementById('startRestoreBtn');
+
+        if (data.has_active_drive && data.active_drive) {
+            driveInfo.style.display = 'flex';
+            noDriveWarn.style.display = 'none';
+            document.getElementById('restoreDriveName').innerText = data.active_drive.name || 'Google Drive';
+            document.getElementById('restoreDriveEmail').innerText = data.active_drive.email || 'সক্রিয় ড্রাইভ';
+            if (data.gdrive_count > 0) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<i class="fas fa-download"></i> লোকালহোস্টে ফিরিয়ে আনুন';
+            } else {
+                startBtn.disabled = true;
+                startBtn.innerHTML = '<i class="fas fa-check"></i> ড্রাইভে কোনো ফাইল নেই';
+            }
+        } else {
+            driveInfo.style.display = 'none';
+            noDriveWarn.style.display = 'block';
+            startBtn.disabled = true;
+        }
+    } catch (err) {
+        document.getElementById('restoreLoading').innerHTML = '<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> তথ্য লোড করা যায়নি: ' + err.message + '</p>';
+    }
+}
+
+async function runRestoreProcess() {
+    const startBtn = document.getElementById('startRestoreBtn');
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ডাউনলোড হচ্ছে...';
+
+    const progressWrapper = document.getElementById('restoreProgressWrapper');
+    progressWrapper.style.display = 'block';
+    
+    const progressBar = document.getElementById('restoreProgressBar');
+    const progressLabel = document.getElementById('restoreProgressLabel');
+    const progressPercent = document.getElementById('restoreProgressPercent');
+    const logBox = document.getElementById('restoreLog');
+
+    let isDone = false;
+    let csrfToken = '<?= csrf_token() ?>';
+    let csrfHash = '<?= csrf_hash() ?>';
+
+    while (!isDone) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'migrate_batch');
+            formData.append('batch_size', '3');
+            if (csrfToken && csrfHash) {
+                formData.append(csrfToken, csrfHash);
+            }
+
+            const res = await fetch('<?= URLROOT ?>/admin/api_migrate_from_gdrive', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                logBox.innerHTML += `<div style="color: #dc2626;">[Error] ${data.error || 'ডাউনলোড ব্যর্থ হয়েছে'}</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<i class="fas fa-redo"></i> আবার চেষ্টা করুন';
+                return;
+            }
+
+            if (data.migrated && data.migrated.length > 0) {
+                data.migrated.forEach(item => {
+                    completedRestoreCount++;
+                    logBox.innerHTML += `<div style="color: #0284c7;"><i class="fas fa-arrow-down"></i> ${item.name} &rarr; লোকালহোস্টে সেভ করা হয়েছে</div>`;
+                });
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+
+            if (data.errors && data.errors.length > 0) {
+                data.errors.forEach(err => {
+                    logBox.innerHTML += `<div style="color: #ea580c;"><i class="fas fa-exclamation-triangle"></i> ${err}</div>`;
+                });
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+
+            const remaining = data.remaining;
+            const pct = (totalRestoreCount > 0) ? Math.min(100, Math.round((completedRestoreCount / totalRestoreCount) * 100)) : 100;
+            progressBar.style.width = pct + '%';
+            progressPercent.innerText = pct + '%';
+            progressLabel.innerText = `ডাউনলোড চলছে (${completedRestoreCount}/${totalRestoreCount})...`;
+
+            if (data.is_finished || remaining === 0) {
+                isDone = true;
+                progressBar.style.width = '100%';
+                progressPercent.innerText = '100%';
+                progressLabel.innerText = 'সব ফাইল সফলভাবে লোকালহোস্টে ফিরিয়ে আনা হয়েছে!';
+                logBox.innerHTML += `<div style="color: #0f9d58; font-weight: 700; margin-top: 8px;">🎉 সম্পন্ন! Google Drive-এর সমস্ত ফাইল লোকাল সার্ভারে ফিরিয়ে আনা হয়েছে।</div>`;
                 logBox.scrollTop = logBox.scrollHeight;
                 
                 startBtn.innerHTML = '<i class="fas fa-sync-alt"></i> রিফ্রেশ করুন';

@@ -461,6 +461,44 @@ class GoogleDrive {
     }
 
     /**
+     * Download a file from Google Drive to a local destination
+     */
+    public static function downloadFile($fileId, $targetLocalPath, $drive) {
+        $token = self::getAccessToken($drive);
+        $url = 'https://www.googleapis.com/drive/v3/files/' . urlencode($fileId) . '?alt=media&supportsAllDrives=true';
+
+        $dir = dirname($targetLocalPath);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0777, true);
+        }
+
+        $fp = fopen($targetLocalPath, 'w+');
+        if (!$fp) {
+            throw new \Exception("Cannot write to local file: {$targetLocalPath}");
+        }
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token
+        ]);
+        $success = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        fclose($fp);
+
+        if (!$success || $httpCode !== 200 || filesize($targetLocalPath) === 0) {
+            @unlink($targetLocalPath);
+            throw new \Exception("Failed to download file from Google Drive (HTTP {$httpCode})");
+        }
+
+        return true;
+    }
+
+    /**
      * Delete a file from Google Drive
      */
     public static function deleteFile($fileId, $drive) {
