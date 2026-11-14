@@ -25,6 +25,14 @@ if (!function_exists('resolve_dynamic_url')) {
             return '';
         }
 
+        // Check if file was migrated to Google Drive
+        if (class_exists('\\App\\Helpers\\GoogleDriveMapping')) {
+            $mapped = \App\Helpers\GoogleDriveMapping::get($path);
+            if (!empty($mapped['url'])) {
+                return $mapped['url'];
+            }
+        }
+
         // If absolute URL provided
         if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
             // If it's a live server link, check if local file exists
@@ -87,9 +95,16 @@ if (!function_exists('resolve_setting_image')) {
 if (!function_exists('resolve_blog_image')) {
     function resolve_blog_image($path) {
         if (empty($path)) {
-            return URLROOT . '/public/img/earth.jpg';
+            return get_site_fallback_og_image();
         }
         return resolve_dynamic_url($path, '/public/img/');
+    }
+}
+
+if (!function_exists('get_site_fallback_og_image')) {
+    function get_site_fallback_og_image() {
+        // Full screen 1200x630 branded logo banner (shows full-width hero card on WhatsApp/Facebook)
+        return URLROOT . '/public/img/og_banner_default.jpg';
     }
 }
 

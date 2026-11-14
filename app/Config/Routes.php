@@ -17,6 +17,8 @@ $routes->get('/', 'Home::index');
 $routes->get('sitemap.xml', 'Home::sitemap');
 $routes->get('q&a', 'Home::qa');
 $routes->get('p/(:num)', 'Home::redirectPostById/$1');
+$routes->get('api/og_banner', 'Home::ogBanner');
+$routes->get('og-image.jpg', 'Home::ogBanner');
 $routes->post('comment/(:num)', 'Home::comment/$1');
 $routes->get('posts', 'Home::redirectBlog');
 $routes->get('posts/(:any)', 'Home::redirectBlog/$1');

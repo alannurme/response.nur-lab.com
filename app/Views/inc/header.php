@@ -91,8 +91,8 @@ if (!function_exists('getBengaliDate')) {
             if (!empty($post['content']) && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $post['content'], $img_match)) {
                 $og_image = resolve_dynamic_url($img_match[1], '/public/img/');
             } else {
-                // Use default post banner / placeholder image instead of site logo
-                $og_image = resolve_blog_image('');
+                // Use full-screen 1200x630 logo banner fallback
+                $og_image = get_site_fallback_og_image();
             }
         }
     } elseif (isset($data['question']) && !empty($data['question'])) {
@@ -104,6 +104,7 @@ if (!function_exists('getBengaliDate')) {
         $og_title = $clean_q;
         $og_description = $meta_description;
         $meta_author = $q['name'] ?? $site_name;
+        $og_image = get_site_fallback_og_image();
     } else {
         // We are on general pages (Home, Category, list pages)
         $meta_description = trim(preg_replace('/\s+/u', ' ', strip_tags($meta_description)));
@@ -117,6 +118,7 @@ if (!function_exists('getBengaliDate')) {
         }
         $og_title = $seo_title;
         $og_description = $meta_description;
+        $og_image = get_site_fallback_og_image();
     }
     ?>
     <title><?= htmlspecialchars($seo_title) ?></title>
@@ -139,11 +141,16 @@ if (!function_exists('getBengaliDate')) {
     <meta property="og:url" content="<?= htmlspecialchars($og_url) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($og_title) ?>">
     <?php if (!empty($og_image)): ?>
+        <?php
+        $imgExt = strtolower(pathinfo(parse_url($og_image, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+        $mimeMap = ['png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg'];
+        $og_mime = $mimeMap[$imgExt] ?? 'image/jpeg';
+        ?>
         <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
         <meta property="og:image:secure_url" content="<?= htmlspecialchars($og_image) ?>">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
-        <meta property="og:image:type" content="image/jpeg">
+        <meta property="og:image:type" content="<?= $og_mime ?>">
         <link rel="image_src" href="<?= htmlspecialchars($og_image) ?>">
     <?php endif; ?>
     <meta property="og:description" content="<?= htmlspecialchars($og_description) ?>">

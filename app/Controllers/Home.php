@@ -1400,6 +1400,7 @@ class Home extends Controller {
             $site_name = $settings['site_title'] ?? 'Response with Nur-Lab';
             
             $canonical_url = URLROOT . '/' . rawurlencode($post['slug']);
+            $short_url = URLROOT . '/p/' . $post['id'];
             
             // Resolve post featured image
             $og_image = '';
@@ -1407,27 +1408,36 @@ class Home extends Controller {
                 $og_image = resolve_blog_image($post['featured_image']);
             } elseif (!empty($post['content']) && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $post['content'], $m)) {
                 $og_image = resolve_dynamic_url($m[1], '/public/img/');
-            } else {
-                $og_image = resolve_blog_image('');
             }
+            
+            // If post has no featured image, fallback to 1200x630 full-screen logo banner
+            if (empty($og_image) || strpos($og_image, 'earth.jpg') !== false) {
+                $og_image = get_site_fallback_og_image();
+            }
+            
+            $imgExt = strtolower(pathinfo(parse_url($og_image, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+            $mimeMap = ['png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg'];
+            $og_mime = $mimeMap[$imgExt] ?? 'image/jpeg';
             
             $og_title = !empty($post['seo_title']) ? $post['seo_title'] : $post['title'];
             $og_desc = !empty($post['seo_description']) ? $post['seo_description'] : (!empty($post['excerpt']) ? $post['excerpt'] : mb_substr(strip_tags($post['content']), 0, 160, 'UTF-8'));
             $og_desc = trim(preg_replace('/\s+/u', ' ', strip_tags($og_desc)));
             
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-            $isBot = (bool) preg_match('/(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Discordbot|SkypeUriPreview|Slackbot|Pinterest|Googlebot|bingbot)/i', $userAgent);
+            $isBot = empty($userAgent) || (bool) preg_match('/(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Discordbot|SkypeUriPreview|Slackbot|Pinterest|Googlebot|bingbot|Applebot|yandex|vkShare|Embedly|quora|outbrain|flipboard|line|snapchat|curl|Wget|python-requests)/i', $userAgent);
             
             if (!$isBot) {
-                // For regular browsers, perform 301 permanent redirect
-                header('HTTP/1.1 301 Moved Permanently');
-                header('Location: ' . $canonical_url);
+                // Immediate clean redirect for regular browser visitors
+                header('Location: ' . $canonical_url, true, 302);
+                exit;
             }
             
-            // Output complete Open Graph and Twitter Card tags for scrapers
+            // Output complete Open Graph and Twitter Card tags for scrapers (200 OK)
+            header('HTTP/1.1 200 OK');
+            header('Content-Type: text/html; charset=UTF-8');
             ?>
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($og_title . ' - ' . $site_name) ?></title>
@@ -1437,26 +1447,22 @@ class Home extends Controller {
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="<?= htmlspecialchars($site_name) ?>">
-    <meta property="og:url" content="<?= htmlspecialchars($canonical_url) ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($short_url) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($og_title) ?>">
-    <?php if (!empty($og_image)): ?>
+    <meta property="og:description" content="<?= htmlspecialchars($og_desc) ?>">
     <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
     <meta property="og:image:secure_url" content="<?= htmlspecialchars($og_image) ?>">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:type" content="<?= $og_mime ?>">
     <link rel="image_src" href="<?= htmlspecialchars($og_image) ?>">
-    <?php endif; ?>
-    <meta property="og:description" content="<?= htmlspecialchars($og_desc) ?>">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="<?= htmlspecialchars($canonical_url) ?>">
+    <meta name="twitter:url" content="<?= htmlspecialchars($short_url) ?>">
     <meta name="twitter:title" content="<?= htmlspecialchars($og_title) ?>">
     <meta name="twitter:description" content="<?= htmlspecialchars(strip_tags($og_desc)) ?>">
-    <?php if (!empty($og_image)): ?>
     <meta name="twitter:image" content="<?= htmlspecialchars($og_image) ?>">
-    <?php endif; ?>
     
     <meta http-equiv="refresh" content="0;url=<?= htmlspecialchars($canonical_url) ?>">
     <script>window.location.replace("<?= addslashes($canonical_url) ?>");</script>
@@ -1468,7 +1474,7 @@ class Home extends Controller {
             <?php
             exit;
         }
-        header('Location: ' . URLROOT);
+        header('Location: ' . URLROOT, true, 302);
         exit;
     }
 
@@ -2123,6 +2129,87 @@ class Home extends Controller {
         // 4. If neither local nor Google Drive has the file, return 404
         header("HTTP/1.0 404 Not Found");
         echo "404 File Not Found";
+        exit;
+    }
+
+    /**
+     * Generates or serves the 1200x630 full-screen branded OG banner with site logo
+     * Ensures any link without a featured image renders as a large hero banner on WhatsApp & Facebook
+     */
+    public function ogBanner() {
+        $cacheFile = \PUBROOT . '/img/og_banner_default.jpg';
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 86400 * 7)) {
+            header('Content-Type: image/jpeg');
+            header('Cache-Control: public, max-age=604800, immutable');
+            readfile($cacheFile);
+            exit;
+        }
+
+        $width = 1200;
+        $height = 630;
+        $img = imagecreatetruecolor($width, $height);
+
+        // Elegant dark slate / navy gradient
+        $topR = 10; $topG = 18; $topB = 30;
+        $botR = 15; $botG = 23; $botB = 42;
+        for ($y = 0; $y < $height; $y++) {
+            $r = (int)($topR + ($botR - $topR) * ($y / $height));
+            $g = (int)($topG + ($botG - $topG) * ($y / $height));
+            $b = (int)($topB + ($botB - $topB) * ($y / $height));
+            $col = imagecolorallocate($img, $r, $g, $b);
+            imageline($img, 0, $y, $width, $y, $col);
+        }
+
+        // Center emerald glow
+        $glow = imagecolorallocatealpha($img, 5, 150, 105, 115);
+        imagefilledellipse($img, $width / 2, $height / 2, 650, 360, $glow);
+
+        // Try loading site logo
+        try {
+            $adminModel = $this->model('AdminModel');
+            $settings = $adminModel->getSettings();
+            $logoPath = $settings['site_logo'] ?? '';
+            $candidatePaths = [
+                \PUBROOT . '/' . ltrim(str_replace('public/', '', $logoPath), '/'),
+                FCPATH . $logoPath,
+                \PUBROOT . '/img/icon-512.png',
+                \PUBROOT . '/img/icon-192.png'
+            ];
+            foreach ($candidatePaths as $cp) {
+                if (file_exists($cp)) {
+                    $ext = strtolower(pathinfo($cp, PATHINFO_EXTENSION));
+                    $logo = null;
+                    if ($ext === 'png') $logo = @imagecreatefrompng($cp);
+                    elseif ($ext === 'jpg' || $ext === 'jpeg') $logo = @imagecreatefromjpeg($cp);
+                    elseif ($ext === 'webp') $logo = @imagecreatefromwebp($cp);
+
+                    if ($logo) {
+                        $logoW = imagesx($logo);
+                        $logoH = imagesy($logo);
+                        $targetH = 220;
+                        $targetW = (int)($logoW * ($targetH / $logoH));
+                        if ($targetW > 700) {
+                            $targetW = 700;
+                            $targetH = (int)($logoH * ($targetW / $logoW));
+                        }
+                        $destX = (int)(($width - $targetW) / 2);
+                        $destY = (int)(($height - $targetH) / 2) - 20;
+
+                        imagealphablending($img, true);
+                        imagesavealpha($img, true);
+                        imagecopyresampled($img, $logo, $destX, $destY, 0, 0, $targetW, $targetH, $logoW, $logoH);
+                        imagedestroy($logo);
+                        break;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        @imagejpeg($img, $cacheFile, 92);
+        header('Content-Type: image/jpeg');
+        header('Cache-Control: public, max-age=604800, immutable');
+        imagejpeg($img, null, 92);
+        imagedestroy($img);
         exit;
     }
 }
