@@ -244,23 +244,23 @@
     <div id="post-form-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; transition: all 0.3s ease;">
         <!-- Left Column: Content and SEO Settings -->
         <div>
-            <!-- Smart Auto-Paste & Document Upload Panel -->
-            <div class="admin-card" id="smart-paste-container" style="border: 2px dashed #3b82f6 !important; background: #eff6ff !important; margin-bottom: 24px; padding: 20px !important; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <!-- Smart Auto-Paste & Document Upload Panel (Default Collapsed) -->
+            <div class="admin-card" id="smart-paste-container" style="border: 2px dashed #3b82f6 !important; background: #eff6ff !important; margin-bottom: 24px; padding: 16px 20px !important; border-radius: 12px; transition: all 0.25s ease;">
+                <div onclick="toggleSmartPastePanel()" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; user-select: none;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
                             <i class="fas fa-file-word"></i>
                         </div>
                         <div>
-                            <strong style="font-size: 16px; color: #1e3a8a; display: block; font-weight: 700;">⚡ স্মার্ট অটো-ইমপোর্ট: সরাসরি ডক ফাইল আপলোড ও পেস্ট (Smart Doc Upload & Auto-Paste)</strong>
-                            <span style="font-size: 13px; color: #3b82f6;">ওয়ার্ড ডকুমেন্ট (.docx) বা .md ফাইল সরাসরি আপলোড করুন অথবা লেখা পেস্ট করুন—টাইটেল, স্লাগ, এসইও, ক্যাটাগরি ও ৬টি পর্ব এক নিমিষেই ফিল হয়ে যাবে!</span>
+                            <strong style="font-size: 15px; color: #1e3a8a; display: block; font-weight: 700;">⚡ স্মার্ট অটো-ইমপোর্ট: সরাসরি ডক ফাইল আপলোড ও পেস্ট (Smart Doc Upload & Auto-Paste)</strong>
+                            <span style="font-size: 13px; color: #3b82f6;">ওয়ার্ড ডকুমেন্ট (.docx) বা .md ফাইল আপলোড বা পেস্ট করতে এখানে ক্লিক করুন</span>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary" onclick="toggleSmartPastePanel()" id="btn-toggle-paste" style="border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-sliders-h"></i> প্যানেল দেখান / লুকান
+                    <button type="button" class="btn btn-primary" onclick="event.stopPropagation(); toggleSmartPastePanel()" id="btn-toggle-paste" style="border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-chevron-down" id="smart-paste-icon"></i> <span id="smart-paste-btn-text">প্যানেল খুলুন (Expand)</span>
                     </button>
                 </div>
-                <div id="smart-paste-panel" style="margin-top: 18px;">
+                <div id="smart-paste-panel" style="display: none; margin-top: 18px; border-top: 1px solid #bfdbfe; padding-top: 18px;">
                     
                     <!-- Drag & Drop / File Upload Zone -->
                     <div id="doc-dropzone" onclick="document.getElementById('doc-file-input').click()" 
@@ -1114,13 +1114,26 @@
     // ==========================================
     function toggleSmartPastePanel(forceOpen = false) {
         const panel = document.getElementById('smart-paste-panel');
+        const icon = document.getElementById('smart-paste-icon');
+        const btnText = document.getElementById('smart-paste-btn-text');
         if (!panel) return;
-        if (forceOpen || panel.style.display === 'none') {
+        
+        const isHidden = panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
+
+        if (forceOpen || isHidden) {
             panel.style.display = 'block';
+            if (icon) icon.className = 'fas fa-chevron-up';
+            if (btnText) btnText.textContent = 'প্যানেল লুকান (Collapse)';
             const input = document.getElementById('smart-paste-input');
-            if (input) input.focus();
+            if (input && forceOpen) input.focus();
+            const container = document.getElementById('smart-paste-container');
+            if (container && forceOpen) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         } else {
             panel.style.display = 'none';
+            if (icon) icon.className = 'fas fa-chevron-down';
+            if (btnText) btnText.textContent = 'প্যানেল খুলুন (Expand)';
         }
     }
 
@@ -1475,6 +1488,14 @@
         // 9. Update UI feedback
         const sourceName = fileName ? ` (${fileName})` : '';
         showToast('🎉 সফল! সম্পূর্ণ পোস্ট ' + parsedParts.length + 'টি অংশে বিভক্ত হয়ে অটো-ফিল হয়েছে' + sourceName + '।', 'success');
+        
+        // Auto-collapse panel after successful import so form fields are visible
+        setTimeout(() => {
+            const panel = document.getElementById('smart-paste-panel');
+            if (panel && panel.style.display !== 'none') {
+                toggleSmartPastePanel(false);
+            }
+        }, 1200);
         
         if (titleInput) {
             titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
