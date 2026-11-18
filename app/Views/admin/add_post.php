@@ -244,27 +244,54 @@
     <div id="post-form-grid" style="display: grid; grid-template-columns: 1fr 380px; gap: 30px; transition: all 0.3s ease;">
         <!-- Left Column: Content and SEO Settings -->
         <div>
-            <!-- Smart Auto-Paste Panel -->
-            <div class="admin-card" id="smart-paste-container" style="border: 2px dashed #3b82f6 !important; background: #eff6ff !important; margin-bottom: 24px; padding: 20px !important;">
+            <!-- Smart Auto-Paste & Document Upload Panel -->
+            <div class="admin-card" id="smart-paste-container" style="border: 2px dashed #3b82f6 !important; background: #eff6ff !important; margin-bottom: 24px; padding: 20px !important; border-radius: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 42px; height: 42px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">
-                            <i class="fas fa-magic"></i>
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">
+                            <i class="fas fa-file-word"></i>
                         </div>
                         <div>
-                            <strong style="font-size: 16px; color: #1e3a8a; display: block; font-weight: 700;">⚡ এক ক্লিকে সম্পূর্ণ পোস্ট অটো-ইমপোর্ট (Smart Auto Paste)</strong>
-                            <span style="font-size: 13px; color: #3b82f6;">Markdown (.md) বা যেকোনো পোস্টের সম্পূর্ণ লেখা এখানে পেস্ট করলেই টাইটেল, স্লাগ, এসইও এবং ৬টি পার্ট স্বয়ংক্রিয়ভাবে ফিল হয়ে যাবে!</span>
+                            <strong style="font-size: 16px; color: #1e3a8a; display: block; font-weight: 700;">⚡ স্মার্ট অটো-ইমপোর্ট: সরাসরি ডক ফাইল আপলোড ও পেস্ট (Smart Doc Upload & Auto-Paste)</strong>
+                            <span style="font-size: 13px; color: #3b82f6;">ওয়ার্ড ডকুমেন্ট (.docx) বা .md ফাইল সরাসরি আপলোড করুন অথবা লেখা পেস্ট করুন—টাইটেল, স্লাগ, এসইও, ক্যাটাগরি ও ৬টি পর্ব এক নিমিষেই ফিল হয়ে যাবে!</span>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary" onclick="toggleSmartPastePanel()" id="btn-toggle-paste" style="border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600;">
-                        <i class="fas fa-clipboard"></i> পেস্ট প্যানেল খুলুন / বন্ধ করুন
+                    <button type="button" class="btn btn-primary" onclick="toggleSmartPastePanel()" id="btn-toggle-paste" style="border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-sliders-h"></i> প্যানেল দেখান / লুকান
                     </button>
                 </div>
-                <div id="smart-paste-panel" style="margin-top: 15px;">
-                    <textarea id="smart-paste-input" class="form-control" rows="8" placeholder="এখানে আপনার .md ফাইলের সম্পূর্ণ লেখাটি পেস্ট (Ctrl+V) করুন..." style="font-family: 'Hind Siliguri', 'Segoe UI', monospace; font-size: 14px; line-height: 1.6; border: 1.5px solid #93c5fd; background: #ffffff;"></textarea>
+                <div id="smart-paste-panel" style="margin-top: 18px;">
+                    
+                    <!-- Drag & Drop / File Upload Zone -->
+                    <div id="doc-dropzone" onclick="document.getElementById('doc-file-input').click()" 
+                         style="border: 2px dashed #93c5fd; background: #ffffff; border-radius: 10px; padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;"
+                         onmouseover="this.style.borderColor='#2563eb'; this.style.background='#f0f7ff';"
+                         onmouseout="this.style.borderColor='#93c5fd'; this.style.background='#ffffff';">
+                        <input type="file" id="doc-file-input" accept=".docx,.doc,.md,.txt" style="display: none;" onchange="handleDocFileUpload(this.files)">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div>
+                            <strong style="font-size: 15px; color: #1e293b; display: block;">এখানে .docx বা .md ফাইল টেনে এনে ছেড়ে দিন (Drag & Drop)</strong>
+                            <span style="font-size: 13px; color: #64748b;">অথবা ফাইল বেছে নিতে ক্লিক করুন (সাপোর্ট করে: Word .docx, .doc, .md, .txt)</span>
+                        </div>
+                        <div id="doc-upload-status" style="display: none; font-size: 13px; font-weight: 600; color: #2563eb; margin-top: 6px;">
+                            <i class="fas fa-spinner fa-spin"></i> ডকুমেন্ট প্রসেস করা হচ্ছে...
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div style="display: flex; align-items: center; gap: 12px; margin: 16px 0; color: #64748b; font-size: 12px; font-weight: 700;">
+                        <span style="flex: 1; height: 1px; background: #cbd5e1;"></span>
+                        <span>অথবা টেক্সট কপি-পেস্ট করুন</span>
+                        <span style="flex: 1; height: 1px; background: #cbd5e1;"></span>
+                    </div>
+
+                    <textarea id="smart-paste-input" class="form-control" rows="6" placeholder="এখানে আপনার .docx বা .md ফাইলের সম্পূর্ণ লেখাটি পেস্ট (Ctrl+V) করুন..." style="font-family: 'Hind Siliguri', 'Segoe UI', monospace; font-size: 14px; line-height: 1.6; border: 1.5px solid #93c5fd; background: #ffffff;"></textarea>
+                    
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 10px;">
                         <div style="font-size: 12px; color: #64748b;">
-                            <i class="fas fa-info-circle" style="color: #3b82f6;"></i> সাপোর্ট করে: Markdown (# শিরোনাম, ## অংশ, ### উপশিরোনাম, > উদ্ধৃতি, **বোল্ড**) ও প্লেইন টেক্সট।
+                            <i class="fas fa-info-circle" style="color: #3b82f6;"></i> সাপোর্ট করে: Word ডক ফাইল (.docx), Markdown (# শিরোনাম, ## অংশ, ### উপশিরোনাম, > উদ্ধৃতি, **বোল্ড**) ও প্লেইন টেক্সট।
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button type="button" class="btn btn-secondary btn-sm" onclick="clearSmartPaste()" style="padding: 8px 16px;">
@@ -487,6 +514,10 @@
         </div>
     </div>
 </form>
+
+<!-- Mammoth.js for client-side Word .docx parsing -->
+<script src="<?= URLROOT ?>/public/js/mammoth.browser.min.js"></script>
+<script>if(typeof mammoth==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"><\/script>');}</script>
 
 <script>
     function updateFeaturedImageUI() {
@@ -1079,7 +1110,7 @@
 
     
     // ==========================================
-    // SMART AUTO-PASTE & IMPORT SYSTEM
+    // SMART AUTO-PASTE & DOC IMPORT SYSTEM
     // ==========================================
     function toggleSmartPastePanel(forceOpen = false) {
         const panel = document.getElementById('smart-paste-panel');
@@ -1096,6 +1127,113 @@
     function clearSmartPaste() {
         const input = document.getElementById('smart-paste-input');
         if (input) input.value = '';
+        const fileInput = document.getElementById('doc-file-input');
+        if (fileInput) fileInput.value = '';
+    }
+
+    function showUploadLoading(msg = 'ডকুমেন্ট প্রসেস করা হচ্ছে...') {
+        const status = document.getElementById('doc-upload-status');
+        if (status) {
+            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + msg;
+            status.style.display = 'block';
+        }
+    }
+
+    function hideUploadLoading() {
+        const status = document.getElementById('doc-upload-status');
+        if (status) {
+            status.style.display = 'none';
+        }
+    }
+
+    // Direct Document File Upload Handler (.docx / .doc / .md / .txt)
+    function handleDocFileUpload(files) {
+        if (!files || files.length === 0) return;
+        const file = files[0];
+        const fileName = file.name;
+        const ext = fileName.split('.').pop().toLowerCase();
+
+        showUploadLoading('ডকুমেন্ট পড়া হচ্ছে: ' + fileName + '...');
+
+        if (ext === 'docx') {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                if (typeof mammoth !== 'undefined') {
+                    showUploadLoading('ওয়ার্ড ডকুমেন্ট কনভার্ট করা হচ্ছে...');
+                    Promise.all([
+                        mammoth.convertToHtml({ arrayBuffer: arrayBuffer }),
+                        mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                    ]).then(function(results) {
+                        hideUploadLoading();
+                        const htmlResult = results[0];
+                        const textResult = results[1];
+                        const html = htmlResult ? htmlResult.value : '';
+                        const text = textResult ? textResult.value : '';
+                        
+                        const input = document.getElementById('smart-paste-input');
+                        if (input) input.value = text;
+                        
+                        processSmartContent(text, html, fileName);
+                    }).catch(function(err) {
+                        console.warn('Mammoth client parse failed, trying server-side endpoint:', err);
+                        uploadDocToServer(file);
+                    });
+                } else {
+                    uploadDocToServer(file);
+                }
+            };
+            reader.onerror = function() {
+                hideUploadLoading();
+                alert('ফাইলটি পড়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।');
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (ext === 'md' || ext === 'txt') {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                hideUploadLoading();
+                const text = e.target.result;
+                const input = document.getElementById('smart-paste-input');
+                if (input) input.value = text;
+                processSmartContent(text, '', fileName);
+            };
+            reader.onerror = function() {
+                hideUploadLoading();
+                alert('ফাইলটি পড়া যায়নি।');
+            };
+            reader.readAsText(file);
+        } else {
+            // Fallback for .doc or other formats to server endpoint
+            uploadDocToServer(file);
+        }
+    }
+
+    // Server-side fallback for document parsing
+    function uploadDocToServer(file) {
+        showUploadLoading('সার্ভারে ফাইল প্রসেস হচ্ছে: ' + file.name + '...');
+        const formData = new FormData();
+        formData.append('doc_file', file);
+
+        fetch('<?= URLROOT ?>/admin/parse_doc_ajax', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            hideUploadLoading();
+            if (data.status === 'success') {
+                const input = document.getElementById('smart-paste-input');
+                if (input) input.value = data.text;
+                processSmartContent(data.text, data.html || '', file.name);
+            } else {
+                alert(data.message || 'ডকুমেন্ট পার্স করতে সমস্যা হয়েছে।');
+            }
+        })
+        .catch(err => {
+            hideUploadLoading();
+            console.error('Server upload error:', err);
+            alert('সার্ভারে ফাইল পাঠাতে সমস্যা হয়েছে। অনুগ্রহ করে টেক্সট কপি করে নিচে পেস্ট করুন।');
+        });
     }
 
     function processSmartPaste() {
@@ -1103,11 +1241,16 @@
         if (!input) return;
         const text = input.value.trim();
         if (!text) {
-            alert('অনুগ্রহ করে প্রথমে Markdown বা পোস্টের টেক্সট পেস্ট করুন।');
+            alert('অনুগ্রহ করে প্রথমে একটি ডকুমেন্ট (.docx/.md) আপলোড করুন বা টেক্সট পেস্ট করুন।');
             return;
         }
+        processSmartContent(text, '');
+    }
 
-        let raw = text;
+    function processSmartContent(rawText, rawHtml = '', fileName = '') {
+        if (!rawText && !rawHtml) return;
+
+        let raw = (rawText || '').trim();
         let metadata = {
             title: '',
             slug: '',
@@ -1161,18 +1304,37 @@
 
         // 3. Extract Main Article Title
         if (!metadata.title) {
-            const h1Match = raw.match(/^#\s+(.*)$/m);
-            if (h1Match) {
-                metadata.title = h1Match[1].trim();
-            } else {
-                const firstLine = raw.split('\n').find(l => l.trim().length > 0 && !l.trim().startsWith('>'));
-                if (firstLine) metadata.title = firstLine.replace(/^#+\s*/, '').trim();
+            if (rawHtml) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawHtml;
+                const h1 = tempDiv.querySelector('h1');
+                if (h1 && h1.textContent.trim()) {
+                    metadata.title = h1.textContent.trim();
+                }
+            }
+            if (!metadata.title) {
+                const h1Match = raw.match(/^#\s+(.*)$/m);
+                if (h1Match) {
+                    metadata.title = h1Match[1].trim();
+                } else {
+                    const firstLine = raw.split('\n').find(l => l.trim().length > 0 && !l.trim().startsWith('>') && !l.trim().startsWith('---'));
+                    if (firstLine) metadata.title = firstLine.replace(/^#+\s*/, '').trim();
+                }
             }
         }
 
-        // Remove H1 title line from raw body so it doesn't get repeated
+        // Clean Frontmatter and H1 from raw text and rawHtml
         raw = raw.replace(/^#\s+.*$/m, '').trim();
         raw = raw.replace(/^---\s*$/m, '').trim();
+        raw = raw.replace(/^\s*(title|slug|category|categories|parent_category|parent|parent_cat|seo_title|seo_description|seo_keywords)\s*:\s*.*$/gim, '').trim();
+
+        if (rawHtml) {
+            // Remove frontmatter paragraph block from HTML if present
+            rawHtml = rawHtml.replace(/<p>\s*---\s*<\/p>[\s\S]*?<p>\s*---\s*<\/p>/i, '').trim();
+            rawHtml = rawHtml.replace(/<p>\s*(title|slug|category|categories|parent_category|parent|parent_cat|seo_title|seo_description|seo_keywords)\s*:\s*.*?<\/p>/gi, '').trim();
+            // Remove first <h1> title tag so it doesn't get duplicated in parts
+            rawHtml = rawHtml.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
+        }
 
         // 4. Fill Main Form Fields
         const titleInput = document.querySelector('input[name="title"]');
@@ -1223,10 +1385,11 @@
         // 5. Split Content into Parts (H2 / ##)
         let parsedParts = [];
 
-        // Check if raw content is HTML with <h2>
-        if (raw.includes('<h2') || raw.includes('<H2')) {
+        // Check if rawHtml or raw contains <h2>
+        const htmlToSplit = rawHtml || (raw.includes('<h2') || raw.includes('<H2') ? raw : '');
+        if (htmlToSplit && (htmlToSplit.includes('<h2') || htmlToSplit.includes('<H2'))) {
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = raw;
+            tempDiv.innerHTML = htmlToSplit;
             const h2Elements = Array.from(tempDiv.querySelectorAll('h2'));
             if (h2Elements.length > 0) {
                 h2Elements.forEach((h2, idx) => {
@@ -1285,7 +1448,7 @@
         if (parsedParts.length === 0) {
             parsedParts.push({
                 title: '',
-                html: convertMarkdownToQuillHtml(raw)
+                html: rawHtml || convertMarkdownToQuillHtml(raw)
             });
         }
 
@@ -1307,6 +1470,16 @@
         const parentCategory = (metadata.parent_category || metadata.parent || metadata.parent_cat || '').split(',')[0].trim();
         if (singleCategory) {
             handleAutoCategorySelection(singleCategory, parentCategory);
+        }
+
+        // 9. Update UI feedback
+        const sourceName = fileName ? ` (${fileName})` : '';
+        showToast('🎉 সফল! সম্পূর্ণ পোস্ট ' + parsedParts.length + 'টি অংশে বিভক্ত হয়ে অটো-ফিল হয়েছে' + sourceName + '।', 'success');
+        
+        if (titleInput) {
+            titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
         }
 
         // 9. Update UI feedback
@@ -1674,6 +1847,34 @@
                     setTimeout(processSmartPaste, 150);
                 }
             });
+        }
+
+        // Setup Drag & Drop for Doc Upload (.docx / .doc / .md / .txt)
+        const docDropzone = document.getElementById('doc-dropzone');
+        if (docDropzone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                docDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    docDropzone.style.borderColor = '#2563eb';
+                    docDropzone.style.background = '#eff6ff';
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                docDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    docDropzone.style.borderColor = '#93c5fd';
+                    docDropzone.style.background = '#ffffff';
+                }, false);
+            });
+            docDropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    handleDocFileUpload(files);
+                }
+            }, false);
         }
     });
 

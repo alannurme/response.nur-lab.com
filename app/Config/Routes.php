@@ -94,6 +94,7 @@ $routes->get('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->post('admin/ajax_search_posts', 'Admin::ajax_search_posts');
 $routes->get('admin/ajax_all_posts_index', 'Admin::ajax_all_posts_index');
 $routes->match(['GET', 'POST'], 'admin/create_category_ajax', 'Admin::create_category_ajax');
+$routes->match(['GET', 'POST'], 'admin/parse_doc_ajax', 'Admin::parse_doc_ajax');
 
 // Media Fallback & Proxy for Google Drive (preserves legacy links in posts)
 $routes->get('img/(:any)', 'Home::mediaFallback/img/$1');

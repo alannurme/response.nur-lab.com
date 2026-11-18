@@ -2487,6 +2487,74 @@ class Admin extends Controller {
 
 
 
+    public function parse_doc_ajax() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_FILES['doc_file'])) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'ফাইল আপলোড করা হয়নি।']);
+        }
+
+        $file = $_FILES['doc_file'];
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'ফাইল আপলোডে ত্রুটি হয়েছে।']);
+        }
+
+        $tmpPath = $file['tmp_name'];
+        $fileName = $file['name'];
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $rawText = '';
+        $rawHtml = '';
+
+        if ($ext === 'docx') {
+            $zip = new \ZipArchive();
+            if ($zip->open($tmpPath) === true) {
+                if (($xmlIndex = $zip->locateName('word/document.xml')) !== false) {
+                    $xmlData = $zip->getFromIndex($xmlIndex);
+                    $dom = new \DOMDocument();
+                    @$dom->loadXML($xmlData);
+                    $paragraphs = $dom->getElementsByTagName('p');
+                    foreach ($paragraphs as $para) {
+                        $pStyle = '';
+                        $pStyleNodes = $para->getElementsByTagName('pStyle');
+                        if ($pStyleNodes->length > 0) {
+                            $pStyle = $pStyleNodes->item(0)->getAttribute('w:val');
+                        }
+                        $textNodes = $para->getElementsByTagName('t');
+                        $paraText = '';
+                        foreach ($textNodes as $t) {
+                            $paraText .= $t->nodeValue;
+                        }
+                        $paraTrimmed = trim($paraText);
+                        if ($paraTrimmed !== '') {
+                            $rawText .= $paraTrimmed . "\n";
+                            $escaped = htmlspecialchars($paraTrimmed, ENT_QUOTES, 'UTF-8');
+                            if (stripos($pStyle, 'Heading1') !== false || stripos($pStyle, '1') === 0) {
+                                $rawHtml .= '<h1>' . $escaped . '</h1>';
+                            } elseif (stripos($pStyle, 'Heading2') !== false || stripos($pStyle, '2') === 0) {
+                                $rawHtml .= '<h2>' . $escaped . '</h2>';
+                            } elseif (stripos($pStyle, 'Heading3') !== false || stripos($pStyle, '3') === 0) {
+                                $rawHtml .= '<h3>' . $escaped . '</h3>';
+                            } else {
+                                $rawHtml .= '<p>' . $escaped . '</p>';
+                            }
+                        }
+                    }
+                }
+                $zip->close();
+            } else {
+                $rawText = file_get_contents($tmpPath);
+            }
+        } else {
+            // .md, .txt or fallback
+            $rawText = file_get_contents($tmpPath);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'filename' => $fileName,
+            'text' => $rawText,
+            'html' => $rawHtml
+        ]);
+    }
+
     public function import_doc() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['doc_file'])) {
             $categoryId = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
