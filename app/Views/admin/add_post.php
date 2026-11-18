@@ -517,7 +517,13 @@
 
 <!-- Mammoth.js for client-side Word .docx parsing -->
 <script src="<?= URLROOT ?>/public/js/mammoth.browser.min.js"></script>
-<script>if(typeof mammoth==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"><\/script>');}</script>
+<script>
+if (typeof mammoth === 'undefined') {
+    var ms = document.createElement('script');
+    ms.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+    document.head.appendChild(ms);
+}
+</script>
 
 <script>
     function updateFeaturedImageUI() {
@@ -1496,15 +1502,6 @@
                 toggleSmartPastePanel(false);
             }
         }, 1200);
-        
-        if (titleInput) {
-            titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-        }
-
-        // 9. Update UI feedback
-        showToast('🎉 সফল! সম্পূর্ণ পোস্ট ' + parsedParts.length + 'টি অংশে বিভক্ত হয়ে অটো-ফিল হয়েছে।', 'success');
         
         if (titleInput) {
             titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
