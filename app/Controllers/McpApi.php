@@ -117,35 +117,44 @@ class McpApi extends Controller {
 
     private function authenticate() {
         $db = \Config\Database::pdoConnect();
-        $stmt = $db->query("SELECT setting_value FROM settings WHERE setting_key = 'post_api_key' OR setting_key = 'mcp_api_key' LIMIT 1");
-        $storedKey = $stmt->fetchColumn();
+        $stmt = $db->query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('post_api_key', 'mcp_api_key')");
+        $storedKeys = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
 
-        if (empty($storedKey)) {
+        if (empty($storedKeys)) {
             // Default fallback if no key generated yet
             return true;
         }
 
         $providedKey = '';
 
-        // Check Authorization header
-        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-        if (empty($authHeader) && function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        // 1. Check X-API-KEY header
+        if (!empty($_SERVER['HTTP_X_API_KEY'])) {
+            $providedKey = trim($_SERVER['HTTP_X_API_KEY']);
         }
 
-        if (!empty($authHeader)) {
-            if (preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {
-                $providedKey = trim($matches[1]);
-            } else {
-                $providedKey = trim($authHeader);
+        // 2. Check Authorization header
+        if (empty($providedKey)) {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+            if (empty($authHeader) && function_exists('apache_request_headers')) {
+                $headers = apache_request_headers();
+                $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            }
+
+            if (!empty($authHeader)) {
+                if (preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {
+                    $providedKey = trim($matches[1]);
+                } else {
+                    $providedKey = trim($authHeader);
+                }
             }
         }
 
+        // 3. Check GET or POST param
         if (empty($providedKey)) {
-            $providedKey = $_GET['api_key'] ?? $_POST['api_key'] ?? '';
+            $providedKey = trim($_GET['api_key'] ?? $_POST['api_key'] ?? '');
         }
 
+        // 4. Check JSON payload body
         if (empty($providedKey)) {
             $rawInput = file_get_contents('php://input');
             if (!empty($rawInput)) {
@@ -156,7 +165,17 @@ class McpApi extends Controller {
             }
         }
 
-        return !empty($providedKey) && hash_equals($storedKey, $providedKey);
+        if (empty($providedKey)) {
+            return false;
+        }
+
+        foreach ($storedKeys as $k => $val) {
+            if (!empty($val) && hash_equals($val, $providedKey)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function ping() {

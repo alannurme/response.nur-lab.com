@@ -404,23 +404,25 @@ function testTool(action, params) {
     outBox.textContent = '// রিকোয়েস্ট প্রসেস হচ্ছে...';
     outBox.style.color = '#f59e0b';
 
-    const apiKey = document.getElementById('mcp_key_input').value;
-    const endpoint = document.getElementById('mcp_endpoint_input').value;
+    const apiKey = document.getElementById('mcp_key_input').value.trim();
+    const endpoint = document.getElementById('mcp_endpoint_input').value.trim();
 
-    const payload = Object.assign({ action: action }, params);
+    const payload = Object.assign({ action: action, api_key: apiKey }, params);
+    const testUrl = endpoint + (endpoint.indexOf('?') !== -1 ? '&' : '?') + 'api_key=' + encodeURIComponent(apiKey);
 
-    fetch(endpoint, {
+    fetch(testUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
+            'Authorization': 'Bearer ' + apiKey,
+            'X-API-KEY': apiKey
         },
         body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {
         outBox.textContent = JSON.stringify(data, null, 2);
-        outBox.style.color = data.status === 'success' || data.success ? '#4ade80' : '#f87171';
+        outBox.style.color = (data.status === 'success' || data.success) ? '#4ade80' : '#f87171';
     })
     .catch(err => {
         outBox.textContent = 'ত্রুটি: ' + err.toString();
