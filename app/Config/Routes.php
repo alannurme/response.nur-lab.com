@@ -45,6 +45,7 @@ $routes->get('api/check_yt_live', 'Home::check_yt_live_ajax');
 // MCP Server & API Routes
 $routes->match(['GET', 'POST', 'OPTIONS'], 'api/mcp', 'McpApi::index');
 $routes->match(['GET', 'POST'], 'admin/mcp', 'Admin::mcp');
+$routes->match(['GET', 'POST'], 'admin/resequence_posts', 'Admin::resequence_posts');
 
 // Admin Routes
 $routes->get('admin', 'Admin::index');

@@ -2074,6 +2074,9 @@ if (!empty($data['breadcrumbs'])) {
                     <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="syncAllPostCategories(this)" title="পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করুন">
                         <i class="fas fa-sync-alt"></i> <span>Sync Categories</span>
                     </button>
+                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border-color: #6366f1; color: #4f46e5; background: #eef2ff;" onclick="autoFixPostOrder(this)" title="আপলোডের সিরিয়াল অনুযায়ী প্রতি পোস্টে ১ মিনিট ব্যবধান দিয়ে টাইমস্ট্যাম্প ও ক্রম ঠিক করুন">
+                        <i class="fas fa-sort-numeric-down"></i> <span>সিরিয়াল ঠিক করুন</span>
+                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
@@ -2220,6 +2223,16 @@ if (!empty($data['breadcrumbs'])) {
                                             <span class="post-badge post-badge-draft" id="post-badge-<?= $post['id'] ?>">Draft</span>
                                         <?php else: ?>
                                             <span class="post-badge post-badge-published" id="post-badge-<?= $post['id'] ?>">Published</span>
+                                        <?php endif; ?>
+                                        <?php $hasFeaturedImg = !empty($post['featured_image']) && trim($post['featured_image']) !== ''; ?>
+                                        <?php if ($hasFeaturedImg): ?>
+                                            <span class="post-badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; margin-left: 6px; font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;" title="ফিচার্ড ছবি সংযুক্ত রয়েছে">
+                                                <i class="fas fa-image" style="color: #10b981;"></i> ছবি আছে
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="post-badge" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; margin-left: 6px; font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;" title="এই পোস্টে কোনো ফিচার্ড ছবি নেই">
+                                                <i class="fas fa-image" style="opacity: 0.4;"></i> ছবি নেই
+                                            </span>
                                         <?php endif; ?>
                                         <!-- Mobile Inline Actions under Title -->
                                         <div class="mobile-row-actions" style="display: none; margin-top: 8px; gap: 12px; align-items: center;">
@@ -6635,6 +6648,45 @@ body.organize-drag-active #organize-root-list {
         applySubfolderViewPreference();
     });
 })();
+
+function autoFixPostOrder(btn) {
+    if (!confirm('আপনি কি আপলোডের সিরিয়াল (ID ASC) অনুযায়ী সকল পোস্টের টাইমস্ট্যাম্প ১ মিনিট ব্যবধানে স্বয়ংক্রিয়ভাবে সাজাতে চান? এতে পোস্টগুলো লেখার প্রকৃত ধারাবাহিকতায় সুবিন্যস্ত হয়ে যাবে।')) {
+        return;
+    }
+
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং হচ্ছে...';
+    }
+
+    fetch('<?= URLROOT ?>/admin/resequence_posts', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message || 'সিরিয়াল সফলভাবে সাজানো হয়েছে!');
+            location.reload();
+        } else {
+            alert('ত্রুটি: ' + (data.message || 'সিরিয়াল ঠিক করা যায়নি।'));
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        }
+    })
+    .catch(err => {
+        alert('সার্ভার রিকোয়েস্টে সমস্যা: ' + err.toString());
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+    });
+}
 </script>
 
 <?php require APPROOT . '/Views/admin/footer.php'; ?>

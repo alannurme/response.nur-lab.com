@@ -275,6 +275,48 @@
                     <td style="padding: 12px 16px; text-align: center;"><button type="button" onclick="testTool('list_questions', {status: 'all', limit: 5})" class="btn btn-sm" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;">পরীক্ষা করুন</button></td>
                 </tr>
                 <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_add_question</td>
+                    <td style="padding: 12px 16px; color: #334155;">প্রশ্নোত্তর (Q&A) সেকশনে সরাসরি নতুন প্রশ্ন ও উত্তর সাবমিট করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">question, user_name, answer</td>
+                    <td style="padding: 12px 16px; text-align: center;"><button type="button" onclick="testTool('add_question', {question: 'নফল রোজার নিয়ত কখন করতে হয়?', user_name: 'তানভীর আহমেদ', answer: 'সুবহে সাদিকের পূর্বে বা দুপুরের পূর্বেও নিয়ত করা যায়।'})" class="btn btn-sm" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;">পরীক্ষা করুন</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_answer_question</td>
+                    <td style="padding: 12px 16px; color: #334155;">পাঠকের প্রশ্নের উত্তর প্রদান করে এবং স্ট্যাটাস answered করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">question_id, answer</td>
+                    <td style="padding: 12px 16px; text-align: center;"><span style="color: #6366f1; font-size: 0.8rem;">POST</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_list_comments</td>
+                    <td style="padding: 12px 16px; color: #334155;">পোস্টের পাঠকদের সাম্প্রতিক মন্তব্য তালিকা ও স্ট্যাটাস প্রদর্শন করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">status (all/pending/approved), limit</td>
+                    <td style="padding: 12px 16px; text-align: center;"><button type="button" onclick="testTool('list_comments', {status: 'all', limit: 5})" class="btn btn-sm" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;">পরীক্ষা করুন</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_moderate_comment</td>
+                    <td style="padding: 12px 16px; color: #334155;">কমেন্ট অনুমোদন (Approve), স্প্যাম মার্কিং বা ডিলিট করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">comment_id, moderation_action</td>
+                    <td style="padding: 12px 16px; text-align: center;"><span style="color: #6366f1; font-size: 0.8rem;">POST</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_update_post_status</td>
+                    <td style="padding: 12px 16px; color: #334155;">পোস্টকে তাৎক্ষণিকভাবে published বা draft স্ট্যাটাসে পরিবর্তন করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">post_id, status</td>
+                    <td style="padding: 12px 16px; text-align: center;"><span style="color: #6366f1; font-size: 0.8rem;">POST</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_clear_cache</td>
+                    <td style="padding: 12px 16px; color: #334155;">ওয়েবসাইটের সমস্ত পেজ ও মেটাডাটা ক্যাশ তাৎক্ষণিকভাবে খালি করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">none</td>
+                    <td style="padding: 12px 16px; text-align: center;"><button type="button" onclick="testTool('clear_cache', {})" class="btn btn-sm" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;">ক্লিয়ার করুন</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_get_settings</td>
+                    <td style="padding: 12px 16px; color: #334155;">ওয়েবসাইটের সাধারণ কনফিগারেশন ও এসইও সেটিংস প্রদর্শন করে।</td>
+                    <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">none</td>
+                    <td style="padding: 12px 16px; text-align: center;"><button type="button" onclick="testTool('get_settings', {})" class="btn btn-sm" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem;">পরীক্ষা করুন</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 12px 16px; font-weight: 700; color: #2563eb; font-family: monospace;">response_get_site_stats</td>
                     <td style="padding: 12px 16px; color: #334155;">সাইটের সামগ্রিক পরিসংখ্যান (মোট পোস্ট, ভিজিটর ভিউ, প্রশ্ন ইত্যাদি) প্রদর্শন করে।</td>
                     <td style="padding: 12px 16px; color: #64748b; font-family: monospace; font-size: 0.85rem;">none</td>
@@ -303,9 +345,13 @@
             </label>
             <select id="test_action_select" onchange="updateTestParamsPlaceholder()" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; font-size: 0.9rem; margin-bottom: 12px;">
                 <option value="search_posts">search_posts (পোস্ট খুঁজুন)</option>
-                <option value="get_site_stats">get_site_stats (সাইট পরিসংখ্যান)</option>
+                <option value="add_question">add_question (নতুন প্রশ্ন ও উত্তর যুক্ত করুন)</option>
+                <option value="list_questions">list_questions (পাঠকদের প্রশ্ন তালিকা)</option>
+                <option value="list_comments">list_comments (মন্তব্য তালিকা)</option>
                 <option value="list_categories">list_categories (ক্যাটাগরি তালিকা)</option>
-                <option value="list_questions">list_questions (পাঠকদের প্রশ্ন)</option>
+                <option value="clear_cache">clear_cache (ক্যাশ খালি করুন)</option>
+                <option value="get_settings">get_settings (সাইট সেটিংস দেখুন)</option>
+                <option value="get_site_stats">get_site_stats (সাইট সামগ্রিক পরিসংখ্যান)</option>
                 <option value="ping">ping (কানেকশন চেক)</option>
             </select>
 
@@ -376,7 +422,15 @@ function updateTestParamsPlaceholder() {
     const input = document.getElementById('test_params_input');
     if (action === 'search_posts') {
         input.value = JSON.stringify({ query: 'তালাক', limit: 3 }, null, 2);
+    } else if (action === 'add_question') {
+        input.value = JSON.stringify({ 
+            question: 'নফল রোজার নিয়ত কখন করতে হয়?', 
+            user_name: 'তানভীর আহমেদ', 
+            answer: 'সুবহে সাদিকের পূর্বে বা দুপুরের পূর্বেও নিয়ত করা যায়। ((সহীহ বুখারী: ১৯০৯))' 
+        }, null, 2);
     } else if (action === 'list_questions') {
+        input.value = JSON.stringify({ status: 'all', limit: 5 }, null, 2);
+    } else if (action === 'list_comments') {
         input.value = JSON.stringify({ status: 'all', limit: 5 }, null, 2);
     } else {
         input.value = '{}';
