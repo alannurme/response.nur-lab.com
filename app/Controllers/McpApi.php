@@ -892,17 +892,6 @@ class McpApi extends Controller {
         }
     }
 
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Question answered successfully!',
-                'question_id' => $id
-            ], JSON_UNESCAPED_UNICODE);
-        } catch (\Throwable $e) {
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
-        }
-    }
-
     private function listComments($payload) {
         $status = strtolower($payload['status'] ?? 'all');
         $limit = max(1, min(2000, (int)($payload['limit'] ?? 10)));
