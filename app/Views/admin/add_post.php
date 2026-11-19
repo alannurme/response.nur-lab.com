@@ -1283,6 +1283,53 @@ if (typeof mammoth === 'undefined') {
             seo_keywords: ''
         };
 
+        // 0. Extract Metadata from Word Document Table if present in rawHtml
+        if (rawHtml && (rawHtml.includes('<table') || rawHtml.includes('<TABLE'))) {
+            const tableWrapper = document.createElement('div');
+            tableWrapper.innerHTML = rawHtml;
+            const tables = tableWrapper.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                let foundMetaCount = 0;
+                rows.forEach(tr => {
+                    const cells = tr.querySelectorAll('td, th');
+                    if (cells.length >= 2) {
+                        const rawKey = cells[0].textContent.trim().toLowerCase().replace(/[\s\-_:]+/g, '_');
+                        const rawVal = cells[1].textContent.trim().replace(/^['"]|['"]$/g, '');
+                        let mappedKey = rawKey;
+                        if (mappedKey === 'parent_cat' || mappedKey === 'parent') mappedKey = 'parent_category';
+                        if (mappedKey === 'categories') mappedKey = 'category';
+                        
+                        if (['title', 'slug', 'category', 'parent_category', 'seo_title', 'seo_description', 'seo_keywords'].includes(mappedKey)) {
+                            foundMetaCount++;
+                            if (!metadata[mappedKey] && rawVal) {
+                                metadata[mappedKey] = rawVal;
+                            }
+                        }
+                    }
+                });
+                // If this was a metadata table, remove it from rawHtml so it doesn't appear in post body
+                if (foundMetaCount >= 2) {
+                    table.remove();
+                }
+            });
+            rawHtml = tableWrapper.innerHTML;
+        }
+
+        // 0b. Extract Metadata from sequential text lines (when table is rendered as text)
+        const textLines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        for (let i = 0; i < textLines.length - 1; i++) {
+            const rawKey = textLines[i].toLowerCase().replace(/[\s\-_:]+/g, '_');
+            let mappedKey = rawKey;
+            if (mappedKey === 'parent_cat' || mappedKey === 'parent') mappedKey = 'parent_category';
+            if (mappedKey === 'categories') mappedKey = 'category';
+            if (['title', 'slug', 'category', 'parent_category', 'seo_title', 'seo_description', 'seo_keywords'].includes(mappedKey)) {
+                if (!metadata[mappedKey] && textLines[i + 1]) {
+                    metadata[mappedKey] = textLines[i + 1].trim().replace(/^['"]|['"]$/g, '');
+                }
+            }
+        }
+
         // 1. Parse YAML Frontmatter if present
         let yamlMatch = raw.match(/^\s*---\s*[\r\n]+([\s\S]*?)\s*[\r\n]+---/);
         if (!yamlMatch) {
@@ -1294,9 +1341,12 @@ if (typeof mammoth === 'undefined') {
             yaml.split('\n').forEach(line => {
                 const idx = line.indexOf(':');
                 if (idx > -1) {
-                    const key = line.substring(0, idx).trim().toLowerCase();
+                    const key = line.substring(0, idx).trim().toLowerCase().replace(/[\s\-_:]+/g, '_');
                     const val = line.substring(idx + 1).trim().replace(/^['"]|['"]$/g, '');
-                    if (key in metadata) metadata[key] = val;
+                    let mappedKey = key;
+                    if (mappedKey === 'parent_cat' || mappedKey === 'parent') mappedKey = 'parent_category';
+                    if (mappedKey === 'categories') mappedKey = 'category';
+                    if (mappedKey in metadata && !metadata[mappedKey]) metadata[mappedKey] = val;
                 }
             });
         } else {
@@ -1304,9 +1354,12 @@ if (typeof mammoth === 'undefined') {
             raw.split('\n').forEach(line => {
                 const m = line.match(/^\s*(title|slug|category|categories|parent_category|parent|parent_cat|seo_title|seo_description|seo_keywords)\s*:\s*(.*)$/i);
                 if (m) {
-                    const key = m[1].toLowerCase();
+                    const key = m[1].toLowerCase().replace(/[\s\-_:]+/g, '_');
                     const val = m[2].trim().replace(/^['"]|['"]$/g, '');
-                    if (key in metadata && !metadata[key]) metadata[key] = val;
+                    let mappedKey = key;
+                    if (mappedKey === 'parent_cat' || mappedKey === 'parent') mappedKey = 'parent_category';
+                    if (mappedKey === 'categories') mappedKey = 'category';
+                    if (mappedKey in metadata && !metadata[mappedKey]) metadata[mappedKey] = val;
                 }
             });
         }
