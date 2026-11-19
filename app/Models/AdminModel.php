@@ -390,7 +390,17 @@ class AdminModel extends Model {
         }
         $data['author'] = $primary_author;
         $data['status'] = !empty($data['status']) ? $data['status'] : 'published';
-        $data['created_at'] = !empty($data['created_at']) ? $data['created_at'] : date('Y-m-d H:i:s');
+        
+        // Ensure strictly unique sequential timestamp (1 minute increment if batch upload)
+        $latestTime = $this->db->query("SELECT MAX(created_at) FROM posts")->fetchColumn();
+        $targetTime = !empty($data['created_at']) ? strtotime($data['created_at']) : time();
+        if ($latestTime) {
+            $latestTs = strtotime($latestTime);
+            if ($targetTime <= $latestTs) {
+                $targetTime = $latestTs + 60;
+            }
+        }
+        $data['created_at'] = date('Y-m-d H:i:s', $targetTime);
         $data['views'] = isset($data['views']) ? intval($data['views']) : 0;
         
         // Auto-generate excerpt if empty
@@ -483,7 +493,17 @@ class AdminModel extends Model {
         }
         $data['author'] = $primary_author;
         $data['status'] = !empty($data['status']) ? $data['status'] : 'published';
-        $data['created_at'] = !empty($data['created_at']) ? $data['created_at'] : date('Y-m-d H:i:s');
+        
+        // Ensure strictly unique sequential timestamp (1 minute increment if batch upload)
+        $latestTime = $this->db->query("SELECT MAX(created_at) FROM posts")->fetchColumn();
+        $targetTime = !empty($data['created_at']) ? strtotime($data['created_at']) : time();
+        if ($latestTime) {
+            $latestTs = strtotime($latestTime);
+            if ($targetTime <= $latestTs) {
+                $targetTime = $latestTs + 60;
+            }
+        }
+        $data['created_at'] = date('Y-m-d H:i:s', $targetTime);
         $data['views'] = isset($data['views']) ? intval($data['views']) : 0;
 
         // Auto-generate excerpt if empty

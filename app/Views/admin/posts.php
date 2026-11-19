@@ -2074,9 +2074,6 @@ if (!empty($data['breadcrumbs'])) {
                     <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="syncAllPostCategories(this)" title="পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করুন">
                         <i class="fas fa-sync-alt"></i> <span>Sync Categories</span>
                     </button>
-                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border-color: #6366f1; color: #4f46e5; background: #eef2ff;" onclick="autoFixPostOrder(this)" title="আপলোডের সিরিয়াল অনুযায়ী প্রতি পোস্টে ১ মিনিট ব্যবধান দিয়ে টাইমস্ট্যাম্প ও ক্রম ঠিক করুন">
-                        <i class="fas fa-sort-numeric-down"></i> <span>সিরিয়াল ঠিক করুন</span>
-                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
