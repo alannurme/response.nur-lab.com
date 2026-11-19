@@ -2071,9 +2071,6 @@ if (!empty($data['breadcrumbs'])) {
                     <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="openFolderOrganizeModal()" title="ড্র্যাগ অ্যান্ড ড্রপ করে ফোল্ডার ও সাব-ফোল্ডার সাজান">
                         <i class="fas fa-sitemap" style="color: #6366f1;"></i> <span>Organize Folders</span>
                     </button>
-                    <button type="button" class="btn-explorer btn-explorer-secondary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" onclick="syncAllPostCategories(this)" title="পূর্ববর্তী সকল পোস্টের ক্যাটাগরি স্বয়ংক্রিয়ভাবে ক্লিন ও সিঙ্ক করুন">
-                        <i class="fas fa-sync-alt"></i> <span>Sync Categories</span>
-                    </button>
                     <a href="<?= URLROOT ?>/admin/add_post?category_id=<?= $data['categoryId'] ?>" class="btn-explorer btn-explorer-primary" style="height: 34px; padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center;">
                         <i class="fas fa-plus"></i> Add Post
                     </a>
