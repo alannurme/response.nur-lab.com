@@ -2912,63 +2912,6 @@ class Admin extends Controller {
         $this->view('admin/storage_settings', $data);
     }
 
-    public function mcp() {
-        $adminModel = $this->model('AdminModel');
-        $data = [];
-
-        $settings = $adminModel->getSettings();
-        $apiKey = $settings['post_api_key'] ?? $settings['mcp_api_key'] ?? '';
-
-        if (empty($apiKey)) {
-            $apiKey = 'nur_' . bin2hex(random_bytes(16));
-            $adminModel->updateSettings(['post_api_key' => $apiKey]);
-            $settings['post_api_key'] = $apiKey;
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (isset($_POST['regenerate_key'])) {
-                $apiKey = 'nur_' . bin2hex(random_bytes(16));
-                $adminModel->updateSettings(['post_api_key' => $apiKey]);
-                $settings['post_api_key'] = $apiKey;
-                \App\Helpers\Cache::clear();
-                $data['success'] = 'নতুন MCP API কী সফলভাবে তৈরি করা হয়েছে।';
-            } elseif (isset($_POST['custom_api_key'])) {
-                $customKey = trim($_POST['custom_api_key']);
-                if (!empty($customKey)) {
-                    $apiKey = $customKey;
-                    $adminModel->updateSettings(['post_api_key' => $apiKey]);
-                    $settings['post_api_key'] = $apiKey;
-                    \App\Helpers\Cache::clear();
-                    $data['success'] = 'MCP API কী সফলভাবে আপডেট করা হয়েছে।';
-                }
-            }
-        }
-
-        $db = \Config\Database::pdoConnect();
-        $totalPosts = 0;
-        $totalCats = 0;
-        $totalQuestions = 0;
-        $totalComments = 0;
-
-        try { $totalPosts = (int)$db->query("SELECT COUNT(*) FROM posts")->fetchColumn(); } catch (\Throwable $e) {}
-        try { $totalCats = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn(); } catch (\Throwable $e) {}
-        try { $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn(); } catch (\Throwable $e) {}
-        try { $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn(); } catch (\Throwable $e) {}
-
-        $data['mcp_api_key'] = $apiKey;
-        $data['api_endpoint'] = rtrim(URLROOT, '/') . '/api/mcp';
-        $data['stats'] = [
-            'total_posts' => $totalPosts,
-            'total_categories' => $totalCats,
-            'total_questions' => $totalQuestions,
-            'total_comments' => $totalComments
-        ];
-        $data['settings'] = $settings;
-        $data['current_page'] = 'mcp';
-        $data['title'] = 'Model Context Protocol (MCP) Server & API';
-        $this->view('admin/mcp', $data);
-    }
-
     public function system_update() {
         $adminModel = $this->model('AdminModel');
         $data = [];
