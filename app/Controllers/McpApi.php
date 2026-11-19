@@ -692,26 +692,52 @@ class McpApi extends Controller {
         $questions = [];
         try {
             $db = \Config\Database::pdoConnect();
-            $sql = "SELECT id, question, answer, status, created_at, user_name FROM questions WHERE 1=1";
+            
+            // Check user_questions first (primary app table)
+            $sql = "SELECT q.id, q.question, q.answer, q.status, q.created_at, q.name as user_name, q.email, c.name as category_name 
+                    FROM user_questions q 
+                    LEFT JOIN question_categories c ON q.category_id = c.id 
+                    WHERE 1=1";
             $params = [];
 
             if ($status === 'unanswered') {
-                $sql .= " AND (status = 'pending' OR answer IS NULL OR answer = '')";
+                $sql .= " AND (q.status = 'pending' OR q.answer IS NULL OR q.answer = '')";
             } elseif ($status === 'answered') {
-                $sql .= " AND (status = 'answered' AND answer IS NOT NULL AND answer != '')";
+                $sql .= " AND (q.status = 'answered' AND q.answer IS NOT NULL AND q.answer != '')";
             }
 
             if (!empty($query)) {
-                $sql .= " AND (question LIKE :q OR answer LIKE :q2)";
+                $sql .= " AND (q.question LIKE :q OR q.answer LIKE :q2)";
                 $params['q'] = "%{$query}%";
                 $params['q2'] = "%{$query}%";
             }
 
-            $sql .= " ORDER BY id DESC LIMIT " . (int)$limit;
+            $sql .= " ORDER BY q.id DESC LIMIT " . (int)$limit;
 
             $stmt = $db->prepare($sql);
             $stmt->execute($params);
             $questions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Fallback to legacy questions table if user_questions had no matching rows
+            if (empty($questions)) {
+                $this->ensureQuestionsTable($db);
+                $sqlLegacy = "SELECT id, question, answer, status, created_at, user_name, email FROM questions WHERE 1=1";
+                $legacyParams = [];
+                if ($status === 'unanswered') {
+                    $sqlLegacy .= " AND (status = 'pending' OR answer IS NULL OR answer = '')";
+                } elseif ($status === 'answered') {
+                    $sqlLegacy .= " AND (status = 'answered' AND answer IS NOT NULL AND answer != '')";
+                }
+                if (!empty($query)) {
+                    $sqlLegacy .= " AND (question LIKE :q OR answer LIKE :q2)";
+                    $legacyParams['q'] = "%{$query}%";
+                    $legacyParams['q2'] = "%{$query}%";
+                }
+                $sqlLegacy .= " ORDER BY id DESC LIMIT " . (int)$limit;
+                $stmtLegacy = $db->prepare($sqlLegacy);
+                $stmtLegacy->execute($legacyParams);
+                $questions = $stmtLegacy->fetchAll(\PDO::FETCH_ASSOC);
+            }
         } catch (\Throwable $e) {}
 
         echo json_encode([
@@ -737,6 +763,9 @@ class McpApi extends Controller {
     private function addQuestion($payload) {
         $question = trim($payload['question'] ?? '');
         $userName = trim($payload['user_name'] ?? $payload['name'] ?? 'Anonymous');
+        $email = trim($payload['email'] ?? '');
+        $categoryName = trim($payload['category'] ?? $payload['category_name'] ?? '');
+        $categoryId = !empty($payload['category_id']) ? (int)$payload['category_id'] : null;
         $answer = trim($payload['answer'] ?? '');
         $status = !empty($answer) ? 'answered' : (trim($payload['status'] ?? 'pending'));
 
@@ -748,23 +777,75 @@ class McpApi extends Controller {
 
         try {
             $db = \Config\Database::pdoConnect();
-            $this->ensureQuestionsTable($db);
 
-            $stmt = $db->prepare("INSERT INTO questions (question, answer, user_name, status, created_at, updated_at) 
-                                  VALUES (:question, :answer, :user_name, :status, NOW(), NOW())");
-            $stmt->execute([
-                'question' => $question,
-                'answer' => !empty($answer) ? $answer : null,
-                'user_name' => $userName,
-                'status' => $status
-            ]);
-            $newId = (int)$db->lastInsertId();
+            // Resolve or create question category if provided
+            if ($categoryId === null && !empty($categoryName)) {
+                try {
+                    $catStmt = $db->prepare("SELECT id FROM question_categories WHERE name = :cname LIMIT 1");
+                    $catStmt->execute(['cname' => $categoryName]);
+                    $foundCat = $catStmt->fetch(\PDO::FETCH_ASSOC);
+                    if ($foundCat) {
+                        $categoryId = (int)$foundCat['id'];
+                    } else {
+                        $slug = trim(preg_replace('~[^\p{L}\p{N}\p{M}]+~u', '-', mb_strtolower($categoryName, 'UTF-8')), '-');
+                        $insCat = $db->prepare("INSERT INTO question_categories (name, slug) VALUES (:cname, :cslug)");
+                        $insCat->execute(['cname' => $categoryName, 'cslug' => $slug]);
+                        $categoryId = (int)$db->lastInsertId();
+                    }
+                } catch (\Throwable $catErr) {}
+            }
+
+            $newId = 0;
+            $answeredAt = ($status === 'answered') ? date('Y-m-d H:i:s') : null;
+
+            // 1. Insert into primary user_questions table (used by website & admin panel)
+            try {
+                $stmtUserQ = $db->prepare("INSERT INTO user_questions (name, email, question, answer, category_id, status, answered_at, created_at) 
+                                           VALUES (:name, :email, :question, :answer, :category_id, :status, :answered_at, NOW())");
+                $stmtUserQ->execute([
+                    'name'        => !empty($userName) ? $userName : 'Anonymous',
+                    'email'       => !empty($email) ? $email : null,
+                    'question'    => $question,
+                    'answer'      => !empty($answer) ? $answer : null,
+                    'category_id' => $categoryId,
+                    'status'      => $status,
+                    'answered_at' => $answeredAt
+                ]);
+                $newId = (int)$db->lastInsertId();
+            } catch (\Throwable $uqErr) {}
+
+            // 2. Also keep legacy questions table synchronized
+            try {
+                $this->ensureQuestionsTable($db);
+                $stmtLegacy = $db->prepare("INSERT INTO questions (question, answer, user_name, email, status, created_at, updated_at) 
+                                            VALUES (:question, :answer, :user_name, :email, :status, NOW(), NOW())");
+                $stmtLegacy->execute([
+                    'question'  => $question,
+                    'answer'    => !empty($answer) ? $answer : null,
+                    'user_name' => $userName,
+                    'email'     => !empty($email) ? $email : null,
+                    'status'    => $status
+                ]);
+                if (!$newId) {
+                    $newId = (int)$db->lastInsertId();
+                }
+            } catch (\Throwable $qErr) {}
+
+            // 3. Auto-sync previous rows from questions table to user_questions if missing
+            try {
+                $db->exec("INSERT INTO user_questions (name, email, question, answer, status, answered_at, created_at)
+                           SELECT q.user_name, q.email, q.question, q.answer, q.status, NOW(), q.created_at 
+                           FROM questions q 
+                           WHERE NOT EXISTS (SELECT 1 FROM user_questions uq WHERE uq.question = q.question)");
+            } catch (\Throwable $syncErr) {}
+
             \App\Helpers\Cache::clear();
 
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Question added successfully!',
                 'question_id' => $newId,
+                'category_id' => $categoryId,
                 'status_state' => $status
             ], JSON_UNESCAPED_UNICODE);
         } catch (\Throwable $e) {
@@ -785,9 +866,31 @@ class McpApi extends Controller {
 
         try {
             $db = \Config\Database::pdoConnect();
-            $stmt = $db->prepare("UPDATE questions SET answer = :ans, status = 'answered', updated_at = NOW() WHERE id = :id");
-            $stmt->execute(['ans' => $answer, 'id' => $id]);
+            
+            // Update primary user_questions table
+            try {
+                $stmt = $db->prepare("UPDATE user_questions SET answer = :ans, status = 'answered', answered_at = NOW() WHERE id = :id");
+                $stmt->execute(['ans' => $answer, 'id' => $id]);
+            } catch (\Throwable $e1) {}
+
+            // Update legacy questions table
+            try {
+                $stmt2 = $db->prepare("UPDATE questions SET answer = :ans, status = 'answered', updated_at = NOW() WHERE id = :id");
+                $stmt2->execute(['ans' => $answer, 'id' => $id]);
+            } catch (\Throwable $e2) {}
+
             \App\Helpers\Cache::clear();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Question answered successfully!',
+                'question_id' => $id
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
 
             echo json_encode([
                 'status' => 'success',
@@ -951,8 +1054,16 @@ class McpApi extends Controller {
         try { $publishedPosts = (int)$db->query("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn(); } catch (\Throwable $e) {}
         try { $totalViews = (int)$db->query("SELECT SUM(views + fake_views) FROM posts")->fetchColumn(); } catch (\Throwable $e) {}
         try { $totalCategories = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn(); } catch (\Throwable $e) {}
-        try { $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn(); } catch (\Throwable $e) {}
-        try { $unansweredQuestions = (int)$db->query("SELECT COUNT(*) FROM questions WHERE status = 'pending' OR answer IS NULL OR answer = ''")->fetchColumn(); } catch (\Throwable $e) {}
+        try { 
+            $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM user_questions")->fetchColumn(); 
+        } catch (\Throwable $e) {
+            try { $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn(); } catch (\Throwable $e2) {}
+        }
+        try { 
+            $unansweredQuestions = (int)$db->query("SELECT COUNT(*) FROM user_questions WHERE status = 'pending' OR answer IS NULL OR answer = ''")->fetchColumn(); 
+        } catch (\Throwable $e) {
+            try { $unansweredQuestions = (int)$db->query("SELECT COUNT(*) FROM questions WHERE status = 'pending' OR answer IS NULL OR answer = ''")->fetchColumn(); } catch (\Throwable $e2) {}
+        }
         try { $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn(); } catch (\Throwable $e) {}
 
         echo json_encode([
