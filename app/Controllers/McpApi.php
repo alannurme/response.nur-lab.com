@@ -80,6 +80,11 @@ class McpApi extends Controller {
                     $this->listQuestions($payload);
                     break;
 
+                case 'add_question':
+                case 'create_question':
+                    $this->addQuestion($payload);
+                    break;
+
                 case 'answer_question':
                     $this->answerQuestion($payload);
                     break;
@@ -663,6 +668,58 @@ class McpApi extends Controller {
             'count' => count($questions),
             'questions' => $questions
         ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function ensureQuestionsTable($db) {
+        $db->exec("CREATE TABLE IF NOT EXISTS questions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            question TEXT NOT NULL,
+            answer LONGTEXT NULL,
+            user_name VARCHAR(255) DEFAULT 'Anonymous',
+            email VARCHAR(255) NULL,
+            status ENUM('pending', 'answered') DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    }
+
+    private function addQuestion($payload) {
+        $question = trim($payload['question'] ?? '');
+        $userName = trim($payload['user_name'] ?? $payload['name'] ?? 'Anonymous');
+        $answer = trim($payload['answer'] ?? '');
+        $status = !empty($answer) ? 'answered' : (trim($payload['status'] ?? 'pending'));
+
+        if (empty($question)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'question is required.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            $this->ensureQuestionsTable($db);
+
+            $stmt = $db->prepare("INSERT INTO questions (question, answer, user_name, status, created_at, updated_at) 
+                                  VALUES (:question, :answer, :user_name, :status, NOW(), NOW())");
+            $stmt->execute([
+                'question' => $question,
+                'answer' => !empty($answer) ? $answer : null,
+                'user_name' => $userName,
+                'status' => $status
+            ]);
+            $newId = (int)$db->lastInsertId();
+            \App\Helpers\Cache::clear();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Question added successfully!',
+                'question_id' => $newId,
+                'status_state' => $status
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
     }
 
     private function answerQuestion($payload) {
