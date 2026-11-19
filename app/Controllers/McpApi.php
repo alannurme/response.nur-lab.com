@@ -224,7 +224,7 @@ class McpApi extends Controller {
             $params['p_cat_id'] = $categoryId;
         }
 
-        $sql .= " ORDER BY p.id DESC LIMIT " . (int)$limit;
+        $sql .= " ORDER BY p.created_at DESC, p.id DESC LIMIT " . (int)$limit;
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
