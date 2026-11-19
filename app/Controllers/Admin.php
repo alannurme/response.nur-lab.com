@@ -2945,10 +2945,15 @@ class Admin extends Controller {
         }
 
         $db = \Config\Database::pdoConnect();
-        $totalPosts = (int)$db->query("SELECT COUNT(*) FROM posts")->fetchColumn();
-        $totalCats = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn();
-        $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn();
-        $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn();
+        $totalPosts = 0;
+        $totalCats = 0;
+        $totalQuestions = 0;
+        $totalComments = 0;
+
+        try { $totalPosts = (int)$db->query("SELECT COUNT(*) FROM posts")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalCats = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn(); } catch (\Throwable $e) {}
 
         $data['mcp_api_key'] = $apiKey;
         $data['api_endpoint'] = rtrim(URLROOT, '/') . '/api/mcp';

@@ -633,27 +633,30 @@ class McpApi extends Controller {
         $limit = max(1, min(50, (int)($payload['limit'] ?? 10)));
         $query = trim($payload['query'] ?? '');
 
-        $db = \Config\Database::pdoConnect();
-        $sql = "SELECT id, question, answer, status, created_at, user_name FROM questions WHERE 1=1";
-        $params = [];
+        $questions = [];
+        try {
+            $db = \Config\Database::pdoConnect();
+            $sql = "SELECT id, question, answer, status, created_at, user_name FROM questions WHERE 1=1";
+            $params = [];
 
-        if ($status === 'unanswered') {
-            $sql .= " AND (status = 'pending' OR answer IS NULL OR answer = '')";
-        } elseif ($status === 'answered') {
-            $sql .= " AND (status = 'answered' AND answer IS NOT NULL AND answer != '')";
-        }
+            if ($status === 'unanswered') {
+                $sql .= " AND (status = 'pending' OR answer IS NULL OR answer = '')";
+            } elseif ($status === 'answered') {
+                $sql .= " AND (status = 'answered' AND answer IS NOT NULL AND answer != '')";
+            }
 
-        if (!empty($query)) {
-            $sql .= " AND (question LIKE :q OR answer LIKE :q2)";
-            $params['q'] = "%{$query}%";
-            $params['q2'] = "%{$query}%";
-        }
+            if (!empty($query)) {
+                $sql .= " AND (question LIKE :q OR answer LIKE :q2)";
+                $params['q'] = "%{$query}%";
+                $params['q2'] = "%{$query}%";
+            }
 
-        $sql .= " ORDER BY id DESC LIMIT " . (int)$limit;
+            $sql .= " ORDER BY id DESC LIMIT " . (int)$limit;
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        $questions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $questions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {}
 
         echo json_encode([
             'status' => 'success',
@@ -672,41 +675,48 @@ class McpApi extends Controller {
             return;
         }
 
-        $db = \Config\Database::pdoConnect();
-        $stmt = $db->prepare("UPDATE questions SET answer = :ans, status = 'answered', updated_at = NOW() WHERE id = :id");
-        $stmt->execute(['ans' => $answer, 'id' => $id]);
+        try {
+            $db = \Config\Database::pdoConnect();
+            $stmt = $db->prepare("UPDATE questions SET answer = :ans, status = 'answered', updated_at = NOW() WHERE id = :id");
+            $stmt->execute(['ans' => $answer, 'id' => $id]);
+            \App\Helpers\Cache::clear();
 
-        \App\Helpers\Cache::clear();
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Question answered successfully!',
-            'question_id' => $id
-        ], JSON_UNESCAPED_UNICODE);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Question answered successfully!',
+                'question_id' => $id
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
     }
 
     private function listComments($payload) {
         $status = strtolower($payload['status'] ?? 'all');
         $limit = max(1, min(50, (int)($payload['limit'] ?? 10)));
 
-        $db = \Config\Database::pdoConnect();
-        $sql = "SELECT c.id, c.post_id, p.title AS post_title, p.slug AS post_slug, 
-                       c.name, c.email, c.comment, c.status, c.created_at
-                FROM comments c
-                LEFT JOIN posts p ON c.post_id = p.id
-                WHERE 1=1";
-        $params = [];
+        $comments = [];
+        try {
+            $db = \Config\Database::pdoConnect();
+            $sql = "SELECT c.id, c.post_id, p.title AS post_title, p.slug AS post_slug, 
+                           c.name, c.email, c.comment, c.status, c.created_at
+                    FROM comments c
+                    LEFT JOIN posts p ON c.post_id = p.id
+                    WHERE 1=1";
+            $params = [];
 
-        if ($status !== 'all') {
-            $sql .= " AND c.status = :st";
-            $params['st'] = $status;
-        }
+            if ($status !== 'all') {
+                $sql .= " AND c.status = :st";
+                $params['st'] = $status;
+            }
 
-        $sql .= " ORDER BY c.id DESC LIMIT " . (int)$limit;
+            $sql .= " ORDER BY c.id DESC LIMIT " . (int)$limit;
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        $comments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $comments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {}
 
         echo json_encode([
             'status' => 'success',
@@ -718,13 +728,21 @@ class McpApi extends Controller {
     private function getSiteStats() {
         $db = \Config\Database::pdoConnect();
 
-        $totalPosts = (int)$db->query("SELECT COUNT(*) FROM posts")->fetchColumn();
-        $publishedPosts = (int)$db->query("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn();
-        $totalViews = (int)$db->query("SELECT SUM(views + fake_views) FROM posts")->fetchColumn();
-        $totalCategories = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn();
-        $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn();
-        $unansweredQuestions = (int)$db->query("SELECT COUNT(*) FROM questions WHERE status = 'pending' OR answer IS NULL OR answer = ''")->fetchColumn();
-        $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn();
+        $totalPosts = 0;
+        $publishedPosts = 0;
+        $totalViews = 0;
+        $totalCategories = 0;
+        $totalQuestions = 0;
+        $unansweredQuestions = 0;
+        $totalComments = 0;
+
+        try { $totalPosts = (int)$db->query("SELECT COUNT(*) FROM posts")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $publishedPosts = (int)$db->query("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalViews = (int)$db->query("SELECT SUM(views + fake_views) FROM posts")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalCategories = (int)$db->query("SELECT COUNT(*) FROM categories")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalQuestions = (int)$db->query("SELECT COUNT(*) FROM questions")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $unansweredQuestions = (int)$db->query("SELECT COUNT(*) FROM questions WHERE status = 'pending' OR answer IS NULL OR answer = ''")->fetchColumn(); } catch (\Throwable $e) {}
+        try { $totalComments = (int)$db->query("SELECT COUNT(*) FROM comments")->fetchColumn(); } catch (\Throwable $e) {}
 
         echo json_encode([
             'status' => 'success',
