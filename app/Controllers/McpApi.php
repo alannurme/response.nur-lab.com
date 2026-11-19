@@ -93,6 +93,26 @@ class McpApi extends Controller {
                     $this->listComments($payload);
                     break;
 
+                case 'moderate_comment':
+                    $this->moderateComment($payload);
+                    break;
+
+                case 'update_post_status':
+                    $this->updatePostStatus($payload);
+                    break;
+
+                case 'delete_post':
+                    $this->deletePost($payload);
+                    break;
+
+                case 'clear_cache':
+                    $this->clearCache();
+                    break;
+
+                case 'get_settings':
+                    $this->getSettings();
+                    break;
+
                 case 'get_site_stats':
                     $this->getSiteStats();
                     break;
@@ -806,6 +826,109 @@ class McpApi extends Controller {
             'status' => 'success',
             'count' => count($comments),
             'comments' => $comments
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function moderateComment($payload) {
+        $id = (int)($payload['comment_id'] ?? $payload['id'] ?? 0);
+        $action = strtolower($payload['moderation_action'] ?? $payload['action_type'] ?? 'approve');
+
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'comment_id is required.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            if ($action === 'delete') {
+                $stmt = $db->prepare("DELETE FROM comments WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+                $msg = 'Comment deleted successfully.';
+            } else {
+                $status = ($action === 'spam') ? 'spam' : (($action === 'pending') ? 'pending' : 'approved');
+                $stmt = $db->prepare("UPDATE comments SET status = :st WHERE id = :id");
+                $stmt->execute(['st' => $status, 'id' => $id]);
+                $msg = "Comment marked as {$status}.";
+            }
+            \App\Helpers\Cache::clear();
+
+            echo json_encode(['status' => 'success', 'message' => $msg, 'comment_id' => $id], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    private function updatePostStatus($payload) {
+        $id = (int)($payload['post_id'] ?? $payload['id'] ?? 0);
+        $status = strtolower($payload['status'] ?? 'published');
+
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'post_id is required.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $allowed = ['published', 'draft'];
+        if (!in_array($status, $allowed)) {
+            $status = 'published';
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            $stmt = $db->prepare("UPDATE posts SET status = :status WHERE id = :id");
+            $stmt->execute(['status' => $status, 'id' => $id]);
+            \App\Helpers\Cache::clear();
+
+            echo json_encode(['status' => 'success', 'message' => "Post #{$id} status updated to {$status}."], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    private function deletePost($payload) {
+        $id = (int)($payload['post_id'] ?? $payload['id'] ?? 0);
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'post_id is required.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        try {
+            $db = \Config\Database::pdoConnect();
+            // Delete relations
+            $db->prepare("DELETE FROM post_categories WHERE post_id = :id")->execute(['id' => $id]);
+            $db->prepare("DELETE FROM post_authors WHERE post_id = :id")->execute(['id' => $id]);
+            $db->prepare("DELETE FROM comments WHERE post_id = :id")->execute(['id' => $id]);
+            $db->prepare("DELETE FROM posts WHERE id = :id")->execute(['id' => $id]);
+            \App\Helpers\Cache::clear();
+
+            echo json_encode(['status' => 'success', 'message' => "Post #{$id} deleted successfully."], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    private function clearCache() {
+        \App\Helpers\Cache::clear();
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Website cache cleared successfully!'
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function getSettings() {
+        $db = \Config\Database::pdoConnect();
+        $settings = $db->query("SELECT setting_key, setting_value FROM settings")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        // Exclude secret keys from public read
+        unset($settings['post_api_key'], $settings['mcp_api_key'], $settings['db_password']);
+
+        echo json_encode([
+            'status' => 'success',
+            'settings' => $settings
         ], JSON_UNESCAPED_UNICODE);
     }
 
