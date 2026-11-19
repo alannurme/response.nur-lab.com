@@ -97,6 +97,14 @@ class McpApi extends Controller {
                     $this->getSiteStats();
                     break;
 
+                case 'fast_index':
+                    $this->fastIndex();
+                    break;
+
+                case 'optimize_search_index':
+                    $this->optimizeSearchIndex();
+                    break;
+
                 default:
                     http_response_code(400);
                     echo json_encode([
@@ -194,7 +202,7 @@ class McpApi extends Controller {
 
     private function searchPosts($payload) {
         $query = trim($payload['query'] ?? $payload['keyword'] ?? $payload['q'] ?? '');
-        $limit = max(1, min(50, (int)($payload['limit'] ?? 10)));
+        $limit = max(1, min(2000, (int)($payload['limit'] ?? 10)));
         $categoryId = !empty($payload['category_id']) ? (int)$payload['category_id'] : null;
 
         $db = \Config\Database::pdoConnect();
@@ -654,7 +662,7 @@ class McpApi extends Controller {
 
     private function listQuestions($payload) {
         $status = strtolower($payload['status'] ?? 'all');
-        $limit = max(1, min(50, (int)($payload['limit'] ?? 10)));
+        $limit = max(1, min(2000, (int)($payload['limit'] ?? 10)));
         $query = trim($payload['query'] ?? '');
 
         $questions = [];
@@ -770,7 +778,7 @@ class McpApi extends Controller {
 
     private function listComments($payload) {
         $status = strtolower($payload['status'] ?? 'all');
-        $limit = max(1, min(50, (int)($payload['limit'] ?? 10)));
+        $limit = max(1, min(2000, (int)($payload['limit'] ?? 10)));
 
         $comments = [];
         try {
@@ -831,6 +839,51 @@ class McpApi extends Controller {
                 'unanswered_questions' => $unansweredQuestions,
                 'total_comments' => $totalComments
             ]
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function fastIndex() {
+        $db = \Config\Database::pdoConnect();
+        $sql = "SELECT p.id, p.title, p.slug, p.seo_keywords, p.status, p.views, p.created_at,
+                       c.name AS category_name, pc.name AS parent_category_name
+                FROM posts p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN categories pc ON c.parent_id = pc.id
+                WHERE p.status = 'published'
+                ORDER BY p.created_at DESC, p.id DESC";
+        $posts = $db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+
+        $baseUrl = rtrim(URLROOT, '/');
+        if (strpos($baseUrl, 'localhost') !== false) {
+            $baseUrl = 'https://response.nur-lab.com';
+        }
+
+        foreach ($posts as &$post) {
+            $post['url'] = $baseUrl . '/post/' . $post['slug'];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'count' => count($posts),
+            'timestamp' => time(),
+            'posts' => $posts
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function optimizeSearchIndex() {
+        $db = \Config\Database::pdoConnect();
+        $messages = [];
+
+        try {
+            $db->exec("ALTER TABLE posts ADD FULLTEXT INDEX idx_ft_title_keywords (title, seo_keywords)");
+            $messages[] = "Created FULLTEXT index on posts (title, seo_keywords)";
+        } catch (\Throwable $e) {
+            $messages[] = "Index notice: " . $e->getMessage();
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'messages' => $messages
         ], JSON_UNESCAPED_UNICODE);
     }
 }
