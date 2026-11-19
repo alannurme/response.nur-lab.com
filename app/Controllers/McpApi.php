@@ -125,6 +125,10 @@ class McpApi extends Controller {
                     $this->optimizeSearchIndex();
                     break;
 
+                case 'resequence_posts':
+                    $this->resequencePosts();
+                    break;
+
                 default:
                     http_response_code(400);
                     echo json_encode([
@@ -1008,5 +1012,50 @@ class McpApi extends Controller {
             'status' => 'success',
             'messages' => $messages
         ], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function resequencePosts() {
+        $db = \Config\Database::pdoConnect();
+
+        try {
+            $stmt = $db->query("SELECT id, created_at FROM posts ORDER BY id ASC");
+            $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($posts)) {
+                echo json_encode(['status' => 'success', 'message' => 'কোনো পোস্ট পাওয়া যায়নি।'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $firstTime = !empty($posts[0]['created_at']) ? strtotime($posts[0]['created_at']) : 0;
+            if ($firstTime <= 0) {
+                $firstTime = strtotime('2026-01-01 00:00:00');
+            }
+
+            $upd = $db->prepare("UPDATE posts SET created_at = :cat WHERE id = :id");
+
+            $curr = $firstTime;
+            $count = 0;
+
+            foreach ($posts as $p) {
+                $curr += 60; // 1 minute increment
+                $newDate = date('Y-m-d H:i:s', $curr);
+                $upd->execute([
+                    'cat' => $newDate,
+                    'id' => (int)$p['id']
+                ]);
+                $count++;
+            }
+
+            \App\Helpers\Cache::clear();
+
+            echo json_encode([
+                'status' => 'success',
+                'count' => $count,
+                'message' => "মোট {$count}টি পোস্টের টাইমস্ট্যাম্প ১ মিনিট ব্যবধানে ক্রমানুসারে (ID ASC) সফলভাবে সাজানো হয়েছে!"
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        }
     }
 }

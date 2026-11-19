@@ -7146,7 +7146,7 @@ class Admin extends Controller {
     }
 
     public function resequence_posts() {
-        if (!isset($_SESSION['user_id'])) {
+        if (empty($_SESSION['admin_id']) && empty($_SESSION['user_id'])) {
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             exit;
