@@ -42,6 +42,10 @@ $routes->get('api/hadith/list', 'Home::api_hadith_list');
 $routes->get('home/check_yt_live_ajax', 'Home::check_yt_live_ajax');
 $routes->get('api/check_yt_live', 'Home::check_yt_live_ajax');
 
+// MCP Server & API Routes
+$routes->match(['GET', 'POST', 'OPTIONS'], 'api/mcp', 'McpApi::index');
+$routes->match(['GET', 'POST'], 'admin/mcp', 'Admin::mcp');
+
 // Admin Routes
 $routes->get('admin', 'Admin::index');
 $routes->get('admin/login', 'Admin::login');
