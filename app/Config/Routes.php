@@ -105,6 +105,7 @@ $routes->get('public/uploads/(:any)', 'Home::mediaFallback/public/uploads/$1');
 // Admin Media Migration Routes
 $routes->match(['GET', 'POST'], 'admin/api_migrate_to_gdrive', 'Admin::api_migrate_to_gdrive');
 $routes->match(['GET', 'POST'], 'admin/api_migrate_from_gdrive', 'Admin::api_migrate_from_gdrive');
+$routes->match(['GET', 'POST', 'OPTIONS'], 'admin/copy_image_proxy', 'Admin::copy_image_proxy');
 
 $routes->add('admin/(:segment)/(:segment)/(:any)', 'Admin::$1/$2/$3');
 $routes->add('admin/(:segment)/(:any)', 'Admin::$1/$2');

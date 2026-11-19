@@ -47,7 +47,7 @@ class Admin extends Controller {
         }
 
         $uri = service('request')->getUri()->getPath();
-        $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false) || strpos($uri, 'gdrive_oauth_callback') !== false);
+        $isLoginRoute = (strpos($uri, 'login') !== false || (isset($_GET['url']) && strpos($_GET['url'], 'login') !== false) || strpos($uri, 'gdrive_oauth_callback') !== false || strpos($uri, 'copy_image_proxy') !== false);
 
         $isAjaxRoute = (strpos($uri, 'ajax_') !== false || strpos($uri, '_ajax') !== false || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
 
@@ -6954,6 +6954,137 @@ class Admin extends Controller {
             $_SESSION['seerah_error'] = 'ডিলিট করতে সমস্যা হয়েছে।';
         }
         header('Location: ' . URLROOT . '/admin/seerah_books');
+        exit;
+    }
+
+    /**
+     * Dedicated CORS-enabled Image Proxy & PNG Converter for Clipboard Copy
+     * Resolves local files, Google Drive mappings/URLs, and external image URLs,
+     * converting them to pure PNG with CORS headers so browsers can copy them directly to clipboard.
+     */
+    public function copy_image_proxy() {
+        // Set CORS headers
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            exit(0);
+        }
+
+        $url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+        if (empty($url)) {
+            http_response_code(400);
+            echo 'Missing image url parameter';
+            exit;
+        }
+
+        $rawImage = null;
+        $contentType = null;
+
+        // 1. Check if it's a relative or local file path
+        $cleanPath = $url;
+        $hosts = [
+            parse_url(URLROOT, PHP_URL_HOST),
+            'response.nur-lab.com',
+            'localhost',
+            '127.0.0.1'
+        ];
+        $parsed = parse_url($url);
+        if (!empty($parsed['host']) && in_array(strtolower($parsed['host']), array_filter($hosts))) {
+            $cleanPath = $parsed['path'] ?? '';
+        }
+        $cleanPath = ltrim(str_replace('\\', '/', $cleanPath), '/');
+        if (strpos($cleanPath, 'public/') === 0) {
+            $cleanPath = substr($cleanPath, 7);
+        }
+
+        // Try local disk paths
+        $candidates = [
+            \PUBROOT . '/' . $cleanPath,
+            \PUBROOT . '/img/' . basename($cleanPath),
+            FCPATH . $cleanPath,
+            FCPATH . 'public/' . $cleanPath,
+            FCPATH . 'public/img/' . basename($cleanPath),
+            WRITEPATH . 'uploads/' . basename($cleanPath)
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $rawImage = file_get_contents($candidate);
+                break;
+            }
+        }
+
+        // 2. If not on local disk, check GoogleDriveMapping
+        if ($rawImage === null) {
+            require_once APPPATH . 'Helpers/GoogleDriveMapping.php';
+            $mapping = \App\Helpers\GoogleDriveMapping::get($cleanPath);
+            if (empty($mapping)) {
+                $mapping = \App\Helpers\GoogleDriveMapping::get(basename($cleanPath));
+            }
+
+            if (!empty($mapping['url'])) {
+                $url = $mapping['url'];
+            }
+        }
+
+        // 3. Fetch from remote URL (Google Drive, external CDN, or live host)
+        if ($rawImage === null && (filter_var($url, FILTER_VALIDATE_URL) || strpos($url, 'http') === 0)) {
+            // If it's a Google Drive share link, convert to direct export link
+            if (strpos($url, 'drive.google.com/file/d/') !== false) {
+                if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $url, $m)) {
+                    $url = 'https://drive.google.com/uc?export=view&id=' . $m[1];
+                }
+            }
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+            $rawImage = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            curl_close($ch);
+
+            if ($httpCode !== 200 || empty($rawImage)) {
+                $rawImage = null;
+            }
+        }
+
+        if (empty($rawImage)) {
+            http_response_code(404);
+            header('Content-Type: text/plain; charset=utf-8');
+            echo 'Image not found or could not be loaded.';
+            exit;
+        }
+
+        // 4. Convert image to PNG using GD
+        if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+            $im = @imagecreatefromstring($rawImage);
+            if ($im !== false) {
+                // Enable alpha blending and save alpha
+                imagealphablending($im, false);
+                imagesavealpha($im, true);
+                header('Content-Type: image/png');
+                header('Cache-Control: public, max-age=86400');
+                imagepng($im);
+                imagedestroy($im);
+                exit;
+            }
+        }
+
+        // Fallback: output raw image
+        $mime = $contentType ?: 'image/png';
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . strlen($rawImage));
+        header('Cache-Control: public, max-age=86400');
+        echo $rawImage;
         exit;
     }
 }

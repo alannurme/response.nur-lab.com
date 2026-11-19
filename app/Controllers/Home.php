@@ -2058,6 +2058,12 @@ class Home extends Controller {
      * Ensures all existing links in posts, pages, and themes remain 100% functional.
      */
     public function mediaFallback(...$params) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            exit(0);
+        }
+
         $path = implode('/', $params);
         $path = ltrim(str_replace('\\', '/', $path), '/');
         

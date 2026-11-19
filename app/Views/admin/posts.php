@@ -6001,12 +6001,12 @@ body.organize-drag-active #organize-root-list {
         }
         const imgUrl = window.currentPostDetailData.image;
         const origHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>কপি হচ্ছে...</span>';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>ছবি প্রস্তুত হচ্ছে...</span>';
         btn.disabled = true;
 
-        const fallbackCopyUrl = () => {
+        const fallbackCopyUrl = (msg = 'ইমেজ লিংক কপি হয়েছে!') => {
             navigator.clipboard.writeText(imgUrl).then(() => {
-                btn.innerHTML = '<i class="fas fa-check" style="color: #2563eb;"></i> <span>ইমেজ লিংক কপি হয়েছে!</span>';
+                btn.innerHTML = '<i class="fas fa-link" style="color: #eab308;"></i> <span>' + msg + '</span>';
             }).catch(() => {
                 btn.innerHTML = '<i class="fas fa-check"></i> <span>কপি সম্পন্ন</span>';
             }).finally(() => {
@@ -6017,49 +6017,52 @@ body.organize-drag-active #organize-root-list {
             });
         };
 
+        const onCopySuccess = () => {
+            btn.innerHTML = '<i class="fas fa-check" style="color: #16a34a;"></i> <span>ছবি কপি হয়েছে!</span>';
+            setTimeout(() => {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+            }, 3000);
+        };
+
         try {
-            const response = await fetch(imgUrl, { mode: 'cors' });
-            if (!response.ok) throw new Error('Fetch status ' + response.status);
-            const blob = await response.blob();
+            // Check if ClipboardItem API is supported
+            if (typeof ClipboardItem === 'undefined' || !navigator.clipboard || !navigator.clipboard.write) {
+                console.warn('ClipboardItem API not supported, falling back to URL copy');
+                fallbackCopyUrl('ব্রাউজারে ইমেজ কপি সমর্থিত নয়');
+                return;
+            }
 
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = URL.createObjectURL(blob);
+            // Dedicated proxy URL that converts any image format (WebP/JPEG/Drive) into pure PNG with CORS headers
+            const proxyUrl = '<?= URLROOT ?>/admin/copy_image_proxy?url=' + encodeURIComponent(imgUrl);
 
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = () => reject(new Error('Image decode error'));
-            });
-
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth || img.width;
-            canvas.height = img.naturalHeight || img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            canvas.toBlob(async (pngBlob) => {
-                if (!pngBlob) {
-                    fallbackCopyUrl();
-                    return;
-                }
-                try {
-                    await navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': pngBlob })
-                    ]);
-                    btn.innerHTML = '<i class="fas fa-check" style="color: #2563eb;"></i> <span>ছবি কপি হয়েছে!</span>';
-                    setTimeout(() => {
-                        btn.innerHTML = origHtml;
-                        btn.disabled = false;
-                    }, 2500);
-                } catch (clipErr) {
-                    console.warn('ClipboardItem write blocked, falling back to URL copy:', clipErr);
-                    fallbackCopyUrl();
-                }
-            }, 'image/png');
+            // In Chromium 86+, Safari 13.1+, Edge: passing a Promise to ClipboardItem preserves the user activation gesture synchronously!
+            try {
+                const item = new ClipboardItem({
+                    'image/png': fetch(proxyUrl)
+                        .then(res => {
+                            if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
+                            return res.blob();
+                        })
+                });
+                await navigator.clipboard.write([item]);
+                onCopySuccess();
+                return;
+            } catch (promiseErr) {
+                console.warn('Promise ClipboardItem failed, trying direct blob fetch write:', promiseErr);
+                const res = await fetch(proxyUrl);
+                if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
+                const pngBlob = await res.blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': pngBlob })
+                ]);
+                onCopySuccess();
+                return;
+            }
 
         } catch (err) {
-            console.warn('Image fetch failed (possibly CORS on local), falling back to URL copy:', err);
-            fallbackCopyUrl();
+            console.warn('Image blob clipboard copy failed, falling back to URL copy:', err);
+            fallbackCopyUrl('লিংক কপি হয়েছে');
         }
     }
 
