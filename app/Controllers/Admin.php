@@ -162,9 +162,9 @@ class Admin extends Controller {
         $pendingQuestionsCount = count($adminModel->getUserQuestions(null, 'pending'));
         $pendingGuestAnswersCount = count($adminModel->getAllAnswers('pending'));
 
-        // Top viewed posts
+        // Top viewed posts & Real-time latest viewed posts
         $topPosts = $adminModel->getTopPosts(5);
-        $leastViewedPosts = $adminModel->getLeastViewedPosts(5);
+        $latestViewedPosts = $adminModel->getLatestViewedPosts(5);
 
         // Draft posts count
         $draftPostsCount = $adminModel->getDraftPostsCount();
@@ -233,7 +233,8 @@ class Admin extends Controller {
             'stats' => $stats,
             'chartData' => $chartData,
             'top_posts' => $topPosts,
-            'least_viewed_posts' => $leastViewedPosts,
+            'latest_viewed_posts' => $latestViewedPosts,
+            'least_viewed_posts' => $latestViewedPosts,
             'draft_posts_count' => $draftPostsCount,
             'category_distribution' => $categoryDistribution,
             'monthly_chart' => $monthlyChartData,

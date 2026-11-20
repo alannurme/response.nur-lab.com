@@ -244,24 +244,51 @@ $dc   = ['#2563eb','#8b5cf6','#ec4899','#f97316','#22c55e','#06b6d4','#f59e0b','
         <?php endforeach; ?>
     </div>
 
-    <!-- Least Viewed Articles -->
+    <!-- Latest Viewed Articles (Real-time) -->
     <div class="db-card">
         <div class="db-card-header">
-            <div class="db-card-title"><div class="icon-box" style="background:#eff6ff;color:#3b82f6"><i class="fas fa-eye-slash"></i></div>Least Viewed Articles</div>
+            <div class="db-card-title"><div class="icon-box" style="background:#eff6ff;color:#2563eb"><i class="fas fa-history"></i></div>Latest Viewed Articles <span style="font-size:.65rem;background:#dbeafe;color:#1e40af;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">Real-time</span></div>
             <a href="<?= URLROOT ?>/admin/posts" class="db-view-link">View All <i class="fas fa-arrow-right" style="font-size:.6rem"></i></a>
         </div>
-        <?php foreach ($data['least_viewed_posts'] as $i => $post): ?>
+        <?php 
+        $viewedPosts = $data['latest_viewed_posts'] ?? $data['least_viewed_posts'] ?? [];
+        if (empty($viewedPosts)): 
+        ?>
+        <div style="padding:24px;text-align:center;color:#94a3b8;font-size:.85rem">No recently viewed articles found</div>
+        <?php else: ?>
+        <?php foreach ($viewedPosts as $i => $post): 
+            $timeAgo = 'Recently';
+            if (!empty($post['last_viewed_at'])) {
+                $diff = time() - strtotime($post['last_viewed_at']);
+                if ($diff < 60) {
+                    $timeAgo = 'Just now';
+                } elseif ($diff < 3600) {
+                    $timeAgo = floor($diff / 60) . 'm ago';
+                } elseif ($diff < 86400) {
+                    $timeAgo = floor($diff / 3600) . 'h ago';
+                } else {
+                    $timeAgo = date('d M, h:i A', strtotime($post['last_viewed_at']));
+                }
+            }
+        ?>
         <a href="<?= URLROOT ?>/admin/edit_post/<?= $post['id'] ?>" class="post-row">
             <div class="post-num" style="background:<?= $dc[$i%8] ?>22;color:<?= $dc[$i%8] ?>"><?= $i+1 ?></div>
             <div style="flex:1;min-width:0">
                 <div style="font-size:.85rem;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($post['title']) ?></div>
-                <?php if (!empty($post['category_names'])): ?><div style="font-size:.7rem;color:#94a3b8;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($post['category_names']) ?></div><?php endif; ?>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;font-size:.7rem;color:#94a3b8">
+                    <?php if (!empty($post['category_names'])): ?>
+                    <span style="color:#2563eb;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px"><?= htmlspecialchars($post['category_names']) ?></span>
+                    <span>•</span>
+                    <?php endif; ?>
+                    <span style="color:#64748b;display:inline-flex;align-items:center;gap:3px"><i class="far fa-clock" style="font-size:.65rem"></i> <?= $timeAgo ?></span>
+                </div>
             </div>
-            <div style="display:flex;align-items:center;gap:4px;color:#ef4444;font-weight:700;font-size:.82rem;flex-shrink:0">
+            <div style="display:flex;align-items:center;gap:4px;color:#2563eb;font-weight:700;font-size:.82rem;flex-shrink:0">
                 <i class="fas fa-eye" style="font-size:.65rem;color:#94a3b8"></i><?= number_format($post['views']) ?>
             </div>
         </a>
         <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
 

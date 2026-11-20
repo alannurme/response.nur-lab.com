@@ -1888,8 +1888,8 @@ class Home extends Controller {
         $post = $stmt->fetch();
 
         if ($post) {
-            // Increment views
-            $db->prepare("UPDATE posts SET views = views + 1 WHERE id = :id")->execute(['id' => $post['id']]);
+            // Increment views and track real-time view timestamp
+            $db->prepare("UPDATE posts SET views = views + 1, last_viewed_at = CURRENT_TIMESTAMP WHERE id = :id")->execute(['id' => $post['id']]);
 
             $postModel = $this->model('PostModel');
             $adminModel = $this->model('AdminModel');

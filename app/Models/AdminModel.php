@@ -7,6 +7,7 @@ class AdminModel extends Model {
         parent::__construct();
         $this->initPagesTable();
         $this->cleanupDeprecatedIslamicTables();
+        $this->migratePostsLastViewedColumn();
     }
 
     public function cleanupDeprecatedIslamicTables() {
@@ -850,6 +851,52 @@ class AdminModel extends Model {
         $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
+    }
+
+    public function migratePostsLastViewedColumn() {
+        try {
+            $this->db->query("SELECT last_viewed_at FROM posts LIMIT 1");
+        } catch (\PDOException $e) {
+            try {
+                $this->db->query("ALTER TABLE posts ADD COLUMN last_viewed_at TIMESTAMP NULL DEFAULT NULL AFTER views, ADD INDEX idx_posts_last_viewed (status, last_viewed_at)");
+                $this->db->query("UPDATE posts SET last_viewed_at = COALESCE(updated_at, created_at) WHERE last_viewed_at IS NULL AND status = 'published'");
+            } catch (\PDOException $ex) {}
+        }
+    }
+
+    public function getLatestViewedPosts($limit = 5) {
+        $stmt = $this->db->prepare("
+            SELECT p.id, p.title, p.slug, p.views, p.created_at, p.last_viewed_at,
+                   GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') AS category_names
+            FROM posts p
+            LEFT JOIN post_categories pc ON p.id = pc.post_id
+            LEFT JOIN categories c ON pc.category_id = c.id
+            WHERE p.status = 'published' AND p.last_viewed_at IS NOT NULL
+            GROUP BY p.id
+            ORDER BY p.last_viewed_at DESC
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        $results = $stmt->fetchAll();
+
+        if (empty($results)) {
+            $stmt = $this->db->prepare("
+                SELECT p.id, p.title, p.slug, p.views, p.created_at, p.created_at AS last_viewed_at,
+                       GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') AS category_names
+                FROM posts p
+                LEFT JOIN post_categories pc ON p.id = pc.post_id
+                LEFT JOIN categories c ON pc.category_id = c.id
+                WHERE p.status = 'published'
+                GROUP BY p.id
+                ORDER BY p.id DESC
+                LIMIT :limit
+            ");
+            $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }
+        return $results;
     }
 
     public function getLeastViewedPosts($limit = 5) {

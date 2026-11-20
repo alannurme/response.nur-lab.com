@@ -207,7 +207,7 @@ class PostModel extends Model {
     }
 
     public function incrementViews($id) {
-        $stmt = $this->db->prepare("UPDATE posts SET views = views + 1 WHERE id = :id");
+        $stmt = $this->db->prepare("UPDATE posts SET views = views + 1, last_viewed_at = CURRENT_TIMESTAMP WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
 
