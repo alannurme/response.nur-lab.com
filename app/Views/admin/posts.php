@@ -2428,11 +2428,11 @@ if (!empty($data['breadcrumbs'])) {
 
                             <!-- Speed Controller: [-] [Speed] [+] -->
                             <div style="display: inline-flex; align-items: center; gap: 2px; background: #ffffff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 1px 4px;">
-                                <button type="button" onclick="changeScrollSpeed(-0.5)" title="স্ক্রোল স্পিড কমান (-0.5x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                <button type="button" onclick="changeScrollSpeed(-0.1)" title="স্ক্রোল স্পিড কমান (-0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span id="scrollSpeedDisplay" title="বর্তমান স্ক্রোল স্পিড (ক্লিক করে রিসেট)" onclick="setExactScrollSpeed(1.0)" style="font-size: 11px; font-weight: 800; color: #6b21a8; min-width: 32px; text-align: center; user-select: none; cursor: pointer;">1.0x</span>
-                                <button type="button" onclick="changeScrollSpeed(0.5)" title="স্ক্রোল স্পিড বাড়ান (+0.5x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                <button type="button" onclick="changeScrollSpeed(0.1)" title="স্ক্রোল স্পিড বাড়ান (+0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -2568,10 +2568,10 @@ if (!empty($data['breadcrumbs'])) {
 
                             <!-- Speed Presets -->
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <button type="button" onclick="setExactScrollSpeed(0.2)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">0.2x</button>
                                 <button type="button" onclick="setExactScrollSpeed(0.5)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">0.5x</button>
                                 <button type="button" onclick="setExactScrollSpeed(1.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">1.0x</button>
-                                <button type="button" onclick="setExactScrollSpeed(2.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">2.0x</button>
-                                <button type="button" onclick="setExactScrollSpeed(3.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">3.0x</button>
+                                <button type="button" onclick="setExactScrollSpeed(1.5)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">1.5x</button>
                             </div>
                         </div>
 
@@ -2634,11 +2634,11 @@ if (!empty($data['breadcrumbs'])) {
                         <span id="floatAutoScrollLabel">পজ</span>
                     </button>
                     <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 2px 6px;">
-                        <button type="button" onclick="changeScrollSpeed(-0.5)" title="স্পিড কমান" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
+                        <button type="button" onclick="changeScrollSpeed(-0.1)" title="স্পিড কমান (-0.1x)" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span id="floatScrollSpeedDisplay" style="font-size: 11px; font-weight: 800; min-width: 30px; text-align: center; color: #facc15;">1.0x</span>
-                        <button type="button" onclick="changeScrollSpeed(0.5)" title="স্পিড বাড়ান" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
+                        <button type="button" onclick="changeScrollSpeed(0.1)" title="স্পিড বাড়ান (+0.1x)" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -6359,8 +6359,8 @@ body.organize-drag-active #organize-root-list {
             const delta = Math.min(timestamp - lastTimestamp, 50); // cap to prevent jumps on tab unfocus
             lastTimestamp = timestamp;
 
-            // Base speed: 60px/sec at 1.0x (comfortable reading pace)
-            const pixelsToScroll = (60 * autoScrollSpeed * delta) / 1000;
+            // Base speed: 25px/sec at 1.0x (comfortable, readable pacing)
+            const pixelsToScroll = (25 * autoScrollSpeed * delta) / 1000;
             autoScrollRemainder += pixelsToScroll;
 
             if (autoScrollRemainder >= 1) {
@@ -6400,14 +6400,14 @@ body.organize-drag-active #organize-root-list {
 
     function changeScrollSpeed(delta) {
         autoScrollSpeed = Math.round((autoScrollSpeed + delta) * 10) / 10;
-        if (autoScrollSpeed < 0.5) autoScrollSpeed = 0.5;
+        if (autoScrollSpeed < 0.1) autoScrollSpeed = 0.1;
         if (autoScrollSpeed > 5.0) autoScrollSpeed = 5.0;
         updateAutoScrollUI();
     }
 
     function setExactScrollSpeed(speed) {
         autoScrollSpeed = parseFloat(speed) || 1.0;
-        if (autoScrollSpeed < 0.5) autoScrollSpeed = 0.5;
+        if (autoScrollSpeed < 0.1) autoScrollSpeed = 0.1;
         if (autoScrollSpeed > 5.0) autoScrollSpeed = 5.0;
         updateAutoScrollUI();
     }
