@@ -195,6 +195,19 @@ if (typeof activePickerStorageFilter === 'undefined') {
 function openMediaPicker(targetInputId, previewImgId) {
     currentTargetInput = document.getElementById(targetInputId);
     currentPreviewImg = document.getElementById(previewImgId);
+    
+    // Set selected image URL from current input value if present
+    if (currentTargetInput && currentTargetInput.value) {
+        selectedImageUrl = currentTargetInput.value;
+    } else {
+        selectedImageUrl = null;
+    }
+    
+    const confirmBtn = document.getElementById('confirmPickerSelection');
+    if (confirmBtn) {
+        confirmBtn.disabled = !selectedImageUrl;
+    }
+    
     document.getElementById('mediaPickerModal').classList.add('active');
     
     // Hide TinyMCE Dialog if active
@@ -204,7 +217,7 @@ function openMediaPicker(targetInputId, previewImgId) {
         tinyAux.style.pointerEvents = 'none';
     }
     
-    loadMediaLibrary();
+    loadMediaLibrary(selectedImageUrl);
 }
 
 function closeMediaPicker() {
@@ -257,13 +270,18 @@ function filterPickerGrid() {
 
     if (filtered.length === 0) {
         list.innerHTML = '<p class="loading-text"><i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; display: block; opacity: 0.5;"></i> কোনো মিডিয়া ফাইল পাওয়া যায়নি।</p>';
+        const confirmBtn = document.getElementById('confirmPickerSelection');
+        if (confirmBtn && !selectedImageUrl) confirmBtn.disabled = true;
         return;
     }
 
     list.innerHTML = '';
+    let hasSelected = false;
     filtered.forEach(file => {
         const div = document.createElement('div');
-        div.className = 'picker-item' + (selectedImageUrl === file.url ? ' selected' : '');
+        const isSel = (selectedImageUrl === file.url);
+        if (isSel) hasSelected = true;
+        div.className = 'picker-item' + (isSel ? ' selected' : '');
         div.onclick = () => selectImage(file.url, div);
         
         const isGdrive = (file.storage === 'google_drive');
@@ -277,17 +295,41 @@ function filterPickerGrid() {
         `;
         list.appendChild(div);
     });
+
+    const confirmBtn = document.getElementById('confirmPickerSelection');
+    if (confirmBtn) {
+        confirmBtn.disabled = !hasSelected && !selectedImageUrl;
+    }
 }
 
-async function loadMediaLibrary() {
+async function loadMediaLibrary(preselectUrl = null) {
     const list = document.getElementById('mediaPickerList');
     list.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> মিডিয়া ফাইল লোড হচ্ছে...</p>';
     
     try {
-        const res = await fetch('<?= URLROOT ?>/admin/api_media?storage=all');
+        const res = await fetch('<?= URLROOT ?>/admin/api_media?storage=all&_t=' + Date.now(), {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
         const data = await res.json();
         
-        allPickerMedia = Array.isArray(data) ? data : [];
+        let fetchedMedia = Array.isArray(data) ? data : [];
+        
+        if (preselectUrl) {
+            selectedImageUrl = preselectUrl;
+            const exists = fetchedMedia.some(f => f.url === preselectUrl);
+            if (!exists && typeof allPickerMedia !== 'undefined') {
+                const inMem = allPickerMedia.find(f => f.url === preselectUrl);
+                if (inMem) {
+                    fetchedMedia.unshift(inMem);
+                }
+            }
+        }
+        
+        allPickerMedia = fetchedMedia;
         
         // Update counts
         const gdriveCount = allPickerMedia.filter(f => f.storage === 'google_drive').length;
@@ -328,6 +370,19 @@ function confirmSelection() {
             currentPreviewImg.src = selectedImageUrl;
             currentPreviewImg.style.display = 'block';
         }
+        
+        // Direct UI update for Featured Image
+        const dropzone = document.getElementById('image_upload_dropzone');
+        const previewContainer = document.getElementById('image_preview_container');
+        if (currentTargetInput.id === 'post_image_path') {
+            if (dropzone) dropzone.style.display = 'none';
+            if (previewContainer) previewContainer.style.display = 'block';
+        }
+        
+        if (typeof updateFeaturedImageUI === 'function') {
+            updateFeaturedImageUI();
+        }
+
         // Auto-show remove button if it exists
         const removeBtn = document.getElementById('remove_' + currentTargetInput.id);
         if (removeBtn) {
@@ -400,13 +455,32 @@ async function handlePickerUpload(file) {
         }
 
         if (result && result.success) {
-            // If url returned, pre-select it
-            if (result.url) {
-                selectedImageUrl = result.url;
+            const uploadedUrl = result.url || '';
+            if (uploadedUrl) {
+                selectedImageUrl = uploadedUrl;
+                
+                // Immediately prepend to in-memory media array so it displays instantly without waiting for fetch
+                const newMediaItem = {
+                    name: file.name || 'Uploaded Image',
+                    url: uploadedUrl,
+                    storage: selectedDest,
+                    mtime: Math.floor(Date.now() / 1000)
+                };
+                allPickerMedia = [newMediaItem, ...allPickerMedia.filter(f => f.url !== uploadedUrl)];
             }
-            // Switch to library tab and reload
+            
+            // Switch to library tab
             switchPickerTab('library');
-            await loadMediaLibrary();
+            filterPickerGrid();
+            
+            // Immediately enable the confirm button
+            const confirmBtn = document.getElementById('confirmPickerSelection');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+            }
+            
+            // Reload fresh library list from server in background with cache-buster
+            await loadMediaLibrary(uploadedUrl);
             dropzone.innerHTML = originalHTML;
         } else {
             throw new Error((result && result.error) ? result.error : 'Upload failed');

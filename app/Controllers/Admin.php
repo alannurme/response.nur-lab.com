@@ -1433,6 +1433,9 @@ class Admin extends Controller {
                         if (!empty($file_name)) {
                             if ($is_ajax) {
                                 header('Content-Type: application/json');
+                                header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+                                header('Pragma: no-cache');
+                                header('Expires: 0');
                                 echo json_encode(['success' => true, 'url' => $file_url]);
                                 exit;
                             }
@@ -1681,6 +1684,9 @@ class Admin extends Controller {
         $sliced_files = array_slice($all_files, 0, $limit);
 
         header('Content-Type: application/json');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         echo json_encode($sliced_files);
         exit;
     }
