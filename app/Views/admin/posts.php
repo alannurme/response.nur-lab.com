@@ -2418,26 +2418,6 @@ if (!empty($data['breadcrumbs'])) {
                     </div>
                     
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <!-- Auto-Scroll Player & Speed Controller -->
-                        <div id="topAutoScrollWidget" style="display: inline-flex; align-items: center; background: #faf5ff; border: 1px solid #d8b4fe; border-radius: 8px; padding: 2px 6px; gap: 6px; box-shadow: 0 1px 2px rgba(147, 51, 234, 0.08);" title="অটো স্ক্রোল প্লেয়ার">
-                            <!-- Play/Pause Button -->
-                            <button type="button" id="btnAutoScroll" onclick="toggleAutoScroll()" title="অটো স্ক্রোল চালু বা সাময়িক বন্ধ করুন" style="display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; background: #9333ea; color: #ffffff; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(147, 51, 234, 0.3);">
-                                <i class="fas fa-play" id="autoScrollIcon" style="font-size: 11px;"></i>
-                                <span id="autoScrollLabel">প্লে</span>
-                            </button>
-
-                            <!-- Speed Controller: [-] [Speed] [+] -->
-                            <div style="display: inline-flex; align-items: center; gap: 2px; background: #ffffff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 1px 4px;">
-                                <button type="button" onclick="changeScrollSpeed(-0.1)" title="স্ক্রোল স্পিড কমান (-0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span id="scrollSpeedDisplay" title="বর্তমান স্ক্রোল স্পিড (ক্লিক করে রিসেট)" onclick="setExactScrollSpeed(1.0)" style="font-size: 11px; font-weight: 800; color: #6b21a8; min-width: 32px; text-align: center; user-select: none; cursor: pointer;">1.0x</span>
-                                <button type="button" onclick="changeScrollSpeed(0.1)" title="স্ক্রোল স্পিড বাড়ান (+0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Font Controls -->
                         <div class="font-controls" style="display: flex; gap: 6px; align-items: center;">
                             <span style="font-size: 12px; font-weight: 500; color: #64748b; margin-right: 4px;">Font:</span>
@@ -2474,9 +2454,9 @@ if (!empty($data['breadcrumbs'])) {
                     <!-- Content will load dynamically -->
                 </div>
                 <!-- Floating Master Action Button & Speed Dial Menu (Docked on Right Edge with 1:3 ratio) -->
-                <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 60px; right: 0; z-index: 99999; flex-direction: column; align-items: flex-end; gap: 10px;">
+                <div id="quickViewMasterContainer" style="display: none; position: fixed; bottom: 40px; right: 0; z-index: 99999; flex-direction: row; align-items: flex-end; gap: 12px;">
                     <!-- TOC Popup Card -->
-                    <div id="quickViewTocMenu" style="display: none; width: 320px; max-width: calc(100vw - 60px); background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.22), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-right: 12px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <div id="quickViewTocMenu" style="display: none; width: 320px; max-width: calc(100vw - 60px); max-height: calc(100vh - 80px); overflow-y: auto; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.22), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; animation: qvMenuSlideLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
                         <!-- Header with Close & Title -->
                         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;">
                             <div style="font-weight: 700; font-size: 13.5px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
@@ -2497,7 +2477,7 @@ if (!empty($data['breadcrumbs'])) {
                     </div>
 
                     <!-- Expanded Master Menu Card -->
-                    <div id="quickViewMasterMenu" style="display: none; width: 310px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-right: 12px; margin-bottom: 6px; animation: qvMenuSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <div id="quickViewMasterMenu" style="display: none; width: 320px; max-width: calc(100vw - 60px); max-height: calc(100vh - 80px); overflow-y: auto; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.2), 0 2px 10px rgba(0,0,0,0.06); padding: 16px; animation: qvMenuSlideLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
                         
                         <!-- Header with Close & Title -->
                         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;">
@@ -2564,6 +2544,14 @@ if (!empty($data['breadcrumbs'])) {
                                     <i class="fas fa-play" id="masterMenuAutoScrollIcon"></i>
                                     <span id="masterMenuAutoScrollLabel">অটো স্ক্রোল চালু করুন</span>
                                 </button>
+                                <div style="display: inline-flex; align-items: center; gap: 2px; background: #ffffff; border: 1px solid #d8b4fe; border-radius: 8px; padding: 2px 4px; height: 34px;">
+                                    <button type="button" onclick="changeScrollSpeed(-0.1)" title="স্পিড কমান (-0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 4px;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" onclick="changeScrollSpeed(0.1)" title="স্পিড বাড়ান (+0.1x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 4px;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Speed Presets -->
@@ -2600,7 +2588,7 @@ if (!empty($data['breadcrumbs'])) {
                         </div>
                     </div>
 
-                    <!-- Right Dock Button Group (Width 1 : Height 3 Ratio - Allows stacking up to 3 buttons) -->
+                    <!-- Right Dock Button Group (Width 1 : Height 3 Ratio) -->
                     <div id="quickViewDockButtons" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
                         <!-- Button 1: সূচিপত্র (TOC) - Width 36px, Height 108px (1:3 ratio) -->
                         <button id="quickViewTocBtn" type="button" class="qv-dock-btn qv-dock-btn-toc" onclick="toggleQuickViewTocMenu()" title="সূচিপত্র দেখুন (Table of Contents)">
@@ -2612,12 +2600,6 @@ if (!empty($data['breadcrumbs'])) {
                         <button id="quickViewMasterBtn" type="button" class="qv-dock-btn qv-dock-btn-primary" onclick="toggleQuickViewMasterMenu()" title="কুইক কন্ট্রোল ও ফন্ট সাইজ (Tools Menu)">
                             <i class="fas fa-sliders-h" id="quickViewMasterIcon" style="font-size: 16px;"></i>
                             <span id="quickViewMasterBtnLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">TOOLS</span>
-                        </button>
-
-                        <!-- Button 3: Auto-Scroll Controller (Width: 36px, Height: 108px -> 1:3 ratio) -->
-                        <button id="quickViewScrollDockBtn" type="button" class="qv-dock-btn qv-dock-btn-scroll" onclick="toggleAutoScroll()" title="অটো স্ক্রোল প্লে/পজ করুন">
-                            <i class="fas fa-play" id="quickViewScrollDockIcon" style="font-size: 16px;"></i>
-                            <span id="quickViewScrollDockLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">স্ক্রোল</span>
                         </button>
                     </div>
                 </div>
@@ -3228,6 +3210,16 @@ if (!function_exists('renderOrganizeCategoryTree')) {
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+@keyframes qvMenuSlideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
     }
 }
 /* Organize Folders Modal Styles */
@@ -6350,6 +6342,12 @@ body.organize-drag-active #organize-root-list {
         isAutoScrolling = true;
         autoScrollRemainder = 0;
         updateAutoScrollUI();
+
+        // Auto-close Master Menu if open so full article reading view is unobstructed
+        const masterMenu = document.getElementById('quickViewMasterMenu');
+        if (masterMenu && masterMenu.style.display === 'block') {
+            toggleQuickViewMasterMenu();
+        }
 
         let lastTimestamp = performance.now();
 
