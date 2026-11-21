@@ -2418,6 +2418,26 @@ if (!empty($data['breadcrumbs'])) {
                     </div>
                     
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <!-- Auto-Scroll Player & Speed Controller -->
+                        <div id="topAutoScrollWidget" style="display: inline-flex; align-items: center; background: #faf5ff; border: 1px solid #d8b4fe; border-radius: 8px; padding: 2px 6px; gap: 6px; box-shadow: 0 1px 2px rgba(147, 51, 234, 0.08);" title="অটো স্ক্রোল প্লেয়ার">
+                            <!-- Play/Pause Button -->
+                            <button type="button" id="btnAutoScroll" onclick="toggleAutoScroll()" title="অটো স্ক্রোল চালু বা সাময়িক বন্ধ করুন" style="display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; background: #9333ea; color: #ffffff; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(147, 51, 234, 0.3);">
+                                <i class="fas fa-play" id="autoScrollIcon" style="font-size: 11px;"></i>
+                                <span id="autoScrollLabel">প্লে</span>
+                            </button>
+
+                            <!-- Speed Controller: [-] [Speed] [+] -->
+                            <div style="display: inline-flex; align-items: center; gap: 2px; background: #ffffff; border: 1px solid #e9d5ff; border-radius: 6px; padding: 1px 4px;">
+                                <button type="button" onclick="changeScrollSpeed(-0.5)" title="স্ক্রোল স্পিড কমান (-0.5x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span id="scrollSpeedDisplay" title="বর্তমান স্ক্রোল স্পিড (ক্লিক করে রিসেট)" onclick="setExactScrollSpeed(1.0)" style="font-size: 11px; font-weight: 800; color: #6b21a8; min-width: 32px; text-align: center; user-select: none; cursor: pointer;">1.0x</span>
+                                <button type="button" onclick="changeScrollSpeed(0.5)" title="স্ক্রোল স্পিড বাড়ান (+0.5x)" style="background: transparent; border: none; color: #7e22ce; font-size: 11px; cursor: pointer; width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0;" onmouseover="this.style.background='#f3e8ff';" onmouseout="this.style.background='transparent';">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Font Controls -->
                         <div class="font-controls" style="display: flex; gap: 6px; align-items: center;">
                             <span style="font-size: 12px; font-weight: 500; color: #64748b; margin-right: 4px;">Font:</span>
@@ -2530,7 +2550,32 @@ if (!empty($data['breadcrumbs'])) {
                             </div>
                         </div>
 
-                        <!-- 3. Quick Action Utilities List -->
+                        <!-- 3. Auto-Scroll Controller in Master Menu -->
+                        <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 12px; font-weight: 700; color: #581c87;">
+                                    <i class="fas fa-scroll" style="color: #9333ea; margin-right: 5px;"></i> অটো স্ক্রোল (Auto Scroll)
+                                </span>
+                                <span id="masterMenuSpeedDisplay" style="font-size: 12px; font-weight: 800; color: #7e22ce; background: #f3e8ff; padding: 2px 8px; border-radius: 6px;">1.0x</span>
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <button type="button" id="masterMenuAutoScrollBtn" onclick="toggleAutoScroll()" style="flex: 1; height: 34px; background: #9333ea; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(147, 51, 234, 0.3); transition: 0.15s;">
+                                    <i class="fas fa-play" id="masterMenuAutoScrollIcon"></i>
+                                    <span id="masterMenuAutoScrollLabel">অটো স্ক্রোল চালু করুন</span>
+                                </button>
+                            </div>
+
+                            <!-- Speed Presets -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <button type="button" onclick="setExactScrollSpeed(0.5)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">0.5x</button>
+                                <button type="button" onclick="setExactScrollSpeed(1.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">1.0x</button>
+                                <button type="button" onclick="setExactScrollSpeed(2.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">2.0x</button>
+                                <button type="button" onclick="setExactScrollSpeed(3.0)" style="font-size: 11px; font-weight: 600; padding: 5px 0; border: 1px solid #d8b4fe; background: #fff; border-radius: 6px; color: #6b21a8; cursor: pointer;">3.0x</button>
+                            </div>
+                        </div>
+
+                        <!-- 4. Quick Action Utilities List -->
                         <div style="display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
                             <a id="fabActionViewLive" href="#" target="_blank" style="display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; text-decoration: none; background: #f8fafc; transition: 0.15s;" onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb';" onmouseout="this.style.background='#f8fafc'; this.style.color='#334155';">
                                 <i class="far fa-eye" style="color: #059669; width: 16px;"></i>
@@ -2569,8 +2614,37 @@ if (!empty($data['breadcrumbs'])) {
                             <span id="quickViewMasterBtnLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">TOOLS</span>
                         </button>
 
-                        <!-- Button Slot 3: (Available for 3rd button - same 1:3 ratio) -->
+                        <!-- Button 3: Auto-Scroll Controller (Width: 36px, Height: 108px -> 1:3 ratio) -->
+                        <button id="quickViewScrollDockBtn" type="button" class="qv-dock-btn qv-dock-btn-scroll" onclick="toggleAutoScroll()" title="অটো স্ক্রোল প্লে/পজ করুন">
+                            <i class="fas fa-play" id="quickViewScrollDockIcon" style="font-size: 16px;"></i>
+                            <span id="quickViewScrollDockLabel" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 10px; font-weight: 800; letter-spacing: 1.5px;">স্ক্রোল</span>
+                        </button>
                     </div>
+                </div>
+
+                <!-- Floating Mini Auto-Scroll Bar (visible when scrolling is active) -->
+                <div id="floatingAutoScrollWidget" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 999999; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 40px; padding: 6px 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.4); align-items: center; gap: 12px; color: #fff; font-family: inherit;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #e2e8f0;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: floatPulse 1.2s infinite alternate;"></span>
+                        <span>অটো স্ক্রোল</span>
+                    </div>
+                    <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.2);"></div>
+                    <button type="button" onclick="toggleAutoScroll()" id="floatBtnPlayPause" style="background: #ea580c; color: #fff; border: none; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.15s; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);">
+                        <i class="fas fa-pause" id="floatAutoScrollIcon"></i>
+                        <span id="floatAutoScrollLabel">পজ</span>
+                    </button>
+                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 2px 6px;">
+                        <button type="button" onclick="changeScrollSpeed(-0.5)" title="স্পিড কমান" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="floatScrollSpeedDisplay" style="font-size: 11px; font-weight: 800; min-width: 30px; text-align: center; color: #facc15;">1.0x</span>
+                        <button type="button" onclick="changeScrollSpeed(0.5)" title="স্পিড বাড়ান" style="background: transparent; border: none; color: #fff; font-size: 11px; cursor: pointer; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <button type="button" onclick="stopAutoScroll()" title="স্ক্রোল বন্ধ করুন" style="background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer;" onmouseover="this.style.color='#ef4444'; this.style.borderColor='#ef4444';" onmouseout="this.style.color='#cbd5e1'; this.style.borderColor='rgba(255,255,255,0.25)';">
+                        <i class="fas fa-stop" style="font-size: 10px; margin-right: 3px;"></i> বন্ধ
+                    </button>
                 </div>
             </div>
         </div>
@@ -3064,6 +3138,22 @@ if (!function_exists('renderOrganizeCategoryTree')) {
 }
 .qv-dock-btn-toc:hover {
     box-shadow: -6px 6px 24px rgba(5, 150, 105, 0.6);
+}
+.qv-dock-btn-scroll {
+    background: linear-gradient(180deg, #9333ea, #7e22ce);
+    color: #ffffff;
+    box-shadow: -4px 4px 18px rgba(147, 51, 234, 0.42);
+}
+.qv-dock-btn-scroll:hover {
+    box-shadow: -6px 6px 24px rgba(147, 51, 234, 0.6);
+}
+.qv-dock-btn-scroll.is-scrolling {
+    background: linear-gradient(180deg, #ea580c, #c2410c);
+    box-shadow: -4px 4px 20px rgba(234, 88, 12, 0.55);
+}
+@keyframes floatPulse {
+    from { opacity: 0.6; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1.15); }
 }
 #quickViewTocContent {
     background: #f8fafc;
@@ -5656,6 +5746,7 @@ body.organize-drag-active #organize-root-list {
     }
 
     function closePostDetailView() {
+        stopAutoScroll();
         // Hide Master Floating button & menu
         const masterContainer = document.getElementById('quickViewMasterContainer');
         if (masterContainer) masterContainer.style.display = 'none';
@@ -6236,6 +6327,173 @@ body.organize-drag-active #organize-root-list {
     // Print / Save as PDF
     function printQuickViewPost() {
         window.print();
+    }
+
+    // ==========================================
+    // AUTO-SCROLL ENGINE WITH SPEED CONTROLLER
+    // ==========================================
+    let isAutoScrolling = false;
+    let autoScrollSpeed = 1.0; // 0.5x, 1.0x, 1.5x, 2.0x, 2.5x, 3.0x, 4.0x, 5.0x
+    let autoScrollRafId = null;
+    let autoScrollRemainder = 0;
+
+    function toggleAutoScroll() {
+        if (isAutoScrolling) {
+            stopAutoScroll();
+        } else {
+            startAutoScroll();
+        }
+    }
+
+    function startAutoScroll() {
+        if (isAutoScrolling) return;
+        isAutoScrolling = true;
+        autoScrollRemainder = 0;
+        updateAutoScrollUI();
+
+        let lastTimestamp = performance.now();
+
+        function step(timestamp) {
+            if (!isAutoScrolling) return;
+
+            const delta = Math.min(timestamp - lastTimestamp, 50); // cap to prevent jumps on tab unfocus
+            lastTimestamp = timestamp;
+
+            // Base speed: 60px/sec at 1.0x (comfortable reading pace)
+            const pixelsToScroll = (60 * autoScrollSpeed * delta) / 1000;
+            autoScrollRemainder += pixelsToScroll;
+
+            if (autoScrollRemainder >= 1) {
+                const movePx = Math.floor(autoScrollRemainder);
+                window.scrollBy({ top: movePx, behavior: 'auto' });
+                autoScrollRemainder -= movePx;
+            }
+
+            // Check if reached bottom of the document
+            const scrollBottom = window.innerHeight + window.pageYOffset;
+            const maxScroll = Math.max(
+                document.body.scrollHeight, 
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight, 
+                document.documentElement.offsetHeight
+            );
+
+            if (scrollBottom >= maxScroll - 6) {
+                stopAutoScroll();
+                return;
+            }
+
+            autoScrollRafId = requestAnimationFrame(step);
+        }
+
+        autoScrollRafId = requestAnimationFrame(step);
+    }
+
+    function stopAutoScroll() {
+        isAutoScrolling = false;
+        if (autoScrollRafId) {
+            cancelAnimationFrame(autoScrollRafId);
+            autoScrollRafId = null;
+        }
+        updateAutoScrollUI();
+    }
+
+    function changeScrollSpeed(delta) {
+        autoScrollSpeed = Math.round((autoScrollSpeed + delta) * 10) / 10;
+        if (autoScrollSpeed < 0.5) autoScrollSpeed = 0.5;
+        if (autoScrollSpeed > 5.0) autoScrollSpeed = 5.0;
+        updateAutoScrollUI();
+    }
+
+    function setExactScrollSpeed(speed) {
+        autoScrollSpeed = parseFloat(speed) || 1.0;
+        if (autoScrollSpeed < 0.5) autoScrollSpeed = 0.5;
+        if (autoScrollSpeed > 5.0) autoScrollSpeed = 5.0;
+        updateAutoScrollUI();
+    }
+
+    function updateAutoScrollUI() {
+        const speedFormatted = autoScrollSpeed.toFixed(1) + 'x';
+
+        // 1. Top action toolbar
+        const topBtn = document.getElementById('btnAutoScroll');
+        const topIcon = document.getElementById('autoScrollIcon');
+        const topLabel = document.getElementById('autoScrollLabel');
+        const topSpeed = document.getElementById('scrollSpeedDisplay');
+
+        if (topSpeed) topSpeed.textContent = speedFormatted;
+        if (topBtn && topIcon && topLabel) {
+            if (isAutoScrolling) {
+                topIcon.className = 'fas fa-pause';
+                topLabel.textContent = 'পজ';
+                topBtn.style.background = '#ea580c';
+                topBtn.style.boxShadow = '0 1px 3px rgba(234, 88, 12, 0.4)';
+                topBtn.title = 'স্ক্রোল সাময়িক বন্ধ করুন (Pause)';
+            } else {
+                topIcon.className = 'fas fa-play';
+                topLabel.textContent = 'প্লে';
+                topBtn.style.background = '#9333ea';
+                topBtn.style.boxShadow = '0 1px 3px rgba(147, 51, 234, 0.3)';
+                topBtn.title = 'অটো স্ক্রোল চালু করুন (Play)';
+            }
+        }
+
+        // 2. Right dock button
+        const dockBtn = document.getElementById('quickViewScrollDockBtn');
+        const dockIcon = document.getElementById('quickViewScrollDockIcon');
+        const dockLabel = document.getElementById('quickViewScrollDockLabel');
+        if (dockBtn && dockIcon && dockLabel) {
+            if (isAutoScrolling) {
+                dockBtn.classList.add('is-scrolling');
+                dockIcon.className = 'fas fa-pause';
+                dockLabel.textContent = 'পজ';
+            } else {
+                dockBtn.classList.remove('is-scrolling');
+                dockIcon.className = 'fas fa-play';
+                dockLabel.textContent = 'স্ক্রোল';
+            }
+        }
+
+        // 3. Master Tools menu
+        const masterBtn = document.getElementById('masterMenuAutoScrollBtn');
+        const masterIcon = document.getElementById('masterMenuAutoScrollIcon');
+        const masterLabel = document.getElementById('masterMenuAutoScrollLabel');
+        const masterSpeed = document.getElementById('masterMenuSpeedDisplay');
+        if (masterSpeed) masterSpeed.textContent = speedFormatted;
+        if (masterBtn && masterIcon && masterLabel) {
+            if (isAutoScrolling) {
+                masterIcon.className = 'fas fa-pause';
+                masterLabel.textContent = 'অটো স্ক্রোল পজ করুন';
+                masterBtn.style.background = '#ea580c';
+            } else {
+                masterIcon.className = 'fas fa-play';
+                masterLabel.textContent = 'অটো স্ক্রোল চালু করুন';
+                masterBtn.style.background = '#9333ea';
+            }
+        }
+
+        // 4. Floating mini controller bar
+        const floatBar = document.getElementById('floatingAutoScrollWidget');
+        const floatIcon = document.getElementById('floatAutoScrollIcon');
+        const floatLabel = document.getElementById('floatAutoScrollLabel');
+        const floatBtn = document.getElementById('floatBtnPlayPause');
+        const floatSpeed = document.getElementById('floatScrollSpeedDisplay');
+
+        if (floatSpeed) floatSpeed.textContent = speedFormatted;
+        if (floatBar) {
+            floatBar.style.display = isAutoScrolling ? 'flex' : 'none';
+        }
+        if (floatBtn && floatIcon && floatLabel) {
+            if (isAutoScrolling) {
+                floatIcon.className = 'fas fa-pause';
+                floatLabel.textContent = 'পজ';
+                floatBtn.style.background = '#ea580c';
+            } else {
+                floatIcon.className = 'fas fa-play';
+                floatLabel.textContent = 'প্লে';
+                floatBtn.style.background = '#9333ea';
+            }
+        }
     }
 </script>
 
