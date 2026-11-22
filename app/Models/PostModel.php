@@ -207,6 +207,31 @@ class PostModel extends Model {
     }
 
     public function incrementViews($id) {
+        $id = (int)$id;
+        if ($id <= 0) {
+            return false;
+        }
+
+        // 1. Exclude Bots, Spiders, Crawlers & Automated Scrapers
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (empty($userAgent)) {
+            return false;
+        }
+
+        $botRegex = '/(bot|crawl|spider|slurp|facebookexternalhit|facebot|whatsapp|twitterbot|telegrambot|linkedinbot|discordbot|skypeuripreview|slackbot|pinterest|googlebot|bingbot|applebot|yandex|duckduckbot|baiduspider|semrushbot|ahrefsbot|mj12bot|dotbot|petalbot|bytespider|curl|wget|python-requests|headless|chrome-lighthouse|screaming frog|uptimerobot)/i';
+        if (preg_match($botRegex, $userAgent)) {
+            return false;
+        }
+
+        // 2. Exclude Logged-in Admins/Authors to prevent self-inflating views during edit/preview
+        if (session_status() === PHP_SESSION_NONE) {
+            @session_start();
+        }
+        if (!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember'])) {
+            return false;
+        }
+
+        // 3. Increment view in database (visitors refreshing/reloading will be counted as requested)
         $stmt = $this->db->prepare("UPDATE posts SET views = views + 1, last_viewed_at = CURRENT_TIMESTAMP WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }

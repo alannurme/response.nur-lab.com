@@ -238,7 +238,7 @@
                         <button type="button" id="btn_test_${idx}" onclick="testDriveAtIndex(${idx})" class="btn" style="background: white; color: #2563eb; border: 1.5px solid #bfdbfe; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;">
                             <i class="fas fa-plug"></i> Test Connection
                         </button>
-                        <button type="button" onclick="deleteDriveAtIndex(${idx})" class="btn" style="background: white; color: #ef4444; border: 1.5px solid #fecaca; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s;" title="Delete Drive">
+                        <button type="button" onclick="deleteDriveAtIndex(${idx}, this)" class="btn" style="background: white; color: #ef4444; border: 1.5px solid #fecaca; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s;" title="Delete Drive">
                             <i class="fas fa-trash-alt"></i> Remove
                         </button>
                     </div>
@@ -254,14 +254,82 @@
         return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function deleteDriveAtIndex(idx) {
-        if (!confirm('আপনি কি নিশ্চিত যে এই গুগল ড্রাইভ অ্যাকাউন্টটি মুছে ফেলতে চান?')) return;
-        googleDrives.splice(idx, 1);
-        if (googleDrives.length > 0 && !googleDrives.some(d => d.is_default)) {
-            googleDrives[0].is_default = 1;
+    function showStorageToast(msg, type = 'success') {
+        let toast = document.getElementById('storage_ajax_toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'storage_ajax_toast';
+            toast.style.cssText = 'position: fixed; top: 25px; right: 25px; z-index: 99999; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; font-family: "Hind Siliguri", sans-serif;';
+            document.body.appendChild(toast);
         }
-        syncDrivesJson();
-        renderDrivesList();
+        if (type === 'success') {
+            toast.style.background = '#dcfce7';
+            toast.style.color = '#166534';
+            toast.style.border = '1.5px solid #86efac';
+            toast.innerHTML = '<i class="fas fa-check-circle" style="font-size: 1.2rem;"></i> ' + escapeHtml(msg);
+        } else {
+            toast.style.background = '#fee2e2';
+            toast.style.color = '#991b1b';
+            toast.style.border = '1.5px solid #fca5a5';
+            toast.innerHTML = '<i class="fas fa-exclamation-circle" style="font-size: 1.2rem;"></i> ' + escapeHtml(msg);
+        }
+        toast.style.display = 'flex';
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-15px)';
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
+        }, 4000);
+    }
+
+    function deleteDriveAtIndex(idx, btnEl) {
+        const drive = googleDrives[idx];
+        if (!drive) return;
+
+        const driveName = drive.name || ('Google Drive ' + (idx + 1));
+        if (!confirm(`আপনি কি নিশ্চিত যে "${driveName}" অ্যাকাউন্টটি মুছে ফেলতে চান?`)) return;
+
+        const btn = btnEl || event.currentTarget || (event.target ? event.target.closest('button') : null);
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
+        }
+
+        fetch('<?= URLROOT ?>/admin/delete_gdrive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                id: drive.id || '',
+                index: idx
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                googleDrives = data.drives || [];
+                syncDrivesJson();
+                renderDrivesList();
+                showStorageToast(data.message || 'গুগল ড্রাইভ সফলভাবে রিমুভ করা হয়েছে!', 'success');
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                }
+                alert(data.message || 'রিমুভ ব্যর্থ হয়েছে!');
+            }
+        })
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+            alert('সার্ভার যোগাযোগ ত্রুটি: ' + err.message);
+        });
     }
 
     function testDriveAtIndex(idx) {

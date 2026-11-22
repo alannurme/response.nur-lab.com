@@ -1888,11 +1888,12 @@ class Home extends Controller {
         $post = $stmt->fetch();
 
         if ($post) {
-            // Increment views and track real-time view timestamp
-            $db->prepare("UPDATE posts SET views = views + 1, last_viewed_at = CURRENT_TIMESTAMP WHERE id = :id")->execute(['id' => $post['id']]);
-
             $postModel = $this->model('PostModel');
             $adminModel = $this->model('AdminModel');
+
+            // Increment views safely with bot detection & session/cookie deduplication
+            $postModel->incrementViews($post['id']);
+            $post['views'] = $postModel->getPostViews($post['id']);
 
             // Get post category name
             $stmt_cat = $db->prepare("SELECT c.name FROM categories c JOIN post_categories pc ON c.id = pc.category_id WHERE pc.post_id = :post_id LIMIT 1");

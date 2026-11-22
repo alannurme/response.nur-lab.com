@@ -6507,6 +6507,76 @@ class Admin extends Controller {
         exit;
     }
 
+    public function delete_gdrive() {
+        header('Content-Type: application/json');
+
+        if (empty($_SESSION['admin_id']) && empty($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'অননুমোদিত অ্যাক্সেস। অনুগ্রহ করে লগইন করুন।']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+            exit;
+        }
+
+        $json = file_get_contents('php://input');
+        $input = json_decode($json, true);
+        if (!$input && !empty($_POST)) {
+            $input = $_POST;
+        }
+
+        $driveId = $input['id'] ?? null;
+        $driveIndex = isset($input['index']) ? (int)$input['index'] : null;
+
+        $adminModel = $this->model('AdminModel');
+        $settings = $adminModel->getSettings();
+        $drives = json_decode($settings['google_drives'] ?? '[]', true) ?: [];
+
+        $found = false;
+        if (!empty($driveId)) {
+            $newDrives = [];
+            foreach ($drives as $d) {
+                if (($d['id'] ?? '') === $driveId) {
+                    $found = true;
+                } else {
+                    $newDrives[] = $d;
+                }
+            }
+            $drives = $newDrives;
+        }
+
+        if (!$found && $driveIndex !== null && isset($drives[$driveIndex])) {
+            array_splice($drives, $driveIndex, 1);
+            $found = true;
+        }
+
+        // Ensure at least one remaining drive is default
+        if (!empty($drives)) {
+            $hasDefault = false;
+            foreach ($drives as $d) {
+                if (!empty($d['is_default'])) {
+                    $hasDefault = true;
+                    break;
+                }
+            }
+            if (!$hasDefault) {
+                $drives[0]['is_default'] = 1;
+            }
+        }
+
+        $jsonDrives = json_encode(array_values($drives), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $adminModel->updateSetting('google_drives', $jsonDrives);
+        \App\Helpers\Cache::clear();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'গুগল ড্রাইভ অ্যাকাউন্টটি সফলভাবে মুছে ফেলা হয়েছে!',
+            'drives'  => array_values($drives)
+        ]);
+        exit;
+    }
+
     public function sitemap() {
         $adminModel = $this->model('AdminModel');
         $data = [];

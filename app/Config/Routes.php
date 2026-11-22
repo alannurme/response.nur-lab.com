@@ -93,6 +93,7 @@ $routes->post('admin/storage_settings', 'Admin::storage_settings');
 $routes->get('admin/gdrive_oauth_init', 'Admin::gdrive_oauth_init');
 $routes->get('admin/gdrive_oauth_callback', 'Admin::gdrive_oauth_callback');
 $routes->post('admin/test_gdrive_connection', 'Admin::test_gdrive_connection');
+$routes->match(['GET', 'POST'], 'admin/delete_gdrive', 'Admin::delete_gdrive');
 // AJAX Live Search Routes
 $routes->get('ajax_search', 'Home::ajax_search');
 $routes->post('ajax_search', 'Home::ajax_search');
