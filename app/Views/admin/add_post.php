@@ -932,7 +932,12 @@ if (typeof mammoth === 'undefined') {
         });
 
         if (initialContent) {
-            quill.clipboard.dangerouslyPasteHTML(initialContent);
+            // Normalize any blockquotes containing <br> into consecutive <blockquote> tags so Quill 2 renders them properly
+            let preparedContent = initialContent.replace(/<blockquote([^>]*)>([\s\S]*?)<\/blockquote>/gi, function(match, attrs, inner) {
+                const lines = inner.split(/<br\s*[\/]?>/gi);
+                return lines.map(l => l.trim()).filter(l => l.length > 0).map(l => `<blockquote${attrs}>${l}</blockquote>`).join('');
+            });
+            quill.clipboard.dangerouslyPasteHTML(preparedContent);
         }
 
         quillInstances[id] = quill;
@@ -1803,6 +1808,7 @@ if (typeof mammoth === 'undefined') {
 
     function convertMarkdownToQuillHtml(mdText) {
         if (!mdText) return '';
+        mdText = mdText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const lines = mdText.split('\n');
         let htmlParts = [];
         let inBq = false;
@@ -1812,9 +1818,11 @@ if (typeof mammoth === 'undefined') {
 
         function flushBq() {
             if (inBq && bqLines.length > 0) {
-                // Join blockquote lines with <br> so it forms ONE single blockquote box
+                // Generate consecutive <blockquote> tags per line so Quill renders them seamlessly as one box
                 const formattedLines = bqLines.map(l => formatInlineMarkdown(l.trim())).filter(l => l.length > 0);
-                htmlParts.push('<blockquote>' + formattedLines.join('<br>') + '</blockquote>');
+                formattedLines.forEach(l => {
+                    htmlParts.push('<blockquote>' + l + '</blockquote>');
+                });
                 bqLines = [];
                 inBq = false;
             }
@@ -1828,10 +1836,10 @@ if (typeof mammoth === 'undefined') {
         lines.forEach(line => {
             const trimmed = line.trim();
 
-            if (/^>\s?(.*)$/.test(line)) {
+            if (/^\s*>\s?(.*)$/.test(line)) {
                 flushList();
                 inBq = true;
-                const m = line.match(/^>\s?(.*)$/);
+                const m = line.match(/^\s*>\s?(.*)$/);
                 bqLines.push(m ? m[1] : '');
                 return;
             } else {
@@ -2052,6 +2060,7 @@ if (typeof mammoth === 'undefined') {
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
     }
+    .ql-editor blockquote:not(:has(+ blockquote)),
     .ql-editor blockquote:last-child {
         margin-bottom: 14px !important;
         padding-bottom: 10px !important;

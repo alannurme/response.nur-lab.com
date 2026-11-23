@@ -867,7 +867,12 @@
         });
 
         if (initialContent) {
-            quill.clipboard.dangerouslyPasteHTML(initialContent);
+            // Normalize any blockquotes containing <br> into consecutive <blockquote> tags so Quill 2 renders them properly
+            let preparedContent = initialContent.replace(/<blockquote([^>]*)>([\s\S]*?)<\/blockquote>/gi, function(match, attrs, inner) {
+                const lines = inner.split(/<br\s*[\/]?>/gi);
+                return lines.map(l => l.trim()).filter(l => l.length > 0).map(l => `<blockquote${attrs}>${l}</blockquote>`).join('');
+            });
+            quill.clipboard.dangerouslyPasteHTML(preparedContent);
         }
 
         quillInstances[id] = quill;
@@ -1212,6 +1217,7 @@
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
     }
+    .ql-editor blockquote:not(:has(+ blockquote)),
     .ql-editor blockquote:last-child {
         margin-bottom: 14px !important;
         padding-bottom: 10px !important;
