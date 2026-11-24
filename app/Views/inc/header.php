@@ -2913,7 +2913,7 @@ if (!$is_islamic_dedicated_page):
                                                 $is_first = true;
                                                 foreach($categories as $cat): 
                                                     $tab_slug = 'post-cat-' . $cat['id'];
-                                                    $stmt_posts = $db->prepare("SELECT p.* FROM posts p 
+                                                    $stmt_posts = $db->prepare("SELECT p.id, p.slug, p.title FROM posts p 
                                                                                 JOIN post_categories pc ON p.id = pc.post_id 
                                                                                 WHERE p.status = 'published' AND pc.category_id = ? 
                                                                                 ORDER BY p.created_at DESC LIMIT 6");
@@ -2947,7 +2947,7 @@ if (!$is_islamic_dedicated_page):
 
                                                     <?php foreach ($subcats_for_panes as $sub): 
                                                         $sub_tab_slug = 'post-cat-' . $sub['id'];
-                                                        $stmt_sub_posts = $db->prepare("SELECT p.* FROM posts p 
+                                                        $stmt_sub_posts = $db->prepare("SELECT p.id, p.slug, p.title FROM posts p 
                                                                                         JOIN post_categories pc ON p.id = pc.post_id 
                                                                                         WHERE p.status = 'published' AND pc.category_id = ? 
                                                                                         ORDER BY p.created_at DESC LIMIT 6");
