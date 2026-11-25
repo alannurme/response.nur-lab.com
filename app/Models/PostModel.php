@@ -224,10 +224,8 @@ class PostModel extends Model {
         }
 
         // 2. Exclude Logged-in Admins/Authors to prevent self-inflating views during edit/preview
-        if (session_status() === PHP_SESSION_NONE) {
-            @session_start();
-        }
-        if (!empty($_SESSION['admin_id']) || !empty($_SESSION['user_id']) || !empty($_COOKIE['admin_remember'])) {
+        $session = \Config\Services::session();
+        if ($session->get('admin_id') || $session->get('user_id') || !empty($_COOKIE['admin_remember'])) {
             return false;
         }
 
